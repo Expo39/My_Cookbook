@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<!--
+============================================
+SAPURI TA' L-KCINA 
+My Cookbook
+============================================
+
+FEATURES:
+- Interactive serving adjusters (scale ingredients automatically)
+- Clickable unit converters (g<->kg, ml<->L, tsp<->tbsp)
+- AI cooking assistant powered by Google Gemini 2.5 Flash
+- Magic link system (share URL with API key included)
+============================================
+-->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sapuri ta' l-kċina - Antonio's Italian-Maltese Cookbook</title>
+    
+    <!-- External Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Antonio's personal collection of Italian-Maltese recipes with interactive serving adjusters and AI cooking assistant">
+    <meta name="keywords" content="Italian recipes, Maltese recipes, cookbook, cooking, pasta, porchetta, gnocchi">
+    <meta name="author" content="Antonio">
+    
+    <!-- Favicon (maybe later) -->
+    <!-- <link rel="icon" type="image/png" href="favicon.png"> -->
+    
+    <!-- Preload critical resources for better performance -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/config.js" as="script">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sapuri ta' l-kċina</h1>
+            <p class="subtitle">Antonio's Personal Collection</p>
+        </header>
+        
+        <div class="toc">
+            <h2>📖 Table of Contents </h2>
+            
+            <div class="toc-section">
+                <h3>First Courses</h3>
+                <div class="toc-subsection">
+                    <h4>Pasta</h4>
+                    <ul>
+                        <li class="subsection-item"><span class="cuisine-tag">Italian Classics</span></li>
+                        <li><a href="#pasta1">One-Pot Pasta with Fresh Tomatoes</a></li>
+                        <li><a href="#pasta2">Sicilian-Style Tuna Pasta</a></li>
+                        <li><a href="#gnocchi">Baked Gnocchi with Tomato & Mozzarella</a></li>
+                        <li class="subsection-item"><span class="cuisine-tag">Creamy & Rich</span></li>
+                        <li><a href="#pasta3">Creamy Steak Pasta</a></li>
+                        <li><a href="#pasta4">Creamy Pancetta & Mushroom Tagliatelle</a></li>
+                    </ul>
+                </div>
+                <div class="toc-subsection">
+                    <h4>Platters</h4>
+                    <ul>
+                        <li><a href="#charcuterie">Charcuterie Board for 10</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="toc-section">
+                <h3>Main Courses</h3>
+                <div class="toc-subsection">
+                    <h4>Rice & Grain Bowls</h4>
+                    <ul>
+                        <li class="subsection-item"><span class="cuisine-tag">Asian-Inspired</span></li>
+                        <li><a href="#korean">Korean Ground Beef Bowl</a></li>
+                        <li><a href="#katsu">Chicken Katsu Curry</a></li>
+                    </ul>
+                </div>
+                <div class="toc-subsection">
+                    <h4>Pork</h4>
+                    <ul>
+                        <li><a href="#cotechino">Cotechino with Lentils</a></li>
+                        <li><a href="#porchetta">Toni's Porchetta</a></li>
+                    </ul>
+                </div>
+                <div class="toc-subsection">
+                    <h4>Lamb</h4>
+                    <ul>
+                        <li><a href="#lamb">Pistachio-Crusted Rack of Lamb</a></li>
+                    </ul>
+                </div>
+                <div class="toc-subsection">
+                    <h4>Beef & Steak</h4>
+                    <ul>
+                        <li><a href="#ribeye">Pan-Seared Ribeye Steak</a></li>
+                        <li><a href="#fillet">Pan-Seared Fillet Steak</a></li>
+                        <li><a href="#wellington">Beef Wellington</a></li>
+                        <li><a href="#shortribs">Braised Beef Short Ribs</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="toc-section">
+                <h3>Soups</h3>
+                <ul>
+                    <li><a href="#soup">Roasted Tomato & Basil Soup</a></li>
+                </ul>
+            </div>
+            
+            <div class="toc-section">
+                <h3>Desserts</h3>
+                <div class="toc-subsection">
+                    <h4>French Classics</h4>
+                    <ul>
+                        <li><a href="#brulee">Crème Brûlée</a></li>
+                        <li><a href="#crepes">Savoury Crepes</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="toc-section">
+                <h3>Sides</h3>
+                <ul>
+                    <li><a href="#asparagus">Orange Asparagus</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="section-header">First Courses</div>
+            
+            <div class="subsection-header">Miscellaneous</div>
+            
+            <!-- Charcuterie Board -->
+            <div class="recipe" id="charcuterie">
+                <h2>Charcuterie Board for 10</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-charcuterie">Servings:</label>
+                        <input type="number" id="servings-charcuterie" value="10" min="1" max="20">
+                        <button onclick="updateRecipe('charcuterie')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        When serving as the main event, aim for 150-200g total food per person. A balanced cheese-to-meat ratio close to 1:1 ensures satisfaction.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Quantities:</h4>
+                        
+                        <p style="margin: 15px 0 10px 0;"><strong>Cheese (<span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="1150" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">1150g</span> total):</strong></p>
+                        <ul style="margin-bottom: 15px;">
+                            <li>Mix of hard (Parmesan, Pecorino), semi-soft (Gouda, Cheddar), soft (Brie, Goat cheese), blue cheese</li>
+                        </ul>
+                        
+                        <p style="margin: 15px 0 10px 0;"><strong>Charcuterie (<span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="775" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">700-850g</span>):</strong></p>
+                        <ul style="margin-bottom: 15px;">
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="180" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">180g</span> prosciutto crudo</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="125" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">100-150g</span> additional prosciutto or salami</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="120" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">120g</span> mortadella</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="150" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">150g</span> coppa or capocollo</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="80" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">80g</span> bresaola</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="175" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">150-200g</span> salami variety</li>
+                        </ul>
+                        
+                        <p style="margin: 15px 0 10px 0;"><strong>Crackers & Bread:</strong></p>
+                        <ul style="margin-bottom: 15px;">
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="300" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">300g</span> crackers or breadsticks</li>
+                            <li>Fresh bread (baguette, ciabatta, focaccia)</li>
+                        </ul>
+                        
+                        <p style="margin: 15px 0 10px 0;"><strong>Accompaniments:</strong></p>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="250" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">200-300g</span> dip (hummus, pesto, olive tapenade)</li>
+                            <li>Mixed olives</li>
+                            <li>Pickled vegetables (cornichons, peppers)</li>
+                            <li>Fresh fruit (grapes, figs, dried apricots)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="charcuterie" data-base="225" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">200-250g</span> nuts and dried fruit</li>
+                            <li>Honey or fruit preserves</li>
+                            <li>Mustards</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Dips add variety and help stretch portions. The total of 180-200g per person ensures guests leave satisfied when serving as the main event. Arrange items in clusters rather than rows for visual appeal.</p>
+                </div>
+            </div>
+            
+            <div class="subsection-header">Pasta</div>
+            <div class="subsection-tag">Italian Classics</div>
+            
+            <!-- Recipe 1: One-Pot Pasta -->
+            <div class="recipe" id="pasta1">
+                <h2>
+                    <span>One-Pot Pasta with Fresh Tomatoes</span>
+                </h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-pasta1">Servings:</label>
+                        <input type="number" id="servings-pasta1" value="4" min="1" max="20">
+                        <button onclick="updateRecipe('pasta1')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        This rustic method of cooking pasta directly in tomato sauce creates an incredibly creamy dish where pasta absorbs all the flavours.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta1" data-base="600" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">600g</span> short pasta (penne, rigatoni)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta1" data-base="1200" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">1200g</span> polpa pelati (crushed tomatoes)</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta1" data-base="6.5">6-7</span> garlic cloves, thinly sliced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta1" data-base="130" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">130ml</span> (<span class="ingredient-amount clickable-unit" data-recipe="pasta1" data-base="9" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">9tbsp</span>) extra virgin olive oil</li>
+                            <li>Fresh basil leaves</li>
+                            <li>Salt to taste</li>
+                            <li>Chili flakes (optional)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta1" data-base="875" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">875ml</span> water or vegetable stock</li>
+                            <li>Parmesan cheese, for serving</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Heat olive oil in large, wide pan over medium heat. Add sliced garlic and chili (if using). Cook 1 minute until fragrant - do not brown.</li>
+                            <li>Add polpa pelati and crush any larger pieces with wooden spoon. Season with salt, add torn basil. Simmer 5 minutes to develop flavour.</li>
+                            <li>Add raw pasta directly to sauce, stirring to coat each piece. Add water or stock to just barely cover pasta. Liquid should be level with pasta.</li>
+                            <li>Cook at steady simmer, stirring frequently to prevent sticking and release starch. Keep adding splashes of water when dry. Cook 12-15 minutes until al dente.</li>
+                            <li>When pasta is al dente and sauce clings nicely, remove from heat. Stir in more fresh basil and drizzle of olive oil.</li>
+                            <li>Serve immediately with freshly grated Parmesan.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Success depends on frequent stirring and liquid adjustment. Use a wide pan for even cooking. Slice garlic rather than mince - slices soften during cooking, giving milder, sweeter flavour. The pasta's released starch creates the creamy texture.</p>
+                </div>
+            </div>
+            
+            <!-- Recipe 2: Tuna Pasta -->
+            <div class="recipe" id="pasta2">
+                <h2>Sicilian-Style Tuna Pasta</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-pasta2">Servings:</label>
+                        <input type="number" id="servings-pasta2" value="2" min="1" max="20">
+                        <button onclick="updateRecipe('pasta2')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        A classic Sicilian combination showcasing bold, briny flavours. Anchovies melt into the sauce adding depth without fishiness.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta2" data-base="250" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">250g</span> casarecce or short pasta</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta2" data-base="175" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">175g</span> tuna in olive oil</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta2" data-base="2.5" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2.5tbsp</span> (<span class="ingredient-amount clickable-unit" data-recipe="pasta2" data-base="37" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">37ml</span>) extra virgin olive oil</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta2" data-base="1">1</span> small white onion, finely chopped</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta2" data-base="4">4</span> anchovy fillets in oil</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta2" data-base="3">3</span> garlic cloves, thinly sliced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta2" data-base="4.5" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">4.5tbsp</span> sliced olives</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta2" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> capers, rinsed</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta2" data-base="1">1</span> small dried chili (optional)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta2" data-base="50" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">50ml</span> white wine (optional)</li>
+                            <li>Fresh parsley, chopped</li>
+                            <li>Salt and black pepper to taste</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Bring large pot of salted water to boil for pasta.</li>
+                            <li>Heat olive oil in large pan over medium heat. Add chopped onion, cook 5-7 minutes until soft and translucent.</li>
+                            <li>Add anchovy fillets to pan. Mash with wooden spoon until dissolved into oil (1-2 minutes).</li>
+                            <li>Add sliced garlic, cook until just golden (1 minute). Watch carefully so it does not burn.</li>
+                            <li>Add olives, capers, and chili (if using). Stir and cook 1-2 minutes to combine flavours.</li>
+                            <li>If using wine, add now and let bubble for 1 minute until slightly reduced.</li>
+                            <li>Add tuna with its oil, breaking up gently. Do not over-mix - keep some chunks. Cook 2-3 minutes to warm through.</li>
+                            <li>Cook pasta until al dente. Reserve 1 cup pasta water before draining.</li>
+                            <li>Add drained pasta to pan with tuna mixture. Add pasta water gradually (start with 3-4 tbsp), tossing until glossy and well-coated.</li>
+                            <li>Remove from heat, add chopped parsley and black pepper. Taste - may not need additional salt. Serve immediately. No cheese.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>If your tuna is in good olive oil (Italian/Spanish brands), use that oil - reduce starting oil accordingly. Casarecce's twisted shape perfectly catches the chunky bits. Use parsley or basil - never rosemary or thyme which overpower delicate tuna.</p>
+                </div>
+            </div>
+            
+            <div class="subsection-tag">Creamy & Rich</div>
+            
+            <!-- Recipe 3: Steak Pasta -->
+            <div class="recipe" id="pasta3">
+                <h2>Creamy Steak Pasta</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-pasta3">Servings:</label>
+                        <input type="number" id="servings-pasta3" value="4" min="1" max="20">
+                        <button onclick="updateRecipe('pasta3')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        An indulgent creation marrying seared beef with Bourssin cheese sauce. Comfort food elegant enough for guests.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="415" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">415g</span> cube-roll ribeye</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> vegetable oil</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="2.5" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2.5tbsp</span> butter</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="550" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">550g</span> tagliatelle</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta3" data-base="1">1</span> white onion, diced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="325" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">325ml</span> chicken stock</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="425" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">425g</span> Boursin Cheese (or cream cheese)</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta3" data-base="2.5">2-3</span> garlic cloves, minced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> parsley, chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="1" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">1tsp</span> thyme (optional)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta3" data-base="55" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">55g</span> Parmesan, grated</li>
+                            <li>Salt and pepper to taste</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Mix cheese with garlic, parsley, herbs (if using), salt and pepper. Set aside at room temperature.</li>
+                            <li>Pat ribeye steak completely dry, season generously with salt and pepper.</li>
+                            <li>Heat large pan over high heat. Add oil. Sear steak whole, 2-3 minutes per side until well browned and cooked to your liking. Remove to plate, rest 5 minutes, then slice into strips. Lower heat to medium.</li>
+                            <li>Cook pasta in salted boiling water until al dente. Do not drain.</li>
+                            <li>Add onion to pan, fry 3-4 minutes until soft and golden.</li>
+                            <li>Pour in stock, bring to simmer. Stir in mascarpone mixture until melted. Add Parmesan, parsley, and steak resting juices. Simmer gently.</li>
+                            <li>Transfer pasta to pan with tongs, bringing pasta water. Toss vigorously until sauce clings. Add more water for silky consistency.</li>
+                            <li>Add steak strips, toss gently. Finish with Parmesan and parsley. Serve immediately.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Cream cheese is a good substitute for Boursin Cheese. Do not overcrowd pan when searing (meat tastes better when well seared !). Transfer pasta directly to sauce with tongs - pasta water binds everything together.</p>
+                </div>
+            </div>
+            
+            <!-- Recipe 4: Pancetta Pasta -->
+            <div class="recipe" id="pasta4">
+                <h2>Creamy Pancetta & Mushroom Tagliatelle</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-pasta4">Servings:</label>
+                        <input type="number" id="servings-pasta4" value="3" min="1" max="20">
+                        <button onclick="updateRecipe('pasta4')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Rendered pancetta fat creates a savoury foundation for this creamy mushroom sauce. The key is searing mushrooms properly to develop deep, nutty flavour.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="300" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">300g</span> tagliatelle</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="150" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">150g</span> pancetta, cubed</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="250" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">250g</span> mushrooms, sliced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="200" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">200ml</span> heavy cream</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta4" data-base="2">2</span> garlic cloves, minced</li>
+                            <li><span class="ingredient-amount" data-recipe="pasta4" data-base="1">1</span> small onion, chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="60" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">60ml</span> (<span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="4" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">4tbsp</span>) white wine (optional)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="40" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">40g</span> Parmesan, grated</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="pasta4" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> butter</li>
+                            <li>Fresh parsley, chopped</li>
+                            <li>Black pepper and salt</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Place large pan over medium heat. Add pancetta (no oil needed). Cook 5-7 minutes until fat renders and cubes are crispy. Remove pancetta, leave fat in pan.</li>
+                            <li>Add butter to rendered fat. Turn heat to medium-high. Add mushrooms, cook undisturbed 2-3 minutes for browning, then stir. Add onion, cook 2-3 minutes. Add garlic, cook 30 seconds.</li>
+                            <li>Meanwhile, boil pasta in salted water for 1 minute less than package instructions. Reserve 1 cup pasta water before draining.</li>
+                            <li>(Optional) Pour wine into mushroom pan, let bubble. Lower heat to medium. Pour in cream, simmer gently 2 minutes.</li>
+                            <li>Stir in Parmesan and black pepper. Taste, add salt if needed (pancetta is salty).</li>
+                            <li>Add pasta and crispy pancetta back to sauce. Toss vigorously 1 minute. Add pasta water if too thick. Turn off heat, stir in parsley. Serve immediately.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Guanciale is an amazing substitute for this dish. Do not overcrowd mushrooms - if pan is small, cook in batches. Starchy pasta water is the secret to restaurant-quality pasta. Room temperature cream integrates more smoothly without splitting.</p>
+                </div>
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- Recipe 5: Baked Gnocchi with Tomato & Mozzarella -->
+            <!-- ============================================ -->
+            <div class="recipe" id="gnocchi">
+                <h2>Baked Gnocchi with Tomato & Mozzarella</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-gnocchi">Servings:</label>
+                        <input type="number" id="servings-gnocchi" value="4" min="1" max="20">
+                        <button onclick="updateRecipe('gnocchi')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Perfectly non-watery baked gnocchi! The secret is using crushed tomatoes and simmering the sauce to concentrate flavours before adding the gnocchi.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        Click any number to change units
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="475" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">475g</span> potato gnocchi (1 package)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> (<span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="30" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">30ml</span>) extra virgin olive oil</li>
+                            <li><span class="ingredient-amount" data-recipe="gnocchi" data-base="0.5">½</span> medium onion, finely chopped</li>
+                            <li><span class="ingredient-amount" data-recipe="gnocchi" data-base="2">2</span> cloves garlic, minced</li>
+                            <li>Pinch red pepper flakes (optional)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="800" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">800g</span> (one 28oz tin) crushed tomatoes</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="0.5" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">0.5tsp</span> dried oregano</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="0.5" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">0.5tsp</span> sugar</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="170" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">170g</span> (6oz) fresh mozzarella, torn</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="40" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">40g</span> freshly grated Parmesan</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> fresh parsley, chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="gnocchi" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> fresh basil, chopped</li>
+                            <li>Kosher salt and black pepper to taste</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Heat 30ml olive oil in a large oven-safe skillet over medium heat. Sauté onion for 1 minute.</li>
+                            <li>Add garlic and red pepper flakes (if using). Cook for 4 more minutes until soft and fragrant.</li>
+                            <li>Stir in crushed tomatoes, oregano, sugar, salt and pepper. Bring to a boil.</li>
+                            <li>Reduce heat to low. Simmer partially covered for 30 minutes, stirring occasionally. This thickens the sauce and prevents wateriness.</li>
+                            <li>Meanwhile, bring a large pot of salted water to boil. Add gnocchi. As soon as they float (2-3 minutes), drain immediately.</li>
+                            <li>Stir fresh parsley and basil into the thickened sauce.</li>
+                            <li>Add drained gnocchi to the sauce, stir gently to coat.</li>
+                            <li>Top with torn mozzarella and grated Parmesan.</li>
+                            <li>Place skillet under grill (broiler) for 5-7 minutes until cheese is golden, bubbly and slightly crispy on top.</li>
+                            <li>Let rest 2-3 minutes before serving.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>The 30-minute simmer is crucial - it evaporates excess liquid and concentrates flavours. Using crushed tomatoes instead of diced creates a thicker, creamier sauce that clings to the gnocchi. Boiling and draining the gnocchi separately (rather than cooking them in the sauce) prevents adding extra water. The broiler step dries out the top and creates that perfect golden crust.</p>
+                </div>
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- MAIN COURSES SECTION -->
+            <!-- ============================================ -->
+            <div class="section-header">Main Courses</div>
+            
+            <div class="subsection-header">Rice & Grain Bowls</div>
+            <div class="subsection-tag">Asian-Inspired</div>
+            
+            <!-- ============================================ -->
+            <!-- Recipe 6: Korean Ground Beef Bowl -->
+            <!-- ============================================ -->
+            <div class="recipe" id="korean">
+                <h2>Korean Ground Beef Bowl</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-korean">Servings:</label>
+                        <input type="number" id="servings-korean" value="3" min="1" max="20">
+                        <button onclick="updateRecipe('korean')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        A quick, flavourful weeknight dinner ready in 25 minutes. The sesame oil and ginger create an authentic Korean flavour profile.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="340" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">340g</span> ground beef (80/20)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="25" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">25g</span> (<span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="1.5" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1.5tbsp</span>) soy sauce</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="10" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">10g</span> (<span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="0.75" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">0.75tbsp</span>) sesame oil</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="7.5" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">7.5g</span> garlic (2 cloves), minced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="3" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">3g</span> (<span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="0.75" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">0.75tsp</span>) ginger, minced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="20" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">20g</span> green onions (2 stalks), sliced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="korean" data-base="240" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">240g</span> cooked rice (80g per person)</li>
+                            <li>Salt and pepper</li>
+                            <li>Optional: vegetables, fried eggs</li>
+                            <li>Garnish: sesame seeds</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Ensure rice is cooked and ready (80-100g raw rice yields 240g cooked).</li>
+                            <li>Place large skillet over medium-high heat. Add ground beef, break apart with spatula. Brown until no longer pink (5-7 minutes). Drain excess fat if preferred.</li>
+                            <li>Stir in minced garlic and ginger. Cook 1-2 minutes until fragrant.</li>
+                            <li>Pour in soy sauce, sesame oil, and green onions. Stir well, simmer 2-3 minutes to meld flavours.</li>
+                            <li>Divide rice into bowls (80g each). Spoon beef mixture over rice. Add optional vegetables or fried egg. Garnish with sesame seeds or extra green onions.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>For vegetables, my favourite in this dish are carrots and bell peppers, both cut into matchsticks (julienne). Toss into skillet with beef for last 2 minutes if you prefer them soft, or pile raw on top for crunch. For tangy Korean flavour, quick-pickle vegetables in rice vinegar, sugar, and salt for 10 minutes or use picked vegetables.</p>
+                </div>
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- Recipe 7: Chicken Katsu Curry -->
+            <!-- ============================================ -->
+            <div class="recipe" id="katsu">
+                <h2>Chicken Katsu Curry</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-katsu">Servings:</label>
+                        <input type="number" id="servings-katsu" value="2" min="1" max="20">
+                        <button onclick="updateRecipe('katsu')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Crispy breaded chicken cutlets with rich Japanese curry sauce.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><strong>For Breaded Chicken:</strong></li>
+                            <li><span class="ingredient-amount" data-recipe="katsu" data-base="2">2</span> chicken breasts</li>
+                            <li><span class="ingredient-amount" data-recipe="katsu" data-base="2">2</span> eggs, beaten</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="100" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">100g</span> plain flour</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="150" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">150g</span> panko breadcrumbs</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="1" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">1tsp</span> paprika</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="1" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">1tsp</span> turmeric</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="1" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">1tsp</span> garam masala</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="1" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">1tsp</span> curry powder</li>
+                            <li><strong>For Katsu Curry Sauce:</strong></li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> plain flour</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> butter</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="0.5" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">0.5tsp</span> ground cloves</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="0.5" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">0.5tsp</span> MSG (optional)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="katsu" data-base="300" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">300ml</span> chicken stock</li>
+                            <li><span class="ingredient-amount" data-recipe="katsu" data-base="2">2</span> large onions, extremely finely chopped (or blended)</li>
+                            <li><span class="ingredient-amount" data-recipe="katsu" data-base="1">1</span> apple, finely sliced (optional)</li>
+                            <li>Spices from breading list (paprika, turmeric, garam masala, curry powder)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Butterfly chicken breasts to make them thinner. Season with salt and pepper.</li>
+                            <li>Set up breading station: flour mixed with spices, beaten eggs, panko breadcrumbs.</li>
+                            <li>Coat each chicken piece in flour, then egg, then breadcrumbs. Press firmly.</li>
+                            <li>Place breaded chicken on a baking rack over a tray. Bake at 180°C for 15 minutes until golden and cooked through.</li>
+                            <li>For curry: Cook finely chopped onions in butter with ground cloves for minimum 20 minutes over medium heat until deeply caramelised. Stir frequently.</li>
+                            <li>Remove onions temporarily. Add flour and butter to pan, cook 2-3 minutes to form a roux.</li>
+                            <li>Add all spices (paprika, turmeric, garam masala, curry powder), cook 1 minute until fragrant.</li>
+                            <li>Return onions to pan. Add apple slices if using. Sauté together 2-3 minutes.</li>
+                            <li>Gradually add chicken stock, stirring constantly until curry emulsifies and thickens.</li>
+                            <li>If onions haven't melted completely, transfer curry to blender and blend until smooth.</li>
+                            <li>Slice chicken katsu. Serve over rice with curry sauce poured over. Garnish with spring onions if desired.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>This is Antonio's favourite dish! The secret is patience - caramelising the onions properly (minimum 20 minutes) creates incredible depth. The apple adds subtle sweetness that balances the spices beautifully. Another option is adding shredded pears as well along with the apples! Baking the katsu instead of frying is a healtier option but frying them is just as good (if even better). You can also use an airfryer!</p>
+                </div>
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- PORK SUBSECTION -->
+            <!-- ============================================ -->
+            <div class="subsection-header">Pork</div>
+            
+            <!-- ============================================ -->
+            <!-- Recipe 8: Cotechino with Lentils -->
+            <!-- ============================================ -->
+            <div class="recipe" id="cotechino">
+                <h2>Cotechino with Lentils</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-cotechino">Servings:</label>
+                        <input type="number" id="servings-cotechino" value="4" min="1" max="20">
+                        <button onclick="updateRecipe('cotechino')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Italian tradition says lentils bring prosperity for the new year. The combination is rich and satisfying - a little cotechino goes far.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="cotechino" data-base="500" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">500g</span> cotechino sausage</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="cotechino" data-base="250" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">250g</span> dried lentils</li>
+                            <li><span class="ingredient-amount" data-recipe="cotechino" data-base="1">1</span> large onion, diced</li>
+                            <li><span class="ingredient-amount" data-recipe="cotechino" data-base="2">2</span> carrots, diced</li>
+                            <li><span class="ingredient-amount" data-recipe="cotechino" data-base="2">2</span> celery stalks, diced</li>
+                            <li><span class="ingredient-amount" data-recipe="cotechino" data-base="3">3</span> garlic cloves, minced</li>
+                            <li><span class="ingredient-amount" data-recipe="cotechino" data-base="2">2</span> bay leaves</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="cotechino" data-base="1000" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">1000ml</span> stock</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="cotechino" data-base="4" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">4tbsp</span> (<span class="ingredient-amount clickable-unit" data-recipe="cotechino" data-base="60" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">60ml</span>) olive oil</li>
+                            <li>Salt and pepper</li>
+                            <li>Fresh parsley</li>
+                            <li>Optional: polenta</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Cook cotechino according to package instructions (typically simmer in water 20-30 minutes). Keep warm.</li>
+                            <li>Heat olive oil in large pot over medium heat. Add onion, carrot, celery. Cook 8-10 minutes until very soft and golden.</li>
+                            <li>Add garlic, cook 1 minute. Add dried lentils (rinsed), bay leaves, and stock. Bring to boil.</li>
+                            <li>Reduce to simmer, cook 25-30 minutes until lentils are tender but not mushy. Add water if too dry.</li>
+                            <li>Season well with salt and pepper. Stir in parsley. Remove bay leaves.</li>
+                            <li>Slice cotechino (125g per person). Serve over lentils, with polenta or mashed potatoes if desired.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Standard cotechino is 500g (125g per person). Because it is extremely rich, this portion works well. The large soffritto base adds volume and flavour. The dish tastes better made ahead - flavours meld beautifully overnight.</p>
+                </div>
+            </div>
+            
+            <!-- ============================================ -->
+            <!-- Recipe 9: Toni's Porchetta -->
+            <!-- ============================================ -->
+            <div class="recipe" id="porchetta">
+                <h2>Toni's Porchetta</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-porchetta">Servings:</label>
+                        <input type="number" id="servings-porchetta" value="6" min="1" max="20">
+                        <button onclick="updateRecipe('porchetta')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Italian rolled and stuffed pork belly with crispy crackling. The rich filling combines pork mince, chicken liver and herbs for intense flavour. Perfect for special occasions or Sunday roast.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="porchetta" data-base="1500" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">1500g</span> (1.5kg) pork belly, skin scored</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="porchetta" data-base="300" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">300g</span> pork mince</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="porchetta" data-base="150" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">150g</span> chicken livers, finely chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="porchetta" data-base="50" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">50g</span> pine nuts</li>
+                            <li>Zest of <span class="ingredient-amount" data-recipe="porchetta" data-base="1">1</span> lemon</li>
+                            <li><span class="ingredient-amount" data-recipe="porchetta" data-base="2">2</span> onions, finely chopped</li>
+                            <li><span class="ingredient-amount" data-recipe="porchetta" data-base="4">4</span> cloves garlic, minced</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="porchetta" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> fresh sage, chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="porchetta" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> fresh rosemary, chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="porchetta" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> fresh thyme leaves</li>
+                            <li>Olive oil</li>
+                            <li>Salt and black pepper</li>
+                            <li>Kitchen string for tying</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Heat olive oil in frying pan. Cook onions and garlic until soft (5 minutes).</li>
+                            <li>Add pork mince, cook until browned. Add chicken livers, cook for 3-4 minutes.</li>
+                            <li>Stir in pine nuts, lemon zest, sage, rosemary, thyme. Season well with salt and pepper. Remove from heat, cool completely.</li>
+                            <li>Lay pork belly skin-side down on work surface. Score the meat side lightly with knife.</li>
+                            <li>Spread cooled filling evenly over meat side, leaving 2cm border around edges.</li>
+                            <li>Roll tightly from one long side, with skin on outside. Tie securely with kitchen string at 3cm intervals.</li>
+                            <li>Pat skin very dry with kitchen paper. Rub skin generously with salt and olive oil. Slash skin with sharp knife in crisscross pattern.</li>
+                            <li>Place on roasting rack, refrigerate uncovered for 2-4 hours (or overnight) to dry skin further.</li>
+                            <li>Preheat oven to 250°C. Roast porchetta for 30 minutes until skin starts to crackle.</li>
+                            <li>Reduce heat to 120°C. Continue roasting for 1 hour until cooked through (internal temp 70°C).</li>
+                            <li>Rest for 15 minutes. Remove string, slice into thick rounds. Serve hot.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>The secret to perfect crackling is dry skin and high initial heat. Pat skin completely dry before scoring and salting. The overnight refrigeration step is optional but produces superior crackling. Tighten the rolled belly properly and ensure kitchen string is secure at regular intervals. The filling can be made a day ahead. Porchetta is traditionally served at room temperature in Italy, making it perfect for gatherings.</p>
+                </div>
+            </div>
+            
+            
+            <!-- ============================================ -->
+            <!-- ============================================ -->
+            <!-- LAMB SUBSECTION -->
+            <!-- ============================================ -->
+            <div class="subsection-header">Lamb</div>
+            
+            <!-- ============================================ -->
+            <!-- Recipe 10: Pistachio-Crusted Rack of Lamb -->
+            <!-- ============================================ -->
+            <div class="recipe" id="lamb">
+                <h2>Pistachio-Crusted Rack of Lamb</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-lamb">Servings:</label>
+                        <input type="number" id="servings-lamb" value="2" min="1" max="20">
+                        <button onclick="updateRecipe('lamb')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Elegant rack of lamb with aromatic herb and pistachio crust. Quick to cook but impressive presentation. Perfect for special dinners. Serve with mashed potatoes and grilled asparagus.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount" data-recipe="lamb" data-base="1">1</span> rack of lamb (8 ribs, about 800-900g)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="80" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">80g</span> pistachios, finely chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="60" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">60g</span> fresh breadcrumbs</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="40" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">40g</span> Parmigiano-Reggiano, finely grated</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> fresh sage, finely chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> fresh rosemary, finely chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> fresh thyme leaves</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="1" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">1tsp</span> fresh mint, finely chopped</li>
+                            <li>Zest of <span class="ingredient-amount" data-recipe="lamb" data-base="1">1</span> lemon</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> Dijon mustard</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="lamb" data-base="3" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">3tbsp</span> olive oil</li>
+                            <li>Salt and black pepper</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Preheat oven to 200°C (180°C fan).</li>
+                            <li>Mix pistachios, breadcrumbs, Parmigiano, sage, rosemary, thyme, mint, lemon zest in bowl. Stir in 2 tbsp olive oil until mixture holds together. Season with salt and pepper.</li>
+                            <li>Season lamb rack generously with salt and pepper.</li>
+                            <li>Heat 1 tbsp olive oil in oven-proof frying pan over high heat. Sear lamb rack on all sides until golden brown (2 minutes per side). Remove from heat.</li>
+                            <li>Brush meat side of lamb (not bones) generously with Dijon mustard.</li>
+                            <li>Press pistachio-herb mixture firmly onto mustard-coated lamb, forming thick crust.</li>
+                            <li>Return pan to oven (or transfer to roasting tray). Roast for 18 minutes for medium-rare (internal temp 52-55°C).</li>
+                            <li>Remove from oven, cover loosely with foil. Rest for 8-10 minutes.</li>
+                            <li>Slice between ribs into individual cutlets. Serve immediately with mashed potatoes and grilled asparagus.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Ask your butcher to french the lamb rack (clean the rib bones) for elegant presentation. The mustard acts as glue for the crust and adds tangy flavour. Do not skip the searing step - it adds crucial flavour and helps crust adhere. For perfectly medium-rare lamb, aim for 52-55°C internal temperature. Lamb continues cooking during resting. The pistachio crust should be golden and aromatic. Save any fallen crust to sprinkle over plated dish. Pair with mint sauce or red wine jus for classic accompaniment.</p>
+                </div>
+            </div>
+            
+            <div class="subsection-header">Beef & Steak</div>
+            
+            <!-- Recipe 6: Ribeye -->
+            <div class="recipe" id="ribeye">
+                <h2>Pan-Seared Ribeye Steak</h2>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Perfect technique for ribeye. Takes longer than fillet despite needing less doneness due to size and fat content that must render. Serves 1.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients (per person):</h4>
+                        <ul>
+                            <li>300g ribeye steak</li>
+                            <li>1 tbsp vegetable or light olive oil</li>
+                            <li>2 tbsp butter</li>
+                            <li>Salt and black pepper</li>
+                            <li>2 sprigs fresh thyme (optional)</li>
+                            <li>2 sprigs rosemary (optional)</li>
+                            <li>2 garlic cloves (optional)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Remove steak from refrigerator 30 minutes before cooking. Pat completely dry with paper towels, season generously with salt and pepper on both sides.</li>
+                            <li>Heat pan over medium-high heat with light coat of oil until very hot.</li>
+                            <li>Place steak in pan without moving. Sear 3-4 minutes first side until deep brown crust forms.</li>
+                            <li>Flip steak, sear second side for 3 minutes.</li>
+                            <li>Add butter (and optional thyme/garlic/rosemary) to pan in last 1-2 minutes. Tilt pan and continuously baste steak with foaming butter using spoon.</li>
+                            <li>Remove to plate, rest minimum 5 minutes before cutting. Internal temperature should be 52-55°C for medium-rare.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Pat steak completely dry before seasoning - moisture prevents proper crust formation. Do not move steak once placed in pan. Basting with butter adds richness. Resting redistributes juices. I personally love large steaks (300g) but if you wish to use smaller cuts, you can ask help from the AI assistant to adjust the cooking times accordingly.</p>
+                </div>
+            </div>
+            
+            <!-- Recipe 7: Fillet -->
+            <div class="recipe" id="fillet">
+                <h2>Pan-Seared Fillet Steak</h2>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Perfect technique for fillet. Cooks faster than ribeye despite needing more doneness - it is leaner with less fat to render. Serves 1.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients (per person):</h4>
+                        <ul>
+                            <li>200g fillet steak</li>
+                            <li>2 tbsp butter</li>
+                            <li>Salt and black pepper</li>
+                            <li>2 sprigs fresh thyme (optional)</li>
+                            <li>2 sprigs rosemary (optional)</li>
+                            <li>2 garlic cloves (optional)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Remove steak from refrigerator 30 minutes before cooking. Pat completely dry, season generously with salt and pepper.</li>
+                            <li>Heat pan over medium heat with butter (fillet is leaner, cooks faster - medium heat prevents outside burning before inside cooks).</li>
+                            <li>Once butter foams, add steak. Sear approximately 4 minutes per side for 200g fillet at medium doneness.</li>
+                            <li>Add optional thyme, rosemary and garlic, baste steak with butter as it cooks using spoon.</li>
+                            <li>Remove to plate, rest 5 minutes. Internal temperature should be 57-60°C for medium.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Fillet has less marbling than ribeye, so use butter throughout cooking. Medium heat is crucial. Use meat thermometer for accuracy: 52-55°C = medium-rare, 57-60°C = medium, 63-66°C = medium-well. You can ask the AI assistant for help with cooking times and temperatures if you wish to change the weight of the fillet.</p>
+                </div>
+            </div>
+            
+            <!-- Recipe 9: Wellington -->
+            <div class="recipe" id="wellington">
+                <h2>Beef Wellington</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-wellington">Servings:</label>
+                        <input type="number" id="servings-wellington" value="5" min="1" max="20">
+                        <button onclick="updateRecipe('wellington')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        The ultimate showstopper for 5 people. Most work done day before - assembly day is manageable with timeline below. Serve with <a href="#asparagus" style="color: #006633; text-decoration: underline;">Orange Asparagus</a> and optionally <a href="#crepes" style="color: #006633; text-decoration: underline;">Savoury Crepes</a> for wrapping.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units (only works if you download the file)</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="wellington" data-base="1000" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">1000g</span> (1kg) chateaubriand beef fillet</li>
+                            <li>Olive oil</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="wellington" data-base="2.5" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2.5tbsp</span> Dijon mustard</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="wellington" data-base="625" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">625g</span> mushrooms (finely chopped)</li>
+                            <li>Fresh thyme</li>
+                            <li><span class="ingredient-amount" data-recipe="wellington" data-base="10">10</span> slices Parma ham</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="wellington" data-base="450" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">450g</span> puff pastry</li>
+                            <li><span class="ingredient-amount" data-recipe="wellington" data-base="3">3</span> egg yolks</li>
+                            <li>Beef trimmings (for sauce)</li>
+                            <li><span class="ingredient-amount" data-recipe="wellington" data-base="5">5</span> shallots (finely chopped)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="wellington" data-base="750" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">750ml</span> red wine</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="wellington" data-base="940" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">940ml</span> beef stock</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Day 1 (Night Before):</h4>
+                        <ol>
+                            <li>Sear beef fillet all over in hot pan with olive oil, 2 minutes per side until golden. Cool completely, brush with Dijon mustard, refrigerate.</li>
+                            <li>Cook duxelles: Finely chop mushrooms, cook in batches over high heat with thyme and olive oil until all moisture evaporates and mixture is dry. Cool, refrigerate.</li>
+                            <li>Make red wine sauce: Roast beef trimmings, add chopped shallots, deglaze with red wine, reduce by half. Add beef stock, simmer 1 hour, strain, refrigerate.</li>
+                            <li>If using savoury crepes for wrapping, prepare them now (see <a href="#crepes" style="color: #006633; text-decoration: underline;">Savoury Crepes recipe</a>).</li>
+                        </ol>
+                        
+                        <h4>Day 2 (Assembly - 3-4 hours before serving):</h4>
+                        <ol>
+                            <li>Roll out puff pastry to large rectangle. If using crepes, lay them overlapping on cling film.</li>
+                            <li>Spread duxelles over pastry (or crepes if using), arrange Parma ham slices on top.</li>
+                            <li>Place beef fillet in centre, use cling film to roll tightly into sausage shape. Chill 15 minutes.</li>
+                            <li>Unwrap onto pastry (if using crepes, place crepe-wrapped beef onto pastry), wrap pastry around beef, sealing edges with egg wash. Score pastry decoratively.</li>
+                            <li>Brush entire surface with remaining egg yolk. Refrigerate 30 minutes.</li>
+                            <li>Bake at 200°C for 20-25 minutes until pastry is golden and internal temperature reaches 52-55°C for medium-rare.</li>
+                            <li>Rest 15-20 minutes. Slice wellington into thick portions, serve with red wine sauce and <a href="#asparagus" style="color: #006633; text-decoration: underline;">Orange Asparagus</a>.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Temperature is critical - aim for 52-55°C internal for medium-rare (use meat thermometer). The single fillet cooks slightly faster than two separate ones. Traditional wellington uses savoury crepes as a moisture barrier between duxelles and pastry, but they're optional. Pair with full-bodied red: Cabernet Sauvignon, Bordeaux, or Syrah. For perfect slicing, use a very sharp knife and wipe between cuts.</p>
+                </div>
+            </div>
+            
+            <!-- Recipe 16: Braised Short Ribs -->
+            <div class="recipe" id="shortribs">
+                <h2>Braised Beef Short Ribs</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-shortribs">Servings:</label>
+                        <input type="number" id="servings-shortribs" value="4" min="1" max="20">
+                        <button onclick="updateRecipe('shortribs')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Melt-in-your-mouth beef short ribs slow-cooked in wine and stock. The long braise creates incredibly tender meat and rich, concentrated gravy. Perfect served with polenta or mashed potatoes.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="shortribs" data-base="1600" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">1600g</span> beef short ribs (400g per person)</li>
+                            <li><span class="ingredient-amount" data-recipe="shortribs" data-base="2">2</span> onions, roughly chopped</li>
+                            <li><span class="ingredient-amount" data-recipe="shortribs" data-base="2">2</span> carrots, roughly chopped</li>
+                            <li><span class="ingredient-amount" data-recipe="shortribs" data-base="2">2</span> celery stalks, roughly chopped</li>
+                            <li><span class="ingredient-amount" data-recipe="shortribs" data-base="6">6</span> cloves garlic, smashed</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="shortribs" data-base="3" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">3tbsp</span> tomato paste (kunserva)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="shortribs" data-base="750" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">750ml</span> red wine (can use 500ml-1000ml)</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="shortribs" data-base="1000" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">1000ml</span> beef stock (enough to submerge ribs)</li>
+                            <li><span class="ingredient-amount" data-recipe="shortribs" data-base="2">2</span> bay leaves</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="shortribs" data-base="2" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">2tsp</span> fresh thyme</li>
+                            <li>Olive oil</li>
+                            <li>Salt and black pepper</li>
+                            <li>Optional: polenta or mashed potatoes, to serve</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Preheat oven to 160°C (140°C fan). Pat short ribs dry, season generously with salt and pepper.</li>
+                            <li>Heat olive oil in large, heavy-bottomed pan over high heat. Sear short ribs on all sides until deeply browned (3-4 minutes per side). Remove ribs, set aside.</li>
+                            <li>In same pan over medium heat, add onions, carrots, celery, garlic. Sauté until vegetables soften and start to colour (8-10 minutes).</li>
+                            <li>Add tomato paste, stir and cook for 2-3 minutes until paste darkens.</li>
+                            <li>Pour in red wine, scraping up brown bits from bottom of pan. Let wine reduce by half (5-7 minutes).</li>
+                            <li>Transfer wine-vegetable mixture to large oven-proof dish or Dutch oven. Nestle short ribs into vegetables.</li>
+                            <li>Add beef stock until ribs are completely submerged. Add bay leaves and thyme.</li>
+                            <li>Cover tightly with lid or aluminium foil. Braise in oven for 4 hours until meat is fall-off-the-bone tender.</li>
+                            <li>Remove ribs carefully (they will be very tender), keep warm.</li>
+                            <li>Strain braising liquid through fine sieve, pressing vegetables to extract all flavour. Discard solids.</li>
+                            <li>Pour liquid into saucepan, bring to boil. Reduce until thickened to gravy consistency (15-20 minutes). Season to taste.</li>
+                            <li>Serve short ribs with reduced gravy, polenta or mashed potatoes, and grilled broccoli.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>The key to tender short ribs is low, slow cooking. Do not rush the braise. The meat should be so tender it falls apart with a fork. Searing the ribs deeply adds immense flavour to the final sauce. The dish is even better made a day ahead - refrigerate overnight, skim fat from surface, then reheat gently. The concentrated gravy is rich and glossy. For authentic Italian presentation, serve with soft polenta and gremolata garnish (lemon zest, parsley, garlic).</p>
+                </div>
+            </div>
+            
+            <div class="section-header">Soups</div>
+            
+            <!-- Recipe 10: Soup -->
+            <div class="recipe" id="soup">
+                <h2>Roasted Tomato & Basil Soup</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-soup">Servings:</label>
+                        <input type="number" id="servings-soup" value="10" min="1" max="20">
+                        <button onclick="updateRecipe('soup')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Perfect make-ahead starter - tastes better the next day as flavours meld. Light and acidic, it will not sit heavy before a rich main course.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="soup" data-base="3000" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">3000g</span> ripe tomatoes, halved</li>
+                            <li><span class="ingredient-amount" data-recipe="soup" data-base="2">2</span> large onions, chopped</li>
+                            <li><span class="ingredient-amount" data-recipe="soup" data-base="1">1</span> bulb garlic, top sliced off</li>
+                            <li><span class="ingredient-amount" data-recipe="soup" data-base="1">1</span> red pepper, chopped</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="soup" data-base="6" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">6tbsp</span> (<span class="ingredient-amount clickable-unit" data-recipe="soup" data-base="90" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">90ml</span>) olive oil</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="soup" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> balsamic vinegar</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="soup" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> sugar</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="soup" data-base="1000" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">1000ml</span> stock</li>
+                            <li>Large handful fresh basil</li>
+                            <li>Salt and pepper</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="soup" data-base="100" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">100ml</span> cream (optional)</li>
+                            <li>Crusty bread, for serving</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Preheat oven to 200°C. Place tomatoes cut-side up on large baking tray. Add onions, red pepper, and whole garlic bulb.</li>
+                            <li>Drizzle with olive oil and balsamic vinegar. Sprinkle with sugar, salt, and pepper.</li>
+                            <li>Roast 40-45 minutes until tomatoes are collapsed and edges caramelised.</li>
+                            <li>Squeeze roasted garlic cloves from skin into bowl.</li>
+                            <li>Transfer everything to large pot. Add stock and most of basil.</li>
+                            <li>Simmer 10 minutes. Blend until smooth.</li>
+                            <li>Add cream if desired. Reheat gently before serving.</li>
+                            <li>Garnish with fresh basil, drizzle of olive oil. Serve with crusty bread.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>Roasting concentrates tomato flavour and adds smoky sweetness. Make 1-2 days ahead - flavours deepen beautifully. Reheat gently, do not boil after adding cream.</p>
+                </div>
+            </div>
+            
+            <div class="section-header">Desserts</div>
+            
+            <div class="subsection-header">French Classics</div>
+            
+            <!-- Recipe 11: Creme Brulee -->
+            <div class="recipe" id="brulee">
+                <h2>Crème Brûlée</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-brulee">Servings:</label>
+                        <input type="number" id="servings-brulee" value="4" min="1" max="20">
+                        <button onclick="updateRecipe('brulee')">Update</button>
+                    </div>
+                    <div class="serving-controls" style="margin-top: 10px;">
+                        <label for="vanilla-type">Vanilla Type:</label>
+                        <select id="vanilla-type" onchange="updateVanillaType()" style="padding: 8px 12px; font-size: 1em; border: 2px solid #cc9900; border-radius: 5px; background: white; cursor: pointer;">
+                            <option value="extract">Vanilla Extract</option>
+                            <option value="essence">Vanilla Essence</option>
+                            <option value="pods">Vanilla Pods</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Silky vanilla custard with crackling caramelised sugar top. Make ahead for dinner parties - the custard needs 6+ hours to chill.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="brulee" data-base="500" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">500ml</span> heavy cream</li>
+                            <li id="vanilla-ingredient"><span class="ingredient-amount clickable-unit" data-recipe="brulee" data-base="2" data-unit="tsp" data-original-unit="tsp" onclick="toggleUnit(this)">2tsp</span> vanilla extract</li>
+                            <li><span class="ingredient-amount" data-recipe="brulee" data-base="5">5</span> egg yolks</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="brulee" data-base="50" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">50g</span> caster sugar</li>
+                            <li>½ tsp sugar per ramekin (topping)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li id="vanilla-method-step">Pour cream into saucepan, heat until just starts to simmer. Remove immediately. Stir in vanilla extract. Let cool to lukewarm (15-20 minutes).</li>
+                            <li>Preheat oven to 130°C (120°C fan). Place ramekins in deep baking pan. Boil kettle.</li>
+                            <li>Whisk egg yolks and sugar until just combined. Do not over-whisk.</li>
+                            <li>Pour lukewarm cream into egg mixture, gently stir.</li>
+                            <li>Divide evenly between ramekins.</li>
+                            <li>Pour boiling water into baking pan until halfway up sides of ramekins.</li>
+                            <li>Bake 35-40 minutes until set but slightly wobbly in centre.</li>
+                            <li>Remove from water bath, cool. Refrigerate minimum 6 hours (overnight is best).</li>
+                            <li>To caramelise: Sprinkle ½ tsp sugar over each custard. Blowtorch until caramelised.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p id="vanilla-tip">Water bath prevents custard from curdling. The wobble test is key - centre should jiggle like jelly when gently shaken. For best results, make custard day before and caramelise sugar just before serving.</p>
+                </div>
+            </div>
+            
+            <!-- Recipe 12: Savoury Crepes -->
+            <div class="recipe" id="crepes">
+                <h2>Savoury Crepes</h2>
+                
+                <div class="serving-adjuster">
+                    <div class="serving-controls">
+                        <label for="servings-crepes">Servings:</label>
+                        <input type="number" id="servings-crepes" value="5" min="1" max="20">
+                        <button onclick="updateRecipe('crepes')">Update</button>
+                    </div>
+                </div>
+                
+                <div class="recipe-card">
+                    <div class="recipe-intro">
+                        Thin, delicate French crepes perfect for wrapping <a href="#wellington" style="color: #006633; text-decoration: underline;">Beef Wellington</a> or serving as a side. These provide a moisture barrier between the duxelles and pastry.
+                    </div>
+                    
+                    <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                        <strong>Click any number to change units</strong>
+                    </div>
+                    
+                    <div class="ingredients">
+                        <h4>Ingredients:</h4>
+                        <ul>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="crepes" data-base="125" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">125g</span> plain flour</li>
+                            <li><span class="ingredient-amount" data-recipe="crepes" data-base="2">2</span> eggs</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="crepes" data-base="250" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">250ml</span> milk</li>
+                            <li><span class="ingredient-amount clickable-unit" data-recipe="crepes" data-base="1.5" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1.5tbsp</span> melted butter</li>
+                            <li>Pinch of salt</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="method">
+                        <h4>Method:</h4>
+                        <ol>
+                            <li>Whisk flour, eggs, milk, melted butter and salt in a bowl until smooth. Let batter rest 30 minutes.</li>
+                            <li>Heat a non-stick frying pan over medium-high heat. Lightly butter the pan.</li>
+                            <li>Pour a small ladleful of batter into pan, swirl to coat bottom thinly.</li>
+                            <li>Cook 1-2 minutes until edges start to brown, flip and cook another 30 seconds.</li>
+                            <li>Stack crepes on a plate with greaseproof paper between each one.</li>
+                            <li>Cool completely before using for wellington, or refrigerate overnight.</li>
+                        </ol>
+                    </div>
+                </div>
+                
+                <div class="chef-tip">
+                    <h5>Chef's Tip</h5>
+                    <p>The key to thin crepes is swirling the batter quickly and using very little. First crepe is often imperfect - this is normal! Crepes can be made the day before and refrigerated with greaseproof paper between each one. For wellington, you'll need about 10 crepes to wrap a 1kg fillet.</p>
+                </div>
+            </div>
+            
+            <div class="section-header">Sides</div>
+            
+            <!-- Recipe 13: Orange Asparagus -->
+        <div class="recipe" id="asparagus">
+            <h2>Orange Asparagus</h2>
+            
+            <div class="serving-adjuster">
+                <div class="serving-controls">
+                    <label for="servings-asparagus">Servings:</label>
+                    <input type="number" id="servings-asparagus" value="5" min="1" max="20">
+                    <button onclick="updateRecipe('asparagus')">Update</button>
+                </div>
+            </div>
+            
+            <div class="recipe-card">
+                <div class="recipe-intro">
+                    Quick roasted asparagus with bright citrus glaze. Perfect accompaniment for <a href="#wellington" style="color: #006633; text-decoration: underline;">Beef Wellington</a> or any rich meat dish. Cooks in 10 minutes during resting time.
+                </div>
+                
+                <div style="background: #e8f4f8; border-left: 3px solid #2196F3; padding: 8px 12px; margin: 10px 0; border-radius: 4px; font-size: 0.9em;">
+                    <strong>Click any number to change units</strong>
+                </div>
+                
+                <div class="ingredients">
+                    <h4>Ingredients:</h4>
+                    <ul>
+                        <li><span class="ingredient-amount clickable-unit" data-recipe="asparagus" data-base="750" data-unit="g" data-original-unit="g" onclick="toggleUnit(this)">750g</span> asparagus, woody ends trimmed</li>
+                        <li><span class="ingredient-amount clickable-unit" data-recipe="asparagus" data-base="2" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">2tbsp</span> olive oil</li>
+                        <li><span class="ingredient-amount clickable-unit" data-recipe="asparagus" data-base="60" data-unit="ml" data-original-unit="ml" onclick="toggleUnit(this)">60ml</span> (<span class="ingredient-amount clickable-unit" data-recipe="asparagus" data-base="4" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">4tbsp</span>) fresh orange juice</li>
+                        <li><span class="ingredient-amount clickable-unit" data-recipe="asparagus" data-base="1" data-unit="tbsp" data-original-unit="tbsp" onclick="toggleUnit(this)">1tbsp</span> honey</li>
+                        <li>Salt and black pepper</li>
+                        <li>Orange zest (optional, for garnish)</li>
+                    </ul>
+                </div>
+                
+                <div class="method">
+                    <h4>Method:</h4>
+                    <ol>
+                        <li>Preheat oven to 200°C (180°C fan). Line a baking tray with greaseproof paper.</li>
+                        <li>Toss asparagus with olive oil, salt and pepper on the tray.</li>
+                        <li>Roast for 8-10 minutes until tender but still bright green with slightly charred tips.</li>
+                        <li>Mix orange juice and honey in a small bowl.</li>
+                        <li>Remove asparagus from oven, drizzle with orange-honey glaze while still hot.</li>
+                        <li>Toss gently to coat, garnish with orange zest if desired. Serve immediately.</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="chef-tip">
+                <h5>Chef's Tip</h5>
+                <p>The asparagus should still have a slight bite - overcooking makes them mushy. The orange glaze adds brightness that cuts through rich dishes like wellington. For best timing, put asparagus in oven when wellington comes out to rest. Thicker asparagus may need an extra 2-3 minutes of roasting.</p>
+            </div>
+        </div>
+        </div>
+        
+        <footer>
+            <div class="quote">"Cooking is like love - it should be entered into with abandon or not at all."</div>
+            <div class="author">— Harriet Van Horne</div>
+            <div class="copyright">Sapuri ta' l-kċina © 2026 | Antonio's Personal Collection</div>
+            <div class="update-date">Latest Update: January 26, 2026</div>
+        </footer>
+    </div>
+    
+    
+    <!-- External JavaScript Files -->
+    <!-- Load in order: config first, then functionality modules -->
+    <script src="js/config.js"></script>
+    <script src="js/scaling.js"></script>
+    <script src="js/units.js"></script>
+    <script src="js/ai.js"></script>
+</body>
+</html>
