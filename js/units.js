@@ -3,9 +3,9 @@
 // UNIT CONVERSION FUNCTION
 // Toggles between different units when user clicks ingredient amounts
 // Conversions supported:
-// - g ↔ kg (grams to kilograms)
-// - ml ↔ L (millilitres to litres)
-// - tsp ↔ tbsp (teaspoons to tablespoons, 1 tbsp = 3 tsp)
+// - g <-> kg (grams to kilograms)
+// - ml <-> L (millilitres to litres)
+// - tsp <->` tbsp (teaspoons to tablespoons, 1 tbsp = 3 tsp)
 // Preserves the scaled amount when toggling units
 // ============================================
 function toggleUnit(element) {
@@ -49,4 +49,6 @@ function toggleUnit(element) {
     
     // Update element display only - keep data-base unchanged
     element.textContent = `${newValue}${newUnit}`;
-    element.setAttribute('data-unit', newUnit);
+        element.setAttribute('data-unit', newUnit);
+    
+    }
