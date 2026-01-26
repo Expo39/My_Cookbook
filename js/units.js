@@ -5,7 +5,7 @@
 // Conversions supported:
 // - g <-> kg (grams to kilograms)
 // - ml <-> L (millilitres to litres)
-// - tsp <->` tbsp (teaspoons to tablespoons, 1 tbsp = 3 tsp)
+// - tsp <-> tbsp (teaspoons to tablespoons, 1 tbsp = 3 tsp)
 // Preserves the scaled amount when toggling units
 // ============================================
 function toggleUnit(element) {
@@ -47,7 +47,7 @@ function toggleUnit(element) {
         newUnit = 'tsp';
     }
     
-    // Update element display only - keep data-base unchanged
+    // Update element display only 
     element.textContent = `${newValue}${newUnit}`;
         element.setAttribute('data-unit', newUnit);
     

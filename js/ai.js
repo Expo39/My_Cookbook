@@ -311,7 +311,7 @@ Provide a helpful, friendly, concise answer. If they ask about substitutions, ex
                 }],
                 generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 2000, 
+                    maxOutputTokens: 2000,  // Increased for complete responses
                 }
             })
         });
@@ -323,7 +323,7 @@ Provide a helpful, friendly, concise answer. If they ask about substitutions, ex
         
         const data = await response.json();
         
-        // Validate response structure 
+        // Validate response structure (Gemini format)
         if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
             console.error('Invalid API response:', data);
             throw new Error(`Invalid response format. Got: ${JSON.stringify(data).substring(0, 200)}`);
