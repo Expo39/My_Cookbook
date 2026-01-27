@@ -1,5 +1,5 @@
 // ============================================
-// ANTONIO AI ASSISTANT 
+// ANTONIO AI ASSISTANT
 // ============================================
 
 let selectedRecipe = '';
@@ -146,7 +146,9 @@ Chef's Tip: ${tip}`;
     
     try {
         // Check if API key is set
-        if (GOOGLE_API_KEY === 'YOUR_API_KEY_HERE') {
+        const apiKey = window.GOOGLE_API_KEY || GOOGLE_API_KEY;
+        
+        if (!apiKey || apiKey === 'YOUR_API_KEY_HERE') {
             throw new Error('API_KEY_NOT_SET');
         }
         
@@ -167,7 +169,7 @@ User question: ${message}
 Provide a helpful, friendly, concise answer. If they ask about substitutions, explain if it will work and any adjustments needed. Keep responses brief (2-3 sentences unless more detail is needed). Use British English spelling.`;
         
         // Use Google AI Studio Gemini API
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GOOGLE_API_KEY}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

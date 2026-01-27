@@ -1,5 +1,5 @@
 /* ============================================
-   SAPORI TA' L-KCINA - STYLESHEET
+   SAPORI TA' L-KCINA - STYLESHEET 
    ============================================ */
 
 /* 1. GLOBAL STYLES & RESET
@@ -680,7 +680,7 @@ footer .update-date {
 .back-to-top {
     position: fixed;
     top: 20px;
-    right: 90px;  /* Positioned to the left of AI button */
+    right: 20px;  /* Same as AI button for vertical alignment */
     width: 50px;
     height: 50px;
     background: linear-gradient(135deg, #006633 0%, #003366 100%);
@@ -750,7 +750,7 @@ footer .update-date {
 
     .back-to-top {
         top: 15px;
-        right: 80px;  /* Positioned to the left of AI button on mobile */
+        right: 15px;  /* Same as AI button on mobile */
         width: 45px;
         height: 45px;
         font-size: 20px;
