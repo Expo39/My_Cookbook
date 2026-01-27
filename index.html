@@ -1322,19 +1322,28 @@ FEATURES:
                 <div class="recipe-option" data-value="crepes">Savoury Crepes</div>
                 <div class="recipe-option" data-value="asparagus">Orange Asparagus</div>
             </div>
-        </div>
-        
-        <div class="ai-chat-area" id="aiChatArea">
-            <div class="ai-message assistant">
-                Hello! I'm AntonioAI, your personal sous chef. Select a recipe above and ask me anything - substitutions, techniques, timing, or any questions you have!
-            </div>
-        </div>
         
         <div class="ai-input-area">
             <input type="text" id="aiInput" placeholder="Ask me anything..." onkeypress="if(event.key==='Enter') sendMessage()">
             <button onclick="sendMessage()" id="aiSendBtn">Send</button>
         </div>
     </div>
+        
+        <div class="ai-chat-area" id="aiChatArea">
+            <div class="ai-message assistant">
+                Hello! I'm AntonioAI, your personal sous chef. Select a recipe above and ask me anything - substitutions, techniques, timing, or any questions you have!
+                <br><br>
+                <div style="background: #fff3cd; border: 2px solid #ff9800; border-radius: 6px; padding: 10px; margin-top: 10px; font-size: 12px;">
+                    <strong style="color: #d32f2f;">⚠️ IMPORTANT - Please Don't Be Trigger Happy!</strong>
+                    <br><br>
+                    The 1,500 daily AI requests are <strong>shared among ALL users</strong> who visit this cookbook, not per person!
+                    <br><br>
+                    Please use the AI thoughtfully. Once the daily limit is reached, nobody can use it until midnight GMT.
+                    <br><br>
+                    Thank you for being considerate! 🙏
+                </div>
+            </div>
+        </div>
     
     
     <!-- External JavaScript Files -->
@@ -1343,5 +1352,7 @@ FEATURES:
     <script src="js/scaling.js"></script>
     <script src="js/units.js"></script>
     <script src="js/ai.js"></script>
+    <script src="js/ui-enhancements.js"></script>
+    
 </body>
 </html>

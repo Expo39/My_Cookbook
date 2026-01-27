@@ -1,154 +1,26 @@
 // ============================================
-// MAGIC LINK SYSTEM - API KEY HANDLING
-// ============================================
-// This cookbook supports "magic links" - you can share a URL with the API key included!
-// Example: https://yoursite.github.io/cookbook/?key=YOUR_API_KEY_HERE
-//
-// How it works:
-// 1. Check URL for ?key= parameter
-// 2. If found, use that key and save it
-// 3. Otherwise, check localStorage for saved key
-// 4. Otherwise, use hardcoded key below (for manual setup)
-//
-// Get a FREE key at: https://aistudio.google.com/app/apikey
-// FREE LIMITS: 1,500 requests/day, no credit card required
-// Model: Gemini 2.5 Flash (latest stable)
-// ============================================
-
-// Get API key from URL parameter, localStorage, or fallback to hardcoded
-function getAPIKey() {
-    // Check URL parameter first
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlKey = urlParams.get('key');
-    
-    if (urlKey) {
-        // Save to localStorage for future visits
-        localStorage.setItem('google_api_key', urlKey);
-        console.log('API key loaded from URL and saved');
-        return urlKey;
-    }
-    
-    // Check localStorage
-    const savedKey = localStorage.getItem('google_api_key');
-    if (savedKey) {
-        console.log('API key loaded from localStorage');
-        return savedKey;
-    }
-    
-    // Fallback to hardcoded key (for manual setup)
-    console.log('Using hardcoded API key');
-    return 'YOUR_API_KEY_HERE';
-}
-
-const GOOGLE_API_KEY = getAPIKey();
+// ANTONIO AI ASSISTANT 
 // ============================================
 
 let selectedRecipe = '';
 let selectedRecipeName = '';
 let conversationHistory = [];
 
-// Request tracking
-let requestCount = parseInt(localStorage.getItem('ai_request_count') || '0');
-let requestDate = localStorage.getItem('ai_request_date') || '';
-const MAX_DAILY_REQUESTS = 1500;
-
-// Reset counter if new day
-const today = new Date().toDateString();
-if (requestDate !== today) {
-    requestCount = 0;
-    requestDate = today;
-    localStorage.setItem('ai_request_count', '0');
-    localStorage.setItem('ai_request_date', today);
-}
-
-// Show request counter notification
-function showRequestsRemaining() {
-    const remaining = MAX_DAILY_REQUESTS - requestCount;
-    const percentage = (remaining / MAX_DAILY_REQUESTS) * 100;
-    
-    let color = '#4caf50'; // Green
-    if (percentage < 50) color = '#ff9800'; // Orange
-    if (percentage < 20) color = '#f44336'; // Red
-    
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        border: 2px solid ${color};
-        border-radius: 8px;
-        padding: 15px 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 10000;
-        animation: slideIn 0.3s ease-out;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    `;
-    
-    notification.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <span style="font-size: 24px;">🤖</span>
-            <div>
-                <div style="font-weight: bold; color: #333; margin-bottom: 4px;">
-                    AI Requests Today
-                </div>
-                <div style="font-size: 18px; font-weight: bold; color: ${color};">
-                    ${remaining} / ${MAX_DAILY_REQUESTS} remaining
-                </div>
-                <div style="font-size: 12px; color: #666; margin-top: 4px;">
-                    Resets at midnight
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // Add slide-in animation
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-    `;
-    document.head.appendChild(style);
-    
-    // Remove after 4 seconds
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in';
-        notification.style.transform = 'translateX(400px)';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
-}
-
-// Check internet connection
-function checkInternetConnection() {
-    return navigator.onLine;
-}
-
 function toggleAI() {
     const panel = document.getElementById('aiPanel');
+    const pointer = document.getElementById('aiPointer');
     const isOpening = !panel.classList.contains('active');
     
     panel.classList.toggle('active');
+    document.body.classList.toggle('ai-open');
     
-    // When opening panel, check internet and show requests remaining
+    // Hide pointer permanently when AI is opened for the first time
     if (isOpening) {
-        if (!checkInternetConnection()) {
-            alert('⚠️ No Internet Connection!\n\nYou need to be online to see remaining AI requests and use the assistant.');
-            return;
+        if (pointer) {
+            pointer.style.display = 'none';
         }
-        
-        // Show requests remaining notification
-        showRequestsRemaining();
+        // Mark that AI has been clicked - pointer won't show again
+        localStorage.setItem('ai_ever_clicked', 'true');
     }
 }
 
@@ -198,7 +70,8 @@ function selectRecipe(recipeValue, recipeName) {
         chatArea.innerHTML = `
             <div class="ai-message assistant">
                 Great! I'm ready to help with <strong>${recipeName}</strong>. 
-                Ask me about ingredient substitutions, cooking techniques, or any questions you have! Take note that I may occasionally be wrong, so always make sure that tips I may give make sense.
+                <br><br>Ask me about ingredient substitutions, cooking techniques, or any questions you have!
+                <br><br><small style="color: #d32f2f;">⚠️ Please be mindful: The 1,500 daily requests are shared among ALL users, not per person!</small>
             </div>
         `;
     }
@@ -235,12 +108,6 @@ async function sendMessage() {
         return;
     }
     
-    // Check if we've hit daily limit
-    if (requestCount >= MAX_DAILY_REQUESTS) {
-        alert(`❌ Daily Limit Reached!\n\nYou've used all ${MAX_DAILY_REQUESTS} requests for today.\n\nLimit resets at midnight. Come back tomorrow!`);
-        return;
-    }
-    
     const chatArea = document.getElementById('aiChatArea');
     const sendBtn = document.getElementById('aiSendBtn');
     
@@ -249,7 +116,7 @@ async function sendMessage() {
     input.value = '';
     chatArea.scrollTop = chatArea.scrollHeight;
     
-    // Disable input while processing
+    // Disable input during processing
     sendBtn.disabled = true;
     input.disabled = true;
     
@@ -311,7 +178,7 @@ Provide a helpful, friendly, concise answer. If they ask about substitutions, ex
                 }],
                 generationConfig: {
                     temperature: 0.7,
-                    maxOutputTokens: 2000,  // Increased for complete responses
+                    maxOutputTokens: 2000,
                 }
             })
         });
@@ -336,10 +203,6 @@ Provide a helpful, friendly, concise answer. If they ask about substitutions, ex
             throw new Error('Empty response from AI');
         }
         
-        // Increment request counter
-        requestCount++;
-        localStorage.setItem('ai_request_count', requestCount.toString());
-        
         // Remove loading
         document.getElementById('loading')?.remove();
         
@@ -351,13 +214,6 @@ Provide a helpful, friendly, concise answer. If they ask about substitutions, ex
             chatArea.innerHTML += `<div class="ai-message assistant" style="background: #fff3cd; border-left: 3px solid #ffc107; padding: 10px; margin-top: 10px; font-size: 0.9em;">
                 ⚠️ <strong>Response was cut off!</strong> The answer was too long. Try asking a more specific question or ask me to continue.
             </div>`;
-        }
-        
-        // Show updated counter after response
-        const remaining = MAX_DAILY_REQUESTS - requestCount;
-        if (remaining <= 100 && remaining % 20 === 0) {
-            // Show warning at 100, 80, 60, 40, 20 remaining
-            showRequestsRemaining();
         }
         
         chatArea.scrollTop = chatArea.scrollHeight;
@@ -376,48 +232,46 @@ Provide a helpful, friendly, concise answer. If they ask about substitutions, ex
         let errorMsg = error.message;
         
         if (errorMsg === 'API_KEY_NOT_SET') {
-            chatArea.innerHTML += `<div class="ai-message assistant" style="color: #d32f2f;">
-                🔑 <strong>API Key Not Set!</strong>
+            chatArea.innerHTML += `<div class="ai-message assistant" style="background: #ffebee; border-left: 3px solid #d32f2f; padding: 12px; font-size: 13px;">
+                <strong style="color: #d32f2f;">🔑 API Key Not Set!</strong>
                 <br><br>You need to add your FREE Google AI Studio API key.
                 <br><br><strong>Steps:</strong>
-                <br>1. Get FREE key: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #006633;">aistudio.google.com/app/apikey</a>
+                <br>1. Get FREE key: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #006633; font-weight: bold;">aistudio.google.com/app/apikey</a>
                 <br>2. Sign in with Google (no credit card needed)
                 <br>3. Click "Create API Key"
-                <br>4. Open this HTML file in a text editor
-                <br>5. Find: <code>GOOGLE_API_KEY = 'YOUR_API_KEY_HERE'</code>
-                <br>6. Replace YOUR_API_KEY_HERE with your key
-                <br>7. Save and reload!
-                <br><br><strong>Limits:</strong> 1,500 requests/day (much better than others!)
+                <br>4. Open <code>js/config.js</code> in a text editor
+                <br>5. Replace <code>YOUR_API_KEY_HERE</code> with your key
+                <br>6. Save and reload!
+                <br><br><strong>⚠️ Important:</strong> The 1,500 requests/day limit is shared among ALL users of this cookbook!
             </div>`;
         } else if (errorMsg.includes('API_KEY_INVALID') || errorMsg.includes('401') || errorMsg.includes('403')) {
-            chatArea.innerHTML += `<div class="ai-message assistant" style="color: #d32f2f;">
-                🔑 <strong>Invalid API Key!</strong>
+            chatArea.innerHTML += `<div class="ai-message assistant" style="background: #ffebee; border-left: 3px solid #d32f2f; padding: 12px; font-size: 13px;">
+                <strong style="color: #d32f2f;">🔑 Invalid API Key!</strong>
                 <br><br>Your Google AI Studio key is not working.
                 <br><br><strong>Solutions:</strong>
-                <br>1. Get a new key: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #006633;">aistudio.google.com/app/apikey</a>
+                <br>1. Get a new key: <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color: #006633; font-weight: bold;">aistudio.google.com/app/apikey</a>
                 <br>2. Make sure you copied the entire key
-                <br>3. Check for extra spaces before/after the key
+                <br>3. Check for extra spaces
                 <br><br><strong>Error:</strong> ${errorMsg}
             </div>`;
-        } else if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('limit')) {
-            chatArea.innerHTML += `<div class="ai-message assistant" style="color: #ff6b00;">
-                ⏱️ <strong>Rate Limit Reached!</strong>
-                <br><br>You've hit Google's rate limit (1,500 requests/day).
-                <br><br><strong>Solutions:</strong>
-                <br>• Wait until midnight (limit resets daily)
-                <br>• Use the cookbook without AI (all recipes still work!)
-                <br><br><strong>Your counter shows:</strong> ${requestCount} requests used today
-                <br><br><strong>Error:</strong> ${errorMsg}
+        } else if (errorMsg.includes('429') || errorMsg.includes('quota') || errorMsg.includes('limit') || errorMsg.includes('RESOURCE_EXHAUSTED')) {
+            chatArea.innerHTML += `<div class="ai-message assistant" style="background: #fff3cd; border-left: 3px solid #ff9800; padding: 12px; font-size: 13px;">
+                <strong style="color: #ff6b00;">⏱️ Daily Limit Reached!</strong>
+                <br><br><strong style="color: #d32f2f;">⚠️ IMPORTANT: The 1,500 requests/day are shared among ALL users of this cookbook, not per person!</strong>
+                <br><br>Someone has used up today's quota. Please be mindful and avoid unnecessary requests.
+                <br><br><strong>The limit resets at midnight GMT.</strong>
+                <br><br>You can still use the cookbook - all recipes work without AI!
+                <br><br><small>Error: ${errorMsg}</small>
             </div>`;
         } else {
-            chatArea.innerHTML += `<div class="ai-message assistant" style="color: #d32f2f;">
-                ⚠️ Sorry, I'm having trouble connecting.
+            chatArea.innerHTML += `<div class="ai-message assistant" style="background: #ffebee; border-left: 3px solid #d32f2f; padding: 12px; font-size: 13px;">
+                <strong style="color: #d32f2f;">⚠️ Connection Error</strong>
                 <br><br><strong>Possible issues:</strong>
-                <br>• You're offline (check internet)
+                <br>• You're offline (check internet connection)
                 <br>• Google AI Studio is temporarily down
-                <br>• API key has been revoked
+                <br>• Daily quota exhausted by all users
                 <br><br><strong>Error:</strong> ${errorMsg}
-                <br><br>Check browser console (F12) for details.
+                <br><br>Check browser console (F12) for more details.
             </div>`;
         }
         chatArea.scrollTop = chatArea.scrollHeight;
