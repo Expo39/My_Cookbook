@@ -1,5 +1,5 @@
 /* ============================================
-   SAPORI TA' L-KCINA - STYLESHEET 
+   SAPORI TA' L-KCINA - STYLESHEET
    ============================================ */
 
 /* 1. GLOBAL STYLES & RESET
@@ -750,10 +750,10 @@ footer .update-date {
 
     .back-to-top {
         top: 15px;
-        right: 15px;  /* Same as AI button on mobile */
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
+        right: 15px;  /* Same as AI button */
+        width: 55px;  /* Same size as AI button for perfect alignment */
+        height: 55px;
+        font-size: 22px;
     }
 
     .ai-chat-area {
@@ -774,6 +774,22 @@ footer .update-date {
 
     .ai-chat-area {
         max-height: 200px;
+    }
+    
+    .ai-helper-button {
+        bottom: 12px;
+        right: 12px;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+    
+    .back-to-top {
+        top: 12px;
+        right: 12px;  /* Same as AI button */
+        width: 50px;  /* Same size as AI button */
+        height: 50px;
+        font-size: 20px;
     }
 
     .ai-message {
