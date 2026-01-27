@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const pointer = document.createElement('div');
         pointer.id = 'aiPointer';
         pointer.className = 'ai-pointer';
-        pointer.textContent = 'Click me to use AI assistant!';
+        pointer.textContent = 'Click me to use the AI assistant!';
         document.body.appendChild(pointer);
         
         // The pointer will be hidden when AI button is clicked (handled in ai.js)

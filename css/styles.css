@@ -1,5 +1,5 @@
 /* ============================================
-   SAPORI TA' L-KCINA - STYLESHEET 
+   SAPORI TA' L-KCINA - STYLESHEET (UNIVERSAL FIX)
    ============================================ */
 
 /* 1. GLOBAL STYLES & RESET
@@ -23,6 +23,7 @@ body {
     line-height: 1.6;
     color: #2c3e50;
     background: #f5f0e6;
+    /* KEY SCROLL FIXES */
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 100vh;
@@ -38,7 +39,7 @@ body {
     width: 100%;
     margin: 0 auto;
     background: white;
-    display: flow-root; 
+    display: flow-root; /* Fixes container height reporting */
     overflow: visible;
 }
 
@@ -454,31 +455,48 @@ footer .update-date {
 /* AI Helper Pointer Arrow (shows until AI is clicked) */
 .ai-pointer {
     position: fixed;
-    bottom: 100px;  /* Positioned above the AI button with spacing */
+    bottom: 100px;  /* Positioned above the AI button */
     right: 20px;  /* Aligned with AI button */
     background: white;
     color: #003366;
-    padding: 10px 15px;
+    padding: 12px 16px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     font-weight: bold;
-    z-index: 2001;  /* Higher than AI button */
+    z-index: 2001;
     animation: bounce 2s infinite;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 14px;
     white-space: nowrap;
+    border: 2px solid #003366;
 }
 
+/* CSS Triangle arrow pointing down - attached to the box */
 .ai-pointer::after {
-    content: '↓';
+    content: '';
     position: absolute;
-    bottom: -25px;  /* Below the pointer box */
-    left: 50%;
-    transform: translateX(-50%);  /* Center the arrow horizontally */
-    font-size: 24px;
-    color: #003366;
-    text-shadow: 0 2px 4px rgba(255,255,255,0.8);
-    animation: bounce-arrow 2s infinite;
+    bottom: -12px;  /* Sits at bottom of box */
+    right: 15px;  /* Positioned to point at button center */
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 12px solid white;  /* White triangle */
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+}
+
+/* Border for the arrow triangle */
+.ai-pointer::before {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    right: 13px;
+    width: 0;
+    height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 14px solid #003366;  /* Border color */
+    z-index: -1;
 }
 
 @keyframes bounce {
@@ -490,18 +508,6 @@ footer .update-date {
     }
     60% {
         transform: translateY(-5px);
-    }
-}
-
-@keyframes bounce-arrow {
-    0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-    }
-    40% {
-        transform: translateY(5px);
-    }
-    60% {
-        transform: translateY(3px);
     }
 }
 
@@ -743,10 +749,26 @@ footer .update-date {
     }
 
     .ai-pointer {
-        bottom: 85px;  /* Above the AI button on mobile */
-        right: 15px;  /* Aligned with AI button */
+        bottom: 85px;
+        right: 22px;
         font-size: 12px;
-        padding: 8px 12px;
+        padding: 10px 14px;
+    }
+    
+    .ai-pointer::after {
+        right: 12px;  /* Adjust arrow position for smaller button */
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid white;
+        bottom: -10px;
+    }
+    
+    .ai-pointer::before {
+        right: 10px;
+        border-left: 12px solid transparent;
+        border-right: 12px solid transparent;
+        border-top: 12px solid #003366;
+        bottom: -12px;
     }
 
     .back-to-top {
