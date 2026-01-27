@@ -1,5 +1,5 @@
 /* ============================================
-   SAPORI TA' L-KCINA - STYLESHEET
+   SAPORI TA' L-KCINA - STYLESHEET 
    ============================================ */
 
 /* 1. GLOBAL STYLES & RESET
@@ -23,7 +23,6 @@ body {
     line-height: 1.6;
     color: #2c3e50;
     background: #f5f0e6;
-    /* KEY SCROLL FIXES */
     overflow-y: auto;
     overflow-x: hidden;
     min-height: 100vh;
@@ -39,7 +38,7 @@ body {
     width: 100%;
     margin: 0 auto;
     background: white;
-    display: flow-root; /* Fixes container height reporting */
+    display: flow-root; 
     overflow: visible;
 }
 
@@ -455,8 +454,8 @@ footer .update-date {
 /* AI Helper Pointer Arrow (shows until AI is clicked) */
 .ai-pointer {
     position: fixed;
-    bottom: 90px;
-    right: 25px;
+    bottom: 100px;  /* Positioned above the AI button with spacing */
+    right: 20px;  /* Aligned with AI button */
     background: white;
     color: #003366;
     padding: 10px 15px;
@@ -473,10 +472,12 @@ footer .update-date {
 .ai-pointer::after {
     content: '↓';
     position: absolute;
-    bottom: -20px;
-    right: 20px;
+    bottom: -25px;  /* Below the pointer box */
+    left: 50%;
+    transform: translateX(-50%);  /* Center the arrow horizontally */
     font-size: 24px;
-    color: white;
+    color: #003366;
+    text-shadow: 0 2px 4px rgba(255,255,255,0.8);
     animation: bounce-arrow 2s infinite;
 }
 
@@ -742,8 +743,8 @@ footer .update-date {
     }
 
     .ai-pointer {
-        bottom: 75px;
-        right: 20px;
+        bottom: 85px;  /* Above the AI button on mobile */
+        right: 15px;  /* Aligned with AI button */
         font-size: 12px;
         padding: 8px 12px;
     }
