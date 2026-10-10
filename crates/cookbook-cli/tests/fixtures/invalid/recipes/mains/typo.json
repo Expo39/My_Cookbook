@@ -1,0 +1,7 @@
+{
+  "title": "Typo",
+  "summary": "Has an unknown field.",
+  "servngs": 4,
+  "ingredientGroups": [{ "items": [{ "item": "water" }] }],
+  "steps": [{ "text": "Boil." }]
+}

@@ -9,3 +9,6 @@ publish.workspace = true
 [dependencies]
 clap.workspace = true
 cookbook-core = { path = "../cookbook-core" }
+schemars = "1"
+serde.workspace = true
+serde_json.workspace = true
