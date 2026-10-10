@@ -1,0 +1,186 @@
+<script lang="ts">
+	import { formatMinutes, servingsText } from '$lib/recipe/format';
+	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
+	import { favourites } from '$lib/stores/favourites.svelte';
+	import type { RecipeCard } from '$lib/types/recipe';
+	import Icon from './Icon.svelte';
+
+	let {
+		card,
+		model,
+		hydrated,
+		onshare
+	}: { card: RecipeCard; model: RecipeModel; hydrated: boolean; onshare: () => void } = $props();
+
+	const recipe = $derived(model.data.recipe);
+	const times = $derived(card.times);
+	const saved = $derived(favourites.has(card.id));
+	const timings = $derived(
+		[
+			['Prep', times.prep],
+			['Cook', times.cook],
+			['Rest', times.rest],
+			['Total', times.total]
+		].filter((entry): entry is [string, number] => typeof entry[1] === 'number')
+	);
+</script>
+
+<header>
+	<div class="titles">
+		<h1>{recipe.title}</h1>
+		{#if recipe.titleLocal}<p class="local">{recipe.titleLocal}</p>{/if}
+		<p class="summary">{recipe.summary}</p>
+	</div>
+
+	<dl class="meta">
+		{#each timings as [label, minutes] (label)}
+			<div>
+				<dt class="label">{label}</dt>
+				<dd class="num">{formatMinutes(minutes)}</dd>
+			</div>
+		{/each}
+		{#if recipe.difficulty}
+			<div>
+				<dt class="label">Difficulty</dt>
+				<dd class="difficulty">{recipe.difficulty}</dd>
+			</div>
+		{/if}
+		<div>
+			<dt class="label">Serves</dt>
+			<dd class="num">{servingsText(model.view.servings, recipe.servingsNoun)}</dd>
+		</div>
+	</dl>
+
+	{#if recipe.tags?.length}
+		<ul class="tags">
+			{#each recipe.tags as tag (tag)}<li>{tag}</li>{/each}
+		</ul>
+	{/if}
+	{#if recipe.origin}<p class="origin">From {recipe.origin}</p>{/if}
+
+	<div class="actions">
+		<button
+			type="button"
+			aria-pressed={saved}
+			disabled={!hydrated}
+			onclick={() => favourites.toggle(card.id)}
+		>
+			<Icon name="heart" />{saved ? 'Favourited' : 'Favourite'}
+		</button>
+		<button type="button" disabled={!hydrated} onclick={onshare}>
+			<Icon name="share" />Share
+		</button>
+	</div>
+</header>
+
+<style>
+	header {
+		display: grid;
+		gap: var(--space-4);
+	}
+
+	.titles {
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	.local {
+		color: var(--colour-muted);
+		font-size: var(--text-l);
+		font-style: italic;
+	}
+
+	.summary {
+		max-inline-size: var(--measure);
+	}
+
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3) var(--space-5);
+	}
+
+	dt {
+		color: var(--colour-muted);
+	}
+
+	dd {
+		font-size: var(--text-l);
+	}
+
+	.difficulty {
+		text-transform: capitalize;
+	}
+
+	.tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	.tags li {
+		padding: var(--space-1) var(--space-3);
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-s);
+		color: var(--colour-muted);
+		font-size: var(--text-s);
+	}
+
+	.origin {
+		color: var(--colour-muted);
+		font-size: var(--text-s);
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+	}
+
+	button {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+		padding-inline: var(--space-4);
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-s);
+		background: var(--colour-surface);
+		color: var(--colour-primary);
+		font-weight: 700;
+		transition: background-color var(--duration-micro);
+	}
+
+	button:hover:not(:disabled) {
+		background: var(--colour-tint);
+	}
+
+	button[aria-pressed='true'] {
+		border-color: var(--colour-accent);
+		color: var(--colour-accent);
+	}
+
+	button[aria-pressed='true'] :global(svg) {
+		fill: currentColor;
+	}
+
+	button:disabled {
+		opacity: 0.6;
+	}
+
+	@media print {
+		.tags,
+		.actions,
+		.origin {
+			display: none;
+		}
+
+		.meta {
+			gap: var(--space-2) var(--space-4);
+		}
+
+		dd {
+			font-size: var(--text-m);
+		}
+	}
+</style>
