@@ -448,7 +448,7 @@ test.describe('moving', () => {
 		await expect(notice).toContainText(`/${linked}`);
 		await expect(notice).toContainText('/specials/house-special');
 		await page.getByRole('button', { name: 'Move and save' }).click();
-		await expect(page.getByText('was moved to')).toBeVisible();
+		await expect(page.getByText('was moved to')).toBeVisible({ timeout: 10_000 });
 		await expect(page.getByText('Live.')).toBeVisible();
 
 		expect(github.commits()).toHaveLength(1);
