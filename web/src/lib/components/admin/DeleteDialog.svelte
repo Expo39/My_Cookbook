@@ -3,6 +3,7 @@
 	import type { EditorState } from '$lib/admin/editor-state.svelte';
 	import { recipesLinkingTo } from '$lib/admin/removal';
 	import { createSource } from '$lib/data';
+	import { uncached } from '$lib/data/uncached';
 	import { editHref, pageHref } from '$lib/links';
 	import Icon from '../Icon.svelte';
 	import Modal from './Modal.svelte';
@@ -25,7 +26,7 @@
 		typed = problem = '';
 		modal.show();
 		try {
-			linked = await recipesLinkingTo(ed.originalId ?? '', ed.index, createSource());
+			linked = await recipesLinkingTo(ed.originalId ?? '', ed.index, createSource(uncached));
 			phase = linked.length ? 'blocked' : 'confirm';
 		} catch {
 			phase = 'failed';

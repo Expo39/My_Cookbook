@@ -64,6 +64,8 @@ describe('merging by food and by wording', () => {
 		});
 		const lines = mergeLines([recipe('a', [egg(2)]), recipe('b', [egg(100, 'g')])], convert);
 		expect(lines).toHaveLength(2);
+		expect(new Set(lines.map((line) => line.key)).size).toBe(2);
+		expect(lines[0].key).toBe('food:egg');
 	});
 
 	it('does not convert at all when it has no converter', () => {
