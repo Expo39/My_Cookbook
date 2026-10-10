@@ -1,7 +1,11 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { expect, type Page } from '@playwright/test';
 
-const dataDir = new URL('../static/data/', import.meta.url);
+// CI downloads only the built site, so read its copy of the data; locally `make data` also fills static/.
+const built = new URL('../build/data/', import.meta.url);
+const dataDir = existsSync(new URL('manifest.json', built))
+	? built
+	: new URL('../static/data/', import.meta.url);
 
 export const recipeIds: string[] = JSON.parse(
 	readFileSync(new URL('manifest.json', dataDir), 'utf8')
