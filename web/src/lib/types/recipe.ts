@@ -7,6 +7,18 @@ export type Level = 'error' | 'warning';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type ScaleMode = 'linear' | 'discrete' | 'seasoning' | 'fixed' | 'toTaste';
 export type PanShape = 'round' | 'square' | 'rect';
+/**
+ * The word for a serving: a plural alone, or separate singular and plural forms.
+ *
+ * This interface was referenced by `Web`'s JSON-Schema
+ * via the `definition` "ServingsNoun".
+ */
+export type ServingsNoun =
+	| string
+	| {
+			one: string;
+			other: string;
+	  };
 export type RenderedSegment =
 	| {
 			text: string;
@@ -24,6 +36,9 @@ export type RenderedSegment =
 			fanCelsius?: number | null;
 			fanFahrenheit?: number | null;
 			gasMark?: string | null;
+			internal: boolean;
+			maxCelsius?: number | null;
+			maxFahrenheit?: number | null;
 			text: string;
 			type: 'temp';
 	  }
@@ -149,7 +164,7 @@ export interface Recipe {
 	related?: string[];
 	scaling?: Scaling | null;
 	servings: number;
-	servingsNoun?: string | null;
+	servingsNoun?: ServingsNoun | null;
 	steps: Step[];
 	summary: string;
 	tags?: string[];

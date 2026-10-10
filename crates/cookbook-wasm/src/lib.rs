@@ -109,14 +109,39 @@ pub fn toggle_unit(qty: f64, unit: JsValue) -> Result<JsValue, JsError> {
     }
 }
 
-/// Renders an oven temperature such as "200 °C (180 °C fan)" for the chosen system ("metric" or "us").
+/// Renders a temperature such as "200 °C (180 °C fan)" or "52–55 °C" for the chosen system ("metric" or "us").
+/// `internal` marks a meat or food temperature, which converts to the nearest degree.
 #[wasm_bindgen]
 pub fn format_temperature(
     celsius: f64,
+    max_celsius: Option<f64>,
     fan_celsius: Option<f64>,
+    internal: bool,
     system: JsValue,
 ) -> Result<String, JsError> {
-    Ok(core::temp_text(celsius, fan_celsius, from_js(system)?))
+    let kind = if internal {
+        core::TempKind::Internal
+    } else {
+        core::TempKind::Oven
+    };
+    Ok(core::temp_text(
+        celsius,
+        max_celsius,
+        fan_celsius,
+        kind,
+        from_js(system)?,
+    ))
+}
+
+/// "4 people" or "1 person": `noun` is a plural string, `{ one, other }`, or absent for "servings".
+#[wasm_bindgen]
+pub fn servings_label(servings: f64, noun: JsValue) -> Result<String, JsError> {
+    let noun: Option<core::ServingsNoun> = if noun.is_undefined() || noun.is_null() {
+        None
+    } else {
+        Some(from_js(noun)?)
+    };
+    Ok(core::servings_label(servings, noun.as_ref()))
 }
 
 /// Converts between units; `food` selects a density for mass to volume. `undefined` when impossible.

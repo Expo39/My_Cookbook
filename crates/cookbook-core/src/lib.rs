@@ -15,7 +15,9 @@ pub use checklist::{
     CheckContext, CheckResult, Collection, Level, RecipeFile, SectionFile, check_all, check_recipe,
     check_removal, has_errors,
 };
-pub use format::{DisplayCtx, Shown, display_amount, format_minutes, format_number, round_amount};
+pub use format::{
+    DisplayCtx, Shown, display_amount, format_minutes, format_number, round_amount, servings_label,
+};
 pub use parse::{IngredientParseError, parse_ingredient_line};
 pub use scale::{
     ScaleOptions, ScaleRequest, ScaledAmount, ScaledGroup, ScaledIngredient, ScaledRecipe,
@@ -23,8 +25,8 @@ pub use scale::{
 };
 pub use schema::{
     Amount, Difficulty, Image, Ingredient, IngredientGroup, Pan, PanShape, Qty, QtyRange, Recipe,
-    ScaleMode, Scaling, Section, Step, StepTime, Times, Unit, Variant, VariantOption, parse_recipe,
-    parse_section,
+    ScaleMode, Scaling, Section, ServingsNoun, Step, StepTime, Times, Unit, Variant, VariantOption,
+    parse_recipe, parse_section,
 };
 pub use search::{Coverage, RecipeSummary, SearchHit, SearchIndex, SummaryIngredient, tokenise};
 pub use site::{

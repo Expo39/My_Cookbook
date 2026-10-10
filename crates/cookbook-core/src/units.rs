@@ -217,14 +217,14 @@ pub fn toggle_unit(qty: f64, unit: Unit) -> Option<(f64, Unit)> {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TempKind {
     Oven,
-    General,
+    Internal,
 }
 
-/// Oven dials move in steps of 25 °F, anything else in steps of 5.
+/// Oven dials move in steps of 25 °F; internal and food temperatures round to the nearest degree.
 pub fn fahrenheit(celsius: f64, kind: TempKind) -> i32 {
     let step = match kind {
         TempKind::Oven => 25.0,
-        TempKind::General => 5.0,
+        TempKind::Internal => 1.0,
     };
     let f = celsius * 9.0 / 5.0 + 32.0;
     ((f / step).round() * step) as i32
@@ -338,7 +338,9 @@ mod tests {
         assert_eq!(fahrenheit(180.0, TempKind::Oven), 350);
         assert_eq!(fahrenheit(200.0, TempKind::Oven), 400);
         assert_eq!(fahrenheit(220.0, TempKind::Oven), 425);
-        assert_eq!(fahrenheit(63.0, TempKind::General), 145);
+        assert_eq!(fahrenheit(63.0, TempKind::Internal), 145);
+        assert_eq!(fahrenheit(52.0, TempKind::Internal), 126);
+        assert_eq!(fahrenheit(55.0, TempKind::Internal), 131);
     }
 
     #[test]

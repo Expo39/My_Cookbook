@@ -6,6 +6,7 @@ import {
 	checkRemoval,
 	convert,
 	formatTemperature,
+	servingsLabel,
 	isCoreLoaded,
 	loadCore,
 	parseIngredientLine,
@@ -96,5 +97,18 @@ describe('the WASM core', () => {
 		expect(toggleUnit(1, 'pinch')).toBeUndefined();
 		expect(formatTemperature(200, 'metric', 180)).toBe('200 °C (180 °C fan)');
 		expect(formatTemperature(200, 'us')).toMatch(/°F$/);
+		expect(formatTemperature(52, 'metric', undefined, { maxCelsius: 55, internal: true })).toBe(
+			'52–55 °C'
+		);
+		expect(formatTemperature(52, 'us', undefined, { maxCelsius: 55, internal: true })).toBe(
+			'126–131 °F'
+		);
+	});
+
+	it('labels servings with singular and plural nouns', () => {
+		expect(servingsLabel(1, { one: 'person', other: 'people' })).toBe('1 person');
+		expect(servingsLabel(4, { one: 'person', other: 'people' })).toBe('4 people');
+		expect(servingsLabel(6, 'boards')).toBe('6 boards');
+		expect(servingsLabel(1)).toBe('1 serving');
 	});
 });

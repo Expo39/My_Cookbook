@@ -2,11 +2,11 @@ use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::{
-    schema::Unit,
+    schema::{ServingsNoun, Unit},
     units::{UnitSystem, convert, density, nearest_cup, normalise},
 };
 
-const EN_DASH: char = '–';
+pub(crate) const EN_DASH: char = '–';
 
 #[derive(Debug, Clone, Copy)]
 pub struct DisplayCtx<'a> {
@@ -251,14 +251,54 @@ pub fn format_number(qty: f64, unit: Option<Unit>) -> String {
     }
 }
 
-/// "12 min" or "12–15 min".
-pub fn format_minutes(min: f64, max: Option<f64>) -> String {
-    match max {
-        Some(max) if (max - min).abs() > 1e-9 => {
-            format!("{}{EN_DASH}{} min", trim_decimal(min), trim_decimal(max))
-        }
-        _ => format!("{} min", trim_decimal(min)),
+fn minutes_text(minutes: f64) -> String {
+    if minutes < 1.0 - 1e-9 {
+        return format!("{} sec", (minutes * 60.0).round() as i64);
     }
+    if minutes < 60.0 - 1e-9 {
+        return format!("{} min", trim_decimal(minutes));
+    }
+    let total = minutes.round() as i64;
+    match (total / 60, total % 60) {
+        (hours, 0) => format!("{hours} h"),
+        (hours, rest) => format!("{hours} h {rest} min"),
+    }
+}
+
+/// "30 sec", "12 min", "1 h 30 min", or a range such as "12–15 min" and "3–4 h".
+pub fn format_minutes(min: f64, max: Option<f64>) -> String {
+    let Some(max) = max.filter(|max| (max - min).abs() > 1e-9) else {
+        return minutes_text(min);
+    };
+    let (lo, hi) = (min.min(max), min.max(max));
+    if hi < 1.0 - 1e-9 {
+        let secs = |m: f64| (m * 60.0).round() as i64;
+        return format!("{}{EN_DASH}{} sec", secs(lo), secs(hi));
+    }
+    if lo >= 1.0 - 1e-9 && hi < 60.0 - 1e-9 {
+        return format!("{}{EN_DASH}{} min", trim_decimal(lo), trim_decimal(hi));
+    }
+    if lo >= 60.0 - 1e-9 && lo % 30.0 < 1e-9 && hi % 30.0 < 1e-9 {
+        return format!(
+            "{}{EN_DASH}{} h",
+            trim_decimal(lo / 60.0),
+            trim_decimal(hi / 60.0)
+        );
+    }
+    format!("{}{EN_DASH}{}", minutes_text(lo), minutes_text(hi))
+}
+
+/// "4 people", "1 person" or, with no noun, "4 servings".
+pub fn servings_label(servings: f64, noun: Option<&ServingsNoun>) -> String {
+    let single = (servings - 1.0).abs() < 1e-9;
+    let word = match noun {
+        Some(ServingsNoun::Plural(plural)) => plural.as_str(),
+        Some(ServingsNoun::Forms { one, .. }) if single => one.as_str(),
+        Some(ServingsNoun::Forms { other, .. }) => other.as_str(),
+        None if single => "serving",
+        None => "servings",
+    };
+    format!("{} {word}", format_number(servings, None))
 }
 
 #[cfg(test)]
@@ -412,5 +452,37 @@ mod tests {
         assert_eq!(format_minutes(12.0, None), "12 min");
         assert_eq!(format_minutes(12.0, Some(15.0)), "12–15 min");
         assert_eq!(format_minutes(1.5, None), "1.5 min");
+    }
+
+    #[test]
+    fn short_timers_read_in_seconds() {
+        assert_eq!(format_minutes(0.5, None), "30 sec");
+        assert_eq!(format_minutes(0.25, Some(0.75)), "15–45 sec");
+        assert_eq!(format_minutes(0.5, Some(2.0)), "30 sec–2 min");
+    }
+
+    #[test]
+    fn long_timers_read_in_hours() {
+        assert_eq!(format_minutes(60.0, None), "1 h");
+        assert_eq!(format_minutes(90.0, None), "1 h 30 min");
+        assert_eq!(format_minutes(240.0, None), "4 h");
+        assert_eq!(format_minutes(180.0, Some(240.0)), "3–4 h");
+        assert_eq!(format_minutes(90.0, Some(120.0)), "1.5–2 h");
+        assert_eq!(format_minutes(45.0, Some(90.0)), "45 min–1 h 30 min");
+        assert_eq!(format_minutes(59.0, None), "59 min");
+    }
+
+    #[test]
+    fn servings_labels() {
+        let forms = ServingsNoun::Forms {
+            one: "person".into(),
+            other: "people".into(),
+        };
+        let plural = ServingsNoun::Plural("boards".into());
+        assert_eq!(servings_label(1.0, Some(&forms)), "1 person");
+        assert_eq!(servings_label(4.0, Some(&forms)), "4 people");
+        assert_eq!(servings_label(1.0, Some(&plural)), "1 boards");
+        assert_eq!(servings_label(1.0, None), "1 serving");
+        assert_eq!(servings_label(2.5, None), "2½ servings");
     }
 }

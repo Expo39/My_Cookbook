@@ -8,6 +8,7 @@ import type {
 	ScaleOptions,
 	ScaleRequest,
 	ScaledRecipe,
+	ServingsNoun,
 	SearchHit,
 	Unit,
 	UnitSystem
@@ -28,7 +29,14 @@ type RawModule = {
 	check_recipe(recipe: unknown, id: string, context?: unknown): unknown;
 	check_removal(id: string, recipes: unknown): unknown;
 	toggle_unit(qty: number, unit: Unit): unknown;
-	format_temperature(celsius: number, fan: number | undefined, system: UnitSystem): string;
+	format_temperature(
+		celsius: number,
+		max: number | undefined,
+		fan: number | undefined,
+		internal: boolean,
+		system: UnitSystem
+	): string;
+	servings_label(servings: number, noun?: ServingsNoun | null): string;
 	convert(qty: number, from: Unit, to: Unit, food?: string): number | undefined;
 	version(): string;
 	SearchEngine: new (indexJson: string) => RawEngine;
@@ -109,12 +117,31 @@ export function toggleUnit(qty: number, unit: Unit): { qty: number; unit: Unit }
 	return core().toggle_unit(qty, unit) as { qty: number; unit: Unit } | undefined;
 }
 
+export interface TemperatureOptions {
+	/** The top of a range, rendered "52–55 °C". */
+	maxCelsius?: number;
+	/** A meat or food temperature: exact degrees, never oven steps. */
+	internal?: boolean;
+}
+
 export function formatTemperature(
 	celsius: number,
 	system: UnitSystem,
-	fanCelsius?: number
+	fanCelsius?: number,
+	options: TemperatureOptions = {}
 ): string {
-	return core().format_temperature(celsius, fanCelsius, system);
+	return core().format_temperature(
+		celsius,
+		options.maxCelsius,
+		fanCelsius,
+		options.internal ?? false,
+		system
+	);
+}
+
+/** "4 people", "1 person"; `noun` is the recipe's `servingsNoun`, and without one it reads "servings". */
+export function servingsLabel(servings: number, noun?: ServingsNoun | null): string {
+	return core().servings_label(servings, noun);
 }
 
 export function convert(qty: number, from: Unit, to: Unit, food?: string): number | undefined {

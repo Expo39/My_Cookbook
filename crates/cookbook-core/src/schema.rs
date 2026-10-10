@@ -24,7 +24,7 @@ pub struct Recipe {
     pub summary: String,
     pub servings: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub servings_noun: Option<String>,
+    pub servings_noun: Option<ServingsNoun>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title_local: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -55,6 +55,14 @@ pub struct Recipe {
     pub variants: Vec<Variant>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub related: Vec<String>,
+}
+
+/// The word for a serving: a plural alone, or separate singular and plural forms.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
+pub enum ServingsNoun {
+    Plural(String),
+    Forms { one: String, other: String },
 }
 
 impl Recipe {
