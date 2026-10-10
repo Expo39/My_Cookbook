@@ -11,7 +11,7 @@ RUST_SRC := Cargo.toml Cargo.lock $(shell find crates/cookbook-core crates/cookb
 RECIPE_SRC := $(shell find recipes -type f 2>/dev/null)
 CARDS_OUT := web/static/cards
 CARDS_STAMP := $(CARDS_OUT)/.state.json
-CARD_SRC := site.json $(shell find assets -type f)
+CARD_SRC := cookbook.config.json $(shell find assets -type f)
 
 .PHONY: screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
 

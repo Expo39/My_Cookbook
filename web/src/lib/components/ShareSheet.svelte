@@ -3,6 +3,7 @@
 	import { cardContent } from '$lib/card/content';
 	import { SHARE_FORMATS, type FormatId } from '$lib/card/layout';
 	import { loadPhoto, renderCard, toBlob } from '$lib/card/render';
+	import { instagram } from '$lib/config';
 	import { loadCore, qrMatrix } from '$lib/core';
 	import { photoOf, widthUpTo } from '$lib/photo';
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
@@ -71,7 +72,8 @@
 				view: model.view,
 				section: model.data.section,
 				qr,
-				hasPhoto: photo !== null
+				hasPhoto: photo !== null,
+				instagram: instagram?.handle
 			});
 			const blob = await toBlob(await renderCard({ format, content, photo }));
 			reset();

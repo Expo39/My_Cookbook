@@ -81,10 +81,12 @@ describe('the sheet layout', () => {
 		expect(Math.max(...text.map((op) => op.y))).toBeLessThan(story.height - story.safeBottom);
 	});
 
-	it('puts a photo at the top with a scrim behind the title when there is one', () => {
+	it('puts a photo band at the top with the title on a solid block right below it', () => {
 		const photo = compose(format, content({ hasPhoto: true }), measure);
 		expect(photo[0]).toMatchObject({ kind: 'photo', x: 0, y: 0, w: format.width });
-		expect(photo[1]).toMatchObject({ kind: 'rect', fill: layout.palette.ink });
+		expect(photo[1]).toMatchObject({ kind: 'rect', fill: layout.palette.ink, opacity: 1 });
+		const [band, block] = photo;
+		expect(band.kind === 'photo' && block.kind === 'rect' && band.h === block.y).toBe(true);
 		expect(ops[0]).toMatchObject({ kind: 'rect', fill: layout.palette.primary });
 	});
 
