@@ -44,6 +44,8 @@ jobs:
           tool: wasm-bindgen@${{ env.WASM_BINDGEN_VERSION }}
       - run: cargo build -p cookbook-wasm --target wasm32-unknown-unknown --release
       - run: wasm-bindgen --target web --out-dir web/src/lib/wasm target/wasm32-unknown-unknown/release/cookbook_wasm.wasm
+      - run: cargo run --quiet -p cookbook-cli -- build
+      - run: cargo run --quiet -p cookbook-cli -- cards
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: web/package.json

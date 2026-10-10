@@ -48,7 +48,7 @@ pub struct CardImage {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub height: Option<u32>,
     /// The widths of the generated files, ascending; empty until the pipeline has run.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub widths: Vec<u32>,
 }
 

@@ -1,18 +1,20 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 	import { page } from '$app/state';
 	import { replaceState } from '$app/navigation';
-	import { loadCore } from '$lib/core';
+	import type { QrMatrix } from '$lib/card/layout';
+	import { loadCore, qrMatrix } from '$lib/core';
 	import { sectionTrail } from '$lib/data/tree';
 	import { homeHref, pageHref } from '$lib/links';
+	import { photoOf, photoUrl } from '$lib/photo';
 	import { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { buildRecipeJsonLd, toScriptJson } from '$lib/seo/recipe-jsonld';
-	import { canonicalUrl, cardUrl } from '$lib/seo/site';
-	import { shareLink } from '$lib/share';
+	import { CARD_SIZES, canonicalUrl, cardUrl } from '$lib/seo/site';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import { favourites } from '$lib/stores/favourites.svelte';
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { Ticks } from '$lib/stores/ticks.svelte';
+	import { siteTitle } from '$lib/title';
 	import type { RecipeCard as Card, RecipeData, SiteIndex } from '$lib/types/recipe';
 	import ActionBar from './ActionBar.svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
@@ -20,9 +22,11 @@
 	import IngredientsPanel from './IngredientsPanel.svelte';
 	import MethodPanel from './MethodPanel.svelte';
 	import PageHead from './PageHead.svelte';
+	import PrintCard from './PrintCard.svelte';
 	import RecipeCard from './RecipeCard.svelte';
 	import RecipeHeader from './RecipeHeader.svelte';
 	import ServingsBar from './ServingsBar.svelte';
+	import ShareSheet from './ShareSheet.svelte';
 
 	let { card, data, index }: { card: Card; data: RecipeData; index: SiteIndex } = $props();
 
@@ -40,6 +44,9 @@
 	let hydrated = $state(false);
 	let restored = $state(false);
 	let tab = $state<Tab>('ingredients');
+	let sheet: ShareSheet | undefined = $state();
+	let printingCard = $state(false);
+	let printQr = $state<QrMatrix | null>(null);
 
 	const cooking = $derived(hydrated && page.url.searchParams.has('cook'));
 	const cookHref = $derived(model.search('?cook'));
@@ -48,6 +55,7 @@
 			? `${data.recipe.summary.slice(0, 152).trimEnd()}…`
 			: data.recipe.summary
 	);
+	const photo = $derived(photoOf(card.image));
 	const jsonLd = $derived(
 		toScriptJson(
 			buildRecipeJsonLd({
@@ -55,7 +63,11 @@
 				view: data.view,
 				section: data.section,
 				url: canonicalUrl(card.id),
-				image: cardUrl(card.id)
+				image: [
+					...(photo ? [photoUrl(card.id, photo.widths)] : []),
+					cardUrl(card.id, 'og'),
+					cardUrl(card.id, 'portrait')
+				]
 			})
 		)
 	);
@@ -95,14 +107,20 @@
 		}
 	});
 
-	async function share() {
-		const outcome = await shareLink(
-			card.title,
-			`${location.origin}${location.pathname}${model.search('')}`
-		);
-		if (outcome === 'copied') chrome.notify('Link copied');
-		if (outcome === 'failed')
-			chrome.notify('Could not share. Copy the address from the bar instead.', 5000);
+	const share = () => sheet?.show();
+
+	/** Prints the A5 index card: the page shows only the card while the browser's print dialog is open. */
+	async function printCard() {
+		try {
+			await loadCore();
+			printQr = qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null;
+		} catch {
+			printQr = null;
+		}
+		printingCard = true;
+		await tick();
+		window.addEventListener('afterprint', () => (printingCard = false), { once: true });
+		window.print();
 	}
 
 	function moveTab(event: KeyboardEvent) {
@@ -118,14 +136,18 @@
 	{description}
 	path={card.id}
 	type="article"
-	image={cardUrl(card.id)}
+	image={{
+		url: cardUrl(card.id),
+		...CARD_SIZES.og,
+		alt: `Recipe card for ${data.recipe.title}, from ${siteTitle}`
+	}}
 />
 <svelte:head>
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -- the JSON is escaped by toScriptJson -->
 	{@html jsonLdTag}
 </svelte:head>
 
-<article class:enhanced={hydrated}>
+<article class:enhanced={hydrated} class:printing-card={printingCard}>
 	<Breadcrumb {trail} />
 	<RecipeHeader {card} {model} {hydrated} onshare={share} />
 	{#if cooking}
@@ -189,6 +211,8 @@
 	{/if}
 
 	{#if hydrated}<ActionBar {model} {cookHref} onshare={share} />{/if}
+	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} onprint={printCard} />{/if}
+	{#if printingCard}<PrintCard {card} {model} qr={printQr} />{/if}
 </article>
 
 <style>
@@ -310,6 +334,11 @@
 	@media print {
 		article {
 			gap: var(--space-3);
+		}
+
+		/* While the index card prints, nothing else on the page does. */
+		.printing-card > :global(:not(.index-card)) {
+			display: none;
 		}
 
 		.tabs,

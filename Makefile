@@ -8,9 +8,12 @@ DATA_OUT := web/static/data
 DATA_STAMP := $(DATA_OUT)/manifest.json
 
 RUST_SRC := Cargo.toml Cargo.lock $(shell find crates/cookbook-core crates/cookbook-wasm crates/cookbook-cli crates/cookbook-tree -type f \( -name '*.rs' -o -name Cargo.toml \) -not -path '*/tests/*')
-RECIPE_SRC := $(shell find recipes -type f -name '*.json' 2>/dev/null)
+RECIPE_SRC := $(shell find recipes -type f 2>/dev/null)
+CARDS_OUT := web/static/cards
+CARDS_STAMP := $(CARDS_OUT)/.state.json
+CARD_SRC := site.json $(shell find assets -type f)
 
-.PHONY: screenshots image dev test-fast test check build wasm data types fmt lint shell install worker-build server selfhost
+.PHONY: screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
 
 image:
 	docker compose build dev
@@ -28,10 +31,15 @@ data: $(DATA_STAMP)
 $(DATA_STAMP): $(RECIPE_SRC) $(RUST_SRC)
 	$(RUN) cargo run --quiet -p cookbook-cli -- build --out $(DATA_OUT)
 
+cards: $(CARDS_STAMP)
+
+$(CARDS_STAMP): $(RECIPE_SRC) $(RUST_SRC) $(CARD_SRC)
+	$(RUN) cargo run --quiet -p cookbook-cli -- cards --out $(CARDS_OUT)
+
 types:
 	$(RUN) pnpm --dir web gen:types
 
-dev: install data wasm
+dev: install data cards wasm
 	docker compose run --rm --service-ports dev pnpm --dir web dev --host 0.0.0.0
 
 check:
@@ -42,7 +50,7 @@ test-fast: install data wasm
 	$(RUN) pnpm --dir web test
 	@if [ -d recipes ] && [ -n "$$(ls -A recipes)" ]; then $(MAKE) --no-print-directory check; else echo "no recipes yet: skipping content check"; fi
 
-build: install data wasm
+build: install data cards wasm
 	$(RUN) pnpm --dir web build
 
 test: test-fast build

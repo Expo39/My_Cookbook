@@ -38,6 +38,7 @@ type RawModule = {
 	): string;
 	servings_label(servings: number, noun?: ServingsNoun | null): string;
 	convert(qty: number, from: Unit, to: Unit, food?: string): number | undefined;
+	qr_matrix(text: string): unknown;
 	version(): string;
 	SearchEngine: new (indexJson: string) => RawEngine;
 };
@@ -146,4 +147,9 @@ export function servingsLabel(servings: number, noun?: ServingsNoun | null): str
 
 export function convert(qty: number, from: Unit, to: Unit, food?: string): number | undefined {
 	return core().convert(qty, from, to, food);
+}
+
+/** The modules of a QR code for `text`, or `undefined` when the text is too long for any symbol. */
+export function qrMatrix(text: string): { size: number; dark: boolean[] } | undefined {
+	return core().qr_matrix(text) as { size: number; dark: boolean[] } | undefined;
 }

@@ -22,7 +22,7 @@ export interface RecipeJsonLd {
 	recipeYield: string[];
 	recipeCategory?: string;
 	keywords?: string;
-	image?: string;
+	image?: string[];
 	prepTime?: string;
 	cookTime?: string;
 	totalTime?: string;
@@ -56,7 +56,7 @@ interface Input {
 	/** Titles of the sections the recipe sits in, outermost first. */
 	section: string[];
 	url: string;
-	image?: string;
+	image?: string[];
 }
 
 export function buildRecipeJsonLd({ recipe, view, section, url, image }: Input): RecipeJsonLd {

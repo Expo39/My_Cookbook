@@ -263,7 +263,7 @@ pub fn run(root: &Path, out: &Path, site_root: &str) -> Result<Summary, BuildErr
         });
         let photo_bytes = photo_path
             .as_ref()
-            .map(|path| fs::read(path))
+            .map(fs::read)
             .transpose()?
             .unwrap_or_default();
         let json = serde_json::to_vec(data)?;

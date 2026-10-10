@@ -5,11 +5,13 @@ export const siteRoot = `${__SITE_URL__.replace(/\/$/, '')}${base}`;
 
 export const canonicalUrl = (path: string): string => `${siteRoot}${path ? `/${path}` : '/'}`;
 
-const available = new Set<string>(__CARDS__);
+/** The cards `cookbook-cli cards` writes for every recipe, with the sizes it renders them at. */
+export const CARD_SIZES = {
+	og: { width: 1200, height: 630 },
+	portrait: { width: 1080, height: 1350 }
+} as const;
 
-/**
- * The share card for a recipe, once the build has produced one at `static/cards/<id>.png`.
- * Until then there is no image to point at, so the meta tag is left out.
- */
-export const cardUrl = (id: string): string | undefined =>
-	available.has(id) ? `${siteRoot}/cards/${id}.png` : undefined;
+export type CardKind = keyof typeof CARD_SIZES;
+
+export const cardUrl = (id: string, kind: CardKind = 'og'): string =>
+	`${siteRoot}/cards/${id}/${kind}.png`;

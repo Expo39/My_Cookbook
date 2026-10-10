@@ -1,26 +1,20 @@
-import { readdirSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 
-/** Ids of the share cards the build has produced under static/cards (none until they exist). */
-function cardIds(): string[] {
-	try {
-		return readdirSync('static/cards', { recursive: true, encoding: 'utf8' })
-			.filter((file) => file.endsWith('.png'))
-			.map((file) => file.slice(0, -'.png'.length));
-	} catch {
-		return [];
-	}
-}
+/** The deployed origin comes from `site.json`, which the card renderer reads too. */
+const site: { url: string } = JSON.parse(
+	readFileSync(new URL('../site.json', import.meta.url), 'utf8')
+);
 
 export default defineConfig({
 	plugins: [sveltekit()],
 	define: {
 		__BACKEND__: JSON.stringify(process.env.PUBLIC_BACKEND ?? 'static'),
-		__CARDS__: JSON.stringify(cardIds()),
-		__SITE_URL__: JSON.stringify(process.env.PUBLIC_SITE_URL ?? 'https://expo39.github.io')
+		__SITE_URL__: JSON.stringify(process.env.PUBLIC_SITE_URL ?? site.url)
 	},
-	server: { port: 5173, strictPort: true },
+	// The share card layout in assets/ is shared with the Rust renderer.
+	server: { port: 5173, strictPort: true, fs: { allow: ['..'] } },
 	preview: { port: 4173, strictPort: true },
 	test: {
 		environment: 'happy-dom',
