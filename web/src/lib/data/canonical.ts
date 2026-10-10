@@ -24,7 +24,18 @@ const ORDER: Record<Kind, string[]> = {
 		'related'
 	],
 	group: ['name', 'total', 'items'],
-	ingredient: ['key', 'food', 'each', 'amount', 'alt', 'prefix', 'item', 'note', 'optional', 'scale'],
+	ingredient: [
+		'key',
+		'food',
+		'each',
+		'amount',
+		'alt',
+		'prefix',
+		'item',
+		'note',
+		'optional',
+		'scale'
+	],
 	step: ['heading', 'text', 'key', 'time'],
 	variant: ['key', 'label', 'options'],
 	option: ['key', 'label', 'default', 'ingredients', 'steps', 'tips'],
@@ -44,29 +55,25 @@ const empty = (value: unknown) =>
 	value === false ||
 	(Array.isArray(value) && value.length === 0);
 
-function arrange(value: unknown, kind: Kind, key?: string): unknown {
-	if (Array.isArray(value)) {
-		const child = (key && CHILD[kind]?.[key]) || 'plain';
-		return value.map((item) => arrange(item, child));
-	}
+function arrange(value: unknown, kind: Kind): unknown {
+	if (Array.isArray(value)) return value.map((item) => arrange(item, kind));
 	if (value === null || typeof value !== 'object') return value;
-	const entries = Object.entries(value).filter(([, v]) => !empty(v));
 	const rank = (name: string) => {
 		const at = ORDER[kind].indexOf(name);
 		return at < 0 ? ORDER[kind].length : at;
 	};
-	entries.sort(([a], [b]) => rank(a) - rank(b));
+	const entries = Object.entries(value)
+		.filter(([, child]) => !empty(child))
+		.sort(([a], [b]) => rank(a) - rank(b));
 	return Object.fromEntries(
 		entries.map(([name, child]) => {
-			const childKind =
-				CHILD[kind]?.[name] ?? (kind === 'option' && name === 'ingredients' ? 'ingredient' : 'plain');
 			if (kind === 'option' && name === 'ingredients') {
-				const map = Object.entries(child as object).map(
-					([k, v]) => [k, arrange(v, 'ingredient')] as const
+				const keyed = Object.entries(child as object).map(
+					([key, item]) => [key, arrange(item, 'ingredient')] as const
 				);
-				return [name, Object.fromEntries(map)];
+				return [name, Object.fromEntries(keyed)];
 			}
-			return [name, arrange(child, childKind, name)];
+			return [name, arrange(child, CHILD[kind]?.[name] ?? 'plain')];
 		})
 	);
 }
@@ -76,7 +83,11 @@ export function renderRecipe(recipe: unknown): string {
 	return `${JSON.stringify(arrange(recipe, 'recipe'), null, 2)}\n`;
 }
 
-export function renderSection(section: { title: string; order?: number; summary?: string }): string {
+export function renderSection(section: {
+	title: string;
+	order?: number;
+	summary?: string;
+}): string {
 	const { title, order, summary } = section;
 	return `${JSON.stringify(Object.fromEntries(Object.entries({ title, order, summary }).filter(([, v]) => v !== undefined && v !== '')), null, 2)}\n`;
 }

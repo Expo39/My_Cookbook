@@ -26,8 +26,10 @@ describe('the static source', () => {
 		await expect(source.getRecipe('nope')).rejects.toBeInstanceOf(RecipeNotFoundError);
 	});
 
-	it('has a stub API backend that is not configured, and refuses unknown backends', async () => {
-		await expect(createSource(undefined, 'api').getIndex()).rejects.toThrow('not configured');
+	it('reads the self-hosted API for the server backends, and refuses unknown backends', async () => {
+		const fetcher = vi.fn<typeof fetch>(async () => reply('{"sections":[]}'));
+		expect(await createSource(fetcher, 'api').getIndex()).toEqual({ sections: [] });
+		expect(fetcher.mock.calls[0][0]).toBe('/api/index');
 		expect(() => createSource(undefined, 'ftp')).toThrow('Unknown PUBLIC_BACKEND');
 	});
 });

@@ -33,6 +33,7 @@ export interface GroupForm {
 	uid: string;
 	name: string;
 	totalQty: string;
+	totalMax: string;
 	totalUnit: Unit | '';
 	items: IngredientRow[];
 }
@@ -80,10 +81,26 @@ export interface FormData {
 }
 
 export const SCALE_MODES: { value: ScaleMode; label: string; help: string }[] = [
-	{ value: 'linear', label: 'Scales evenly', help: 'Twice the servings, twice the amount. Right for most ingredients.' },
-	{ value: 'discrete', label: 'Whole pieces', help: 'Rounds to whole items, such as eggs, cloves or tins.' },
-	{ value: 'seasoning', label: 'Seasoning', help: 'Grows more slowly than the rest, so salt and spice are not overdone. The page says to start low.' },
-	{ value: 'fixed', label: 'Stays the same', help: 'The amount never changes, such as a pan greased once or a garnish.' },
+	{
+		value: 'linear',
+		label: 'Scales evenly',
+		help: 'Twice the servings, twice the amount. Right for most ingredients.'
+	},
+	{
+		value: 'discrete',
+		label: 'Whole pieces',
+		help: 'Rounds to whole items, such as eggs, cloves or tins.'
+	},
+	{
+		value: 'seasoning',
+		label: 'Seasoning',
+		help: 'Grows more slowly than the rest, so salt and spice are not overdone. The page says to start low.'
+	},
+	{
+		value: 'fixed',
+		label: 'Stays the same',
+		help: 'The amount never changes, such as a pan greased once or a garnish.'
+	},
 	{ value: 'toTaste', label: 'To taste', help: 'No amount is shown; the line reads "to taste".' }
 ];
 
@@ -141,6 +158,13 @@ const num = (text: string): number | undefined => {
 	return value;
 };
 
+function totalFields(total: Amount | null | undefined): { totalQty: string; totalMax: string } {
+	const qty = total?.qty;
+	if (typeof qty === 'object' && qty !== null)
+		return { totalQty: show(qty.min), totalMax: show(qty.max) };
+	return { totalQty: show(qty), totalMax: '' };
+}
+
 export function rowFromIngredient(ingredient: Ingredient): IngredientRow {
 	const qty = ingredient.amount?.qty;
 	const range = typeof qty === 'object' && qty !== null;
@@ -169,6 +193,7 @@ export const emptyGroup = (): GroupForm => ({
 	uid: uid(),
 	name: '',
 	totalQty: '',
+	totalMax: '',
 	totalUnit: '',
 	items: [emptyRow()]
 });
@@ -233,9 +258,7 @@ export function formFromRecipe(recipe: Recipe, id: string): FormData {
 		groups: recipe.ingredientGroups.map((group) => ({
 			uid: uid(),
 			name: group.name ?? '',
-			totalQty: show(
-				typeof group.total?.qty === 'number' ? group.total.qty : group.total?.qty.min
-			),
+			...totalFields(group.total),
 			totalUnit: group.total?.unit ?? '',
 			items: group.items.map(rowFromIngredient)
 		})),
@@ -265,25 +288,32 @@ export const derivedSlug = (form: FormData): string =>
 
 type Issue = Pick<CheckResult, 'path' | 'message'>;
 
+/** An amount from the two boxes and the unit; a problem is reported once and the amount is left out. */
+function amountFrom(
+	lower: string,
+	upper: string,
+	unit: Unit | '',
+	path: string,
+	issues: Issue[]
+): Amount | undefined {
+	const min = parseQty(lower);
+	const max = parseQty(upper);
+	if ([min, max].some((q) => q !== undefined && Number.isNaN(q))) {
+		issues.push({ path, message: 'Enter a number such as 250, 0.5, 1/2 or 1 1/2.' });
+		return undefined;
+	}
+	if (min === undefined) {
+		if (max !== undefined) issues.push({ path, message: 'Fill in the lower amount first.' });
+		return undefined;
+	}
+	return {
+		qty: max !== undefined && max !== min ? { min, max } : min,
+		...(unit ? { unit } : {})
+	};
+}
+
 export function ingredientFromRow(row: IngredientRow, path: string, issues: Issue[]): Ingredient {
-	const min = parseQty(row.qtyMin);
-	const max = parseQty(row.qtyMax);
-	const bad = [min, max].some((q) => q !== undefined && Number.isNaN(q));
-	if (bad) {
-		issues.push({
-			path: `${path}.amount.qty`,
-			message: 'Enter a number such as 250, 0.5, 1/2 or 1 1/2.'
-		});
-	}
-	let amount: Amount | undefined;
-	if (!bad && min !== undefined) {
-		amount = {
-			qty: max !== undefined && max !== min ? { min, max } : min,
-			...(row.unit ? { unit: row.unit } : {})
-		};
-	} else if (!bad && max !== undefined) {
-		issues.push({ path: `${path}.amount.qty`, message: 'Fill in the lower amount first.' });
-	}
+	const amount = amountFrom(row.qtyMin, row.qtyMax, row.unit, `${path}.amount.qty`, issues);
 	return {
 		...(row.key.trim() ? { key: row.key.trim() } : {}),
 		...row.extra,
@@ -338,18 +368,16 @@ export function recipeFromForm(
 		tags: form.tags,
 		...(src ? { image: { src, alt: form.imageAlt.trim() } } : {}),
 		ingredientGroups: form.groups.map((group, g) => {
-			const total = parseQty(group.totalQty);
-			if (total !== undefined && Number.isNaN(total)) {
-				issues.push({
-					path: `ingredientGroups[${g}].total.qty`,
-					message: 'Enter a number such as 1150.'
-				});
-			}
+			const total = amountFrom(
+				group.totalQty,
+				group.totalMax,
+				group.totalUnit,
+				`ingredientGroups[${g}].total.qty`,
+				issues
+			);
 			return {
 				...(group.name.trim() ? { name: group.name.trim() } : {}),
-				...(total !== undefined && !Number.isNaN(total)
-					? { total: { qty: total, ...(group.totalUnit ? { unit: group.totalUnit } : {}) } }
-					: {}),
+				...(total ? { total } : {}),
 				items: group.items.map((row, i) =>
 					ingredientFromRow(row, `ingredientGroups[${g}].items[${i}]`, issues)
 				)

@@ -61,6 +61,15 @@
 						hint="Shown in the group name, such as 1150 g of cheese"
 						error={ed.errorFor(`ingredientGroups[${g}].total.qty`)}
 					/>
+					<TextField
+						id="f-ingredientGroups-{g}-total-max"
+						label="Total up to"
+						bind:value={group.totalMax}
+						inputmode="decimal"
+						numeric
+						optional
+						hint="For a range"
+					/>
 					<div class="unit">
 						<label for="f-ingredientGroups-{g}-total-unit">Total unit</label>
 						<select
@@ -115,18 +124,6 @@
 <PasteIngredients bind:this={paste} ready={ed.coreReady} onadd={addPasted} />
 
 <style>
-	.help {
-		color: var(--colour-muted);
-		font-size: var(--text-s);
-	}
-
-	.error {
-		display: flex;
-		gap: var(--space-1);
-		color: var(--colour-danger);
-		font-weight: 700;
-	}
-
 	.group {
 		display: grid;
 		gap: var(--space-4);
@@ -164,7 +161,7 @@
 
 	@media (min-width: 40rem) {
 		.group-head {
-			grid-template-columns: 2fr 1fr 1fr;
+			grid-template-columns: 2fr 1fr 1fr 1fr;
 		}
 	}
 </style>
