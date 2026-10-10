@@ -1,3 +1,4 @@
+mod build;
 mod migrate;
 mod report;
 mod tree;
@@ -25,6 +26,8 @@ struct Cli {
 enum SchemaKind {
     Recipe,
     Section,
+    /// Every type the web app consumes, as one set of definitions
+    Web,
 }
 
 #[derive(Subcommand)]
@@ -46,6 +49,12 @@ enum Command {
         html: PathBuf,
         /// The folder to write the recipe tree into
         #[arg(long, default_value = "recipes")]
+        out: PathBuf,
+    },
+    /// Check the tree, then write the data the static site reads
+    Build {
+        /// The folder to write `index.json`, `search.json`, `manifest.json` and `recipes/` into
+        #[arg(long, default_value = "web/static/data")]
         out: PathBuf,
     },
     /// Print the JSON Schema for recipes and sections
@@ -113,12 +122,34 @@ fn check(root: &Path, all: bool, json: bool, paths: &[PathBuf]) -> ExitCode {
     }
 }
 
+fn web_schema() -> serde_json::Value {
+    let mut generator = schemars::SchemaGenerator::default();
+    generator.subschema_for::<Recipe>();
+    generator.subschema_for::<Section>();
+    generator.subschema_for::<cookbook_core::RecipeData>();
+    generator.subschema_for::<cookbook_core::SiteIndex>();
+    generator.subschema_for::<cookbook_core::Manifest>();
+    generator.subschema_for::<cookbook_core::ScaleRequest>();
+    generator.subschema_for::<cookbook_core::ScaleOptions>();
+    generator.subschema_for::<cookbook_core::CheckResult>();
+    generator.subschema_for::<cookbook_core::CheckContext>();
+    generator.subschema_for::<cookbook_core::RecipeFile>();
+    generator.subschema_for::<cookbook_core::SearchHit>();
+    generator.subschema_for::<cookbook_core::Coverage>();
+    serde_json::json!({
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "title": "Web",
+        "$defs": generator.take_definitions(true),
+    })
+}
+
 fn schema(kind: Option<SchemaKind>) -> ExitCode {
     let recipe = schemars::schema_for!(Recipe);
     let section = schemars::schema_for!(Section);
     let value = match kind {
         Some(SchemaKind::Recipe) => serde_json::to_value(recipe),
         Some(SchemaKind::Section) => serde_json::to_value(section),
+        Some(SchemaKind::Web) => Ok(web_schema()),
         None => serde_json::to_value(serde_json::json!({ "Recipe": recipe, "Section": section })),
     };
     match value.and_then(|v| serde_json::to_string_pretty(&v)) {
@@ -144,6 +175,27 @@ fn main() -> ExitCode {
             }
             Err(error) => {
                 eprintln!("migration failed: {error}");
+                ExitCode::FAILURE
+            }
+        },
+        Command::Build { out } => match build::run(&cli.root, &out) {
+            Ok(built) => {
+                println!("built {} recipes into {}", built.count, out.display());
+                if !built.warnings.is_empty() {
+                    println!(
+                        "{} warnings; run `check --all` for details",
+                        built.warnings.len()
+                    );
+                }
+                ExitCode::SUCCESS
+            }
+            Err(build::BuildError::Check(report)) => {
+                println!("{report}");
+                eprintln!("the checklist has errors, so nothing was built");
+                ExitCode::FAILURE
+            }
+            Err(build::BuildError::Other(message)) => {
+                eprintln!("build failed: {message}");
                 ExitCode::FAILURE
             }
         },
