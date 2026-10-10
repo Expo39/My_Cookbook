@@ -7,6 +7,9 @@
     "cook": 25,
     "rest": 30
   },
+  "tags": [
+    "Savoury"
+  ],
   "order": 2,
   "ingredientGroups": [
     {
@@ -74,8 +77,5 @@
   ],
   "related": [
     "main-courses/beef-steak/beef-wellington"
-  ],
-  "tags": [
-    "Savoury"
   ]
 }
