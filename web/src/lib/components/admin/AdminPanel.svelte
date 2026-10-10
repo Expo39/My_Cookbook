@@ -7,7 +7,7 @@
 	import Icon from '../Icon.svelte';
 	import TextField from './TextField.svelte';
 
-	let { onnavigate }: { onnavigate?: () => void } = $props();
+	let { onnavigate, lazy = false }: { onnavigate?: () => void; lazy?: boolean } = $props();
 
 	const uid = $props.id();
 	let busy = $state(false);
@@ -21,9 +21,14 @@
 	let current = $state('');
 	let next = $state('');
 
+	/** Looks for the published editing key; a page that is not about editing waits until it is asked. */
+	export function check() {
+		void admin.checkConfigured();
+	}
+
 	onMount(() => {
 		void admin.restore();
-		void admin.checkConfigured();
+		if (!lazy) check();
 	});
 
 	function reset() {

@@ -7,9 +7,11 @@
 	import Segmented from './Segmented.svelte';
 
 	let dialog: HTMLDialogElement;
+	let adminPanel: AdminPanel;
 
 	export function show() {
 		dialog.showModal();
+		adminPanel.check();
 	}
 </script>
 
@@ -58,7 +60,7 @@
 			<p class="help">Recipes open in these units. A shared link can still choose its own.</p>
 		</div>
 
-		<AdminPanel onnavigate={() => dialog.close()} />
+		<AdminPanel bind:this={adminPanel} lazy onnavigate={() => dialog.close()} />
 	</div>
 </dialog>
 
