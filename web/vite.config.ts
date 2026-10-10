@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => ({
 	preview: { port: 4173, strictPort: true },
 	test: {
 		environment: 'happy-dom',
-		include: ['src/**/*.test.ts']
+		include: ['src/**/*.test.ts'],
+		testTimeout: 2_000
 	}
 }));

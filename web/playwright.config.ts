@@ -13,6 +13,8 @@ export default defineConfig({
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: 0,
+	// The e2e budget: the whole run fails past 90 s.
+	globalTimeout: 90_000,
 	timeout: 15_000,
 	expect: { timeout: 3_000 },
 	reporter: process.env.CI ? [['github'], ['list']] : 'list',

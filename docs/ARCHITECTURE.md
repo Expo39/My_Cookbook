@@ -71,9 +71,9 @@ The checklist is written once, in `cookbook-core/src/checklist.rs`, and runs in 
 
 | Tier | Command | What runs | Budget |
 |---|---|---|---|
-| Fast | `make test-fast` | `cargo nextest` over the workspace, Vitest with `happy-dom`, and the recipe checklist | a few seconds on a warm cache; `nextest` flags any test over 5 s |
-| Full | `make test` | the fast tier, the site build, `verify-site` and the Playwright suite against the built site | e2e under 90 s |
-| CI | `.github/workflows/ci.yml` | the same checks as parallel jobs, with e2e and `verify-site` reusing the built `site` artifact | under 5 minutes |
+| Fast | `make test-fast` | `cargo nextest` over the workspace, Vitest with `happy-dom`, and the recipe checklist | about 15 s on a warm cache (a target); a Rust test over 10 s or a Vitest test over 2 s fails |
+| Full | `make test` | the fast tier, the site build, `verify-site` and the Playwright suite against the built site | the Playwright run fails past 90 s |
+| CI | `.github/workflows/ci.yml` | the same checks as parallel jobs, with e2e and `verify-site` reusing the built `site` artifact | under 5 minutes on warm caches (a target; a cold Rust build alone can exceed it) |
 
 The e2e suite never uses the dev server. It serves `web/build` with `web/scripts/serve-build.mjs`, mocks all network, runs Chromium on pull requests (and mobile WebKit when `FULL_E2E` is set) with reduced motion, and has a smoke test that runs once for every recipe file, so a new recipe is covered without a new test.
 
