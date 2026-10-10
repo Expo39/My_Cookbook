@@ -100,7 +100,7 @@ fn conflict() -> Failure {
     )
 }
 
-fn header_text<'a>(headers: &'a HeaderMap, name: header::HeaderName) -> Option<&'a str> {
+fn header_text(headers: &HeaderMap, name: header::HeaderName) -> Option<&str> {
     headers.get(name).map(|v| v.to_str().unwrap_or_default())
 }
 
