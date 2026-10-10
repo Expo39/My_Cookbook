@@ -1,0 +1,74 @@
+{
+  "title": "Pan-Seared Fillet Steak",
+  "summary": "Perfect technique for fillet. Cooks faster than ribeye despite needing more doneness - it is leaner with less fat to render. Serves 1.",
+  "servings": 1,
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 200,
+            "unit": "g"
+          },
+          "item": "fillet steak"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "item": "Salt and black pepper"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "sprigs fresh thyme",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "sprigs rosemary",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "optional": true,
+          "scale": "discrete"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Remove steak from refrigerator 30 minutes before cooking. Pat completely dry, season generously with salt and pepper."
+    },
+    {
+      "text": "Heat pan over medium heat with butter (fillet is leaner, cooks faster - medium heat prevents outside burning before inside cooks)."
+    },
+    {
+      "text": "Once butter foams, add steak. Sear approximately 4 minutes per side for 200g fillet at medium doneness."
+    },
+    {
+      "text": "Add optional thyme, rosemary and garlic, baste steak with butter as it cooks using spoon."
+    },
+    {
+      "text": "Remove to plate, rest 5 minutes. Internal temperature should be 57-60°C for medium."
+    }
+  ],
+  "tips": [
+    "Fillet has less marbling than ribeye, so use butter throughout cooking. Medium heat is crucial. Use meat thermometer for accuracy: 52-55°C = medium-rare, 57-60°C = medium, 63-66°C = medium-well. You can ask the AI assistant for help with cooking times and temperatures if you wish to change the weight of the fillet."
+  ]
+}

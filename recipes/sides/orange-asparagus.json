@@ -1,0 +1,81 @@
+{
+  "title": "Orange Asparagus",
+  "summary": "Quick roasted asparagus with bright citrus glaze. Perfect accompaniment for Beef Wellington or any rich meat dish. Cooks in 10 minutes during resting time.",
+  "servings": 5,
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 750,
+            "unit": "g"
+          },
+          "item": "asparagus",
+          "note": "woody ends trimmed"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "amount": {
+            "qty": 60,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 4,
+            "unit": "tbsp"
+          },
+          "item": "fresh orange juice"
+        },
+        {
+          "food": "honey",
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "honey"
+        },
+        {
+          "item": "Salt and black pepper"
+        },
+        {
+          "item": "Orange zest",
+          "note": "for garnish",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Preheat oven to 200°C (180°C fan). Line a baking tray with greaseproof paper."
+    },
+    {
+      "text": "Toss asparagus with olive oil, salt and pepper on the tray."
+    },
+    {
+      "text": "Roast for 8-10 minutes until tender but still bright green with slightly charred tips."
+    },
+    {
+      "text": "Mix orange juice and honey in a small bowl."
+    },
+    {
+      "text": "Remove asparagus from oven, drizzle with orange-honey glaze while still hot."
+    },
+    {
+      "text": "Toss gently to coat, garnish with orange zest if desired. Serve immediately."
+    }
+  ],
+  "tips": [
+    "The asparagus should still have a slight bite - overcooking makes them mushy. The orange glaze adds brightness that cuts through rich dishes like wellington. For best timing, put asparagus in oven when wellington comes out to rest. Thicker asparagus may need an extra 2-3 minutes of roasting."
+  ],
+  "related": [
+    "main-courses/beef-steak/beef-wellington"
+  ]
+}

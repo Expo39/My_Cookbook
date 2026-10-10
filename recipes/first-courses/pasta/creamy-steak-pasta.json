@@ -1,0 +1,135 @@
+{
+  "title": "Creamy Steak Pasta",
+  "summary": "An indulgent creation marrying seared beef with Bourssin cheese sauce. Comfort food elegant enough for guests.",
+  "servings": 4,
+  "tags": [
+    "Creamy & Rich"
+  ],
+  "order": 3,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 415,
+            "unit": "g"
+          },
+          "item": "cube-roll ribeye"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "vegetable oil"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 2.5,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "amount": {
+            "qty": 550,
+            "unit": "g"
+          },
+          "item": "tagliatelle"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "white onion",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 325,
+            "unit": "ml"
+          },
+          "item": "chicken stock"
+        },
+        {
+          "amount": {
+            "qty": 425,
+            "unit": "g"
+          },
+          "item": "Boursin Cheese",
+          "note": "or cream cheese"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 2,
+              "max": 3
+            }
+          },
+          "item": "garlic cloves",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "parsley",
+          "note": "chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "thyme",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 55,
+            "unit": "g"
+          },
+          "item": "Parmesan",
+          "note": "grated"
+        },
+        {
+          "item": "Salt and pepper to taste",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Mix cheese with garlic, parsley, herbs (if using), salt and pepper. Set aside at room temperature."
+    },
+    {
+      "text": "Pat ribeye steak completely dry, season generously with salt and pepper."
+    },
+    {
+      "text": "Heat large pan over high heat. Add oil. Sear steak whole, 2-3 minutes per side until well browned and cooked to your liking. Remove to plate, rest 5 minutes, then slice into strips. Lower heat to medium."
+    },
+    {
+      "text": "Cook pasta in salted boiling water until al dente. Do not drain."
+    },
+    {
+      "text": "Add onion to pan, fry 3-4 minutes until soft and golden."
+    },
+    {
+      "text": "Pour in stock, bring to simmer. Stir in mascarpone mixture until melted. Add Parmesan, parsley, and steak resting juices. Simmer gently."
+    },
+    {
+      "text": "Transfer pasta to pan with tongs, bringing pasta water. Toss vigorously until sauce clings. Add more water for silky consistency."
+    },
+    {
+      "text": "Add steak strips, toss gently. Finish with Parmesan and parsley. Serve immediately."
+    }
+  ],
+  "tips": [
+    "Cream cheese is a good substitute for Boursin Cheese. Do not overcrowd pan when searing (meat tastes better when well seared !). Transfer pasta directly to sauce with tongs - pasta water binds everything together."
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "title": "One-Pot Pasta with Fresh Tomatoes",
+  "summary": "This rustic method of cooking pasta directly in tomato sauce creates an incredibly creamy dish where pasta absorbs all the flavours.",
+  "servings": 4,
+  "tags": [
+    "Italian Classics"
+  ],
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 600,
+            "unit": "g"
+          },
+          "item": "short pasta",
+          "note": "penne, rigatoni"
+        },
+        {
+          "amount": {
+            "qty": 1200,
+            "unit": "g"
+          },
+          "item": "polpa pelati",
+          "note": "crushed tomatoes"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 6,
+              "max": 7
+            }
+          },
+          "item": "garlic cloves",
+          "note": "thinly sliced",
+          "scale": "discrete"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 130,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 9,
+            "unit": "tbsp"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "item": "Fresh basil leaves"
+        },
+        {
+          "item": "Salt to taste",
+          "scale": "toTaste"
+        },
+        {
+          "item": "Chili flakes",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 875,
+            "unit": "ml"
+          },
+          "item": "water or vegetable stock"
+        },
+        {
+          "item": "Parmesan cheese",
+          "note": "for serving"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Heat olive oil in large, wide pan over medium heat. Add sliced garlic and chili (if using). Cook 1 minute until fragrant - do not brown."
+    },
+    {
+      "text": "Add polpa pelati and crush any larger pieces with wooden spoon. Season with salt, add torn basil. Simmer 5 minutes to develop flavour."
+    },
+    {
+      "text": "Add raw pasta directly to sauce, stirring to coat each piece. Add water or stock to just barely cover pasta. Liquid should be level with pasta."
+    },
+    {
+      "text": "Cook at steady simmer, stirring frequently to prevent sticking and release starch. Keep adding splashes of water when dry. Cook 12-15 minutes until al dente."
+    },
+    {
+      "text": "When pasta is al dente and sauce clings nicely, remove from heat. Stir in more fresh basil and drizzle of olive oil."
+    },
+    {
+      "text": "Serve immediately with freshly grated Parmesan."
+    }
+  ],
+  "tips": [
+    "Success depends on frequent stirring and liquid adjustment. Use a wide pan for even cooking. Slice garlic rather than mince - slices soften during cooking, giving milder, sweeter flavour. The pasta's released starch creates the creamy texture."
+  ]
+}

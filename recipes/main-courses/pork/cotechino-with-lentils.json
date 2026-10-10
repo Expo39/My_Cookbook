@@ -1,0 +1,117 @@
+{
+  "title": "Cotechino with Lentils",
+  "summary": "Italian tradition says lentils bring prosperity for the new year. The combination is rich and satisfying - a little cotechino goes far.",
+  "servings": 4,
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 500,
+            "unit": "g"
+          },
+          "item": "cotechino sausage"
+        },
+        {
+          "amount": {
+            "qty": 250,
+            "unit": "g"
+          },
+          "item": "dried lentils"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "large onion",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "carrots",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "celery stalks",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 3
+          },
+          "item": "garlic cloves",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "bay leaves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1000,
+            "unit": "ml"
+          },
+          "item": "stock"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 4,
+            "unit": "tbsp"
+          },
+          "alt": {
+            "qty": 60,
+            "unit": "ml"
+          },
+          "item": "olive oil"
+        },
+        {
+          "item": "Salt and pepper"
+        },
+        {
+          "item": "Fresh parsley"
+        },
+        {
+          "item": "polenta",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Cook cotechino according to package instructions (typically simmer in water 20-30 minutes). Keep warm."
+    },
+    {
+      "text": "Heat olive oil in large pot over medium heat. Add onion, carrot, celery. Cook 8-10 minutes until very soft and golden."
+    },
+    {
+      "text": "Add garlic, cook 1 minute. Add dried lentils (rinsed), bay leaves, and stock. Bring to boil."
+    },
+    {
+      "text": "Reduce to simmer, cook 25-30 minutes until lentils are tender but not mushy. Add water if too dry."
+    },
+    {
+      "text": "Season well with salt and pepper. Stir in parsley. Remove bay leaves."
+    },
+    {
+      "text": "Slice cotechino (125g per person). Serve over lentils, with polenta or mashed potatoes if desired."
+    }
+  ],
+  "tips": [
+    "Standard cotechino is 500g (125g per person). Because it is extremely rich, this portion works well. The large soffritto base adds volume and flavour. The dish tastes better made ahead - flavours meld beautifully overnight."
+  ]
+}

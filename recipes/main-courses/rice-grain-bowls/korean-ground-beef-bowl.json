@@ -1,0 +1,111 @@
+{
+  "title": "Korean Ground Beef Bowl",
+  "summary": "A quick, flavourful weeknight dinner ready in 25 minutes. The sesame oil and ginger create an authentic Korean flavour profile.",
+  "servings": 3,
+  "tags": [
+    "Asian-Inspired"
+  ],
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 340,
+            "unit": "g"
+          },
+          "item": "ground beef",
+          "note": "80/20"
+        },
+        {
+          "amount": {
+            "qty": 25,
+            "unit": "g"
+          },
+          "alt": {
+            "qty": 1.5,
+            "unit": "tbsp"
+          },
+          "item": "soy sauce"
+        },
+        {
+          "amount": {
+            "qty": 10,
+            "unit": "g"
+          },
+          "alt": {
+            "qty": 0.75,
+            "unit": "tbsp"
+          },
+          "item": "sesame oil"
+        },
+        {
+          "amount": {
+            "qty": 7.5,
+            "unit": "g"
+          },
+          "item": "garlic",
+          "note": "2 cloves, minced"
+        },
+        {
+          "amount": {
+            "qty": 3,
+            "unit": "g"
+          },
+          "alt": {
+            "qty": 0.75,
+            "unit": "tsp"
+          },
+          "item": "ginger",
+          "note": "minced"
+        },
+        {
+          "amount": {
+            "qty": 20,
+            "unit": "g"
+          },
+          "item": "green onions",
+          "note": "2 stalks, sliced"
+        },
+        {
+          "amount": {
+            "qty": 240,
+            "unit": "g"
+          },
+          "item": "cooked rice",
+          "note": "80g per person"
+        },
+        {
+          "item": "Salt and pepper"
+        },
+        {
+          "item": "vegetables, fried eggs",
+          "optional": true
+        },
+        {
+          "item": "Garnish: sesame seeds"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Ensure rice is cooked and ready (80-100g raw rice yields 240g cooked)."
+    },
+    {
+      "text": "Place large skillet over medium-high heat. Add ground beef, break apart with spatula. Brown until no longer pink (5-7 minutes). Drain excess fat if preferred."
+    },
+    {
+      "text": "Stir in minced garlic and ginger. Cook 1-2 minutes until fragrant."
+    },
+    {
+      "text": "Pour in soy sauce, sesame oil, and green onions. Stir well, simmer 2-3 minutes to meld flavours."
+    },
+    {
+      "text": "Divide rice into bowls (80g each). Spoon beef mixture over rice. Add optional vegetables or fried egg. Garnish with sesame seeds or extra green onions."
+    }
+  ],
+  "tips": [
+    "For vegetables, my favourite in this dish are carrots and bell peppers, both cut into matchsticks (julienne). Toss into skillet with beef for last 2 minutes if you prefer them soft, or pile raw on top for crunch. For tangy Korean flavour, quick-pickle vegetables in rice vinegar, sugar, and salt for 10 minutes or use picked vegetables."
+  ]
+}

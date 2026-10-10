@@ -1,0 +1,147 @@
+{
+  "title": "Charcuterie Board for 10",
+  "summary": "When serving as the main event, aim for 150-200g total food per person. A balanced cheese-to-meat ratio close to 1:1 ensures satisfaction.",
+  "servings": 10,
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "name": "Cheese",
+      "total": {
+        "qty": 1150,
+        "unit": "g"
+      },
+      "items": [
+        {
+          "item": "Mix of hard (Parmesan, Pecorino), semi-soft (Gouda, Cheddar), soft (Brie, Goat cheese), blue cheese"
+        }
+      ]
+    },
+    {
+      "name": "Charcuterie",
+      "total": {
+        "qty": {
+          "min": 700,
+          "max": 850
+        },
+        "unit": "g"
+      },
+      "items": [
+        {
+          "amount": {
+            "qty": 180,
+            "unit": "g"
+          },
+          "item": "prosciutto crudo"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 100,
+              "max": 150
+            },
+            "unit": "g"
+          },
+          "item": "additional prosciutto or salami"
+        },
+        {
+          "amount": {
+            "qty": 120,
+            "unit": "g"
+          },
+          "item": "mortadella"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "coppa or capocollo"
+        },
+        {
+          "amount": {
+            "qty": 80,
+            "unit": "g"
+          },
+          "item": "bresaola"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 150,
+              "max": 200
+            },
+            "unit": "g"
+          },
+          "item": "salami variety"
+        }
+      ]
+    },
+    {
+      "name": "Crackers & Bread",
+      "items": [
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "g"
+          },
+          "item": "crackers or breadsticks"
+        },
+        {
+          "item": "Fresh bread",
+          "note": "baguette, ciabatta, focaccia"
+        }
+      ]
+    },
+    {
+      "name": "Accompaniments",
+      "items": [
+        {
+          "amount": {
+            "qty": {
+              "min": 200,
+              "max": 300
+            },
+            "unit": "g"
+          },
+          "item": "dip",
+          "note": "hummus, pesto, olive tapenade"
+        },
+        {
+          "item": "Mixed olives"
+        },
+        {
+          "item": "Pickled vegetables",
+          "note": "cornichons, peppers"
+        },
+        {
+          "item": "Fresh fruit",
+          "note": "grapes, figs, dried apricots"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 200,
+              "max": 250
+            },
+            "unit": "g"
+          },
+          "item": "nuts and dried fruit"
+        },
+        {
+          "item": "Honey or fruit preserves"
+        },
+        {
+          "item": "Mustards"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Arrange items in clusters rather than rows for visual appeal."
+    }
+  ],
+  "tips": [
+    "Dips add variety and help stretch portions. The total of 180-200g per person ensures guests leave satisfied when serving as the main event. Arrange items in clusters rather than rows for visual appeal."
+  ]
+}

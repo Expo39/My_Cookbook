@@ -1,0 +1,73 @@
+{
+  "title": "Savoury Crepes",
+  "summary": "Thin, delicate French crepes perfect for wrapping Beef Wellington or serving as a side. These provide a moisture barrier between the duxelles and pastry.",
+  "servings": 5,
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 125,
+            "unit": "g"
+          },
+          "item": "plain flour"
+        },
+        {
+          "food": "egg",
+          "amount": {
+            "qty": 2
+          },
+          "item": "eggs",
+          "scale": "discrete"
+        },
+        {
+          "food": "milk",
+          "amount": {
+            "qty": 250,
+            "unit": "ml"
+          },
+          "item": "milk"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 1.5,
+            "unit": "tbsp"
+          },
+          "item": "melted butter"
+        },
+        {
+          "item": "Pinch of salt"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Whisk flour, eggs, milk, melted butter and salt in a bowl until smooth. Let batter rest 30 minutes."
+    },
+    {
+      "text": "Heat a non-stick frying pan over medium-high heat. Lightly butter the pan."
+    },
+    {
+      "text": "Pour a small ladleful of batter into pan, swirl to coat bottom thinly."
+    },
+    {
+      "text": "Cook 1-2 minutes until edges start to brown, flip and cook another 30 seconds."
+    },
+    {
+      "text": "Stack crepes on a plate with greaseproof paper between each one."
+    },
+    {
+      "text": "Cool completely before using for wellington, or refrigerate overnight."
+    }
+  ],
+  "tips": [
+    "The key to thin crepes is swirling the batter quickly and using very little. First crepe is often imperfect - this is normal! Crepes can be made the day before and refrigerated with greaseproof paper between each one. For wellington, you'll need about 10 crepes to wrap a 1kg fillet."
+  ],
+  "related": [
+    "main-courses/beef-steak/beef-wellington"
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "title": "Creamy Pancetta & Mushroom Tagliatelle",
+  "summary": "Rendered pancetta fat creates a savoury foundation for this creamy mushroom sauce. The key is searing mushrooms properly to develop deep, nutty flavour.",
+  "servings": 3,
+  "tags": [
+    "Creamy & Rich"
+  ],
+  "order": 4,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "g"
+          },
+          "item": "tagliatelle"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "pancetta",
+          "note": "cubed"
+        },
+        {
+          "amount": {
+            "qty": 250,
+            "unit": "g"
+          },
+          "item": "mushrooms",
+          "note": "sliced"
+        },
+        {
+          "food": "cream",
+          "amount": {
+            "qty": 200,
+            "unit": "ml"
+          },
+          "item": "heavy cream"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "small onion",
+          "note": "chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 60,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 4,
+            "unit": "tbsp"
+          },
+          "item": "white wine",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 40,
+            "unit": "g"
+          },
+          "item": "Parmesan",
+          "note": "grated"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "item": "Fresh parsley",
+          "note": "chopped"
+        },
+        {
+          "item": "Black pepper and salt"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Place large pan over medium heat. Add pancetta (no oil needed). Cook 5-7 minutes until fat renders and cubes are crispy. Remove pancetta, leave fat in pan."
+    },
+    {
+      "text": "Add butter to rendered fat. Turn heat to medium-high. Add mushrooms, cook undisturbed 2-3 minutes for browning, then stir. Add onion, cook 2-3 minutes. Add garlic, cook 30 seconds."
+    },
+    {
+      "text": "Meanwhile, boil pasta in salted water for 1 minute less than package instructions. Reserve 1 cup pasta water before draining."
+    },
+    {
+      "text": "(Optional) Pour wine into mushroom pan, let bubble. Lower heat to medium. Pour in cream, simmer gently 2 minutes."
+    },
+    {
+      "text": "Stir in Parmesan and black pepper. Taste, add salt if needed (pancetta is salty)."
+    },
+    {
+      "text": "Add pasta and crispy pancetta back to sauce. Toss vigorously 1 minute. Add pasta water if too thick. Turn off heat, stir in parsley. Serve immediately."
+    }
+  ],
+  "tips": [
+    "Guanciale is an amazing substitute for this dish. Do not overcrowd mushrooms - if pan is small, cook in batches. Starchy pasta water is the secret to restaurant-quality pasta. Room temperature cream integrates more smoothly without splitting."
+  ]
+}

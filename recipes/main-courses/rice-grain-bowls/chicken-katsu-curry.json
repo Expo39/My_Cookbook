@@ -1,0 +1,177 @@
+{
+  "title": "Chicken Katsu Curry",
+  "summary": "Crispy breaded chicken cutlets with rich Japanese curry sauce.",
+  "servings": 2,
+  "tags": [
+    "Asian-Inspired"
+  ],
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "name": "For Breaded Chicken",
+      "items": [
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "chicken breasts",
+          "scale": "discrete"
+        },
+        {
+          "food": "egg",
+          "amount": {
+            "qty": 2
+          },
+          "item": "eggs",
+          "note": "beaten",
+          "scale": "discrete"
+        },
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 100,
+            "unit": "g"
+          },
+          "item": "plain flour"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "panko breadcrumbs"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "paprika"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "turmeric"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "garam masala"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "curry powder"
+        }
+      ]
+    },
+    {
+      "name": "For Katsu Curry Sauce",
+      "items": [
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "plain flour"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "ground cloves"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "MSG",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "ml"
+          },
+          "item": "chicken stock"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "large onions",
+          "note": "extremely finely chopped (or blended)",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "apple",
+          "note": "finely sliced",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "item": "Spices from breading list",
+          "note": "paprika, turmeric, garam masala, curry powder"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Butterfly chicken breasts to make them thinner. Season with salt and pepper."
+    },
+    {
+      "text": "Set up breading station: flour mixed with spices, beaten eggs, panko breadcrumbs."
+    },
+    {
+      "text": "Coat each chicken piece in flour, then egg, then breadcrumbs. Press firmly."
+    },
+    {
+      "text": "Place breaded chicken on a baking rack over a tray. Bake at 180°C for 15 minutes until golden and cooked through."
+    },
+    {
+      "text": "For curry: Cook finely chopped onions in butter with ground cloves for minimum 20 minutes over medium heat until deeply caramelised. Stir frequently."
+    },
+    {
+      "text": "Remove onions temporarily. Add flour and butter to pan, cook 2-3 minutes to form a roux."
+    },
+    {
+      "text": "Add all spices (paprika, turmeric, garam masala, curry powder), cook 1 minute until fragrant."
+    },
+    {
+      "text": "Return onions to pan. Add apple slices if using. Sauté together 2-3 minutes."
+    },
+    {
+      "text": "Gradually add chicken stock, stirring constantly until curry emulsifies and thickens."
+    },
+    {
+      "text": "If onions haven't melted completely, transfer curry to blender and blend until smooth."
+    },
+    {
+      "text": "Slice chicken katsu. Serve over rice with curry sauce poured over. Garnish with spring onions if desired."
+    }
+  ],
+  "tips": [
+    "This is Antonio's favourite dish! The secret is patience - caramelising the onions properly (minimum 20 minutes) creates incredible depth. The apple adds subtle sweetness that balances the spices beautifully. Another option is adding shredded pears as well along with the apples! Baking the katsu instead of frying is a healtier option but frying them is just as good (if even better). You can also use an airfryer!"
+  ]
+}

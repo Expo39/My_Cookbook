@@ -1,0 +1,142 @@
+{
+  "title": "Braised Beef Short Ribs",
+  "summary": "Melt-in-your-mouth beef short ribs slow-cooked in wine and stock. The long braise creates incredibly tender meat and rich, concentrated gravy. Perfect served with polenta or mashed potatoes.",
+  "servings": 4,
+  "order": 4,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1600,
+            "unit": "g"
+          },
+          "item": "beef short ribs",
+          "note": "400g per person"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "onions",
+          "note": "roughly chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "carrots",
+          "note": "roughly chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "celery stalks",
+          "note": "roughly chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 6
+          },
+          "item": "cloves garlic",
+          "note": "smashed",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 3,
+            "unit": "tbsp"
+          },
+          "item": "tomato paste",
+          "note": "kunserva"
+        },
+        {
+          "amount": {
+            "qty": 750,
+            "unit": "ml"
+          },
+          "item": "red wine",
+          "note": "can use 500ml-1000ml"
+        },
+        {
+          "amount": {
+            "qty": 1000,
+            "unit": "ml"
+          },
+          "item": "beef stock",
+          "note": "enough to submerge ribs"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "bay leaves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tsp"
+          },
+          "item": "fresh thyme"
+        },
+        {
+          "food": "olive-oil",
+          "item": "Olive oil"
+        },
+        {
+          "item": "Salt and black pepper"
+        },
+        {
+          "item": "polenta or mashed potatoes, to serve",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Preheat oven to 160°C (140°C fan). Pat short ribs dry, season generously with salt and pepper."
+    },
+    {
+      "text": "Heat olive oil in large, heavy-bottomed pan over high heat. Sear short ribs on all sides until deeply browned (3-4 minutes per side). Remove ribs, set aside."
+    },
+    {
+      "text": "In same pan over medium heat, add onions, carrots, celery, garlic. Sauté until vegetables soften and start to colour (8-10 minutes)."
+    },
+    {
+      "text": "Add tomato paste, stir and cook for 2-3 minutes until paste darkens."
+    },
+    {
+      "text": "Pour in red wine, scraping up brown bits from bottom of pan. Let wine reduce by half (5-7 minutes)."
+    },
+    {
+      "text": "Transfer wine-vegetable mixture to large oven-proof dish or Dutch oven. Nestle short ribs into vegetables."
+    },
+    {
+      "text": "Add beef stock until ribs are completely submerged. Add bay leaves and thyme."
+    },
+    {
+      "text": "Cover tightly with lid or aluminium foil. Braise in oven for 4 hours until meat is fall-off-the-bone tender."
+    },
+    {
+      "text": "Remove ribs carefully (they will be very tender), keep warm."
+    },
+    {
+      "text": "Strain braising liquid through fine sieve, pressing vegetables to extract all flavour. Discard solids."
+    },
+    {
+      "text": "Pour liquid into saucepan, bring to boil. Reduce until thickened to gravy consistency (15-20 minutes). Season to taste."
+    },
+    {
+      "text": "Serve short ribs with reduced gravy, polenta or mashed potatoes, and grilled broccoli."
+    }
+  ],
+  "tips": [
+    "The key to tender short ribs is low, slow cooking. Do not rush the braise. The meat should be so tender it falls apart with a fork. Searing the ribs deeply adds immense flavour to the final sauce. The dish is even better made a day ahead - refrigerate overnight, skim fat from surface, then reheat gently. The concentrated gravy is rich and glossy. For authentic Italian presentation, serve with soft polenta and gremolata garnish (lemon zest, parsley, garlic)."
+  ]
+}

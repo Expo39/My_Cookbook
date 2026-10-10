@@ -1,0 +1,151 @@
+{
+  "title": "Baked Gnocchi with Tomato & Mozzarella",
+  "summary": "Perfectly non-watery baked gnocchi! The secret is using crushed tomatoes and simmering the sauce to concentrate flavours before adding the gnocchi.",
+  "servings": 4,
+  "tags": [
+    "Italian Classics"
+  ],
+  "order": 5,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 475,
+            "unit": "g"
+          },
+          "item": "potato gnocchi",
+          "note": "1 package"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "alt": {
+            "qty": 30,
+            "unit": "ml"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "amount": {
+            "qty": 0.5
+          },
+          "item": "medium onion",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "cloves garlic",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "item": "Pinch red pepper flakes",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 800,
+            "unit": "g"
+          },
+          "item": "crushed tomatoes",
+          "note": "one 28oz tin"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "dried oregano"
+        },
+        {
+          "food": "sugar",
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "sugar"
+        },
+        {
+          "amount": {
+            "qty": 170,
+            "unit": "g"
+          },
+          "alt": {
+            "qty": 6,
+            "unit": "oz"
+          },
+          "item": "fresh mozzarella",
+          "note": "torn"
+        },
+        {
+          "amount": {
+            "qty": 40,
+            "unit": "g"
+          },
+          "item": "freshly grated Parmesan"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh parsley",
+          "note": "chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh basil",
+          "note": "chopped"
+        },
+        {
+          "item": "Kosher salt and black pepper to taste",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Heat 30ml olive oil in a large oven-safe skillet over medium heat. Sauté onion for 1 minute."
+    },
+    {
+      "text": "Add garlic and red pepper flakes (if using). Cook for 4 more minutes until soft and fragrant."
+    },
+    {
+      "text": "Stir in crushed tomatoes, oregano, sugar, salt and pepper. Bring to a boil."
+    },
+    {
+      "text": "Reduce heat to low. Simmer partially covered for 30 minutes, stirring occasionally. This thickens the sauce and prevents wateriness."
+    },
+    {
+      "text": "Meanwhile, bring a large pot of salted water to boil. Add gnocchi. As soon as they float (2-3 minutes), drain immediately."
+    },
+    {
+      "text": "Stir fresh parsley and basil into the thickened sauce."
+    },
+    {
+      "text": "Add drained gnocchi to the sauce, stir gently to coat."
+    },
+    {
+      "text": "Top with torn mozzarella and grated Parmesan."
+    },
+    {
+      "text": "Place skillet under grill (broiler) for 5-7 minutes until cheese is golden, bubbly and slightly crispy on top."
+    },
+    {
+      "text": "Let rest 2-3 minutes before serving."
+    }
+  ],
+  "tips": [
+    "The 30-minute simmer is crucial - it evaporates excess liquid and concentrates flavours. Using crushed tomatoes instead of diced creates a thicker, creamier sauce that clings to the gnocchi. Boiling and draining the gnocchi separately (rather than cooking them in the sauce) prevents adding extra water. The broiler step dries out the top and creates that perfect golden crust."
+  ]
+}

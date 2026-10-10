@@ -1,0 +1,132 @@
+{
+  "title": "Pistachio-Crusted Rack of Lamb",
+  "summary": "Elegant rack of lamb with aromatic herb and pistachio crust. Quick to cook but impressive presentation. Perfect for special dinners. Serve with mashed potatoes and grilled asparagus.",
+  "servings": 2,
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "rack of lamb",
+          "note": "8 ribs, about 800-900g",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 80,
+            "unit": "g"
+          },
+          "item": "pistachios",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 60,
+            "unit": "g"
+          },
+          "item": "fresh breadcrumbs"
+        },
+        {
+          "amount": {
+            "qty": 40,
+            "unit": "g"
+          },
+          "item": "Parmigiano-Reggiano",
+          "note": "finely grated"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh sage",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh rosemary",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh thyme leaves"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "fresh mint",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "prefix": "Zest of",
+          "item": "lemon",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "Dijon mustard"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 3,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "item": "Salt and black pepper"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Preheat oven to 200°C (180°C fan)."
+    },
+    {
+      "text": "Mix pistachios, breadcrumbs, Parmigiano, sage, rosemary, thyme, mint, lemon zest in bowl. Stir in 2 tbsp olive oil until mixture holds together. Season with salt and pepper."
+    },
+    {
+      "text": "Season lamb rack generously with salt and pepper."
+    },
+    {
+      "text": "Heat 1 tbsp olive oil in oven-proof frying pan over high heat. Sear lamb rack on all sides until golden brown (2 minutes per side). Remove from heat."
+    },
+    {
+      "text": "Brush meat side of lamb (not bones) generously with Dijon mustard."
+    },
+    {
+      "text": "Press pistachio-herb mixture firmly onto mustard-coated lamb, forming thick crust."
+    },
+    {
+      "text": "Return pan to oven (or transfer to roasting tray). Roast for 18 minutes for medium-rare (internal temp 52-55°C)."
+    },
+    {
+      "text": "Remove from oven, cover loosely with foil. Rest for 8-10 minutes."
+    },
+    {
+      "text": "Slice between ribs into individual cutlets. Serve immediately with mashed potatoes and grilled asparagus."
+    }
+  ],
+  "tips": [
+    "Ask your butcher to french the lamb rack (clean the rib bones) for elegant presentation. The mustard acts as glue for the crust and adds tangy flavour. Do not skip the searing step - it adds crucial flavour and helps crust adhere. For perfectly medium-rare lamb, aim for 52-55°C internal temperature. Lamb continues cooking during resting. The pistachio crust should be golden and aromatic. Save any fallen crust to sprinkle over plated dish. Pair with mint sauce or red wine jus for classic accompaniment."
+  ]
+}
