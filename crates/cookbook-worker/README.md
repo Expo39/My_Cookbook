@@ -29,14 +29,26 @@ No account id is committed. Wrangler takes it from `CLOUDFLARE_ACCOUNT_ID` or fr
 
 ## Deploying
 
-Everything runs in the dev container, so nothing is installed on the host:
+Everything runs in the dev container, so nothing is installed on the host. `wrangler login` cannot complete its browser callback inside the container, so deploys authenticate with an API token instead:
 
-```sh
-docker compose run --rm dev npx wrangler login
-docker compose run --rm dev sh -c 'cd crates/cookbook-worker && npx wrangler deploy'
-docker compose run --rm dev sh -c 'cd crates/cookbook-worker && npx wrangler secret put GEMINI_API_KEY'
-docker compose run --rm dev sh -c 'cd crates/cookbook-worker && npx wrangler secret put ADMIN_IMPORT_SECRET'
-```
+1. In the Cloudflare dashboard, create an API token from the **Edit Cloudflare Workers** template (**My Profile > API Tokens > Create Token**).
+2. Export it in the shell, together with the account id if the token covers more than one account:
+
+   ```sh
+   export CLOUDFLARE_API_TOKEN=...
+   export CLOUDFLARE_ACCOUNT_ID=...   # optional
+   ```
+
+3. Deploy, then set the secrets. Each secret is prompted for, so it never appears in the shell history:
+
+   ```sh
+   make worker-deploy
+   make worker-secrets
+   ```
+
+   `make worker-deploy` prints the Worker's URL, e.g. `https://sapori-ai.<subdomain>.workers.dev`. The first deploy also creates the `RATE_LIMIT` KV namespace.
+
+4. Point the site at it with `ai.endpoint` in `cookbook.config.json` (or `PUBLIC_AI_ENDPOINT`), and add the site's origin to `ALLOWED_ORIGINS` if it is not already listed.
 
 `make worker-build` builds the Worker without deploying. Point the site at the deployed URL with `PUBLIC_AI_ENDPOINT`.
 

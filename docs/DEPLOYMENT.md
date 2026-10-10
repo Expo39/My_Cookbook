@@ -72,18 +72,17 @@ The bypass exists for the in-site editor. Its saves are direct commits to `main`
 
 The static site cannot hold the Gemini key, so the sous-chef and the importer go through `crates/cookbook-worker`, a Rust Worker configured in `crates/cookbook-worker/wrangler.toml`. Everything runs in the dev container, so nothing is installed on the host.
 
-1. Log in to Cloudflare and deploy the Worker. The first deploy creates the `RATE_LIMIT` KV namespace.
+1. Create a Cloudflare API token from the **Edit Cloudflare Workers** template, export it as `CLOUDFLARE_API_TOKEN` (and `CLOUDFLARE_ACCOUNT_ID` if the token covers several accounts), and deploy. `wrangler login` is not used, because its browser callback cannot reach the container. The first deploy creates the `RATE_LIMIT` KV namespace and prints the Worker's URL.
 
    ```sh
-   docker compose run --rm dev npx wrangler login
-   docker compose run --rm dev sh -c 'cd crates/cookbook-worker && npx wrangler deploy'
+   export CLOUDFLARE_API_TOKEN=...
+   make worker-deploy
    ```
 
-2. Add the secrets. `GEMINI_API_KEY` is a Google AI Studio key; `ADMIN_IMPORT_SECRET` keys the importer's admin proof (generate it with `openssl rand -hex 32`).
+2. Add the secrets. `GEMINI_API_KEY` is a Google AI Studio key; `ADMIN_IMPORT_SECRET` keys the importer's admin proof (generate it with `openssl rand -hex 32`). Both are prompted for, so neither reaches the shell history.
 
    ```sh
-   docker compose run --rm dev sh -c 'cd crates/cookbook-worker && npx wrangler secret put GEMINI_API_KEY'
-   docker compose run --rm dev sh -c 'cd crates/cookbook-worker && npx wrangler secret put ADMIN_IMPORT_SECRET'
+   make worker-secrets
    ```
 
 3. Check the variables in `wrangler.toml`:
@@ -92,7 +91,7 @@ The static site cannot hold the Gemini key, so the sous-chef and the importer go
    - `GEMINI_MODEL`, `RATE_LIMIT_CHAT` and `RATE_LIMIT_IMPORT` tune the model and the hourly limits.
 4. Set `ai.endpoint` in `cookbook.config.json` (or `PUBLIC_AI_ENDPOINT` at build time) to the Worker's URL, and enter the same `ADMIN_IMPORT_SECRET` in the site's editing settings (see [ADMIN.md](ADMIN.md#importing-a-recipe-with-ai)).
 
-`make worker-build` builds the Worker without deploying it. No Cloudflare account id is committed; Wrangler takes it from `CLOUDFLARE_ACCOUNT_ID` or from the login. The routes, limits and the admin proof are documented in [crates/cookbook-worker/README.md](../crates/cookbook-worker/README.md).
+`make worker-build` builds the Worker without deploying it. No Cloudflare account id is committed; Wrangler takes it from `CLOUDFLARE_ACCOUNT_ID` or from the token. The routes, limits and the admin proof are documented in [crates/cookbook-worker/README.md](../crates/cookbook-worker/README.md).
 
 ## Self-hosting
 

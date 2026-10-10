@@ -51,6 +51,8 @@ Every target runs inside the `dev` container unless noted.
 | `make fmt` | Formats Rust with `cargo fmt` and the web code with Prettier. |
 | `make lint` | `cargo fmt --check`, `cargo clippy -D warnings`, `svelte-check --fail-on-warnings`, Prettier and ESLint. |
 | `make screenshots` | Builds the site and writes review screenshots into `SHOTS` (default `web/test-results/shots`). |
+| `make preview` | Builds the production site with the GitHub Pages base path and serves it at http://localhost:5173/My_Cookbook/. |
+| `make worker-deploy` | Deploys the AI Worker; needs `CLOUDFLARE_API_TOKEN`. `make worker-secrets` sets its secrets. |
 | `make shell` | Opens a bash shell in the `dev` container. |
 | `make ascii` | Fails on non-ASCII text outside accented letters, the degree sign and fraction glyphs. `make lint` runs it, and so does CI. |
 | `make worker-build` | Builds the Cloudflare Worker without deploying it. |

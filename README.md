@@ -123,6 +123,7 @@ make test-fast   # Rust, Vitest and the recipe checklist
 make test        # everything, including Playwright against the built site
 make check       # the recipe checklist alone
 make build       # WebAssembly and the static site into web/build
+make preview     # the production build, served as Pages serves it, at http://localhost:5173/My_Cookbook/
 make lint        # rustfmt, clippy, svelte-check, prettier and eslint
 make hooks       # install the pre-push hook (once per clone)
 ```

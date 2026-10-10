@@ -13,7 +13,7 @@ CARDS_OUT := web/static/cards
 CARDS_STAMP := $(CARDS_OUT)/.state.json
 CARD_SRC := cookbook.config.json $(shell find assets -type f)
 
-.PHONY: ascii verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
+.PHONY: ascii preview worker-deploy worker-secrets verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
 
 image:
 	docker compose build dev
@@ -53,6 +53,11 @@ test-fast: install data wasm
 build: install data cards wasm
 	$(RUN) pnpm --dir web build
 
+# The production build served the way GitHub Pages serves it: http://localhost:5173/My_Cookbook/
+preview: export BASE_PATH = /My_Cookbook
+preview: build
+	docker compose run --rm --service-ports dev pnpm --dir web preview --host 0.0.0.0 --port 5173
+
 verify: build
 	$(RUN) cargo run --quiet -p cookbook-cli -- verify-site web/build
 
@@ -76,6 +81,15 @@ screenshots: build
 
 worker-build:
 	$(RUN) sh -c 'cd crates/cookbook-worker && worker-build --release'
+
+WRANGLER := npx --yes wrangler@4.147.0
+
+# Needs CLOUDFLARE_API_TOKEN (and CLOUDFLARE_ACCOUNT_ID if the token covers several accounts).
+worker-deploy:
+	$(RUN) sh -c 'cd crates/cookbook-worker && $(WRANGLER) deploy'
+
+worker-secrets:
+	docker compose run --rm -it dev sh -c 'cd crates/cookbook-worker && $(WRANGLER) secret put GEMINI_API_KEY && $(WRANGLER) secret put ADMIN_IMPORT_SECRET'
 
 server:
 	docker compose run --rm --service-ports -e COOKBOOK_ROOT=/work -e WEB_DIR=/work/web/build -e COOKIE_SECURE=false dev cargo run -p cookbook-server
