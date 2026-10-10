@@ -1,4 +1,5 @@
 import type { CheckResult, Recipe, Section } from '$lib/types/recipe';
+import { ApiSource } from './api-source';
 import { WriteError, type BuildStatus, type RecipeWriter, type SaveResult } from './writer';
 
 /** Photos already written, so a retry after a failed save does not send them again. */
@@ -12,6 +13,10 @@ export class ApiWriter implements RecipeWriter {
 	constructor(fetcher: typeof fetch = (...args) => fetch(...args), root = '') {
 		this.#fetch = fetcher;
 		this.#root = root;
+	}
+
+	async read(id: string): Promise<Recipe> {
+		return (await new ApiSource(this.#fetch).getRecipe(id)).recipe;
 	}
 
 	async #send<T>(path: string, init: RequestInit): Promise<T> {

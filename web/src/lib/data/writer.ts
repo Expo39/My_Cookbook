@@ -12,6 +12,11 @@ export type BuildStatus = BuildState;
 /** Where an edited recipe goes. Sections and the photo must be handed over before `save`. */
 export interface RecipeWriter {
 	/**
+	 * The recipe as it is stored now, not as the published site shows it. An edit must start from
+	 * this, and `save` refuses when the stored recipe has changed since. Throws `RecipeNotFoundError`.
+	 */
+	read(id: string): Promise<Recipe>;
+	/**
 	 * Writes the recipe, together with anything staged by `createSection` and `uploadImage`.
 	 * `previousImage` is the photo file the edit started from; it is deleted when the recipe no longer uses it.
 	 */

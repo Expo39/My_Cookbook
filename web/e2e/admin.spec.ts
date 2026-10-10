@@ -25,6 +25,7 @@ interface Request {
 /** A stand-in for the parts of the GitHub API the editor uses, recording what it is sent. */
 async function mockGitHub(page: Page, options: { build?: 'live' | 'failed' } = {}) {
 	const requests: Request[] = [];
+	const changed = new Set<string>();
 	const blobs = new Map<string, string>();
 	const state = { adminBlob: null as unknown };
 
@@ -40,6 +41,17 @@ async function mockGitHub(page: Page, options: { build?: 'live' | 'failed' } = {
 		const body = request.postDataJSON() as Record<string, unknown> | null;
 		requests.push({ method: request.method(), path, body: body ?? undefined });
 
+		if (path.startsWith('/contents/')) {
+			const id = path.replace(/^\/contents\/recipes\//, '').replace(/\.json$/, '');
+			const text = recipeIds.includes(id) ? original(id) : undefined;
+			if (text === undefined) return route.fulfill({ status: 404, json: { message: 'Not Found' } });
+			return route.fulfill({
+				json: {
+					sha: changed.has(id) ? 'sha-newer' : 'sha-stored',
+					content: Buffer.from(text).toString('base64')
+				}
+			});
+		}
 		if (path === '/git/blobs') {
 			const sha = `blob-${blobs.size + 1}`;
 			blobs.set(sha, body?.content as string);
@@ -98,7 +110,7 @@ async function mockGitHub(page: Page, options: { build?: 'live' | 'failed' } = {
 		return sha ? blobs.get(sha) : undefined;
 	};
 	const commits = () => requests.filter((r) => r.path === '/git/commits');
-	return { requests, tree, contentAt, commits };
+	return { requests, tree, contentAt, commits, changed };
 }
 
 /** A tab that is already unlocked, as one is after the password has been entered. */
@@ -261,6 +273,20 @@ test.describe('the editor', () => {
 		expect(github.contentAt(`recipes/${id}.json`)).toBe(
 			before.replace(JSON.stringify(summary), JSON.stringify('A new summary for this recipe.'))
 		);
+	});
+
+	test('refuses to save over a recipe that changed on GitHub after it was opened', async ({
+		page
+	}) => {
+		const github = await mockGitHub(page);
+		await unlocked(page);
+		await page.goto(`edit?id=${unlinked}`);
+		await expect(saveButton(page)).toBeEnabled();
+		github.changed.add(unlinked);
+		await page.getByLabel('Summary').fill('A stale edit.');
+		await saveButton(page).click();
+		await expect(page.getByText(/changed on GitHub after you opened it/)).toBeVisible();
+		expect(github.commits()).toHaveLength(0);
 	});
 
 	test('shows a failed build with a link to the run', async ({ page }) => {

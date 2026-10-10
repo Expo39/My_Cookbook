@@ -1,7 +1,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 import { checkRecipe, isCoreLoaded } from '$lib/core';
 import { allRecipes, findRecipe } from '$lib/data/tree';
-import type { CheckResult, Recipe, RecipeData, SectionNode, SiteIndex } from '$lib/types/recipe';
+import type { CheckResult, Recipe, SectionNode, SiteIndex } from '$lib/types/recipe';
 import {
 	emptyForm,
 	formFromRecipe,
@@ -62,16 +62,16 @@ export class EditorState {
 	readonly touched = new SvelteSet<string>();
 	#baseline = '';
 
-	constructor(options: { index: SiteIndex; id?: string; data?: RecipeData; section?: string }) {
+	constructor(options: { index: SiteIndex; id?: string; recipe?: Recipe; section?: string }) {
 		this.index = options.index;
 		this.existingIds = $derived(allRecipes(this.index).map((card) => card.id));
 		this.existingFolders = $derived(folders(this.index.sections));
-		this.editing = options.data !== undefined && options.id !== undefined;
+		this.editing = options.recipe !== undefined && options.id !== undefined;
 		this.originalId = options.id;
-		this.original = options.data?.recipe;
+		this.original = options.recipe;
 		this.form =
-			options.data && options.id
-				? formFromRecipe(options.data.recipe, options.id)
+			options.recipe && options.id
+				? formFromRecipe(options.recipe, options.id)
 				: emptyForm(options.section ?? '');
 		this.#baseline = this.#snapshot();
 	}

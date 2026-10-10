@@ -28,7 +28,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import { loadCore } from '$lib/core';
-	import { createSource, createWriter, RecipeNotFoundError } from '$lib/data';
+	import { createWriter, RecipeNotFoundError } from '$lib/data';
 	import type { BuildStatus, RecipeWriter, SaveResult } from '$lib/data/writer';
 	import { WriteError } from '$lib/data/writer';
 	import { editHref, homeHref, pageHref } from '$lib/links';
@@ -47,6 +47,7 @@
 	let phase = $state<Phase>('loading');
 	let mounted = $state(false);
 	let ed = $state.raw<EditorState>();
+	let writer: RecipeWriter | undefined;
 	let pane = $state<Pane>('edit');
 	let draft = $state<Draft<FormData> | null>(null);
 	let saving = $state(false);
@@ -88,8 +89,9 @@
 		const id = params.get('id');
 		let state: EditorState;
 		try {
+			writer = createWriter(admin.token);
 			state = id
-				? new EditorState({ index: data.index, id, data: await createSource().getRecipe(id) })
+				? new EditorState({ index: data.index, id, recipe: await writer.read(id) })
 				: new EditorState({ index: data.index, section: params.get('section') ?? '' });
 		} catch (error) {
 			if (error instanceof RecipeNotFoundError) phase = 'missing';
@@ -198,16 +200,16 @@
 		problem = '';
 		outcome = null;
 		try {
-			const writer = createWriter(admin.token);
+			const target = (writer ??= createWriter(admin.token));
 			for (const added of ed.neededSections) {
-				await writer.createSection(added.path, { title: added.title });
+				await target.createSection(added.path, { title: added.title });
 			}
 			let recipe = ed.built.recipe;
 			if (ed.photo) {
-				const { src } = await writer.uploadImage(ed.id, ed.photo.blob);
+				const { src } = await target.uploadImage(ed.id, ed.photo.blob);
 				recipe = { ...recipe, image: { src, alt: ed.form.imageAlt.trim() } };
 			}
-			const result = await writer.save(ed.id, recipe, {
+			const result = await target.save(ed.id, recipe, {
 				isNew: !ed.editing,
 				// A moved or renamed recipe leaves the original in place, and with it the original's photo.
 				previousImage: ed.originalId === ed.id ? ed.original?.image?.src : undefined
@@ -216,7 +218,7 @@
 			ed.markSaved();
 			outcome = { kind: 'saved', id: ed.id, title: recipe.title };
 			chrome.notify('Saved. It goes live once the build finishes');
-			void watch(writer, result);
+			void watch(target, result);
 		} catch (error) {
 			problem = failure(error);
 		} finally {
@@ -226,15 +228,15 @@
 
 	async function remove() {
 		if (!ed?.originalId || !ed.original) return;
-		const writer = createWriter(admin.token);
-		const result = await writer.remove(ed.originalId, {
+		const target = (writer ??= createWriter(admin.token));
+		const result = await target.remove(ed.originalId, {
 			title: ed.original.title,
 			image: ed.original.image?.src
 		});
 		clearDraft(ed.draftId);
 		ed.markSaved();
 		outcome = { kind: 'deleted', id: ed.originalId, title: ed.original.title };
-		void watch(writer, result);
+		void watch(target, result);
 	}
 </script>
 

@@ -110,7 +110,7 @@ sw.addEventListener('fetch', (event) => {
 
 	if (isImmutable(url.pathname) || assets.includes(url.pathname)) {
 		event.respondWith(cacheFirst(request));
-	} else if (isData(url.pathname)) {
+	} else if (isData(url.pathname) && request.cache !== 'no-store') {
 		event.respondWith(staleWhileRevalidate(event));
 	} else if (request.mode === 'navigate') {
 		event.respondWith(navigation(event));

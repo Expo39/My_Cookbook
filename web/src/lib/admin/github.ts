@@ -1,4 +1,4 @@
-import { toBase64 } from './encoding';
+import { fromBase64, toBase64 } from './encoding';
 
 export interface RepoRef {
 	/** `owner/name`. */
@@ -43,6 +43,8 @@ export class GitHubClient {
 		try {
 			response = await this.fetcher(`${API}${path}`, {
 				method,
+				// The API lets a browser keep a read for a minute, which is too stale to edit from.
+				cache: method === 'GET' ? 'no-store' : undefined,
 				headers: {
 					Accept: 'application/vnd.github+json',
 					Authorization: `Bearer ${this.token}`,
@@ -72,6 +74,24 @@ export class GitHubClient {
 				'That token can read the repository but not write to it. Give it Contents: read and write.',
 				403
 			);
+		}
+	}
+
+	/** The file's text and blob sha on the branch, or `null` when it is not there. */
+	async file(
+		{ repo, branch }: RepoRef,
+		path: string
+	): Promise<{ sha: string; text: string } | null> {
+		try {
+			const found = await this.request<{ sha: string; content: string }>(
+				'GET',
+				`/repos/${repo}/contents/${path}?ref=${encodeURIComponent(branch)}`
+			);
+			const text = new TextDecoder().decode(fromBase64(found.content.replace(/\s/g, '')));
+			return { sha: found.sha, text };
+		} catch (error) {
+			if (error instanceof GitHubError && error.status === 404) return null;
+			throw error;
 		}
 	}
 

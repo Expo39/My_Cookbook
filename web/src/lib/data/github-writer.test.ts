@@ -19,7 +19,9 @@ interface Call {
 	body?: Record<string, unknown>;
 }
 
-function github(options: { refFailures?: number } = {}) {
+function github(
+	options: { refFailures?: number; files?: Record<string, { sha: string; text: string }> } = {}
+) {
 	const calls: Call[] = [];
 	let blobs = 0;
 	let refFailures = options.refFailures ?? 0;
@@ -28,6 +30,12 @@ function github(options: { refFailures?: number } = {}) {
 		const body = init.body ? JSON.parse(init.body as string) : undefined;
 		calls.push({ method: init.method ?? 'GET', path, body });
 		const reply = (json: unknown, status = 200) => new Response(JSON.stringify(json), { status });
+		if (path.startsWith('/contents/')) {
+			const file = options.files?.[decodeURIComponent(path.slice('/contents/'.length))];
+			return file
+				? reply({ sha: file.sha, content: btoa(file.text) })
+				: reply({ message: 'Not Found' }, 404);
+		}
 		if (path === '/git/blobs') return reply({ sha: `blob-${++blobs}` }, 201);
 		if (path.startsWith('/git/ref/')) return reply({ object: { sha: `head-${calls.length}` } });
 		if (path.startsWith('/git/commits/')) return reply({ tree: { sha: 'base-tree' } });
@@ -65,7 +73,7 @@ describe('GitHubWriter', () => {
 			tree: 'new-tree',
 			parents: [expect.stringMatching(/^head-/)]
 		});
-		const update = api.calls.at(-1);
+		const update = api.calls.find((call) => call.method === 'PATCH');
 		expect(update).toMatchObject({
 			method: 'PATCH',
 			path: '/git/refs/heads/main',
@@ -214,6 +222,63 @@ describe('GitHubWriter', () => {
 		}) as unknown as typeof fetch;
 		await new GitHubWriter('secret-token', ref, fetcher).status({ id: 'a', commit: 'abc' });
 		expect(seen[0].get('authorization')).toBe('Bearer secret-token');
+	});
+});
+
+describe('editing from the stored recipe', () => {
+	const stored = (sha: string) => ({
+		'recipes/d/tart.json': { sha, text: JSON.stringify(recipe) }
+	});
+
+	it('reads the recipe from the branch, not the published site', async () => {
+		const api = github({ files: stored('v1') });
+		const read = await new GitHubWriter('t', ref, api.fetcher).read('d/tart');
+		expect(read).toEqual(recipe);
+		expect(api.calls[0].path).toBe('/contents/recipes/d/tart.json');
+	});
+
+	it('says when the recipe is not stored', async () => {
+		await expect(new GitHubWriter('t', ref, github().fetcher).read('d/tart')).rejects.toThrow(
+			'no recipe called'
+		);
+	});
+
+	it('refuses to save over a recipe that changed after it was read', async () => {
+		const files = stored('v1');
+		const api = github({ files });
+		const writer = new GitHubWriter('t', ref, api.fetcher);
+		await writer.read('d/tart');
+		files['recipes/d/tart.json'] = { sha: 'v2', text: '{}' };
+		await expect(writer.save('d/tart', recipe, { isNew: false })).rejects.toMatchObject({
+			code: 'conflict'
+		});
+		expect(api.calls.some((call) => call.path === '/git/commits')).toBe(false);
+	});
+
+	it('saves when the recipe is as it was read', async () => {
+		const api = github({ files: stored('v1') });
+		const writer = new GitHubWriter('t', ref, api.fetcher);
+		await writer.read('d/tart');
+		await writer.save('d/tart', recipe, { isNew: false });
+		expect(api.calls.some((call) => call.path === '/git/commits')).toBe(true);
+	});
+
+	it('refuses a new recipe whose address was taken in the meantime', async () => {
+		const api = github({ files: stored('v1') });
+		await expect(
+			new GitHubWriter('t', ref, api.fetcher).save('d/tart', recipe, { isNew: true })
+		).rejects.toMatchObject({ code: 'conflict' });
+	});
+
+	it('refuses to delete a recipe that changed after it was read', async () => {
+		const files = stored('v1');
+		const api = github({ files });
+		const writer = new GitHubWriter('t', ref, api.fetcher);
+		await writer.read('d/tart');
+		files['recipes/d/tart.json'] = { sha: 'v2', text: '{}' };
+		await expect(writer.remove('d/tart', { title: 'Tart' })).rejects.toMatchObject({
+			code: 'conflict'
+		});
 	});
 });
 
