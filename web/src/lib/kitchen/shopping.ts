@@ -181,7 +181,13 @@ export function mergeLines(
 				}
 			}
 			if (!merged) {
-				const line: ShoppingLine = { key, ...pick(item), ...amount, recipes: [] };
+				// The first line keeps the plain key, so ticks stored before lines were split still apply to it.
+				const line: ShoppingLine = {
+					key: lines.length ? `${key}#${lines.length}` : key,
+					...pick(item),
+					...amount,
+					recipes: []
+				};
 				add(line);
 				lines.push(line);
 				order.push(line);
