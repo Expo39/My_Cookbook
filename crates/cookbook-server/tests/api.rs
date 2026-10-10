@@ -55,7 +55,11 @@ impl Reply {
     fn codes(&self) -> Vec<String> {
         self.json()["results"]
             .as_array()
-            .map(|r| r.iter().map(|c| c["id"].as_str().unwrap().to_owned()).collect())
+            .map(|r| {
+                r.iter()
+                    .map(|c| c["id"].as_str().unwrap().to_owned())
+                    .collect()
+            })
             .unwrap_or_default()
     }
 }
@@ -89,7 +93,8 @@ fn cheap_hash(password: &str) -> String {
 
 fn kitchen_with(gemini: Option<Arc<dyn Gemini>>, web: Option<&Path>) -> Kitchen {
     let dir = TempDir::new().unwrap();
-    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../cookbook-cli/tests/fixtures/valid/recipes");
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../cookbook-cli/tests/fixtures/valid/recipes");
     copy_tree(&fixtures, &dir.path().join("recipes"));
     let hash = cheap_hash(PASSWORD);
     let root = dir.path().to_string_lossy().into_owned();
@@ -124,7 +129,13 @@ impl Kitchen {
         }
     }
 
-    async fn call(&self, method: Method, uri: &str, cookie: Option<&str>, body: Option<Value>) -> Reply {
+    async fn call(
+        &self,
+        method: Method,
+        uri: &str,
+        cookie: Option<&str>,
+        body: Option<Value>,
+    ) -> Reply {
         let mut builder = Request::builder().method(method).uri(uri);
         if let Some(cookie) = cookie {
             builder = builder.header(header::COOKIE, cookie);
@@ -145,7 +156,12 @@ impl Kitchen {
 
     async fn login(&self) -> String {
         let reply = self
-            .call(Method::POST, "/api/session", None, Some(json!({ "password": PASSWORD })))
+            .call(
+                Method::POST,
+                "/api/session",
+                None,
+                Some(json!({ "password": PASSWORD })),
+            )
             .await;
         assert_eq!(reply.status, StatusCode::OK);
         let cookie = reply.headers[header::SET_COOKIE].to_str().unwrap();
@@ -153,7 +169,9 @@ impl Kitchen {
     }
 
     async fn upload(&self, uri: &str, cookie: &str, bytes: &[u8]) -> Reply {
-        let mut body = b"--B\r\nContent-Disposition: form-data; name=\"file\"; filename=\"x\"\r\n\r\n".to_vec();
+        let mut body =
+            b"--B\r\nContent-Disposition: form-data; name=\"file\"; filename=\"x\"\r\n\r\n"
+                .to_vec();
         body.extend_from_slice(bytes);
         body.extend_from_slice(b"\r\n--B--\r\n");
         self.send(
@@ -183,7 +201,9 @@ fn recipe(extra: Value) -> Value {
         ]}],
         "steps": [{ "text": "Simmer {@chickpeas} for {timer:20}." }]
     });
-    base.as_object_mut().unwrap().extend(extra.as_object().unwrap().clone());
+    base.as_object_mut()
+        .unwrap()
+        .extend(extra.as_object().unwrap().clone());
     base
 }
 
@@ -194,7 +214,11 @@ async fn editing_needs_a_session() {
     let k = kitchen();
     let sections = json!({ "path": "starters", "title": "Starters" });
     for (method, uri, body) in [
-        (Method::PUT, "/api/recipes/mains/new-stew", Some(recipe(json!({})))),
+        (
+            Method::PUT,
+            "/api/recipes/mains/new-stew",
+            Some(recipe(json!({}))),
+        ),
         (Method::DELETE, "/api/recipes/mains/lentil-soup", None),
         (Method::POST, "/api/sections", Some(sections)),
         (Method::POST, "/api/ai/import", Some(json!({ "text": "x" }))),
@@ -202,7 +226,13 @@ async fn editing_needs_a_session() {
         let reply = k.call(method.clone(), uri, None, body).await;
         assert_eq!(reply.status, StatusCode::UNAUTHORIZED, "{method} {uri}");
     }
-    let upload = k.upload("/api/images/mains/lentil-soup", "cookbook_session=forged.00", PNG).await;
+    let upload = k
+        .upload(
+            "/api/images/mains/lentil-soup",
+            "cookbook_session=forged.00",
+            PNG,
+        )
+        .await;
     assert_eq!(upload.status, StatusCode::UNAUTHORIZED);
     assert!(!k.path("recipes/mains/new-stew.json").exists());
 }
@@ -212,13 +242,23 @@ async fn a_wrong_password_is_rejected_and_repeated_guesses_are_limited() {
     let k = kitchen();
     for _ in 0..5 {
         let reply = k
-            .call(Method::POST, "/api/session", None, Some(json!({ "password": "nope" })))
+            .call(
+                Method::POST,
+                "/api/session",
+                None,
+                Some(json!({ "password": "nope" })),
+            )
             .await;
         assert_eq!(reply.status, StatusCode::UNAUTHORIZED);
         assert!(reply.headers.get(header::SET_COOKIE).is_none());
     }
     let blocked = k
-        .call(Method::POST, "/api/session", None, Some(json!({ "password": PASSWORD })))
+        .call(
+            Method::POST,
+            "/api/session",
+            None,
+            Some(json!({ "password": PASSWORD })),
+        )
         .await;
     assert_eq!(blocked.status, StatusCode::TOO_MANY_REQUESTS);
     assert!(blocked.headers.contains_key(header::RETRY_AFTER));
@@ -229,19 +269,36 @@ async fn a_wrong_password_is_rejected_and_repeated_guesses_are_limited() {
 async fn the_right_password_sets_a_hardened_twelve_hour_cookie_that_logout_clears() {
     let k = kitchen();
     let reply = k
-        .call(Method::POST, "/api/session", None, Some(json!({ "password": PASSWORD })))
+        .call(
+            Method::POST,
+            "/api/session",
+            None,
+            Some(json!({ "password": PASSWORD })),
+        )
         .await;
-    let cookie = reply.headers[header::SET_COOKIE].to_str().unwrap().to_owned();
+    let cookie = reply.headers[header::SET_COOKIE]
+        .to_str()
+        .unwrap()
+        .to_owned();
     for part in ["HttpOnly", "Secure", "SameSite=Strict", "Max-Age=43200"] {
         assert!(cookie.contains(part), "{cookie}");
     }
     let session = cookie.split(';').next().unwrap();
-    let status = k.call(Method::GET, "/api/session", Some(session), None).await;
+    let status = k
+        .call(Method::GET, "/api/session", Some(session), None)
+        .await;
     assert_eq!(status.json()["authenticated"], true);
     assert_eq!(k.get("/api/session").await.json()["authenticated"], false);
 
-    let out = k.call(Method::DELETE, "/api/session", Some(session), None).await;
-    assert!(out.headers[header::SET_COOKIE].to_str().unwrap().contains("Max-Age=0"));
+    let out = k
+        .call(Method::DELETE, "/api/session", Some(session), None)
+        .await;
+    assert!(
+        out.headers[header::SET_COOKIE]
+            .to_str()
+            .unwrap()
+            .contains("Max-Age=0")
+    );
 }
 
 #[tokio::test]
@@ -250,9 +307,19 @@ async fn a_valid_recipe_is_written_and_read_back() {
     let cookie = k.login().await;
     let id = "mains/chickpea-stew";
     let saved = k
-        .call(Method::PUT, &format!("/api/recipes/{id}"), Some(&cookie), Some(recipe(json!({}))))
+        .call(
+            Method::PUT,
+            &format!("/api/recipes/{id}"),
+            Some(&cookie),
+            Some(recipe(json!({}))),
+        )
         .await;
-    assert_eq!(saved.status, StatusCode::OK, "{}", String::from_utf8_lossy(&saved.body));
+    assert_eq!(
+        saved.status,
+        StatusCode::OK,
+        "{}",
+        String::from_utf8_lossy(&saved.body)
+    );
 
     let page = k.get(&format!("/api/recipes/{id}")).await;
     assert_eq!(page.status, StatusCode::OK);
@@ -283,21 +350,43 @@ async fn an_invalid_recipe_gets_the_checklist_and_is_not_written() {
     let cookie = k.login().await;
     let broken = recipe(json!({ "steps": [{ "text": "Stir {@missing}." }] }));
     let reply = k
-        .call(Method::PUT, "/api/recipes/mains/broken", Some(&cookie), Some(broken))
+        .call(
+            Method::PUT,
+            "/api/recipes/mains/broken",
+            Some(&cookie),
+            Some(broken),
+        )
         .await;
     assert_eq!(reply.status, StatusCode::UNPROCESSABLE_ENTITY);
-    assert!(reply.codes().contains(&"E-TOKEN-UNRESOLVED".to_owned()), "{:?}", reply.json());
+    assert!(
+        reply.codes().contains(&"E-TOKEN-UNRESOLVED".to_owned()),
+        "{:?}",
+        reply.json()
+    );
     assert!(!k.path("recipes/mains/broken.json").exists());
-    assert_eq!(k.get("/api/recipes/mains/broken").await.status, StatusCode::NOT_FOUND);
+    assert_eq!(
+        k.get("/api/recipes/mains/broken").await.status,
+        StatusCode::NOT_FOUND
+    );
 
     let outside = k
-        .call(Method::PUT, "/api/recipes/nowhere/stew", Some(&cookie), Some(recipe(json!({}))))
+        .call(
+            Method::PUT,
+            "/api/recipes/nowhere/stew",
+            Some(&cookie),
+            Some(recipe(json!({}))),
+        )
         .await;
     assert_eq!(outside.status, StatusCode::UNPROCESSABLE_ENTITY);
     assert!(outside.codes().contains(&"E-SECTION-MISSING".to_owned()));
 
     let nonsense = k
-        .call(Method::PUT, "/api/recipes/mains/odd", Some(&cookie), Some(json!({ "title": 3 })))
+        .call(
+            Method::PUT,
+            "/api/recipes/mains/odd",
+            Some(&cookie),
+            Some(json!({ "title": 3 })),
+        )
         .await;
     assert_eq!(nonsense.status, StatusCode::UNPROCESSABLE_ENTITY);
     assert!(nonsense.codes().contains(&"E-SCHEMA-PARSE".to_owned()));
@@ -309,28 +398,61 @@ async fn deleting_a_linked_recipe_is_a_conflict_until_the_link_goes() {
     let cookie = k.login().await;
     let linking = recipe(json!({ "related": ["mains/lentil-soup"] }));
     let put = k
-        .call(Method::PUT, "/api/recipes/mains/linking", Some(&cookie), Some(linking))
+        .call(
+            Method::PUT,
+            "/api/recipes/mains/linking",
+            Some(&cookie),
+            Some(linking),
+        )
         .await;
-    assert_eq!(put.status, StatusCode::OK, "{}", String::from_utf8_lossy(&put.body));
+    assert_eq!(
+        put.status,
+        StatusCode::OK,
+        "{}",
+        String::from_utf8_lossy(&put.body)
+    );
 
     let refused = k
-        .call(Method::DELETE, "/api/recipes/mains/lentil-soup", Some(&cookie), None)
+        .call(
+            Method::DELETE,
+            "/api/recipes/mains/lentil-soup",
+            Some(&cookie),
+            None,
+        )
         .await;
     assert_eq!(refused.status, StatusCode::CONFLICT);
     assert_eq!(refused.json()["results"][0]["recipe"], "mains/linking");
     assert!(k.path("recipes/mains/lentil-soup.json").exists());
 
-    k.call(Method::PUT, "/api/recipes/mains/linking", Some(&cookie), Some(recipe(json!({}))))
-        .await;
+    k.call(
+        Method::PUT,
+        "/api/recipes/mains/linking",
+        Some(&cookie),
+        Some(recipe(json!({}))),
+    )
+    .await;
     let removed = k
-        .call(Method::DELETE, "/api/recipes/mains/lentil-soup", Some(&cookie), None)
+        .call(
+            Method::DELETE,
+            "/api/recipes/mains/lentil-soup",
+            Some(&cookie),
+            None,
+        )
         .await;
     assert_eq!(removed.status, StatusCode::OK);
     assert!(!k.path("recipes/mains/lentil-soup.json").exists());
-    assert_eq!(k.get("/api/recipes/mains/lentil-soup").await.status, StatusCode::NOT_FOUND);
+    assert_eq!(
+        k.get("/api/recipes/mains/lentil-soup").await.status,
+        StatusCode::NOT_FOUND
+    );
 
     let again = k
-        .call(Method::DELETE, "/api/recipes/mains/lentil-soup", Some(&cookie), None)
+        .call(
+            Method::DELETE,
+            "/api/recipes/mains/lentil-soup",
+            Some(&cookie),
+            None,
+        )
         .await;
     assert_eq!(again.status, StatusCode::NOT_FOUND);
 }
@@ -339,24 +461,53 @@ async fn deleting_a_linked_recipe_is_a_conflict_until_the_link_goes() {
 async fn paths_that_climb_out_are_refused_everywhere() {
     let k = kitchen();
     let cookie = k.login().await;
-    for id in ["../evil", "mains/../../evil", "%2e%2e/evil", "mains/..%2f..%2fevil", "mains/Evil", "mains//evil"] {
+    for id in [
+        "../evil",
+        "mains/../../evil",
+        "%2e%2e/evil",
+        "mains/..%2f..%2fevil",
+        "mains/Evil",
+        "mains//evil",
+    ] {
         let put = k
-            .call(Method::PUT, &format!("/api/recipes/{id}"), Some(&cookie), Some(recipe(json!({}))))
+            .call(
+                Method::PUT,
+                &format!("/api/recipes/{id}"),
+                Some(&cookie),
+                Some(recipe(json!({}))),
+            )
             .await;
         assert_eq!(put.status, StatusCode::BAD_REQUEST, "PUT {id}");
         let delete = k
-            .call(Method::DELETE, &format!("/api/recipes/{id}"), Some(&cookie), None)
+            .call(
+                Method::DELETE,
+                &format!("/api/recipes/{id}"),
+                Some(&cookie),
+                None,
+            )
             .await;
         assert_eq!(delete.status, StatusCode::BAD_REQUEST, "DELETE {id}");
         let image = k.upload(&format!("/api/images/{id}"), &cookie, PNG).await;
         assert_eq!(image.status, StatusCode::BAD_REQUEST, "image {id}");
-        assert_eq!(k.get(&format!("/api/images/{id}.png")).await.status, StatusCode::NOT_FOUND);
+        assert_eq!(
+            k.get(&format!("/api/images/{id}.png")).await.status,
+            StatusCode::NOT_FOUND
+        );
     }
     let section = k
-        .call(Method::POST, "/api/sections", Some(&cookie), Some(json!({ "path": "../evil", "title": "Evil" })))
+        .call(
+            Method::POST,
+            "/api/sections",
+            Some(&cookie),
+            Some(json!({ "path": "../evil", "title": "Evil" })),
+        )
         .await;
     assert_eq!(section.status, StatusCode::BAD_REQUEST);
-    assert!(!k.path("evil.json").exists() && !k.path("evil").exists() && !k.path("recipes/evil").exists());
+    assert!(
+        !k.path("evil.json").exists()
+            && !k.path("evil").exists()
+            && !k.path("recipes/evil").exists()
+    );
 }
 
 #[tokio::test]
@@ -364,22 +515,55 @@ async fn sections_can_be_added_once() {
     let k = kitchen();
     let cookie = k.login().await;
     let make = |path: &str| json!({ "path": path, "title": "Salads", "order": 3 });
-    let created = k.call(Method::POST, "/api/sections", Some(&cookie), Some(make("salads"))).await;
+    let created = k
+        .call(
+            Method::POST,
+            "/api/sections",
+            Some(&cookie),
+            Some(make("salads")),
+        )
+        .await;
     assert_eq!(created.status, StatusCode::CREATED);
     let file = fs::read_to_string(k.path("recipes/salads/_section.json")).unwrap();
     assert!(file.contains("\"title\": \"Salads\"") && file.contains("\"order\": 3"));
 
-    let nested = k.call(Method::POST, "/api/sections", Some(&cookie), Some(make("salads/green"))).await;
+    let nested = k
+        .call(
+            Method::POST,
+            "/api/sections",
+            Some(&cookie),
+            Some(make("salads/green")),
+        )
+        .await;
     assert_eq!(nested.status, StatusCode::CREATED);
-    let twice = k.call(Method::POST, "/api/sections", Some(&cookie), Some(make("salads"))).await;
+    let twice = k
+        .call(
+            Method::POST,
+            "/api/sections",
+            Some(&cookie),
+            Some(make("salads")),
+        )
+        .await;
     assert_eq!(twice.status, StatusCode::CONFLICT);
-    let orphan = k.call(Method::POST, "/api/sections", Some(&cookie), Some(make("soups/clear"))).await;
+    let orphan = k
+        .call(
+            Method::POST,
+            "/api/sections",
+            Some(&cookie),
+            Some(make("soups/clear")),
+        )
+        .await;
     assert_eq!(orphan.status, StatusCode::UNPROCESSABLE_ENTITY);
 
     let index = k.get("/api/index").await.json();
     assert_eq!(index["sections"].as_array().unwrap().len(), 2);
     let saved = k
-        .call(Method::PUT, "/api/recipes/salads/green/slaw", Some(&cookie), Some(recipe(json!({}))))
+        .call(
+            Method::PUT,
+            "/api/recipes/salads/green/slaw",
+            Some(&cookie),
+            Some(recipe(json!({}))),
+        )
         .await;
     assert_eq!(saved.status, StatusCode::OK);
 }
@@ -388,22 +572,40 @@ async fn sections_can_be_added_once() {
 async fn images_must_be_images_and_small() {
     let k = kitchen();
     let cookie = k.login().await;
-    let ok = k.upload("/api/images/mains/lentil-soup", &cookie, PNG).await;
+    let ok = k
+        .upload("/api/images/mains/lentil-soup", &cookie, PNG)
+        .await;
     assert_eq!(ok.status, StatusCode::CREATED);
     assert_eq!(ok.json()["src"], "lentil-soup.png");
-    assert_eq!(fs::read(k.path("recipes/mains/lentil-soup.png")).unwrap(), PNG);
+    assert_eq!(
+        fs::read(k.path("recipes/mains/lentil-soup.png")).unwrap(),
+        PNG
+    );
 
     let served = k.get("/api/images/mains/lentil-soup.png").await;
     assert_eq!(served.headers[header::CONTENT_TYPE], "image/png");
     assert_eq!(served.body, PNG);
 
-    let text = k.upload("/api/images/mains/lentil-soup", &cookie, b"<script>alert(1)</script>").await;
+    let text = k
+        .upload(
+            "/api/images/mains/lentil-soup",
+            &cookie,
+            b"<script>alert(1)</script>",
+        )
+        .await;
     assert_eq!(text.status, StatusCode::UNSUPPORTED_MEDIA_TYPE);
-    let huge = k.upload("/api/images/mains/lentil-soup", &cookie, &[&PNG[..], &vec![0; 9 * 1024 * 1024]].concat()).await;
+    let mut big = PNG.to_vec();
+    big.resize(9 * 1024 * 1024, 0);
+    let huge = k
+        .upload("/api/images/mains/lentil-soup", &cookie, &big)
+        .await;
     assert_eq!(huge.status, StatusCode::PAYLOAD_TOO_LARGE);
     let nowhere = k.upload("/api/images/nowhere/stew", &cookie, PNG).await;
     assert_eq!(nowhere.status, StatusCode::UNPROCESSABLE_ENTITY);
-    assert_eq!(k.get("/api/images/mains/_section.json").await.status, StatusCode::NOT_FOUND);
+    assert_eq!(
+        k.get("/api/images/mains/_section.json").await.status,
+        StatusCode::NOT_FOUND
+    );
 }
 
 #[tokio::test]
@@ -417,18 +619,47 @@ async fn the_sous_chef_answers_and_the_importer_needs_a_session() {
     let k = kitchen_with(Some(Arc::new(Canned(Ok(draft)))), None);
     let chat = json!({ "recipeId": "mains/lentil-soup", "recipe": recipe(json!({})), "question": "Can I freeze it?" });
     let reply = k.call(Method::POST, "/api/ai/chat", None, Some(chat)).await;
-    assert_eq!(reply.status, StatusCode::OK, "{}", String::from_utf8_lossy(&reply.body));
+    assert_eq!(
+        reply.status,
+        StatusCode::OK,
+        "{}",
+        String::from_utf8_lossy(&reply.body)
+    );
     assert_eq!(reply.json()["truncated"], false);
-    assert!(reply.json()["reply"].as_str().unwrap().contains("Imported soup"));
+    assert!(
+        reply.json()["reply"]
+            .as_str()
+            .unwrap()
+            .contains("Imported soup")
+    );
 
-    let bad = k.call(Method::POST, "/api/ai/chat", None, Some(json!({ "question": "hi" }))).await;
+    let bad = k
+        .call(
+            Method::POST,
+            "/api/ai/chat",
+            None,
+            Some(json!({ "question": "hi" })),
+        )
+        .await;
     assert_eq!(bad.status, StatusCode::BAD_REQUEST);
 
-    let anonymous = k.call(Method::POST, "/api/ai/import", None, Some(json!({ "text": "Soup" }))).await;
+    let anonymous = k
+        .call(
+            Method::POST,
+            "/api/ai/import",
+            None,
+            Some(json!({ "text": "Soup" })),
+        )
+        .await;
     assert_eq!(anonymous.status, StatusCode::UNAUTHORIZED);
     let cookie = k.login().await;
     let imported = k
-        .call(Method::POST, "/api/ai/import", Some(&cookie), Some(json!({ "text": "Soup: boil water." })))
+        .call(
+            Method::POST,
+            "/api/ai/import",
+            Some(&cookie),
+            Some(json!({ "text": "Soup: boil water." })),
+        )
         .await;
     assert_eq!(imported.status, StatusCode::OK);
     assert_eq!(imported.json()["recipe"]["title"], "Imported soup");
@@ -438,13 +669,21 @@ async fn the_sous_chef_answers_and_the_importer_needs_a_session() {
 #[tokio::test]
 async fn ai_failures_are_relayed_calmly() {
     let k = kitchen_with(Some(Arc::new(Canned(Err(AiError::Quota)))), None);
-    let chat = json!({ "recipeId": "mains/lentil-soup", "recipe": recipe(json!({})), "question": "Hi" });
-    let reply = k.call(Method::POST, "/api/ai/chat", None, Some(chat.clone())).await;
+    let chat =
+        json!({ "recipeId": "mains/lentil-soup", "recipe": recipe(json!({})), "question": "Hi" });
+    let reply = k
+        .call(Method::POST, "/api/ai/chat", None, Some(chat.clone()))
+        .await;
     assert_eq!(reply.status, StatusCode::TOO_MANY_REQUESTS);
-    assert_eq!(reply.json()["message"], "The sous-chef has reached today's limit. Try again tomorrow.");
+    assert_eq!(
+        reply.json()["message"],
+        "The sous-chef has reached today's limit. Try again tomorrow."
+    );
 
     let off = kitchen();
-    let disabled = off.call(Method::POST, "/api/ai/chat", None, Some(chat)).await;
+    let disabled = off
+        .call(Method::POST, "/api/ai/chat", None, Some(chat))
+        .await;
     assert_eq!(disabled.status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(disabled.json()["error"], "ai_disabled");
 }
@@ -453,7 +692,11 @@ async fn ai_failures_are_relayed_calmly() {
 async fn the_site_is_served_with_a_spa_fallback_and_cache_headers() {
     let web = TempDir::new().unwrap();
     fs::create_dir_all(web.path().join("_app/immutable")).unwrap();
-    fs::write(web.path().join("index.html"), "<html>shell</html>".repeat(20)).unwrap();
+    fs::write(
+        web.path().join("index.html"),
+        "<html>shell</html>".repeat(20),
+    )
+    .unwrap();
     fs::write(web.path().join("about.html"), "<html>about</html>").unwrap();
     fs::write(web.path().join("_app/immutable/app.js"), "console.log(1)").unwrap();
     let k = kitchen_with(None, Some(web.path()));
@@ -471,7 +714,12 @@ async fn the_site_is_served_with_a_spa_fallback_and_cache_headers() {
     assert!(String::from_utf8_lossy(&route.body).contains("shell"));
 
     let asset = k.get("/_app/immutable/app.js").await;
-    assert!(asset.headers[header::CACHE_CONTROL].to_str().unwrap().contains("immutable"));
+    assert!(
+        asset.headers[header::CACHE_CONTROL]
+            .to_str()
+            .unwrap()
+            .contains("immutable")
+    );
 
     let compressed = k
         .send(

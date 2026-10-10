@@ -27,6 +27,29 @@ fn hash_password_from_stdin() -> ExitCode {
     }
 }
 
+/// For the container health check: asks the local server for the index and expects a 200.
+async fn healthcheck() -> ExitCode {
+    use tokio::{
+        io::{AsyncReadExt, AsyncWriteExt},
+        net::TcpStream,
+    };
+    let bind = std::env::var("BIND").unwrap_or_else(|_| "0.0.0.0:8080".to_owned());
+    let port = bind.rsplit(':').next().unwrap_or("8080");
+    let attempt = async {
+        let mut stream = TcpStream::connect(format!("127.0.0.1:{port}")).await?;
+        stream
+            .write_all(b"GET /api/index HTTP/1.0\r\nHost: localhost\r\n\r\n")
+            .await?;
+        let mut head = [0_u8; 12];
+        stream.read_exact(&mut head).await?;
+        Ok::<_, std::io::Error>(head.ends_with(b" 200"))
+    };
+    match attempt.await {
+        Ok(true) => ExitCode::SUCCESS,
+        _ => ExitCode::FAILURE,
+    }
+}
+
 async fn shutdown() {
     let terminate = async {
         match tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()) {
@@ -71,6 +94,7 @@ async fn run() -> Result<(), String> {
 async fn main() -> ExitCode {
     match std::env::args().nth(1).as_deref() {
         Some("--hash-password") => return hash_password_from_stdin(),
+        Some("--healthcheck") => return healthcheck().await,
         Some("--help" | "-h") => {
             println!("cookbook-server: configured through the environment, see docs/DEPLOYMENT.md");
             println!(
