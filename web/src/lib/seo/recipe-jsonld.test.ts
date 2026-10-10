@@ -119,8 +119,16 @@ describe('the recipe JSON-LD', () => {
 		expect(JSON.stringify(plain)).not.toContain('Crepes');
 	});
 
-	it('omits the image until a card exists, and escapes angle brackets for the script element', () => {
+	it('lists the images it is given, and omits the property otherwise', () => {
 		expect(ld.image).toBeUndefined();
+		const images = [
+			'https://example.test/cards/a/og.png',
+			'https://example.test/cards/a/portrait.png'
+		];
+		expect(buildRecipeJsonLd({ ...input, image: images }).image).toEqual(images);
+	});
+
+	it('escapes angle brackets for the script element', () => {
 		expect(toScriptJson({ text: '</script>' })).not.toContain('<');
 	});
 });

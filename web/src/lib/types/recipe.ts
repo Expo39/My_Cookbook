@@ -77,6 +77,28 @@ export interface QtyRange {
 	min: number;
 }
 /**
+ * A recipe photo as the web app needs it: alt text, the source's shape and the widths on offer.
+ *
+ * This interface was referenced by `Web`'s JSON-Schema
+ * via the `definition` "CardImage".
+ */
+export interface CardImage {
+	alt: string;
+	height?: number | null;
+	/**
+	 * Relative to the `recipes/` root.
+	 */
+	src: string;
+	/**
+	 * The source's size, so the page can reserve space before the photo loads.
+	 */
+	width?: number | null;
+	/**
+	 * The widths of the generated files, ascending; empty until the pipeline has run.
+	 */
+	widths?: number[];
+}
+/**
  * What a single-recipe check needs to know about the rest of the collection.
  *
  * This interface was referenced by `Web`'s JSON-Schema
@@ -87,6 +109,12 @@ export interface CheckContext {
 	 * `None` skips the image existence check.
 	 */
 	files?: string[] | null;
+	/**
+	 * Pixel widths of the image files, by path relative to `recipes/`; a missing entry skips the size check.
+	 */
+	imageWidths?: {
+		[k: string]: number;
+	};
 	knownIds?: string[];
 	sectionFolders?: string[];
 }
@@ -241,10 +269,7 @@ export interface VariantOption {
 export interface RecipeCard {
 	difficulty?: Difficulty | null;
 	id: string;
-	/**
-	 * `src` is relative to the `recipes/` root.
-	 */
-	image?: Image | null;
+	image?: CardImage | null;
 	/**
 	 * Titles of the sections the recipe sits in, outermost first.
 	 */

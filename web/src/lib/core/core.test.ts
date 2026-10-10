@@ -10,6 +10,7 @@ import {
 	isCoreLoaded,
 	loadCore,
 	parseIngredientLine,
+	qrMatrix,
 	scaleRecipe,
 	toggleUnit,
 	version,
@@ -103,6 +104,13 @@ describe('the WASM core', () => {
 		expect(formatTemperature(52, 'us', undefined, { maxCelsius: 55, internal: true })).toBe(
 			'126–131 °F'
 		);
+	});
+
+	it('draws QR codes as a square of modules', () => {
+		const qr = qrMatrix('https://example.test/r/soup?serves=6');
+		expect(qr?.dark).toHaveLength((qr?.size ?? 0) ** 2);
+		expect(qr?.dark[0]).toBe(true);
+		expect(qrMatrix('x'.repeat(4000))).toBeUndefined();
 	});
 
 	it('labels servings with singular and plural nouns', () => {

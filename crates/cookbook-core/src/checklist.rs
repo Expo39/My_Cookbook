@@ -68,6 +68,8 @@ pub struct Collection {
     pub folders: Vec<String>,
     /// Every file found, for image existence checks.
     pub files: BTreeSet<String>,
+    /// Pixel widths of the image files that could be measured.
+    pub image_widths: BTreeMap<String, u32>,
     /// Ids of recipe files that failed to parse, so links to them are not reported as dangling.
     pub unparsed: Vec<String>,
 }
@@ -80,6 +82,8 @@ pub struct CheckContext {
     pub section_folders: BTreeSet<String>,
     /// `None` skips the image existence check.
     pub files: Option<BTreeSet<String>>,
+    /// Pixel widths of the image files, by path relative to `recipes/`; a missing entry skips the size check.
+    pub image_widths: BTreeMap<String, u32>,
 }
 
 impl Collection {
@@ -93,6 +97,7 @@ impl Collection {
                 .collect(),
             section_folders: self.sections.iter().map(|s| s.folder.clone()).collect(),
             files: Some(self.files.clone()),
+            image_widths: self.image_widths.clone(),
         }
     }
 }
@@ -127,6 +132,12 @@ fn resolve_relative(folder: &str, src: &str) -> String {
     }
     parts.join("/")
 }
+
+/// The formats the image pipeline can read.
+pub const IMAGE_FORMATS: &[&str] = &["jpg", "jpeg", "png", "webp"];
+
+/// Narrower photos are warned about, because the largest generated width is 1600 px.
+pub const MIN_IMAGE_WIDTH: u32 = 1200;
 
 const AMERICAN: &[(&str, &str)] = &[
     ("color", "colour"),
@@ -523,15 +534,34 @@ impl Checker<'_> {
                 );
             }
         }
-        if let (Some(image), Some(files)) = (&self.recipe.image, &ctx.files) {
-            let resolved = resolve_relative(file.folder(), &image.src);
-            if !files.contains(&resolved) {
-                self.error(
-                    "E-IMAGE-MISSING",
-                    "image.src",
-                    format!("{resolved} does not exist"),
-                );
-            }
+        let Some(image) = &self.recipe.image else {
+            return;
+        };
+        let resolved = resolve_relative(file.folder(), &image.src);
+        let extension = resolved.rsplit_once('.').map(|(_, e)| e.to_lowercase());
+        if !extension.is_some_and(|e| IMAGE_FORMATS.contains(&e.as_str())) {
+            self.error(
+                "E-IMAGE-FORMAT",
+                "image.src",
+                format!("{resolved} must be a JPEG, PNG or WebP file"),
+            );
+        }
+        if let Some(files) = &ctx.files
+            && !files.contains(&resolved)
+        {
+            self.error(
+                "E-IMAGE-MISSING",
+                "image.src",
+                format!("{resolved} does not exist"),
+            );
+        } else if let Some(&width) = ctx.image_widths.get(&resolved)
+            && width < MIN_IMAGE_WIDTH
+        {
+            self.warn(
+                "W-IMAGE-SMALL",
+                "image.src",
+                format!("{resolved} is {width} px wide; {MIN_IMAGE_WIDTH} px or more stays sharp on large screens"),
+            );
         }
     }
 
@@ -1004,6 +1034,7 @@ mod tests {
             known_ids: ["mains/soup", "mains/other"].map(String::from).into(),
             section_folders: ["mains"].map(String::from).into(),
             files: Some(BTreeSet::new()),
+            image_widths: BTreeMap::new(),
         }
     }
 
@@ -1028,7 +1059,7 @@ mod tests {
 
     #[test]
     fn each_mutation_raises_its_check() {
-        let cases: [(&str, &str, &str, &str); 24] = [
+        let cases: [(&str, &str, &str, &str); 25] = [
             (
                 "zero quantity",
                 r#""qty": 1, "unit": "l""#,
@@ -1153,6 +1184,12 @@ mod tests {
                 "E-VARIANT-UNRESOLVED",
             ),
             (
+                "unsupported image format",
+                r#""servings": 4,"#,
+                r#""servings": 4, "image": { "src": "a.gif", "alt": "Soup" },"#,
+                "E-IMAGE-FORMAT",
+            ),
+            (
                 "empty steps",
                 r#""steps": [{ "key": "cook", "text": "Heat {@stock} to {temp:90}, add {@salt} and {@egg}, simmer {timer:10}." }]"#,
                 r#""steps": []"#,
@@ -1171,6 +1208,30 @@ mod tests {
                 codes(&results)
             );
         }
+    }
+
+    #[test]
+    fn narrow_photos_get_a_warning() {
+        let with_image = BASE.replace(
+            r#""servings": 4,"#,
+            r#""servings": 4, "image": { "src": "a.jpg", "alt": "Soup" },"#,
+        );
+        let check = |width: u32| {
+            let context = CheckContext {
+                files: Some(BTreeSet::from(["mains/a.jpg".to_owned()])),
+                image_widths: BTreeMap::from([("mains/a.jpg".to_owned(), width)]),
+                ..ctx()
+            };
+            check_recipe(
+                &RecipeFile {
+                    path: "mains/soup.json".into(),
+                    recipe: parse_recipe(&with_image).unwrap(),
+                },
+                &context,
+            )
+        };
+        assert_eq!(codes(&check(800)), ["W-IMAGE-SMALL"]);
+        assert_eq!(codes(&check(1200)), Vec::<&str>::new());
     }
 
     #[test]

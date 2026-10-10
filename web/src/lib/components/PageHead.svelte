@@ -13,7 +13,7 @@
 		description: string;
 		/** The page's path below the base, without a leading slash; empty for the home page. */
 		path: string;
-		image?: string;
+		image?: { url: string; width: number; height: number; alt: string };
 		type?: 'website' | 'article';
 	} = $props();
 
@@ -30,5 +30,15 @@
 	<meta property="og:title" content={title} />
 	<meta property="og:description" content={description} />
 	<meta property="og:url" content={url} />
-	{#if image}<meta property="og:image" content={image} />{/if}
+	{#if image}
+		<meta property="og:image" content={image.url} />
+		<meta property="og:image:width" content={String(image.width)} />
+		<meta property="og:image:height" content={String(image.height)} />
+		<meta property="og:image:alt" content={image.alt} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:image" content={image.url} />
+		<meta name="twitter:image:alt" content={image.alt} />
+	{:else}
+		<meta name="twitter:card" content="summary" />
+	{/if}
 </svelte:head>

@@ -24,6 +24,12 @@ pub fn load(root: &Path) -> io::Result<Loaded> {
     Ok(loaded)
 }
 
+fn is_image(name: &str) -> bool {
+    name.rsplit_once('.').is_some_and(|(_, e)| {
+        cookbook_core::checklist::IMAGE_FORMATS.contains(&e.to_lowercase().as_str())
+    })
+}
+
 fn join(folder: &str, name: &str) -> String {
     if folder.is_empty() {
         name.to_owned()
@@ -48,6 +54,14 @@ fn walk(dir: &Path, folder: &str, loaded: &mut Loaded) -> io::Result<()> {
             continue;
         }
         loaded.collection.files.insert(rel.clone());
+        if is_image(&name)
+            && let Ok(size) = imagesize::size(&path)
+        {
+            loaded
+                .collection
+                .image_widths
+                .insert(rel.clone(), size.width as u32);
+        }
         if name == "_section.json" {
             let parsed = parse_section(&fs::read_to_string(&path)?);
             match parsed {

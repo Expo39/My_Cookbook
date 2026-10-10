@@ -4,6 +4,7 @@
 pub mod checklist;
 pub mod format;
 pub mod parse;
+pub mod qr;
 pub mod scale;
 pub mod schema;
 pub mod search;
@@ -19,6 +20,7 @@ pub use format::{
     DisplayCtx, Shown, display_amount, format_minutes, format_number, round_amount, servings_label,
 };
 pub use parse::{IngredientParseError, parse_ingredient_line};
+pub use qr::{QrMatrix, qr_matrix};
 pub use scale::{
     ScaleOptions, ScaleRequest, ScaledAmount, ScaledGroup, ScaledIngredient, ScaledRecipe,
     ScaledStep, Warning, apply_variants, factor_for, scale,
@@ -30,7 +32,8 @@ pub use schema::{
 };
 pub use search::{Coverage, RecipeSummary, SearchHit, SearchIndex, SummaryIngredient, tokenise};
 pub use site::{
-    Manifest, RecipeCard, RecipeData, SectionNode, Site, SiteIndex, TimesSummary, build_site,
+    CardImage, ImageMeta, Manifest, RecipeCard, RecipeData, SectionNode, Site, SiteIndex,
+    TimesSummary, build_site, build_site_with_images,
 };
 pub use tokens::{RenderedSegment, Segment, parse_tokens, render_segments, render_text, temp_text};
 pub use units::{

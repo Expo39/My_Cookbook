@@ -26,3 +26,11 @@ inherits = "release"
 opt-level = "z"
 panic = "abort"
 strip = true
+
+# Card rendering and image encoding are slow without optimisation, even in tests.
+[profile.dev.package."*"]
+opt-level = 2
+
+# Its image and card code is generic over the dependencies, so it is compiled here and needs the same.
+[profile.dev.package.cookbook-cli]
+opt-level = 2

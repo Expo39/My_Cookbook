@@ -57,3 +57,7 @@ CLAUDE.md
 web/static/data/
 .claude/worktrees/
 web/static/icons/
+
+# built from recipes/ by `make cards` and `make data`
+web/static/cards/
+web/static/img/

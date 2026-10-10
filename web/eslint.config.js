@@ -12,6 +12,8 @@ export default ts.config(
 			'src/lib/wasm/',
 			'src/lib/types/recipe.ts',
 			'static/data/',
+			'static/cards/',
+			'static/img/',
 			'playwright-report/',
 			'test-results/'
 		]

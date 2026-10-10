@@ -5,11 +5,12 @@ use std::{
 };
 
 use cookbook_core::{
-    CheckResult, Collection, RecipeFile, Site, build_site, check_all, has_errors, site::Manifest,
+    CheckResult, Collection, RecipeFile, Site, build_site_with_images, check_all, has_errors,
+    site::Manifest,
 };
 use serde::Serialize;
 
-use crate::report::Report;
+use crate::{images, report::Report};
 
 #[derive(Debug)]
 pub enum BuildError {
@@ -119,7 +120,8 @@ pub struct Built {
     pub warnings: Vec<CheckResult>,
 }
 
-pub fn run(root: &Path, out: &Path) -> Result<Built, BuildError> {
+/// Reads the tree and runs the checklist; errors stop everything, warnings are handed back.
+pub fn load_checked(root: &Path) -> Result<(cookbook_tree::Loaded, Vec<CheckResult>), BuildError> {
     if !cookbook_tree::has_recipes(root) {
         return Err(BuildError::Other(format!(
             "no recipes in {}",
@@ -137,14 +139,18 @@ pub fn run(root: &Path, out: &Path) -> Result<Built, BuildError> {
     subjects.sort();
     let results: Vec<CheckResult> = check_all(&loaded.collection)
         .into_iter()
-        .chain(loaded.parse_errors)
+        .chain(loaded.parse_errors.iter().cloned())
         .collect();
     if has_errors(&results) {
         return Err(BuildError::Check(Report::new(subjects, results).text()));
     }
-    let warnings = results;
+    Ok((loaded, results))
+}
 
-    let site = build_site(&loaded.collection);
+pub fn run(root: &Path, out: &Path, images_out: &Path) -> Result<Built, BuildError> {
+    let (loaded, warnings) = load_checked(root)?;
+    let images = images::process(root, images_out, &loaded.collection)?;
+    let site = build_site_with_images(&loaded.collection, &images);
     let recipes_dir: PathBuf = out.join("recipes");
     match fs::remove_dir_all(&recipes_dir) {
         Err(error) if error.kind() != io::ErrorKind::NotFound => return Err(error.into()),

@@ -8,7 +8,7 @@ use serde::Serialize;
 use crate::{
     checklist::Collection,
     scale::{ScaleOptions, ScaleRequest, ScaledRecipe, scale},
-    schema::{Difficulty, Image, Recipe},
+    schema::{Difficulty, Recipe},
     search::{RecipeSummary, SearchIndex},
 };
 
@@ -26,6 +26,32 @@ pub struct TimesSummary {
     pub total: Option<u32>,
 }
 
+/// What the image pipeline measured and produced for one recipe photo.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ImageMeta {
+    pub width: u32,
+    pub height: u32,
+    /// The widths written to `static/img/<id>/`, ascending.
+    pub widths: Vec<u32>,
+}
+
+/// A recipe photo as the web app needs it: alt text, the source's shape and the widths on offer.
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct CardImage {
+    /// Relative to the `recipes/` root.
+    pub src: String,
+    pub alt: String,
+    /// The source's size, so the page can reserve space before the photo loads.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub width: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub height: Option<u32>,
+    /// The widths of the generated files, ascending; empty until the pipeline has run.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub widths: Vec<u32>,
+}
+
 /// What a recipe card or list row needs without loading the recipe itself.
 #[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
@@ -41,9 +67,8 @@ pub struct RecipeCard {
     pub servings: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub difficulty: Option<Difficulty>,
-    /// `src` is relative to the `recipes/` root.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub image: Option<Image>,
+    pub image: Option<CardImage>,
     /// Titles of the sections the recipe sits in, outermost first.
     pub section: Vec<String>,
 }
@@ -110,8 +135,14 @@ fn total_minutes(recipe: &Recipe) -> TimesSummary {
     }
 }
 
-fn card(id: &str, recipe: &Recipe, section: &[String]) -> RecipeCard {
+fn card(
+    id: &str,
+    recipe: &Recipe,
+    section: &[String],
+    images: &BTreeMap<String, ImageMeta>,
+) -> RecipeCard {
     let folder = id.rsplit_once('/').map_or("", |(folder, _)| folder);
+    let meta = images.get(id);
     RecipeCard {
         id: id.to_owned(),
         slug: id.rsplit('/').next().unwrap_or(id).to_owned(),
@@ -122,13 +153,16 @@ fn card(id: &str, recipe: &Recipe, section: &[String]) -> RecipeCard {
         times: total_minutes(recipe),
         servings: recipe.servings,
         difficulty: recipe.difficulty,
-        image: recipe.image.as_ref().map(|image| Image {
+        image: recipe.image.as_ref().map(|image| CardImage {
             src: if folder.is_empty() {
                 image.src.clone()
             } else {
                 format!("{folder}/{}", image.src)
             },
             alt: image.alt.clone(),
+            width: meta.map(|m| m.width),
+            height: meta.map(|m| m.height),
+            widths: meta.map(|m| m.widths.clone()).unwrap_or_default(),
         }),
         section: section.to_vec(),
     }
@@ -209,6 +243,14 @@ fn node(
 
 /// Derives the index, the per-recipe pages and the search index. The tree is assumed to have passed the checklist.
 pub fn build_site(collection: &Collection) -> Site {
+    build_site_with_images(collection, &BTreeMap::new())
+}
+
+/// Like [`build_site`], with the photo sizes the image pipeline measured, keyed by recipe id.
+pub fn build_site_with_images(
+    collection: &Collection,
+    images: &BTreeMap<String, ImageMeta>,
+) -> Site {
     let mut files: Vec<_> = collection.recipes.iter().collect();
     files.sort_by_key(|f| f.id());
     let cards: Vec<(String, Option<i32>, RecipeCard)> = files
@@ -216,7 +258,7 @@ pub fn build_site(collection: &Collection) -> Site {
         .map(|f| {
             let id = f.id();
             let folder = id.rsplit_once('/').map_or("", |(folder, _)| folder);
-            let card = card(&id, &f.recipe, &titles(collection, folder));
+            let card = card(&id, &f.recipe, &titles(collection, folder), images);
             (id, f.recipe.order, card)
         })
         .collect();
@@ -281,7 +323,7 @@ mod tests {
     use super::*;
     use crate::{
         checklist::{RecipeFile, SectionFile},
-        schema::{Section, parse_recipe},
+        schema::{Image, Section, parse_recipe},
     };
 
     fn recipe(title: &str, extra: &str) -> Recipe {
@@ -376,5 +418,27 @@ mod tests {
         let site = build_site(&c);
         let image = site.index.sections[0].recipes[0].image.as_ref().unwrap();
         assert_eq!(image.src, "starters/soup.jpg");
+        assert_eq!((image.width, image.widths.len()), (None, 0));
+    }
+
+    #[test]
+    fn measured_photos_reach_the_card() {
+        let mut c = collection();
+        c.recipes[2].recipe.image = Some(Image {
+            src: "soup.jpg".to_owned(),
+            alt: "Soup".to_owned(),
+        });
+        let images = BTreeMap::from([(
+            "starters/soup".to_owned(),
+            ImageMeta {
+                width: 2000,
+                height: 1500,
+                widths: vec![480, 960, 1600],
+            },
+        )]);
+        let site = build_site_with_images(&c, &images);
+        let image = site.index.sections[0].recipes[0].image.as_ref().unwrap();
+        assert_eq!((image.width, image.height), (Some(2000), Some(1500)));
+        assert_eq!(image.widths, [480, 960, 1600]);
     }
 }

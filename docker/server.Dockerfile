@@ -22,7 +22,8 @@ COPY . .
 
 RUN cargo build --release --locked -p cookbook-server -p cookbook-cli
 RUN sh scripts/build-wasm.sh \
- && target/release/cookbook-cli build --out web/static/data
+ && target/release/cookbook-cli build --out web/static/data \
+ && target/release/cookbook-cli cards --out web/static/cards
 RUN pnpm --dir web install --frozen-lockfile \
  && PUBLIC_BACKEND=server BASE_PATH="" pnpm --dir web build
 

@@ -92,6 +92,7 @@ jobs:
             | sudo tar -xz --strip-components=2 -C /usr/local/bin "binaryen-version_${BINARYEN_VERSION}/bin/wasm-opt"
       - run: sh scripts/build-wasm.sh
       - run: cargo run --quiet -p cookbook-cli -- build
+      - run: cargo run --quiet -p cookbook-cli -- cards
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: web/package.json
@@ -113,6 +114,8 @@ jobs:
           path: |
             web/src/lib/wasm
             web/static/data
+            web/static/cards
+            web/static/img
           if-no-files-found: error
           retention-days: 1
 

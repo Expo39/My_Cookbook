@@ -1,17 +1,18 @@
 <script lang="ts">
-	import { onMount, untrack } from 'svelte';
+	import { onMount, tick, untrack } from 'svelte';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import { afterNavigate, replaceState } from '$app/navigation';
-	import { loadCore } from '$lib/core';
+	import type { QrMatrix } from '$lib/card/layout';
+	import { loadCore, qrMatrix } from '$lib/core';
 	import { sectionTrail } from '$lib/data/tree';
 	import { homeHref, pageHref } from '$lib/links';
+	import { photoOf, photoUrl } from '$lib/photo';
 	import { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { buildRecipeJsonLd, toScriptJson } from '$lib/seo/recipe-jsonld';
-	import { canonicalUrl, cardUrl } from '$lib/seo/site';
+	import { CARD_SIZES, canonicalUrl, cardUrl } from '$lib/seo/site';
 	import { itemsFromGroups } from '$lib/kitchen/shopping';
 	import { servingsText } from '$lib/recipe/format';
-	import { shareLink } from '$lib/share';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import { favourites } from '$lib/stores/favourites.svelte';
 	import { Notes } from '$lib/stores/notes.svelte';
@@ -19,6 +20,7 @@
 	import { recent } from '$lib/stores/recent.svelte';
 	import { shopping } from '$lib/stores/shopping.svelte';
 	import { Ticks } from '$lib/stores/ticks.svelte';
+	import { siteTitle } from '$lib/title';
 	import type { RecipeCard as Card, RecipeData, SiteIndex } from '$lib/types/recipe';
 	import ActionBar from './ActionBar.svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
@@ -26,10 +28,12 @@
 	import MethodPanel from './MethodPanel.svelte';
 	import PageHead from './PageHead.svelte';
 	import Planner from './Planner.svelte';
+	import PrintCard from './PrintCard.svelte';
 	import RecipeCard from './RecipeCard.svelte';
 	import RecipeHeader from './RecipeHeader.svelte';
 	import RecipeNotes from './RecipeNotes.svelte';
 	import ServingsBar from './ServingsBar.svelte';
+	import ShareSheet from './ShareSheet.svelte';
 
 	let { card, data, index }: { card: Card; data: RecipeData; index: SiteIndex } = $props();
 
@@ -49,6 +53,9 @@
 	let hydrated = $state(false);
 	let restored = $state(false);
 	let tab = $state<Tab>('ingredients');
+	let sheet: ShareSheet | undefined = $state();
+	let printingCard = $state(false);
+	let printQr = $state<QrMatrix | null>(null);
 
 	/** The step cook mode is on (1-based), or `null` while it is closed. `?cook=3` deep-links to a step. */
 	let cookStep = $state<number | null>(null);
@@ -64,6 +71,7 @@
 			? `${data.recipe.summary.slice(0, 152).trimEnd()}…`
 			: data.recipe.summary
 	);
+	const photo = $derived(photoOf(card.image));
 	const jsonLd = $derived(
 		toScriptJson(
 			buildRecipeJsonLd({
@@ -71,7 +79,11 @@
 				view: data.view,
 				section: data.section,
 				url: canonicalUrl(card.id),
-				image: cardUrl(card.id)
+				image: [
+					...(photo ? [photoUrl(card.id, photo.widths)] : []),
+					cardUrl(card.id, 'og'),
+					cardUrl(card.id, 'portrait')
+				]
 			})
 		)
 	);
@@ -188,14 +200,20 @@
 		);
 	}
 
-	async function share() {
-		const outcome = await shareLink(
-			card.title,
-			`${location.origin}${location.pathname}${model.search('')}`
-		);
-		if (outcome === 'copied') chrome.notify('Link copied');
-		if (outcome === 'failed')
-			chrome.notify('Could not share. Copy the address from the bar instead.', 5000);
+	const share = () => sheet?.show();
+
+	/** Prints the A5 index card: the page shows only the card while the browser's print dialog is open. */
+	async function printCard() {
+		try {
+			await loadCore();
+			printQr = qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null;
+		} catch {
+			printQr = null;
+		}
+		printingCard = true;
+		await tick();
+		window.addEventListener('afterprint', () => (printingCard = false), { once: true });
+		window.print();
 	}
 
 	function moveTab(event: KeyboardEvent) {
@@ -211,14 +229,18 @@
 	{description}
 	path={card.id}
 	type="article"
-	image={cardUrl(card.id)}
+	image={{
+		url: cardUrl(card.id),
+		...CARD_SIZES.og,
+		alt: `Recipe card for ${data.recipe.title}, from ${siteTitle}`
+	}}
 />
 <svelte:head>
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -- the JSON is escaped by toScriptJson -->
 	{@html jsonLdTag}
 </svelte:head>
 
-<article class:enhanced={hydrated}>
+<article class:enhanced={hydrated} class:printing-card={printingCard}>
 	<Breadcrumb {trail} />
 	<RecipeHeader {card} {model} {hydrated} {cookHref} onshare={share} onaddlist={addToList} />
 	<ServingsBar {model} />
@@ -285,6 +307,8 @@
 	{#if hydrated && cookStep !== null && CookMode}
 		<CookMode {model} {recipe} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
+	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} onprint={printCard} />{/if}
+	{#if printingCard}<PrintCard {card} {model} qr={printQr} />{/if}
 </article>
 
 <style>
@@ -399,6 +423,11 @@
 	@media print {
 		article {
 			gap: var(--space-3);
+		}
+
+		/* While the index card prints, nothing else on the page does. */
+		.printing-card > :global(:not(.index-card)) {
+			display: none;
 		}
 
 		.tabs,

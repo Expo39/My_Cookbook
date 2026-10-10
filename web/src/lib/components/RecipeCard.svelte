@@ -1,16 +1,22 @@
 <script lang="ts">
 	import { pageHref } from '$lib/links';
+	import { photoOf } from '$lib/photo';
 	import { formatMinutes } from '$lib/recipe/format';
 	import type { RecipeCard } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
+	import RecipePhoto from './RecipePhoto.svelte';
 
 	let { card, coverage }: { card: RecipeCard; coverage?: { matched: number; total: number } } =
 		$props();
 
 	const total = $derived(card.times.total);
+	const photo = $derived(photoOf(card.image));
 </script>
 
 <article>
+	{#if photo}
+		<RecipePhoto id={card.id} {photo} sizes="(min-width: 48rem) 20rem, 90vw" />
+	{/if}
 	<h3><a href={pageHref(card.id)}>{card.title}</a></h3>
 	{#if card.titleLocal}<p class="local">{card.titleLocal}</p>{/if}
 	{#if coverage}

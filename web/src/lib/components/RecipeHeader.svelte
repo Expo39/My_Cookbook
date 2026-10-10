@@ -1,9 +1,11 @@
 <script lang="ts">
+	import { photoOf } from '$lib/photo';
 	import { formatMinutes, servingsText } from '$lib/recipe/format';
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { favourites } from '$lib/stores/favourites.svelte';
 	import type { RecipeCard } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
+	import RecipePhoto from './RecipePhoto.svelte';
 
 	let {
 		card,
@@ -23,6 +25,7 @@
 
 	const recipe = $derived(model.data.recipe);
 	const times = $derived(card.times);
+	const photo = $derived(photoOf(card.image));
 	const saved = $derived(favourites.has(card.id));
 	const timings = $derived(
 		[
@@ -35,6 +38,9 @@
 </script>
 
 <header>
+	{#if photo}
+		<RecipePhoto id={card.id} {photo} sizes="(min-width: 72rem) 72rem, 100vw" hero />
+	{/if}
 	<div class="titles">
 		<h1>{recipe.title}</h1>
 		{#if recipe.titleLocal}<p class="local">{recipe.titleLocal}</p>{/if}
