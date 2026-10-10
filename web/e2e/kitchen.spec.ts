@@ -87,7 +87,7 @@ test.describe('cook mode', () => {
 		await page.goto(`${brulee}?cook=1`);
 		const side = cookDialog(page).getByLabel('All ingredients');
 		await expect(side).toBeVisible();
-		await expect(side).toContainText('heavy cream');
+		await expect(side).toContainText('double cream');
 		await page.setViewportSize({ width: 800, height: 900 });
 		await expect(side).toBeHidden();
 	});
@@ -223,7 +223,7 @@ test.describe('shopping list', () => {
 		await page.getByRole('button', { name: 'Add to shopping list' }).click();
 
 		await page.goto('shopping-list');
-		const cream = page.getByRole('listitem').filter({ hasText: 'heavy cream' });
+		const cream = page.getByRole('listitem').filter({ hasText: 'double cream' });
 		await expect(cream).toHaveCount(1);
 		await expect(cream).toContainText('1.2 l');
 		await expect(cream).toContainText('Crème Brûlée, Creamy Pancetta');
@@ -244,10 +244,10 @@ test.describe('shopping list', () => {
 		const copied = await page.evaluate(() => navigator.clipboard.readText());
 		expect(copied).toContain('Shopping list');
 		expect(copied).toContain('egg yolks');
-		expect(copied).not.toContain('heavy cream');
+		expect(copied).not.toContain('double cream');
 
 		await page.getByRole('button', { name: 'Clear ticked' }).click();
-		await expect(page.getByRole('listitem').filter({ hasText: 'heavy cream' })).toHaveCount(0);
+		await expect(page.getByRole('listitem').filter({ hasText: 'double cream' })).toHaveCount(0);
 		await expect(page.getByRole('listitem').filter({ hasText: 'egg yolks' })).toHaveCount(1);
 
 		await page.getByRole('button', { name: 'Clear all' }).click();
@@ -265,8 +265,8 @@ test.describe('shopping list', () => {
 		await page.getByRole('button', { name: 'Add to shopping list' }).click();
 		await expect(page.getByText('Shopping list updated for this recipe')).toBeVisible();
 		await page.goto('shopping-list');
-		await expect(page.getByRole('listitem').filter({ hasText: 'heavy cream' })).toHaveCount(1);
-		await expect(page.getByRole('listitem').filter({ hasText: 'heavy cream' })).toContainText(
+		await expect(page.getByRole('listitem').filter({ hasText: 'double cream' })).toHaveCount(1);
+		await expect(page.getByRole('listitem').filter({ hasText: 'double cream' })).toContainText(
 			'625 ml'
 		);
 	});
