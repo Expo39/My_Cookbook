@@ -80,3 +80,24 @@ test('every touch target on the phone view is at least 44 px', async ({ page }) 
 	});
 	expect(small).toEqual([]);
 });
+
+test('the header and breadcrumb stay on one line, and the servings panel starts folded', async ({
+	page
+}) => {
+	await page.goto(wellington);
+	await waitForCore(page);
+	const height = (selector: string) =>
+		page
+			.locator(selector)
+			.first()
+			.evaluate((element) => element.getBoundingClientRect().height);
+	expect(await height('nav[aria-label="Sections"] ul')).toBeLessThan(50);
+	expect(await height('nav[aria-label="Breadcrumb"] ol')).toBeLessThan(50);
+
+	const panel = page.getByRole('region', { name: 'Adjust the recipe' });
+	const stepper = panel.getByRole('group', { name: 'Servings' });
+	await expect(stepper).toBeHidden();
+	await expect(panel.locator('summary').first()).toContainText('5 servings');
+	await panel.getByText('Scale', { exact: true }).click();
+	await expect(stepper).toBeVisible();
+});

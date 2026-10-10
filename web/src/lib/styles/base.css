@@ -127,14 +127,15 @@ h4 {
 	color: var(--colour-primary);
 	font-family: var(--font-display);
 	font-weight: 800;
-	letter-spacing: -0.02em;
-	word-spacing: 0.1em;
+	letter-spacing: 0.005em;
 	line-height: 1.15;
 	text-wrap: balance;
 }
 
+/* Tight tracking suits Bitter only at display sizes; smaller text needs its word spaces. */
 h1 {
 	font-size: var(--text-3xl);
+	letter-spacing: -0.02em;
 }
 
 h2 {

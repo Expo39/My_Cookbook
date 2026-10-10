@@ -43,8 +43,7 @@
 >
 	<Icon name="timer" size={14} />
 	{#if endAt === null}{text}{:else if finished}Done{:else}{clock(remaining)}{/if}
-</button>
-<span class="sr-only" role="status">{finished ? `The ${subject} has finished.` : ''}</span>
+</button><span class="sr-only" role="status">{finished ? `The ${subject} has finished.` : ''}</span>
 
 <style>
 	.timer {

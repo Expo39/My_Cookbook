@@ -67,6 +67,7 @@
 
 	.grid {
 		display: grid;
+		align-items: start;
 		grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
 		gap: var(--space-4);
 	}

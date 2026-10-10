@@ -16,7 +16,8 @@
 	{#if coverage}
 		<p class="coverage">
 			<progress value={coverage.matched} max={coverage.total}></progress>
-			<span class="num">{coverage.matched} of {coverage.total}</span> ingredients
+			<span class="num">{coverage.matched} of {coverage.total}</span>
+			{coverage.total === 1 ? 'ingredient' : 'ingredients'}
 		</p>
 	{/if}
 	<div class="meta">

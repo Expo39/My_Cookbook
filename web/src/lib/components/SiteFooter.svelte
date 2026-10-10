@@ -28,8 +28,7 @@
 		font-family: var(--font-display);
 		font-size: var(--text-l);
 		font-weight: 800;
-		letter-spacing: -0.02em;
-		word-spacing: 0.1em;
+		letter-spacing: 0.005em;
 		line-height: 1.35;
 		text-wrap: balance;
 	}

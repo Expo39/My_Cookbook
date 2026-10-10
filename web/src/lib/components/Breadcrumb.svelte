@@ -20,26 +20,43 @@
 </nav>
 
 <style>
+	nav {
+		min-inline-size: 0;
+	}
+
 	ol {
 		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-1) var(--space-2);
+		gap: var(--space-2);
 		color: var(--colour-muted);
 		font-size: var(--text-s);
 	}
 
+	/* One line: the crumbs share the width and shorten with an ellipsis, Home and the chevrons never do. */
 	li {
-		display: inline-flex;
+		display: flex;
+		flex: 0 1 auto;
 		align-items: center;
 		gap: var(--space-2);
+		min-inline-size: 0;
 	}
 
-	a {
-		display: inline-flex;
-		align-items: center;
-		min-block-size: var(--target);
+	li:first-child {
+		flex: none;
+	}
+
+	li :global(svg) {
+		flex: none;
+	}
+
+	a,
+	span {
+		display: block;
 		min-inline-size: var(--target);
-		justify-content: center;
+		overflow: hidden;
+		line-height: var(--target);
+		text-align: center;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
 	span {

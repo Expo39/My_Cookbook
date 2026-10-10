@@ -71,8 +71,7 @@
 		font-family: var(--font-display);
 		font-size: var(--text-l);
 		font-weight: 800;
-		letter-spacing: -0.02em;
-		word-spacing: 0.1em;
+		letter-spacing: 0.005em;
 		text-decoration: none;
 	}
 
@@ -109,10 +108,23 @@
 		inline-size: 100%;
 	}
 
+	/* One row that scrolls sideways on narrow screens, with a fade where it runs on. */
 	ul {
 		display: flex;
-		flex-wrap: wrap;
 		column-gap: var(--space-4);
+		overflow-x: auto;
+		scroll-snap-type: x proximity;
+		scrollbar-width: none;
+		mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent);
+	}
+
+	ul::-webkit-scrollbar {
+		display: none;
+	}
+
+	li {
+		flex: none;
+		scroll-snap-align: start;
 	}
 
 	nav a {
@@ -149,6 +161,10 @@
 			flex: 1;
 			order: 0;
 			inline-size: auto;
+		}
+
+		ul {
+			mask-image: none;
 		}
 
 		.desktop-search {

@@ -58,6 +58,16 @@
 		panDepth = String(pan?.depth ?? '');
 	});
 
+	// On a phone the bottom bar is the main control, so this panel starts folded to one summary row.
+	let open = $state(true);
+	$effect(() => {
+		const phone = matchMedia('(max-width: 47.99rem)');
+		const sync = () => (open = !phone.matches);
+		sync();
+		phone.addEventListener('change', sync);
+		return () => phone.removeEventListener('change', sync);
+	});
+
 	function chooseIngredient(key: string) {
 		haveKey = key;
 		haveUnit = choices.find((c) => c.key === key)?.unit ?? '';
@@ -94,130 +104,142 @@
 
 <section aria-labelledby="{id}-title">
 	<h2 id="{id}-title" class="sr-only">Adjust the recipe</h2>
-	<fieldset class="controls" disabled={!model.ready}>
-		<div class="row">
-			<div class="field">
-				<span class="label">Servings</span>
-				<ServingsStepper
-					label="Servings"
-					value={servingsText(model.view.servings, recipe.servingsNoun)}
-					canDecrease={model.view.servings > 1}
-					onstep={(direction) => model.step(direction)}
+	<details class="panel" bind:open>
+		<summary class="fold">
+			<span class="num">{servingsText(model.view.servings, recipe.servingsNoun)}</span>
+			<span aria-hidden="true">·</span>
+			<span>{model.effectiveSystem === 'us' ? 'US' : 'Metric'}</span>
+			<span class="scale-label">Scale<Icon name="chevronDown" size={18} /></span>
+		</summary>
+		<fieldset class="controls" disabled={!model.ready}>
+			<div class="row">
+				<div class="field">
+					<span class="label">Servings</span>
+					<ServingsStepper
+						label="Servings"
+						value={servingsText(model.view.servings, recipe.servingsNoun)}
+						canDecrease={model.view.servings > 1}
+						onstep={(direction) => model.step(direction)}
+					/>
+				</div>
+				<Segmented
+					legend="Quick scale"
+					name="{id}-multiplier"
+					options={multipliers}
+					value={activeMultiplier}
+					onchange={(value) => model.setMultiplier(Number(value))}
+				/>
+				<Segmented
+					legend="Units"
+					name="{id}-units"
+					options={[
+						{ value: 'metric', label: 'Metric' },
+						{ value: 'us', label: 'US' }
+					]}
+					value={model.effectiveSystem}
+					onchange={(value) => model.setSystem(value as UnitSystem)}
 				/>
 			</div>
-			<Segmented
-				legend="Quick scale"
-				name="{id}-multiplier"
-				options={multipliers}
-				value={activeMultiplier}
-				onchange={(value) => model.setMultiplier(Number(value))}
-			/>
-			<Segmented
-				legend="Units"
-				name="{id}-units"
-				options={[
-					{ value: 'metric', label: 'Metric' },
-					{ value: 'us', label: 'US' }
-				]}
-				value={model.effectiveSystem}
-				onchange={(value) => model.setSystem(value as UnitSystem)}
-			/>
-		</div>
 
-		{#each recipe.variants ?? [] as variant (variant.key)}
-			<Segmented
-				legend={variant.label}
-				name="{id}-variant-{variant.key}"
-				options={variant.options.map((option) => ({ value: option.key, label: option.label }))}
-				value={model.chosenOption(variant.key)}
-				onchange={(value) => model.setVariant(variant.key, value)}
-			/>
-		{/each}
+			{#each recipe.variants ?? [] as variant (variant.key)}
+				<Segmented
+					legend={variant.label}
+					name="{id}-variant-{variant.key}"
+					options={variant.options.map((option) => ({ value: option.key, label: option.label }))}
+					value={model.chosenOption(variant.key)}
+					onchange={(value) => model.setVariant(variant.key, value)}
+				/>
+			{/each}
 
-		{#if choices.length || recipe.pan}
-			<details>
-				<summary><Icon name="chevronDown" size={18} />Scale another way</summary>
-				<div class="more">
-					{#if choices.length}
-						<form onsubmit={applyHave} novalidate>
-							<h3 class="label">I have…</h3>
-							<div class="inputs">
-								<label>
-									<span>Ingredient</span>
-									<select
-										value={haveKey}
-										onchange={(event) => chooseIngredient(event.currentTarget.value)}
-									>
-										{#each choices as choice (choice.key)}
-											<option value={choice.key}>{choice.label}</option>
-										{/each}
-									</select>
-								</label>
-								<label>
-									<span>Amount</span>
-									<input
-										class="num"
-										type="text"
-										inputmode="decimal"
-										bind:value={haveQty}
-										aria-invalid={haveError !== ''}
-										aria-describedby={haveError ? `${id}-have-error` : undefined}
-									/>
-								</label>
-								{#if haveUnits.length}
+			{#if choices.length || recipe.pan}
+				<details class="more-details">
+					<summary><Icon name="chevronDown" size={18} />Scale another way</summary>
+					<div class="more">
+						{#if choices.length}
+							<form onsubmit={applyHave} novalidate>
+								<h3 class="label">I have…</h3>
+								<div class="inputs">
 									<label>
-										<span>Unit</span>
-										<select bind:value={haveUnit}>
-											{#each haveUnits as unit (unit)}
-												<option value={unit}>{unitLabel(unit)}</option>
+										<span>Ingredient</span>
+										<select
+											value={haveKey}
+											onchange={(event) => chooseIngredient(event.currentTarget.value)}
+										>
+											{#each choices as choice (choice.key)}
+												<option value={choice.key}>{choice.label}</option>
 											{/each}
 										</select>
 									</label>
-								{/if}
-								<button type="submit">Scale to this</button>
-							</div>
-							{#if haveError}<p class="error" id="{id}-have-error">{haveError}</p>{/if}
-						</form>
-					{/if}
-
-					{#if recipe.pan}
-						<form onsubmit={applyPan} novalidate>
-							<h3 class="label">My tin</h3>
-							<p class="help">{panDescription}</p>
-							<div class="inputs">
-								<label>
-									<span>Shape</span>
-									<select bind:value={panShape}>
-										<option value="round">Round</option>
-										<option value="square">Square</option>
-										<option value="rect">Rectangular</option>
-									</select>
-								</label>
-								<label>
-									<span
-										>{panShape === 'round' ? 'Diameter' : panShape === 'square' ? 'Side' : 'Width'} (cm)</span
-									>
-									<input class="num" type="text" inputmode="decimal" bind:value={panWidth} />
-								</label>
-								{#if panShape === 'rect'}
 									<label>
-										<span>Length (cm)</span>
-										<input class="num" type="text" inputmode="decimal" bind:value={panLength} />
+										<span>Amount</span>
+										<input
+											class="num"
+											type="text"
+											inputmode="decimal"
+											bind:value={haveQty}
+											aria-invalid={haveError !== ''}
+											aria-describedby={haveError ? `${id}-have-error` : undefined}
+										/>
 									</label>
-								{/if}
-								<label>
-									<span>Depth (cm, optional)</span>
-									<input class="num" type="text" inputmode="decimal" bind:value={panDepth} />
-								</label>
-								<button type="submit">Scale to this tin</button>
-							</div>
-							{#if panError}<p class="error">{panError}</p>{/if}
-						</form>
-					{/if}
-				</div>
-			</details>
-		{/if}
-	</fieldset>
+									{#if haveUnits.length}
+										<label>
+											<span>Unit</span>
+											<select bind:value={haveUnit}>
+												{#each haveUnits as unit (unit)}
+													<option value={unit}>{unitLabel(unit)}</option>
+												{/each}
+											</select>
+										</label>
+									{/if}
+									<button type="submit">Scale to this</button>
+								</div>
+								{#if haveError}<p class="error" id="{id}-have-error">{haveError}</p>{/if}
+							</form>
+						{/if}
+
+						{#if recipe.pan}
+							<form onsubmit={applyPan} novalidate>
+								<h3 class="label">My tin</h3>
+								<p class="help">{panDescription}</p>
+								<div class="inputs">
+									<label>
+										<span>Shape</span>
+										<select bind:value={panShape}>
+											<option value="round">Round</option>
+											<option value="square">Square</option>
+											<option value="rect">Rectangular</option>
+										</select>
+									</label>
+									<label>
+										<span
+											>{panShape === 'round'
+												? 'Diameter'
+												: panShape === 'square'
+													? 'Side'
+													: 'Width'} (cm)</span
+										>
+										<input class="num" type="text" inputmode="decimal" bind:value={panWidth} />
+									</label>
+									{#if panShape === 'rect'}
+										<label>
+											<span>Length (cm)</span>
+											<input class="num" type="text" inputmode="decimal" bind:value={panLength} />
+										</label>
+									{/if}
+									<label>
+										<span>Depth (cm, optional)</span>
+										<input class="num" type="text" inputmode="decimal" bind:value={panDepth} />
+									</label>
+									<button type="submit">Scale to this tin</button>
+								</div>
+								{#if panError}<p class="error">{panError}</p>{/if}
+							</form>
+						{/if}
+					</div>
+				</details>
+			{/if}
+		</fieldset>
+	</details>
 
 	{#if model.scaled}
 		<p class="scaled">
@@ -245,6 +267,30 @@
 		border: 1px solid var(--colour-line);
 		border-radius: var(--radius-m);
 		background: var(--colour-tint);
+	}
+
+	.fold {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+		color: var(--colour-primary);
+		font-weight: 700;
+	}
+
+	.scale-label {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		margin-inline-start: auto;
+	}
+
+	.panel[open] > .fold {
+		margin-block-end: var(--space-3);
+	}
+
+	.panel[open] .scale-label :global(svg) {
+		transform: rotate(180deg);
 	}
 
 	.controls {
@@ -277,7 +323,7 @@
 		color: var(--colour-muted);
 	}
 
-	summary {
+	.more-details > summary {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-2);
@@ -286,7 +332,7 @@
 		font-weight: 700;
 	}
 
-	details[open] summary :global(svg) {
+	.more-details[open] > summary :global(svg) {
 		transform: rotate(180deg);
 	}
 
@@ -392,6 +438,12 @@
 	.notes :global(svg) {
 		flex: none;
 		margin-block-start: 0.15rem;
+	}
+
+	@media (min-width: 48rem) {
+		.fold {
+			display: none;
+		}
 	}
 
 	@media print {

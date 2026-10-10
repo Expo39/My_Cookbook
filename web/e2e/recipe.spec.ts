@@ -147,3 +147,19 @@ test('the recipe page is structured data for search engines', async ({ page }) =
 	expect(parsed.recipeIngredient).toContain('500 ml heavy cream');
 	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /creme-brulee$/);
 });
+
+test('step text joins exactly as written around timers, and a redundant alt is not shown', async ({
+	page
+}) => {
+	await page.goto('main-courses/beef-steak/beef-wellington');
+	await expect(method(page)).toContainText('Chill for 15 min.');
+	await expect(method(page)).toContainText('Rest for 15–20 min. Slice');
+	await expect(ingredients(page)).toContainText('1 kg chateaubriand beef fillet');
+	await expect(ingredients(page)).not.toContainText('(1 kg)');
+});
+
+test('counts use the singular when there is one', async ({ page }) => {
+	await page.goto('./');
+	await expect(page.getByText('1 recipe', { exact: true }).first()).toBeVisible();
+	await expect(page.getByText('1 recipes')).toHaveCount(0);
+});
