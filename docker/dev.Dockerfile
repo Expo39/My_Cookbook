@@ -36,6 +36,10 @@ RUN corepack enable && corepack prepare "pnpm@${PNPM_VERSION}" --activate \
 RUN curl -fsSL "https://github.com/WebAssembly/binaryen/releases/download/version_${BINARYEN_VERSION}/binaryen-version_${BINARYEN_VERSION}-x86_64-linux.tar.gz" \
     | tar -xz --strip-components=2 -C /usr/local/bin "binaryen-version_${BINARYEN_VERSION}/bin/wasm-opt"
 
+ARG WORKER_BUILD_VERSION=0.8.6
+RUN cargo install worker-build --version "${WORKER_BUILD_VERSION}" --locked --root /usr/local \
+ && rm -rf /usr/local/cargo/registry /usr/local/cargo/git
+
 RUN groupadd --gid "${HOST_GID}" dev \
  && useradd --uid "${HOST_UID}" --gid "${HOST_GID}" --create-home --shell /bin/bash dev \
  && mkdir -p /home/dev/.cargo/registry /home/dev/.cargo/git /home/dev/.local/share/pnpm /work/target /work/web/node_modules \

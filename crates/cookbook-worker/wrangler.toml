@@ -1,0 +1,19 @@
+name = "sapori-ai"
+main = "build/worker/shim.mjs"
+compatibility_date = "2026-10-01"
+
+[build]
+command = "worker-build --release"
+
+[vars]
+ALLOWED_ORIGINS = "https://expo39.github.io,http://localhost:5173"
+GEMINI_MODEL = "gemini-3.8-flash"
+RATE_LIMIT_CHAT = "30"
+RATE_LIMIT_IMPORT = "5"
+
+# No id is given: `wrangler deploy` creates and links the namespace on the first deploy.
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+
+# Secrets are never written here. Set them with `wrangler secret put`:
+#   GEMINI_API_KEY, ADMIN_IMPORT_SECRET
