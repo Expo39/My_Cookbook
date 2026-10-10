@@ -1,7 +1,10 @@
 {
   "title": "One-Pot Pasta with Fresh Tomatoes",
-  "summary": "This rustic method of cooking pasta directly in tomato sauce creates an incredibly creamy dish where pasta absorbs all the flavours.",
+  "summary": "The pasta cooks straight in the tomato sauce, a rustic method that gives a creamy dish and lets the pasta absorb all the flavour.",
   "servings": 4,
+  "times": {
+    "cook": 25
+  },
   "tags": [
     "Italian Classics"
   ],
@@ -15,7 +18,7 @@
             "unit": "g"
           },
           "item": "short pasta",
-          "note": "penne, rigatoni"
+          "note": "such as penne or rigatoni"
         },
         {
           "amount": {
@@ -56,7 +59,7 @@
           "scale": "toTaste"
         },
         {
-          "item": "Chili flakes",
+          "item": "Chilli flakes",
           "optional": true
         },
         {
@@ -75,25 +78,25 @@
   ],
   "steps": [
     {
-      "text": "Heat olive oil in large, wide pan over medium heat. Add sliced garlic and chili (if using). Cook 1 minute until fragrant - do not brown."
+      "text": "Heat the olive oil in a large, wide pan over a medium heat. Add the sliced garlic, and the chilli flakes if using. Cook for {timer:1}, until fragrant; do not let the garlic brown."
     },
     {
-      "text": "Add polpa pelati and crush any larger pieces with wooden spoon. Season with salt, add torn basil. Simmer 5 minutes to develop flavour."
+      "text": "Add the polpa pelati and crush any larger pieces with a wooden spoon. Season with salt and add some torn basil. Simmer for {timer:5} to develop the flavour."
     },
     {
-      "text": "Add raw pasta directly to sauce, stirring to coat each piece. Add water or stock to just barely cover pasta. Liquid should be level with pasta."
+      "text": "Add the raw pasta straight to the sauce, stirring to coat each piece. Add just enough water or stock to cover the pasta; the liquid should be level with it."
     },
     {
-      "text": "Cook at steady simmer, stirring frequently to prevent sticking and release starch. Keep adding splashes of water when dry. Cook 12-15 minutes until al dente."
+      "text": "Cook at a steady simmer, stirring often to stop it sticking and to release the starch. Add a splash of water whenever it looks dry. Cook for {timer:12-15}, until al dente."
     },
     {
-      "text": "When pasta is al dente and sauce clings nicely, remove from heat. Stir in more fresh basil and drizzle of olive oil."
+      "text": "When the pasta is al dente and the sauce clings nicely, take the pan off the heat. Stir in more fresh basil and a drizzle of olive oil."
     },
     {
-      "text": "Serve immediately with freshly grated Parmesan."
+      "text": "Serve straight away with freshly grated Parmesan."
     }
   ],
   "tips": [
-    "Success depends on frequent stirring and liquid adjustment. Use a wide pan for even cooking. Slice garlic rather than mince - slices soften during cooking, giving milder, sweeter flavour. The pasta's released starch creates the creamy texture."
+    "Success depends on frequent stirring and adjusting the liquid. Use a wide pan so the pasta cooks evenly. Slice the garlic rather than mince it: the slices soften as they cook and give a milder, sweeter flavour. The starch the pasta releases is what makes the dish creamy."
   ]
 }

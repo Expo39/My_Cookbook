@@ -1,7 +1,11 @@
 {
   "title": "Korean Ground Beef Bowl",
-  "summary": "A quick, flavourful weeknight dinner ready in 25 minutes. The sesame oil and ginger create an authentic Korean flavour profile.",
+  "summary": "A quick, flavourful weeknight dinner, ready in 25 minutes. Sesame oil and ginger give it an authentic Korean flavour.",
   "servings": 3,
+  "times": {
+    "prep": 10,
+    "cook": 15
+  },
   "tags": [
     "Asian-Inspired"
   ],
@@ -14,8 +18,8 @@
             "qty": 340,
             "unit": "g"
           },
-          "item": "ground beef",
-          "note": "80/20"
+          "item": "beef mince",
+          "note": "20% fat (80/20)"
         },
         {
           "amount": {
@@ -64,7 +68,7 @@
             "qty": 20,
             "unit": "g"
           },
-          "item": "green onions",
+          "item": "spring onions",
           "note": "2 stalks, sliced"
         },
         {
@@ -79,33 +83,34 @@
           "item": "Salt and pepper"
         },
         {
-          "item": "vegetables, fried eggs",
+          "item": "Vegetables and fried eggs",
           "optional": true
         },
         {
-          "item": "Garnish: sesame seeds"
+          "item": "Sesame seeds",
+          "note": "to garnish"
         }
       ]
     }
   ],
   "steps": [
     {
-      "text": "Ensure rice is cooked and ready (80-100g raw rice yields 240g cooked)."
+      "text": "Have the rice cooked and ready: 80–100 g of raw rice gives 240 g cooked."
     },
     {
-      "text": "Place large skillet over medium-high heat. Add ground beef, break apart with spatula. Brown until no longer pink (5-7 minutes). Drain excess fat if preferred."
+      "text": "Put a large frying pan over a medium-high heat. Add the beef mince and break it up with a spatula. Brown until no longer pink, {timer:5-7}. Drain off the excess fat if you prefer."
     },
     {
-      "text": "Stir in minced garlic and ginger. Cook 1-2 minutes until fragrant."
+      "text": "Stir in the garlic and ginger and cook for {timer:1-2}, until fragrant."
     },
     {
-      "text": "Pour in soy sauce, sesame oil, and green onions. Stir well, simmer 2-3 minutes to meld flavours."
+      "text": "Pour in the soy sauce and sesame oil and add the spring onions. Stir well and simmer for {timer:2-3} to let the flavours meld."
     },
     {
-      "text": "Divide rice into bowls (80g each). Spoon beef mixture over rice. Add optional vegetables or fried egg. Garnish with sesame seeds or extra green onions."
+      "text": "Divide the rice between bowls, 80 g each, and spoon the beef over. Add vegetables or a fried egg, if you like. Garnish with sesame seeds or extra spring onions."
     }
   ],
   "tips": [
-    "For vegetables, my favourite in this dish are carrots and bell peppers, both cut into matchsticks (julienne). Toss into skillet with beef for last 2 minutes if you prefer them soft, or pile raw on top for crunch. For tangy Korean flavour, quick-pickle vegetables in rice vinegar, sugar, and salt for 10 minutes or use picked vegetables."
+    "For vegetables, my favourites here are carrots and peppers, both cut into matchsticks (julienne). Toss them into the pan with the beef for the last 2 minutes if you like them soft, or pile them on raw for crunch. For a tangy Korean flavour, quick-pickle vegetables in rice vinegar, sugar and salt for 10 minutes, or use pickled vegetables."
   ]
 }

@@ -1,7 +1,11 @@
 {
   "title": "Toni's Porchetta",
-  "summary": "Italian rolled and stuffed pork belly with crispy crackling. The rich filling combines pork mince, chicken liver and herbs for intense flavour. Perfect for special occasions or Sunday roast.",
+  "summary": "Pork belly rolled around a rich filling of pork mince, chicken livers and herbs, then roasted to crisp crackling. For a special occasion or a Sunday roast.",
   "servings": 6,
+  "times": {
+    "cook": 100,
+    "rest": 15
+  },
   "order": 2,
   "ingredientGroups": [
     {
@@ -60,7 +64,7 @@
           "amount": {
             "qty": 4
           },
-          "item": "cloves garlic",
+          "item": "garlic cloves",
           "note": "minced",
           "scale": "discrete"
         },
@@ -95,47 +99,48 @@
           "item": "Salt and black pepper"
         },
         {
-          "item": "Kitchen string for tying"
+          "item": "Kitchen string",
+          "note": "for tying"
         }
       ]
     }
   ],
   "steps": [
     {
-      "text": "Heat olive oil in frying pan. Cook onions and garlic until soft (5 minutes)."
+      "text": "Heat the olive oil in a frying pan and cook the onions and garlic until soft, about {timer:5}."
     },
     {
-      "text": "Add pork mince, cook until browned. Add chicken livers, cook for 3-4 minutes."
+      "text": "Add the pork mince and cook until browned. Add the chicken livers and cook for {timer:3-4}."
     },
     {
-      "text": "Stir in pine nuts, lemon zest, sage, rosemary, thyme. Season well with salt and pepper. Remove from heat, cool completely."
+      "text": "Stir in the pine nuts, lemon zest, sage, rosemary and thyme, and season well with salt and pepper. Take off the heat and leave to cool completely."
     },
     {
-      "text": "Lay pork belly skin-side down on work surface. Score the meat side lightly with knife."
+      "text": "Lay the pork belly skin-side down on the work surface and lightly score the meat side with a knife."
     },
     {
-      "text": "Spread cooled filling evenly over meat side, leaving 2cm border around edges."
+      "text": "Spread the cooled filling evenly over the meat, leaving a 2 cm border all round."
     },
     {
-      "text": "Roll tightly from one long side, with skin on outside. Tie securely with kitchen string at 3cm intervals."
+      "text": "Roll up tightly from one long side, with the skin on the outside. Tie securely with kitchen string at 3 cm intervals."
     },
     {
-      "text": "Pat skin very dry with kitchen paper. Rub skin generously with salt and olive oil. Slash skin with sharp knife in crisscross pattern."
+      "text": "Pat the skin very dry with kitchen paper and rub it generously with salt and olive oil. Slash the skin in a criss-cross pattern with a sharp knife."
     },
     {
-      "text": "Place on roasting rack, refrigerate uncovered for 2-4 hours (or overnight) to dry skin further."
+      "text": "Set on a roasting rack and refrigerate, uncovered, for 2–4 hours or overnight to dry the skin further."
     },
     {
-      "text": "Preheat oven to 250°C. Roast porchetta for 30 minutes until skin starts to crackle."
+      "text": "Preheat the oven to {temp:250}. Roast the porchetta for {timer:30}, until the skin starts to crackle."
     },
     {
-      "text": "Reduce heat to 120°C. Continue roasting for 1 hour until cooked through (internal temp 70°C)."
+      "text": "Reduce the oven to {temp:120} and roast for another {timer:60}, until cooked through (70 °C inside)."
     },
     {
-      "text": "Rest for 15 minutes. Remove string, slice into thick rounds. Serve hot."
+      "text": "Rest for {timer:15}. Remove the string, slice into thick rounds and serve hot."
     }
   ],
   "tips": [
-    "The secret to perfect crackling is dry skin and high initial heat. Pat skin completely dry before scoring and salting. The overnight refrigeration step is optional but produces superior crackling. Tighten the rolled belly properly and ensure kitchen string is secure at regular intervals. The filling can be made a day ahead. Porchetta is traditionally served at room temperature in Italy, making it perfect for gatherings."
+    "The secret to good crackling is dry skin and a high initial heat. Pat the skin completely dry before scoring and salting. The overnight chill is optional but gives better crackling. Roll the belly tightly and make sure the string is secure at regular intervals. You can make the filling a day ahead. In Italy, porchetta is traditionally served at room temperature, which makes it ideal for gatherings."
   ]
 }

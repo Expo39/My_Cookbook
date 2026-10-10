@@ -1,7 +1,10 @@
 {
   "title": "Braised Beef Short Ribs",
-  "summary": "Melt-in-your-mouth beef short ribs slow-cooked in wine and stock. The long braise creates incredibly tender meat and rich, concentrated gravy. Perfect served with polenta or mashed potatoes.",
+  "summary": "Beef short ribs slow-cooked in wine and stock until they melt in the mouth, with a rich, concentrated gravy. Serve with polenta or mashed potatoes.",
   "servings": 4,
+  "times": {
+    "cook": 300
+  },
   "order": 4,
   "ingredientGroups": [
     {
@@ -12,7 +15,7 @@
             "unit": "g"
           },
           "item": "beef short ribs",
-          "note": "400g per person"
+          "note": "400 g per person"
         },
         {
           "amount": {
@@ -42,7 +45,7 @@
           "amount": {
             "qty": 6
           },
-          "item": "cloves garlic",
+          "item": "garlic cloves",
           "note": "smashed",
           "scale": "discrete"
         },
@@ -60,7 +63,7 @@
             "unit": "ml"
           },
           "item": "red wine",
-          "note": "can use 500ml-1000ml"
+          "note": "anywhere from 500 to 1000 ml works"
         },
         {
           "amount": {
@@ -92,7 +95,8 @@
           "item": "Salt and black pepper"
         },
         {
-          "item": "polenta or mashed potatoes, to serve",
+          "item": "Polenta or mashed potatoes",
+          "note": "to serve",
           "optional": true
         }
       ]
@@ -100,43 +104,43 @@
   ],
   "steps": [
     {
-      "text": "Preheat oven to 160°C (140°C fan). Pat short ribs dry, season generously with salt and pepper."
+      "text": "Preheat the oven to {temp:160/140}. Pat the short ribs dry and season generously with salt and pepper."
     },
     {
-      "text": "Heat olive oil in large, heavy-bottomed pan over high heat. Sear short ribs on all sides until deeply browned (3-4 minutes per side). Remove ribs, set aside."
+      "text": "Heat the olive oil in a large, heavy-based pan over a high heat. Sear the short ribs on all sides until deeply browned, {timer:3-4} per side. Lift out the ribs and set aside."
     },
     {
-      "text": "In same pan over medium heat, add onions, carrots, celery, garlic. Sauté until vegetables soften and start to colour (8-10 minutes)."
+      "text": "Lower the heat to medium and add the onions, carrots, celery and garlic to the same pan. Sauté for {timer:8-10}, until the vegetables soften and start to colour."
     },
     {
-      "text": "Add tomato paste, stir and cook for 2-3 minutes until paste darkens."
+      "text": "Add the tomato paste and cook, stirring, for {timer:2-3}, until it darkens."
     },
     {
-      "text": "Pour in red wine, scraping up brown bits from bottom of pan. Let wine reduce by half (5-7 minutes)."
+      "text": "Pour in the red wine, scraping up the browned bits from the bottom of the pan. Let it reduce by half, {timer:5-7}."
     },
     {
-      "text": "Transfer wine-vegetable mixture to large oven-proof dish or Dutch oven. Nestle short ribs into vegetables."
+      "text": "Transfer the wine and vegetables to a large ovenproof dish or casserole. Nestle the short ribs into the vegetables."
     },
     {
-      "text": "Add beef stock until ribs are completely submerged. Add bay leaves and thyme."
+      "text": "Add beef stock until the ribs are completely submerged, then add the bay leaves and thyme."
     },
     {
-      "text": "Cover tightly with lid or aluminium foil. Braise in oven for 4 hours until meat is fall-off-the-bone tender."
+      "text": "Cover tightly with a lid or foil and braise in the oven for {timer:240} (4 hours), until the meat is falling off the bone."
     },
     {
-      "text": "Remove ribs carefully (they will be very tender), keep warm."
+      "text": "Lift the ribs out carefully, as they will be very tender, and keep them warm."
     },
     {
-      "text": "Strain braising liquid through fine sieve, pressing vegetables to extract all flavour. Discard solids."
+      "text": "Strain the braising liquid through a fine sieve, pressing the vegetables to extract all the flavour. Discard the solids."
     },
     {
-      "text": "Pour liquid into saucepan, bring to boil. Reduce until thickened to gravy consistency (15-20 minutes). Season to taste."
+      "text": "Pour the liquid into a saucepan and bring to the boil. Reduce for {timer:15-20}, until thickened to a gravy. Season to taste."
     },
     {
-      "text": "Serve short ribs with reduced gravy, polenta or mashed potatoes, and grilled broccoli."
+      "text": "Serve the short ribs with the reduced gravy, polenta or mashed potatoes, and grilled broccoli."
     }
   ],
   "tips": [
-    "The key to tender short ribs is low, slow cooking. Do not rush the braise. The meat should be so tender it falls apart with a fork. Searing the ribs deeply adds immense flavour to the final sauce. The dish is even better made a day ahead - refrigerate overnight, skim fat from surface, then reheat gently. The concentrated gravy is rich and glossy. For authentic Italian presentation, serve with soft polenta and gremolata garnish (lemon zest, parsley, garlic)."
+    "The key to tender short ribs is low, slow cooking, so do not rush the braise. The meat should be tender enough to fall apart under a fork. Searing the ribs well adds a great deal of flavour to the sauce. The dish is even better made a day ahead: refrigerate it overnight, skim the fat from the surface, then reheat gently. The reduced gravy should be rich and glossy. For a traditional Italian finish, serve with soft polenta and a gremolata of lemon zest, parsley and garlic."
   ]
 }

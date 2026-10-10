@@ -1,7 +1,10 @@
 {
   "title": "Baked Gnocchi with Tomato & Mozzarella",
-  "summary": "Perfectly non-watery baked gnocchi! The secret is using crushed tomatoes and simmering the sauce to concentrate flavours before adding the gnocchi.",
+  "summary": "Baked gnocchi that never turns watery. The secret is crushed tomatoes and a long simmer to concentrate the sauce before the gnocchi go in.",
   "servings": 4,
+  "times": {
+    "cook": 45
+  },
   "tags": [
     "Italian Classics"
   ],
@@ -15,9 +18,10 @@
             "unit": "g"
           },
           "item": "potato gnocchi",
-          "note": "1 package"
+          "note": "1 packet"
         },
         {
+          "key": "oil",
           "food": "olive-oil",
           "amount": {
             "qty": 2,
@@ -40,12 +44,12 @@
           "amount": {
             "qty": 2
           },
-          "item": "cloves garlic",
+          "item": "garlic cloves",
           "note": "minced",
           "scale": "discrete"
         },
         {
-          "item": "Pinch red pepper flakes",
+          "item": "Pinch of chilli flakes",
           "optional": true
         },
         {
@@ -54,7 +58,7 @@
             "unit": "g"
           },
           "item": "crushed tomatoes",
-          "note": "one 28oz tin"
+          "note": "one 28 oz tin"
         },
         {
           "amount": {
@@ -115,37 +119,37 @@
   ],
   "steps": [
     {
-      "text": "Heat 30ml olive oil in a large oven-safe skillet over medium heat. Sauté onion for 1 minute."
+      "text": "Heat {@oil} in a large ovenproof frying pan over a medium heat. Add the onion and sauté for {timer:1}."
     },
     {
-      "text": "Add garlic and red pepper flakes (if using). Cook for 4 more minutes until soft and fragrant."
+      "text": "Add the garlic, and the chilli flakes if using. Cook for another {timer:4}, until soft and fragrant."
     },
     {
-      "text": "Stir in crushed tomatoes, oregano, sugar, salt and pepper. Bring to a boil."
+      "text": "Stir in the crushed tomatoes, oregano and sugar, and season with salt and pepper. Bring to the boil."
     },
     {
-      "text": "Reduce heat to low. Simmer partially covered for 30 minutes, stirring occasionally. This thickens the sauce and prevents wateriness."
+      "text": "Reduce the heat to low and simmer, partially covered, for {timer:30|sauce}, stirring occasionally. This thickens the sauce and stops it turning watery."
     },
     {
-      "text": "Meanwhile, bring a large pot of salted water to boil. Add gnocchi. As soon as they float (2-3 minutes), drain immediately."
+      "text": "Meanwhile, bring a large pan of salted water to the boil and add the gnocchi. Drain them as soon as they float, after {timer:2-3|gnocchi}."
     },
     {
-      "text": "Stir fresh parsley and basil into the thickened sauce."
+      "text": "Stir the parsley and basil into the thickened sauce."
     },
     {
-      "text": "Add drained gnocchi to the sauce, stir gently to coat."
+      "text": "Add the drained gnocchi to the sauce and stir gently to coat."
     },
     {
-      "text": "Top with torn mozzarella and grated Parmesan."
+      "text": "Top with the torn mozzarella and grated Parmesan."
     },
     {
-      "text": "Place skillet under grill (broiler) for 5-7 minutes until cheese is golden, bubbly and slightly crispy on top."
+      "text": "Put the pan under the grill for {timer:5-7}, until the cheese is golden, bubbling and slightly crisp on top."
     },
     {
-      "text": "Let rest 2-3 minutes before serving."
+      "text": "Leave to rest for {timer:2-3} before serving."
     }
   ],
   "tips": [
-    "The 30-minute simmer is crucial - it evaporates excess liquid and concentrates flavours. Using crushed tomatoes instead of diced creates a thicker, creamier sauce that clings to the gnocchi. Boiling and draining the gnocchi separately (rather than cooking them in the sauce) prevents adding extra water. The broiler step dries out the top and creates that perfect golden crust."
+    "The 30-minute simmer is crucial: it evaporates excess liquid and concentrates the flavour. Crushed tomatoes, rather than diced, make a thicker, creamier sauce that clings to the gnocchi. Boiling and draining the gnocchi separately, rather than cooking them in the sauce, keeps extra water out. The grill dries out the top and gives it a golden crust."
   ]
 }

@@ -1,6 +1,6 @@
 {
   "title": "Charcuterie Board for 10",
-  "summary": "When serving as the main event, aim for 150-200g total food per person. A balanced cheese-to-meat ratio close to 1:1 ensures satisfaction.",
+  "summary": "A board for ten to serve as the main event. Allow 150–200 g of food per person, with roughly as much cheese as meat.",
   "servings": 10,
   "order": 1,
   "ingredientGroups": [
@@ -12,7 +12,7 @@
       },
       "items": [
         {
-          "item": "Mix of hard (Parmesan, Pecorino), semi-soft (Gouda, Cheddar), soft (Brie, Goat cheese), blue cheese"
+          "item": "A mix of hard (Parmesan, Pecorino), semi-soft (Gouda, Cheddar), soft (Brie, goat's cheese) and blue cheeses"
         }
       ]
     },
@@ -88,7 +88,7 @@
         },
         {
           "item": "Fresh bread",
-          "note": "baguette, ciabatta, focaccia"
+          "note": "such as baguette, ciabatta or focaccia"
         }
       ]
     },
@@ -104,18 +104,18 @@
             "unit": "g"
           },
           "item": "dip",
-          "note": "hummus, pesto, olive tapenade"
+          "note": "such as hummus, pesto or olive tapenade"
         },
         {
           "item": "Mixed olives"
         },
         {
           "item": "Pickled vegetables",
-          "note": "cornichons, peppers"
+          "note": "such as cornichons and peppers"
         },
         {
           "item": "Fresh fruit",
-          "note": "grapes, figs, dried apricots"
+          "note": "such as grapes, figs or dried apricots"
         },
         {
           "amount": {
@@ -138,10 +138,19 @@
   ],
   "steps": [
     {
-      "text": "Arrange items in clusters rather than rows for visual appeal."
+      "text": "Start with the cheeses, a mix of hard, semi-soft, soft and blue. Arrange them on the board in clusters rather than rows."
+    },
+    {
+      "text": "Add the charcuterie in clusters of its own, keeping the amount of meat close to the amount of cheese."
+    },
+    {
+      "text": "Fill in around them with the crackers, breadsticks and bread, then the dip, olives, pickled vegetables, fresh fruit, and nuts and dried fruit."
+    },
+    {
+      "text": "Finish with the honey or fruit preserves and the mustards."
     }
   ],
   "tips": [
-    "Dips add variety and help stretch portions. The total of 180-200g per person ensures guests leave satisfied when serving as the main event. Arrange items in clusters rather than rows for visual appeal."
+    "Dips add variety and help stretch the portions. When the board is the main event, a total of 180–200 g per person ensures guests leave satisfied. Arrange everything in clusters rather than rows for visual appeal."
   ]
 }

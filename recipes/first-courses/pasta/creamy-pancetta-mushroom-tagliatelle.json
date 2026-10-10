@@ -1,7 +1,10 @@
 {
   "title": "Creamy Pancetta & Mushroom Tagliatelle",
-  "summary": "Rendered pancetta fat creates a savoury foundation for this creamy mushroom sauce. The key is searing mushrooms properly to develop deep, nutty flavour.",
+  "summary": "Rendered pancetta fat is the savoury base for this creamy mushroom sauce. The key is searing the mushrooms properly to develop a deep, nutty flavour.",
   "servings": 3,
+  "times": {
+    "cook": 20
+  },
   "tags": [
     "Creamy & Rich"
   ],
@@ -89,32 +92,32 @@
           "note": "chopped"
         },
         {
-          "item": "Black pepper and salt"
+          "item": "Salt and black pepper"
         }
       ]
     }
   ],
   "steps": [
     {
-      "text": "Place large pan over medium heat. Add pancetta (no oil needed). Cook 5-7 minutes until fat renders and cubes are crispy. Remove pancetta, leave fat in pan."
+      "text": "Put a large frying pan over a medium heat and add the pancetta; you do not need oil. Cook for {timer:5-7}, until the fat renders and the cubes are crisp. Lift out the pancetta and leave the fat in the pan."
     },
     {
-      "text": "Add butter to rendered fat. Turn heat to medium-high. Add mushrooms, cook undisturbed 2-3 minutes for browning, then stir. Add onion, cook 2-3 minutes. Add garlic, cook 30 seconds."
+      "text": "Add the butter to the rendered fat and turn the heat up to medium-high. Add the mushrooms and cook undisturbed for {timer:2-3} to brown, then stir. Add the onion and cook for {timer:2-3}, then the garlic for 30 seconds."
     },
     {
-      "text": "Meanwhile, boil pasta in salted water for 1 minute less than package instructions. Reserve 1 cup pasta water before draining."
+      "text": "Meanwhile, cook the pasta in salted water for 1 minute less than the packet instructions. Reserve 1 cup of pasta water before draining."
     },
     {
-      "text": "(Optional) Pour wine into mushroom pan, let bubble. Lower heat to medium. Pour in cream, simmer gently 2 minutes."
+      "text": "If using wine, pour it into the mushroom pan and let it bubble. Lower the heat to medium, pour in the cream and simmer gently for {timer:2}."
     },
     {
-      "text": "Stir in Parmesan and black pepper. Taste, add salt if needed (pancetta is salty)."
+      "text": "Stir in the Parmesan and black pepper. Taste and add salt if needed; the pancetta is salty."
     },
     {
-      "text": "Add pasta and crispy pancetta back to sauce. Toss vigorously 1 minute. Add pasta water if too thick. Turn off heat, stir in parsley. Serve immediately."
+      "text": "Return the pasta and crispy pancetta to the sauce and toss vigorously for {timer:1}, adding pasta water if it is too thick. Turn off the heat, stir in the parsley and serve straight away."
     }
   ],
   "tips": [
-    "Guanciale is an amazing substitute for this dish. Do not overcrowd mushrooms - if pan is small, cook in batches. Starchy pasta water is the secret to restaurant-quality pasta. Room temperature cream integrates more smoothly without splitting."
+    "Guanciale is an excellent substitute for the pancetta. Do not overcrowd the mushrooms: if your pan is small, cook them in batches. Starchy pasta water is the secret to restaurant-quality pasta. Cream at room temperature blends in more smoothly without splitting."
   ]
 }

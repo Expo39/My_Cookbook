@@ -1,7 +1,10 @@
 {
   "title": "Cotechino with Lentils",
-  "summary": "Italian tradition says lentils bring prosperity for the new year. The combination is rich and satisfying - a little cotechino goes far.",
+  "summary": "Italian tradition says lentils bring prosperity in the new year. The pairing is rich and satisfying, and a little cotechino goes a long way.",
   "servings": 4,
+  "times": {
+    "cook": 45
+  },
   "order": 1,
   "ingredientGroups": [
     {
@@ -85,7 +88,7 @@
           "item": "Fresh parsley"
         },
         {
-          "item": "polenta",
+          "item": "Polenta",
           "optional": true
         }
       ]
@@ -93,25 +96,25 @@
   ],
   "steps": [
     {
-      "text": "Cook cotechino according to package instructions (typically simmer in water 20-30 minutes). Keep warm."
+      "text": "Cook the cotechino according to the packet instructions (usually simmered in water for {timer:20-30|cotechino}). Keep warm."
     },
     {
-      "text": "Heat olive oil in large pot over medium heat. Add onion, carrot, celery. Cook 8-10 minutes until very soft and golden."
+      "text": "Heat the olive oil in a large pan over a medium heat. Add the onion, carrots and celery and cook for {timer:8-10}, until very soft and golden."
     },
     {
-      "text": "Add garlic, cook 1 minute. Add dried lentils (rinsed), bay leaves, and stock. Bring to boil."
+      "text": "Add the garlic and cook for {timer:1}. Add the rinsed lentils, bay leaves and stock, and bring to the boil."
     },
     {
-      "text": "Reduce to simmer, cook 25-30 minutes until lentils are tender but not mushy. Add water if too dry."
+      "text": "Reduce to a simmer and cook for {timer:25-30|lentils}, until the lentils are tender but not mushy. Add water if it gets too dry."
     },
     {
-      "text": "Season well with salt and pepper. Stir in parsley. Remove bay leaves."
+      "text": "Season well with salt and pepper, stir in the parsley and remove the bay leaves."
     },
     {
-      "text": "Slice cotechino (125g per person). Serve over lentils, with polenta or mashed potatoes if desired."
+      "text": "Slice the cotechino, allowing 125 g per person. Serve over the lentils, with polenta or mashed potatoes if you like."
     }
   ],
   "tips": [
-    "Standard cotechino is 500g (125g per person). Because it is extremely rich, this portion works well. The large soffritto base adds volume and flavour. The dish tastes better made ahead - flavours meld beautifully overnight."
+    "A standard cotechino weighs 500 g, which is 125 g per person. It is very rich, so this portion works well. The generous soffritto base adds volume and flavour. The dish tastes better made ahead, as the flavours meld overnight."
   ]
 }

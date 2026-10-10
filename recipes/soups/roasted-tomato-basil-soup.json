@@ -1,7 +1,10 @@
 {
   "title": "Roasted Tomato & Basil Soup",
-  "summary": "Perfect make-ahead starter - tastes better the next day as flavours meld. Light and acidic, it will not sit heavy before a rich main course.",
+  "summary": "A make-ahead starter that tastes better the next day, once the flavours have melded. Light and acidic, it will not sit heavily before a rich main course.",
   "servings": 10,
+  "times": {
+    "cook": 55
+  },
   "order": 1,
   "ingredientGroups": [
     {
@@ -26,7 +29,7 @@
           "amount": {
             "qty": 1
           },
-          "item": "bulb garlic",
+          "item": "garlic bulb",
           "note": "top sliced off",
           "scale": "discrete"
         },
@@ -73,7 +76,7 @@
           "item": "stock"
         },
         {
-          "item": "Large handful fresh basil"
+          "item": "Large handful of fresh basil"
         },
         {
           "item": "Salt and pepper"
@@ -96,31 +99,31 @@
   ],
   "steps": [
     {
-      "text": "Preheat oven to 200°C. Place tomatoes cut-side up on large baking tray. Add onions, red pepper, and whole garlic bulb."
+      "text": "Preheat the oven to {temp:200}. Put the tomatoes cut-side up on a large baking tray and add the onions, red pepper and whole garlic bulb."
     },
     {
-      "text": "Drizzle with olive oil and balsamic vinegar. Sprinkle with sugar, salt, and pepper."
+      "text": "Drizzle with the olive oil and balsamic vinegar, and sprinkle with the sugar, salt and pepper."
     },
     {
-      "text": "Roast 40-45 minutes until tomatoes are collapsed and edges caramelised."
+      "text": "Roast for {timer:40-45}, until the tomatoes have collapsed and the edges are caramelised."
     },
     {
-      "text": "Squeeze roasted garlic cloves from skin into bowl."
+      "text": "Squeeze the roasted garlic cloves out of their skins into a bowl."
     },
     {
-      "text": "Transfer everything to large pot. Add stock and most of basil."
+      "text": "Transfer everything to a large pan and add the stock and most of the basil."
     },
     {
-      "text": "Simmer 10 minutes. Blend until smooth."
+      "text": "Simmer for {timer:10}, then blend until smooth."
     },
     {
-      "text": "Add cream if desired. Reheat gently before serving."
+      "text": "Stir in the cream, if using, and reheat gently before serving."
     },
     {
-      "text": "Garnish with fresh basil, drizzle of olive oil. Serve with crusty bread."
+      "text": "Garnish with fresh basil and a drizzle of olive oil, and serve with crusty bread."
     }
   ],
   "tips": [
-    "Roasting concentrates tomato flavour and adds smoky sweetness. Make 1-2 days ahead - flavours deepen beautifully. Reheat gently, do not boil after adding cream."
+    "Roasting concentrates the tomato flavour and adds a smoky sweetness. Make it 1–2 days ahead; the flavour deepens. Reheat gently, and do not let it boil once the cream is in."
   ]
 }

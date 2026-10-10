@@ -1,7 +1,11 @@
 {
   "title": "Savoury Crepes",
-  "summary": "Thin, delicate French crepes perfect for wrapping Beef Wellington or serving as a side. These provide a moisture barrier between the duxelles and pastry.",
+  "summary": "Thin, delicate French crepes for wrapping a Beef Wellington or serving as a side. In a Wellington they form a moisture barrier between the duxelles and the pastry.",
   "servings": 5,
+  "times": {
+    "cook": 25,
+    "rest": 30
+  },
   "order": 2,
   "ingredientGroups": [
     {
@@ -46,26 +50,26 @@
   ],
   "steps": [
     {
-      "text": "Whisk flour, eggs, milk, melted butter and salt in a bowl until smooth. Let batter rest 30 minutes."
+      "text": "Whisk the flour, eggs, milk, melted butter and salt in a bowl until smooth. Leave the batter to rest for {timer:30}."
     },
     {
-      "text": "Heat a non-stick frying pan over medium-high heat. Lightly butter the pan."
+      "text": "Heat a non-stick frying pan over a medium-high heat and butter it lightly."
     },
     {
-      "text": "Pour a small ladleful of batter into pan, swirl to coat bottom thinly."
+      "text": "Pour a small ladleful of batter into the pan and swirl to coat the base thinly."
     },
     {
-      "text": "Cook 1-2 minutes until edges start to brown, flip and cook another 30 seconds."
+      "text": "Cook for {timer:1-2}, until the edges start to brown, then flip and cook for another 30 seconds."
     },
     {
-      "text": "Stack crepes on a plate with greaseproof paper between each one."
+      "text": "Stack the crepes on a plate with greaseproof paper between each one."
     },
     {
-      "text": "Cool completely before using for wellington, or refrigerate overnight."
+      "text": "Leave to cool completely before using for a Wellington, or refrigerate overnight."
     }
   ],
   "tips": [
-    "The key to thin crepes is swirling the batter quickly and using very little. First crepe is often imperfect - this is normal! Crepes can be made the day before and refrigerated with greaseproof paper between each one. For wellington, you'll need about 10 crepes to wrap a 1kg fillet."
+    "The key to thin crepes is to use very little batter and swirl it quickly. The first crepe is often imperfect; that is normal. You can make the crepes the day before and refrigerate them with greaseproof paper between each one. For a Wellington, you will need about 10 crepes to wrap a 1 kg fillet."
   ],
   "related": [
     "main-courses/beef-steak/beef-wellington"

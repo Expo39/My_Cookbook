@@ -1,7 +1,10 @@
 {
   "title": "Creamy Steak Pasta",
-  "summary": "An indulgent creation marrying seared beef with Bourssin cheese sauce. Comfort food elegant enough for guests.",
+  "summary": "Seared beef and tagliatelle in an indulgent Boursin sauce. Comfort food, elegant enough for guests.",
   "servings": 4,
+  "times": {
+    "cook": 25
+  },
   "tags": [
     "Creamy & Rich"
   ],
@@ -58,7 +61,7 @@
             "qty": 425,
             "unit": "g"
           },
-          "item": "Boursin Cheese",
+          "item": "Boursin cheese",
           "note": "or cream cheese"
         },
         {
@@ -105,31 +108,31 @@
   ],
   "steps": [
     {
-      "text": "Mix cheese with garlic, parsley, herbs (if using), salt and pepper. Set aside at room temperature."
+      "text": "Mix the cheese with the garlic, parsley, thyme (if using), salt and pepper. Set aside at room temperature."
     },
     {
-      "text": "Pat ribeye steak completely dry, season generously with salt and pepper."
+      "text": "Pat the steak completely dry and season generously with salt and pepper."
     },
     {
-      "text": "Heat large pan over high heat. Add oil. Sear steak whole, 2-3 minutes per side until well browned and cooked to your liking. Remove to plate, rest 5 minutes, then slice into strips. Lower heat to medium."
+      "text": "Heat a large frying pan over a high heat and add the oil. Sear the steak whole for {timer:2-3} per side, until well browned and cooked to your liking. Move it to a plate, rest for {timer:5}, then slice into strips. Lower the heat to medium."
     },
     {
-      "text": "Cook pasta in salted boiling water until al dente. Do not drain."
+      "text": "Cook the pasta in boiling salted water until al dente. Do not drain it."
     },
     {
-      "text": "Add onion to pan, fry 3-4 minutes until soft and golden."
+      "text": "Add the onion to the steak pan and fry for {timer:3-4}, until soft and golden."
     },
     {
-      "text": "Pour in stock, bring to simmer. Stir in mascarpone mixture until melted. Add Parmesan, parsley, and steak resting juices. Simmer gently."
+      "text": "Pour in the stock and bring to a simmer. Stir in the cheese mixture until melted, then add the Parmesan, parsley and the steak's resting juices. Simmer gently."
     },
     {
-      "text": "Transfer pasta to pan with tongs, bringing pasta water. Toss vigorously until sauce clings. Add more water for silky consistency."
+      "text": "Lift the pasta into the pan with tongs, bringing some of its cooking water with it. Toss vigorously until the sauce clings, adding more water for a silky consistency."
     },
     {
-      "text": "Add steak strips, toss gently. Finish with Parmesan and parsley. Serve immediately."
+      "text": "Add the steak strips and toss gently. Finish with Parmesan and parsley and serve straight away."
     }
   ],
   "tips": [
-    "Cream cheese is a good substitute for Boursin Cheese. Do not overcrowd pan when searing (meat tastes better when well seared !). Transfer pasta directly to sauce with tongs - pasta water binds everything together."
+    "Cream cheese is a good substitute for Boursin. Do not overcrowd the pan when searing: meat tastes better when it is well seared. Lift the pasta straight into the sauce with tongs; the pasta water binds everything together."
   ]
 }

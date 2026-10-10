@@ -1,14 +1,17 @@
 {
   "title": "Chicken Katsu Curry",
-  "summary": "Crispy breaded chicken cutlets with rich Japanese curry sauce.",
+  "summary": "Crisp breaded chicken cutlets with a rich Japanese curry sauce.",
   "servings": 2,
+  "times": {
+    "cook": 30
+  },
   "tags": [
     "Asian-Inspired"
   ],
   "order": 2,
   "ingredientGroups": [
     {
-      "name": "For Breaded Chicken",
+      "name": "Breaded chicken",
       "items": [
         {
           "amount": {
@@ -72,7 +75,7 @@
       ]
     },
     {
-      "name": "For Katsu Curry Sauce",
+      "name": "Katsu curry sauce",
       "items": [
         {
           "food": "flour-plain",
@@ -130,7 +133,7 @@
           "scale": "discrete"
         },
         {
-          "item": "Spices from breading list",
+          "item": "Spices from the breading list",
           "note": "paprika, turmeric, garam masala, curry powder"
         }
       ]
@@ -138,40 +141,40 @@
   ],
   "steps": [
     {
-      "text": "Butterfly chicken breasts to make them thinner. Season with salt and pepper."
+      "text": "Butterfly the chicken breasts to make them thinner, and season with salt and pepper."
     },
     {
-      "text": "Set up breading station: flour mixed with spices, beaten eggs, panko breadcrumbs."
+      "text": "Set up a breading station: the flour mixed with the spices, the beaten eggs and the panko breadcrumbs."
     },
     {
-      "text": "Coat each chicken piece in flour, then egg, then breadcrumbs. Press firmly."
+      "text": "Coat each piece of chicken in flour, then egg, then breadcrumbs, pressing firmly."
     },
     {
-      "text": "Place breaded chicken on a baking rack over a tray. Bake at 180°C for 15 minutes until golden and cooked through."
+      "text": "Set the breaded chicken on a rack over a baking tray. Bake at {temp:180} for {timer:15|katsu}, until golden and cooked through."
     },
     {
-      "text": "For curry: Cook finely chopped onions in butter with ground cloves for minimum 20 minutes over medium heat until deeply caramelised. Stir frequently."
+      "text": "For the curry, cook the onions in the butter with the ground cloves over a medium heat for at least {timer:20|onions}, stirring often, until deeply caramelised."
     },
     {
-      "text": "Remove onions temporarily. Add flour and butter to pan, cook 2-3 minutes to form a roux."
+      "text": "Lift out the onions for now. Add the flour and butter to the pan and cook for {timer:2-3} to make a roux."
     },
     {
-      "text": "Add all spices (paprika, turmeric, garam masala, curry powder), cook 1 minute until fragrant."
+      "text": "Add the spices (paprika, turmeric, garam masala and curry powder) and cook for {timer:1}, until fragrant."
     },
     {
-      "text": "Return onions to pan. Add apple slices if using. Sauté together 2-3 minutes."
+      "text": "Return the onions to the pan, with the apple slices if using. Sauté together for {timer:2-3}."
     },
     {
-      "text": "Gradually add chicken stock, stirring constantly until curry emulsifies and thickens."
+      "text": "Gradually add the chicken stock, stirring constantly, until the curry emulsifies and thickens."
     },
     {
-      "text": "If onions haven't melted completely, transfer curry to blender and blend until smooth."
+      "text": "If the onions have not melted completely, blend the curry until smooth."
     },
     {
-      "text": "Slice chicken katsu. Serve over rice with curry sauce poured over. Garnish with spring onions if desired."
+      "text": "Slice the katsu and serve over rice with the curry sauce poured over. Garnish with spring onions, if you like."
     }
   ],
   "tips": [
-    "This is Antonio's favourite dish! The secret is patience - caramelising the onions properly (minimum 20 minutes) creates incredible depth. The apple adds subtle sweetness that balances the spices beautifully. Another option is adding shredded pears as well along with the apples! Baking the katsu instead of frying is a healtier option but frying them is just as good (if even better). You can also use an airfryer!"
+    "This is Antonio's favourite dish. The secret is patience: caramelising the onions properly, for at least 20 minutes, creates great depth. The apple adds a subtle sweetness that balances the spices, and you can add shredded pear along with it. Baking the katsu rather than frying it is the healthier option, but frying is just as good, if not better. An air fryer also works."
   ]
 }

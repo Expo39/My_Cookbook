@@ -1,7 +1,11 @@
 {
   "title": "Pistachio-Crusted Rack of Lamb",
-  "summary": "Elegant rack of lamb with aromatic herb and pistachio crust. Quick to cook but impressive presentation. Perfect for special dinners. Serve with mashed potatoes and grilled asparagus.",
+  "summary": "Rack of lamb under a fragrant herb and pistachio crust. Quick to cook and impressive on the plate, for a special dinner. Serve with mashed potatoes and grilled asparagus.",
   "servings": 2,
+  "times": {
+    "cook": 25,
+    "rest": 10
+  },
   "order": 1,
   "ingredientGroups": [
     {
@@ -84,6 +88,7 @@
           "item": "Dijon mustard"
         },
         {
+          "key": "oil",
           "food": "olive-oil",
           "amount": {
             "qty": 3,
@@ -99,34 +104,34 @@
   ],
   "steps": [
     {
-      "text": "Preheat oven to 200°C (180°C fan)."
+      "text": "Preheat the oven to {temp:200/180}."
     },
     {
-      "text": "Mix pistachios, breadcrumbs, Parmigiano, sage, rosemary, thyme, mint, lemon zest in bowl. Stir in 2 tbsp olive oil until mixture holds together. Season with salt and pepper."
+      "text": "In a bowl, mix the pistachios, breadcrumbs, Parmigiano, sage, rosemary, thyme, mint and lemon zest. Stir in {@oil:amount*2/3} of the olive oil until the mixture holds together, and season with salt and pepper."
     },
     {
-      "text": "Season lamb rack generously with salt and pepper."
+      "text": "Season the rack of lamb generously with salt and pepper."
     },
     {
-      "text": "Heat 1 tbsp olive oil in oven-proof frying pan over high heat. Sear lamb rack on all sides until golden brown (2 minutes per side). Remove from heat."
+      "text": "Heat the remaining {@oil:amount*1/3} of olive oil in an ovenproof frying pan over a high heat. Sear the lamb on all sides until golden brown, {timer:2} per side. Take off the heat."
     },
     {
-      "text": "Brush meat side of lamb (not bones) generously with Dijon mustard."
+      "text": "Brush the meat side of the lamb (not the bones) generously with the Dijon mustard."
     },
     {
-      "text": "Press pistachio-herb mixture firmly onto mustard-coated lamb, forming thick crust."
+      "text": "Press the pistachio and herb mixture firmly onto the mustard to form a thick crust."
     },
     {
-      "text": "Return pan to oven (or transfer to roasting tray). Roast for 18 minutes for medium-rare (internal temp 52-55°C)."
+      "text": "Put the pan in the oven, or move the lamb to a roasting tray. Roast for {timer:18} for medium-rare (52–55 °C inside)."
     },
     {
-      "text": "Remove from oven, cover loosely with foil. Rest for 8-10 minutes."
+      "text": "Take out of the oven, cover loosely with foil and rest for {timer:8-10}."
     },
     {
-      "text": "Slice between ribs into individual cutlets. Serve immediately with mashed potatoes and grilled asparagus."
+      "text": "Slice between the ribs into cutlets. Serve straight away with mashed potatoes and grilled asparagus."
     }
   ],
   "tips": [
-    "Ask your butcher to french the lamb rack (clean the rib bones) for elegant presentation. The mustard acts as glue for the crust and adds tangy flavour. Do not skip the searing step - it adds crucial flavour and helps crust adhere. For perfectly medium-rare lamb, aim for 52-55°C internal temperature. Lamb continues cooking during resting. The pistachio crust should be golden and aromatic. Save any fallen crust to sprinkle over plated dish. Pair with mint sauce or red wine jus for classic accompaniment."
+    "Ask your butcher to french the rack (clean the rib bones) for a neater presentation. The mustard glues the crust on and adds a tangy flavour. Do not skip the searing: it adds flavour and helps the crust stick. For medium-rare lamb, aim for 52–55 °C inside; it keeps cooking as it rests. The crust should be golden and fragrant. Save any crust that falls off to sprinkle over the plates. Mint sauce or a red wine jus makes a classic accompaniment."
   ]
 }

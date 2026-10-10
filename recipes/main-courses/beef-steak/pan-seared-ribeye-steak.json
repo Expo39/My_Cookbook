@@ -1,7 +1,11 @@
 {
   "title": "Pan-Seared Ribeye Steak",
-  "summary": "Perfect technique for ribeye. Takes longer than fillet despite needing less doneness due to size and fat content that must render. Serves 1.",
+  "summary": "A pan-seared ribeye for one. It takes longer than fillet, even though it is cooked less, because of its size and the fat that has to render.",
   "servings": 1,
+  "times": {
+    "cook": 7,
+    "rest": 5
+  },
   "order": 1,
   "ingredientGroups": [
     {
@@ -60,25 +64,25 @@
   ],
   "steps": [
     {
-      "text": "Remove steak from refrigerator 30 minutes before cooking. Pat completely dry with paper towels, season generously with salt and pepper on both sides."
+      "text": "Take the steak out of the fridge {timer:30} before cooking. Pat it completely dry with kitchen paper and season both sides generously with salt and pepper."
     },
     {
-      "text": "Heat pan over medium-high heat with light coat of oil until very hot."
+      "text": "Heat a frying pan over a medium-high heat with a light coat of oil until very hot."
     },
     {
-      "text": "Place steak in pan without moving. Sear 3-4 minutes first side until deep brown crust forms."
+      "text": "Lay the steak in the pan and do not move it. Sear the first side for {timer:3-4}, until a deep brown crust forms."
     },
     {
-      "text": "Flip steak, sear second side for 3 minutes."
+      "text": "Turn the steak and sear the second side for {timer:3}."
     },
     {
-      "text": "Add butter (and optional thyme/garlic/rosemary) to pan in last 1-2 minutes. Tilt pan and continuously baste steak with foaming butter using spoon."
+      "text": "In the last {timer:1-2}, add the butter to the pan, with the thyme, garlic and rosemary if using. Tilt the pan and baste the steak continuously with the foaming butter, using a spoon."
     },
     {
-      "text": "Remove to plate, rest minimum 5 minutes before cutting. Internal temperature should be 52-55°C for medium-rare."
+      "text": "Move to a plate and rest for at least {timer:5} before cutting. The internal temperature should be 52–55 °C for medium-rare."
     }
   ],
   "tips": [
-    "Pat steak completely dry before seasoning - moisture prevents proper crust formation. Do not move steak once placed in pan. Basting with butter adds richness. Resting redistributes juices. I personally love large steaks (300g) but if you wish to use smaller cuts, you can ask help from the AI assistant to adjust the cooking times accordingly."
+    "Pat the steak completely dry before seasoning; moisture stops a good crust forming. Do not move the steak once it is in the pan. Basting with butter adds richness, and resting lets the juices redistribute. I love a large steak (300 g), but if you want to use smaller cuts, you can ask the AI assistant to adjust the cooking times."
   ]
 }

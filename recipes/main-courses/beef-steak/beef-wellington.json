@@ -1,7 +1,11 @@
 {
   "title": "Beef Wellington",
-  "summary": "The ultimate showstopper for 5 people. Most work done day before - assembly day is manageable with timeline below. Serve with Orange Asparagus and optionally Savoury Crepes for wrapping.",
+  "summary": "A showstopper for five. Most of the work is done the day before, so assembly day is manageable.",
   "servings": 5,
+  "times": {
+    "cook": 95,
+    "rest": 20
+  },
   "order": 3,
   "ingredientGroups": [
     {
@@ -62,7 +66,7 @@
         },
         {
           "item": "Beef trimmings",
-          "note": "for sauce"
+          "note": "for the sauce"
         },
         {
           "amount": {
@@ -91,41 +95,44 @@
   ],
   "steps": [
     {
-      "text": "Sear beef fillet all over in hot pan with olive oil, 2 minutes per side until golden. Cool completely, brush with Dijon mustard, refrigerate."
+      "heading": "Day 1: the night before",
+      "text": "Sear the beef fillet all over in a hot pan with olive oil, {timer:2} per side, until golden. Leave to cool completely, brush with the Dijon mustard and refrigerate."
     },
     {
-      "text": "Cook duxelles: Finely chop mushrooms, cook in batches over high heat with thyme and olive oil until all moisture evaporates and mixture is dry. Cool, refrigerate."
+      "text": "For the duxelles, finely chop the mushrooms and cook them in batches over a high heat with the thyme and olive oil, until all the moisture has evaporated and the mixture is dry. Leave to cool, then refrigerate."
     },
     {
-      "text": "Make red wine sauce: Roast beef trimmings, add chopped shallots, deglaze with red wine, reduce by half. Add beef stock, simmer 1 hour, strain, refrigerate."
+      "text": "For the red wine sauce, roast the beef trimmings, add the chopped shallots and deglaze with the red wine. Reduce by half, then add the beef stock and simmer for {timer:60|sauce}. Strain and refrigerate."
     },
     {
-      "text": "If using savoury crepes for wrapping, prepare them now (see Savoury Crepes recipe)."
+      "text": "If you are wrapping the beef in savoury crepes, make them now (see the Savoury Crepes recipe)."
     },
     {
-      "text": "Roll out puff pastry to large rectangle. If using crepes, lay them overlapping on cling film."
+      "heading": "Day 2: assembly, 3–4 hours before serving",
+      "text": "Roll the puff pastry out into a large rectangle. If using crepes, lay them overlapping on a sheet of cling film."
     },
     {
-      "text": "Spread duxelles over pastry (or crepes if using), arrange Parma ham slices on top."
+      "text": "Spread the duxelles over the pastry, or over the crepes if using, and lay the Parma ham slices on top."
     },
     {
-      "text": "Place beef fillet in centre, use cling film to roll tightly into sausage shape. Chill 15 minutes."
+      "text": "Place the beef fillet in the centre and use the cling film to roll it tightly into a sausage shape. Chill for {timer:15}."
     },
     {
-      "text": "Unwrap onto pastry (if using crepes, place crepe-wrapped beef onto pastry), wrap pastry around beef, sealing edges with egg wash. Score pastry decoratively."
+      "text": "Unwrap it onto the pastry (if using crepes, place the crepe-wrapped beef on the pastry). Wrap the pastry around the beef, sealing the edges with egg wash, and score the top decoratively."
     },
     {
-      "text": "Brush entire surface with remaining egg yolk. Refrigerate 30 minutes."
+      "text": "Brush the whole surface with the remaining egg yolk. Refrigerate for {timer:30}."
     },
     {
-      "text": "Bake at 200°C for 20-25 minutes until pastry is golden and internal temperature reaches 52-55°C for medium-rare."
+      "text": "Bake at {temp:200} for {timer:20-25}, until the pastry is golden and the internal temperature reaches 52–55 °C for medium-rare."
     },
     {
-      "text": "Rest 15-20 minutes. Slice wellington into thick portions, serve with red wine sauce and Orange Asparagus."
+      "text": "Rest for {timer:15-20}. Slice the Wellington into thick portions and serve with the red wine sauce and Orange Asparagus."
     }
   ],
   "tips": [
-    "Temperature is critical - aim for 52-55°C internal for medium-rare (use meat thermometer). The single fillet cooks slightly faster than two separate ones. Traditional wellington uses savoury crepes as a moisture barrier between duxelles and pastry, but they're optional. Pair with full-bodied red: Cabernet Sauvignon, Bordeaux, or Syrah. For perfect slicing, use a very sharp knife and wipe between cuts."
+    "Temperature is critical: aim for 52–55 °C inside for medium-rare, and use a meat thermometer. A single fillet cooks slightly faster than two separate ones. A traditional Wellington uses savoury crepes as a moisture barrier between the duxelles and the pastry, but they are optional. Pair it with a full-bodied red such as Cabernet Sauvignon, Bordeaux or Syrah. For clean slices, use a very sharp knife and wipe it between cuts.",
+    "Serve with Orange Asparagus, and use Savoury Crepes for wrapping if you like."
   ],
   "related": [
     "sides/orange-asparagus",
