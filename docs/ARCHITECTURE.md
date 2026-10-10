@@ -48,7 +48,7 @@ A service worker caches the shell and the pages for offline use. The recipe JSON
 - `RecipeWriter` saves and deletes recipes. One writer commits through the GitHub API, and one calls the server.
 - `AiClient` talks to the AI endpoint, either the Worker or the server.
 
-`PUBLIC_BACKEND` selects the source at build time: `static` (the default) or `api`. `PUBLIC_AI_ENDPOINT` sets the AI endpoint, and the sous-chef is hidden when there is none. Moving off GitHub Pages means changing these variables and running the server image; no code changes.
+`PUBLIC_BACKEND` selects the source at build time: `static` (the default) or `server` (`api` is accepted as an alias). `PUBLIC_AI_ENDPOINT` sets the AI endpoint, and the sous-chef is hidden when there is none. Moving off GitHub Pages means changing these variables and running the server image; no code changes.
 
 ## Where the checklist runs
 

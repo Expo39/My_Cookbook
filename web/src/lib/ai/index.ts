@@ -16,6 +16,6 @@ export function createAiClient(
 	endpoint: string = __AI_ENDPOINT__,
 	fetcher?: typeof fetch
 ): AiClient | null {
-	if (backend === 'api') return new ServerClient(base, fetcher);
+	if (backend === 'api' || backend === 'server') return new ServerClient(base, fetcher);
 	return endpoint ? new WorkerClient(endpoint, fetcher) : null;
 }

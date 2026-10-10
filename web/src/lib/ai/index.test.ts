@@ -13,5 +13,6 @@ describe('createAiClient', () => {
 	it('uses the server on the self-hosted backend, whatever the endpoint', () => {
 		expect(createAiClient('api', '')).toBeInstanceOf(ServerClient);
 		expect(createAiClient('api', 'https://ai.example.test')).toBeInstanceOf(ServerClient);
+		expect(createAiClient('server', '')).toBeInstanceOf(ServerClient);
 	});
 });
