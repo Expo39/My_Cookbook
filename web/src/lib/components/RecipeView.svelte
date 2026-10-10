@@ -1,27 +1,34 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { page } from '$app/state';
-	import { replaceState } from '$app/navigation';
+	import { afterNavigate, replaceState } from '$app/navigation';
 	import { loadCore } from '$lib/core';
 	import { sectionTrail } from '$lib/data/tree';
 	import { homeHref, pageHref } from '$lib/links';
 	import { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { buildRecipeJsonLd, toScriptJson } from '$lib/seo/recipe-jsonld';
 	import { canonicalUrl, cardUrl } from '$lib/seo/site';
+	import { itemsFromGroups } from '$lib/kitchen/shopping';
+	import { servingsText } from '$lib/recipe/format';
 	import { shareLink } from '$lib/share';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import { favourites } from '$lib/stores/favourites.svelte';
+	import { Notes } from '$lib/stores/notes.svelte';
 	import { preferences } from '$lib/stores/preferences.svelte';
+	import { recent } from '$lib/stores/recent.svelte';
+	import { shopping } from '$lib/stores/shopping.svelte';
 	import { Ticks } from '$lib/stores/ticks.svelte';
 	import type { RecipeCard as Card, RecipeData, SiteIndex } from '$lib/types/recipe';
 	import ActionBar from './ActionBar.svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
-	import Icon from './Icon.svelte';
 	import IngredientsPanel from './IngredientsPanel.svelte';
 	import MethodPanel from './MethodPanel.svelte';
 	import PageHead from './PageHead.svelte';
+	import Planner from './Planner.svelte';
 	import RecipeCard from './RecipeCard.svelte';
 	import RecipeHeader from './RecipeHeader.svelte';
+	import RecipeNotes from './RecipeNotes.svelte';
 	import ServingsBar from './ServingsBar.svelte';
 
 	let { card, data, index }: { card: Card; data: RecipeData; index: SiteIndex } = $props();
@@ -36,12 +43,21 @@
 	// The page remounts this component for each recipe, so the props are read once.
 	const model = untrack(() => new RecipeModel(data, () => preferences.units));
 	const ticks = untrack(() => new Ticks(card.id));
+	const notes = untrack(() => new Notes(card.id));
+	const recipe = untrack(() => ({ id: card.id, title: data.recipe.title }));
 
 	let hydrated = $state(false);
 	let restored = $state(false);
 	let tab = $state<Tab>('ingredients');
 
-	const cooking = $derived(hydrated && page.url.searchParams.has('cook'));
+	/** The step cook mode is on (1-based), or `null` while it is closed. `?cook=3` deep-links to a step. */
+	let cookStep = $state<number | null>(null);
+	// Opened by a link, cook mode has its own history entry, so leaving it goes back one.
+	let cookEntry: 'load' | 'link' = 'load';
+	let seenUrl = false;
+	// Loaded when first needed, so a page that is never cooked from does not carry it.
+	let CookMode = $state.raw<typeof import('./CookMode.svelte').default>();
+
 	const cookHref = $derived(model.search('?cook'));
 	const description = $derived(
 		data.recipe.summary.length > 155
@@ -74,6 +90,9 @@
 		preferences.load();
 		favourites.load();
 		ticks.load();
+		notes.load();
+		shopping.load();
+		recent.add(card.id);
 		model.restore(location.search);
 		restored = true;
 		hydrated = true;
@@ -94,6 +113,80 @@
 			/* the router is not ready yet; the next change will write the URL */
 		}
 	});
+
+	$effect(() => {
+		if (!hydrated) return;
+		const value = page.url.searchParams.get('cook');
+		untrack(() => {
+			const next =
+				value === null
+					? null
+					: Math.min(Math.max(1, Math.floor(Number(value)) || 1), model.view.steps.length);
+			if (next !== null && cookStep === null) cookEntry = seenUrl ? 'link' : 'load';
+			seenUrl = true;
+			cookStep = next;
+		});
+	});
+
+	$effect(() => {
+		if (cookStep !== null && !CookMode) {
+			import('./CookMode.svelte')
+				.then((module) => (CookMode = module.default))
+				.catch(() =>
+					chrome.notify('Cook mode could not load. Reload the page to try again.', 6000)
+				);
+		}
+	});
+
+	function writeCook(step: number | null) {
+		const params = new SvelteURLSearchParams(location.search);
+		if (step === null) params.delete('cook');
+		else params.set('cook', String(step));
+		const next = model.search(params.size ? `?${params}` : '');
+		try {
+			replaceState(`${location.pathname}${next}${location.hash}`, {});
+		} catch {
+			/* the router is not ready yet */
+		}
+	}
+
+	function cookTo(step: number) {
+		cookStep = step;
+		writeCook(step);
+	}
+
+	// SvelteKit moves focus to the page after a Back navigation, so cook mode's opener is refocused after it.
+	let returnFocus: HTMLElement | null = null;
+
+	afterNavigate(({ type }) => {
+		const target = returnFocus;
+		returnFocus = null;
+		if (type === 'popstate' && target?.isConnected) setTimeout(() => target.focus());
+	});
+
+	function exitCook(opener: HTMLElement | null) {
+		returnFocus = opener;
+		if (cookStep === null) return;
+		cookStep = null;
+		if (cookEntry === 'link') history.back();
+		else writeCook(null);
+	}
+
+	function addToList() {
+		const items = itemsFromGroups(model.view.groups);
+		const updated = shopping.has(card.id);
+		shopping.add({
+			id: card.id,
+			title: data.recipe.title,
+			serves: servingsText(model.view.servings, data.recipe.servingsNoun),
+			items
+		});
+		chrome.notify(
+			updated
+				? 'Shopping list updated for this recipe'
+				: `Added ${items.length} ingredients to your shopping list`
+		);
+	}
 
 	async function share() {
 		const outcome = await shareLink(
@@ -127,10 +220,7 @@
 
 <article class:enhanced={hydrated}>
 	<Breadcrumb {trail} />
-	<RecipeHeader {card} {model} {hydrated} onshare={share} />
-	{#if cooking}
-		<p class="notice" role="status"><Icon name="info" size={18} />Cook mode is on its way.</p>
-	{/if}
+	<RecipeHeader {card} {model} {hydrated} {cookHref} onshare={share} onaddlist={addToList} />
 	<ServingsBar {model} />
 
 	{#if hydrated}
@@ -167,7 +257,8 @@
 			id="{id}-panel-method"
 			aria-labelledby={hydrated ? `${id}-tab-method` : undefined}
 		>
-			<MethodPanel {model} {ticks} {hydrated} />
+			<Planner steps={model.view.steps} />
+			<MethodPanel {model} {ticks} {hydrated} {recipe} />
 			{#if model.view.tips.length}
 				<aside class="tip">
 					<h2 class="label">Chef's tip</h2>
@@ -176,6 +267,8 @@
 			{/if}
 		</div>
 	</div>
+
+	<RecipeNotes {notes} {hydrated} />
 
 	{#if data.related.length}
 		<section class="related" aria-labelledby="{id}-related">
@@ -189,19 +282,15 @@
 	{/if}
 
 	{#if hydrated}<ActionBar {model} {cookHref} onshare={share} />{/if}
+	{#if hydrated && cookStep !== null && CookMode}
+		<CookMode {model} {recipe} step={cookStep} onstep={cookTo} onexit={exitCook} />
+	{/if}
 </article>
 
 <style>
 	article {
 		display: grid;
 		gap: var(--space-5);
-	}
-
-	.notice {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		color: var(--colour-muted);
 	}
 
 	.tabs {
@@ -314,8 +403,7 @@
 
 		.tabs,
 		.tip,
-		.related,
-		.notice {
+		.related {
 			display: none;
 		}
 

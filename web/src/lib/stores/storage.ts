@@ -16,6 +16,19 @@ export function writeStorage(key: string, value: string | null): void {
 	}
 }
 
+/** Parsed JSON from storage, or `undefined` when it is missing, corrupt or blocked. */
+export function readJson(key: string): unknown {
+	try {
+		const text = readStorage(key);
+		return text === null ? undefined : JSON.parse(text);
+	} catch {
+		return undefined;
+	}
+}
+
+export const writeJson = (key: string, value: unknown): void =>
+	writeStorage(key, JSON.stringify(value));
+
 export function readList(key: string): string[] {
 	try {
 		const parsed: unknown = JSON.parse(readStorage(key) ?? '[]');

@@ -1,49 +1,42 @@
 <script lang="ts">
+	import { unlockAudio } from '$lib/kitchen/alert';
+	import { clockText } from '$lib/kitchen/timer-math';
+	import { timers } from '$lib/stores/timers.svelte';
 	import Icon from './Icon.svelte';
 
-	let { minutes, text, name }: { minutes: number; text: string; name?: string | null } = $props();
+	let { id, name, minutes, text }: { id: string; name: string; minutes: number; text: string } =
+		$props();
 
-	let endAt = $state<number | null>(null);
-	let now = $state(0);
+	const timer = $derived(timers.get(id));
+	const status = $derived(timer ? timers.status(timer) : undefined);
 
-	const remaining = $derived(endAt === null ? 0 : Math.max(0, Math.ceil((endAt - now) / 1000)));
-	const finished = $derived(endAt !== null && remaining === 0);
-	const running = $derived(endAt !== null && !finished);
-	const subject = $derived(name ? `${name} timer` : 'timer');
-
-	$effect(() => {
-		if (!running) return;
-		const tick = setInterval(() => (now = Date.now()), 250);
-		return () => clearInterval(tick);
-	});
-
-	function toggle() {
-		if (endAt !== null) {
-			endAt = null;
+	function press() {
+		if (timer) {
+			const pill = [...document.querySelectorAll<HTMLElement>('[data-timer]')].find(
+				(element) => element.dataset.timer === id
+			);
+			pill?.querySelector('button')?.focus();
 			return;
 		}
-		now = Date.now();
-		endAt = now + minutes * 60_000;
-	}
-
-	function clock(seconds: number): string {
-		const [h, m, s] = [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), seconds % 60];
-		const pad = (n: number) => String(n).padStart(2, '0');
-		return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
+		unlockAudio();
+		timers.start({ id, name, minutes });
 	}
 </script>
 
 <button
 	type="button"
 	class="timer num"
-	class:running
-	class:finished
-	aria-label={endAt === null ? `Start ${text} ${subject}` : `Stop the ${subject}`}
-	onclick={toggle}
+	class:running={status === 'running'}
+	class:paused={status === 'paused'}
+	class:finished={status === 'finished'}
+	aria-label={timer ? `Show the ${name} timer` : `Start ${text} timer, ${name}`}
+	onclick={press}
 >
 	<Icon name="timer" size={14} />
-	{#if endAt === null}{text}{:else if finished}Done{:else}{clock(remaining)}{/if}
-</button><span class="sr-only" role="status">{finished ? `The ${subject} has finished.` : ''}</span>
+	{#if !timer}{text}{:else if status === 'finished'}Done{:else}{clockText(
+			timers.remaining(timer)
+		)}{/if}
+</button>
 
 <style>
 	.timer {
@@ -73,15 +66,18 @@
 	}
 
 	.timer:hover,
-	.running {
+	.running,
+	.finished {
 		background: var(--colour-accent);
 		color: var(--colour-on-primary);
 	}
 
+	.paused {
+		border-style: dashed;
+	}
+
 	.finished {
 		animation: pulse 900ms ease-out 3;
-		background: var(--colour-accent);
-		color: var(--colour-on-primary);
 	}
 
 	@keyframes pulse {

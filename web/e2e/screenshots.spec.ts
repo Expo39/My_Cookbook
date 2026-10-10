@@ -47,3 +47,43 @@ test('writes screenshots of the main pages in both themes', async ({ page }) => 
 
 	expect(overflowing).toEqual([]);
 });
+
+test('writes screenshots of cook mode, the timer strip and the shopping list', async ({ page }) => {
+	mkdirSync(out, { recursive: true });
+	const wellington = 'main-courses/beef-steak/beef-wellington';
+
+	await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+	await page.setViewportSize({ width: 375, height: 812 });
+	await page.goto(`${wellington}?cook=10`);
+	await waitForCore(page).catch(() => page.waitForLoadState('networkidle'));
+	await page
+		.getByRole('dialog')
+		.getByRole('button', { name: /^Start 20–25 min timer/ })
+		.click();
+	await page.screenshot({ path: join(out, 'cook-mode-375-dark.png') });
+
+	await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await page.goto(`${wellington}?cook=5`);
+	await page.screenshot({ path: join(out, 'cook-mode-1440-light.png') });
+
+	await page.goto(`${wellington}?serves=8`);
+	await waitForCore(page);
+	await page.getByRole('button', { name: /^Start 30 min timer/ }).click();
+	await page.getByRole('button', { name: /^Start 15–20 min timer/ }).click();
+	await page.screenshot({ path: join(out, 'timer-strip-1440-light.png') });
+	await page.setViewportSize({ width: 375, height: 812 });
+	await page.screenshot({ path: join(out, 'timer-strip-375-light.png') });
+
+	await page.setViewportSize({ width: 1440, height: 900 });
+	await page.getByRole('button', { name: 'Add to shopping list' }).click();
+	await page.goto('desserts/french-classics/creme-brulee?x=2');
+	await waitForCore(page);
+	await page.getByRole('button', { name: 'Add to shopping list' }).click();
+	await page.goto('shopping-list');
+	await page.getByRole('listitem').getByRole('checkbox').first().check();
+	await page.screenshot({ path: join(out, 'shopping-list-1440-light.png'), fullPage: true });
+	await page.setViewportSize({ width: 375, height: 812 });
+	await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+	await page.screenshot({ path: join(out, 'shopping-list-375-dark.png'), fullPage: true });
+});

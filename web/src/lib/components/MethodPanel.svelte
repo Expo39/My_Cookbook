@@ -3,10 +3,19 @@
 	import type { Ticks } from '$lib/stores/ticks.svelte';
 	import type { ScaledStep } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
-	import Timer from './Timer.svelte';
+	import StepText from './StepText.svelte';
 
-	let { model, ticks, hydrated }: { model: RecipeModel; ticks: Ticks; hydrated: boolean } =
-		$props();
+	let {
+		model,
+		ticks,
+		hydrated,
+		recipe
+	}: {
+		model: RecipeModel;
+		ticks: Ticks;
+		hydrated: boolean;
+		recipe: { id: string; title: string };
+	} = $props();
 
 	const id = $props.id();
 	const steps = $derived(model.view.steps);
@@ -26,24 +35,6 @@
 		});
 		return result;
 	});
-
-	const amounts = $derived(
-		new Map(
-			model.view.groups.flatMap((group) =>
-				group.items.flatMap((item) =>
-					item.key && item.amount ? [[item.key, item.amount.text]] : []
-				)
-			)
-		)
-	);
-
-	/** Splits an ingredient reference around its amount, so the amount can use the numeral face. */
-	function around(text: string, key: string): [string, string, string] {
-		const amount = amounts.get(key);
-		const at = amount ? text.indexOf(amount) : -1;
-		if (!amount || at < 0) return [text, '', ''];
-		return [text.slice(0, at), amount, text.slice(at + amount.length)];
-	}
 </script>
 
 <section aria-labelledby="{id}-title">
@@ -74,31 +65,7 @@
 							onchange={() => ticks.toggle(`s:${number}`)}
 						/>
 						<div class="body">
-							<p>
-								{#each step.segments as segment, k (k)}
-									{#if segment.type === 'text'}{segment.text}{:else if segment.type === 'ingredient'}{@const [
-											before,
-											amount,
-											after
-										] = around(segment.text, segment.key)}<strong class="ref"
-											>{before}{#if amount}<span class="num">{amount}</span>{/if}{after}</strong
-										>{:else if segment.type === 'temp'}<span
-											class="temp num"
-											title={segment.gasMark && !segment.internal
-												? `Gas mark ${segment.gasMark}`
-												: undefined}
-											>{segment.text}{#if segment.gasMark && !segment.internal}<span
-													class="sr-only"
-												>
-													(gas mark {segment.gasMark})</span
-												>{/if}</span
-										>{:else}<Timer
-											minutes={segment.minMinutes}
-											text={segment.text}
-											name={segment.name}
-										/>{/if}
-								{/each}
-							</p>
+							<StepText {step} {recipe} {number} />
 							{#if step.hint}
 								<p class="hint"><Icon name="alert" size={16} />{step.hint}</p>
 							{/if}
@@ -229,15 +196,6 @@
 		display: grid;
 		gap: var(--space-1);
 		padding-block: calc((var(--target) - 1.6em) / 2);
-	}
-
-	.ref {
-		color: var(--colour-primary);
-		font-weight: 700;
-	}
-
-	.temp {
-		white-space: nowrap;
 	}
 
 	.hint {

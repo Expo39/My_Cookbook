@@ -102,4 +102,14 @@ export function formatShown(min: number, max: number, unit: Unit): string {
 	return low === high ? `${number(high)} ${label}` : `${number(low)}–${number(high)} ${label}`;
 }
 
+const AMOUNT =
+	/(?:\d[\d.,]*|[⅛¼⅓½⅔¾])[⅛¼⅓½⅔¾]?(?:\s?[–-]\s?(?:\d[\d.,]*|[⅛¼⅓½⅔¾])[⅛¼⅓½⅔¾]?)?(?:\s?(?:g|kg|ml|l|tsp|tbsp|cups?|oz|lb|fl oz|pinch(?:es)?)\b)?/;
+
+/** Splits a line around its first amount, so the amount can use the numeral face. */
+export function splitAmount(text: string): [string, string, string] {
+	const found = AMOUNT.exec(text);
+	if (!found) return [text, '', ''];
+	return [text.slice(0, found.index), found[0], text.slice(found.index + found[0].length)];
+}
+
 export const recipesText = (count: number): string => (count === 1 ? 'recipe' : 'recipes');

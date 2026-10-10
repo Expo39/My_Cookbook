@@ -15,7 +15,9 @@
 		canDecrease={model.view.servings > 1}
 		onstep={(direction) => model.step(direction)}
 	/>
-	<a class="cook" href={cookHref}><Icon name="play" size={18} />Start cooking</a>
+	<a class="cook" href={cookHref} data-sveltekit-keepfocus
+		><Icon name="play" size={18} />Start cooking</a
+	>
 	<button type="button" aria-label="Share this recipe" onclick={onshare}>
 		<Icon name="share" />
 	</button>

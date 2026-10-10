@@ -101,15 +101,17 @@ test('ticks stay between visits and can be reset', async ({ page }) => {
 	await expect(method(page).getByText('1 of 9')).toBeVisible();
 });
 
-test('a timer pill counts down and can be stopped', async ({ page }) => {
+test('a timer pill starts a timer that counts down and can be dismissed from the strip', async ({
+	page
+}) => {
 	await page.goto(brulee);
 	await waitForCore(page);
 	const pill = method(page).getByRole('button', { name: /Start 15–20 min timer/ });
 	await pill.click();
-	await expect(method(page).getByRole('button', { name: 'Stop the timer' }).first()).toHaveText(
-		/^\s*1[45]:\d\d$/
-	);
-	await method(page).getByRole('button', { name: 'Stop the timer' }).first().click();
+	const shown = method(page).getByRole('button', { name: /^Show the .* timer/ });
+	await expect(shown).toHaveText(/^\s*1[45]:\d\d$/);
+	const timers = page.getByRole('region', { name: 'Timers' });
+	await timers.getByRole('button', { name: /^Dismiss/ }).click();
 	await expect(pill).toBeVisible();
 });
 
