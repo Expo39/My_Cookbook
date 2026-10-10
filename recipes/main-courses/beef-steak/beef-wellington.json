@@ -124,7 +124,7 @@
       "text": "Brush the whole surface with the remaining egg yolk. Refrigerate for {timer:30}."
     },
     {
-      "text": "Bake at {temp:200} for {timer:20-25}, until the pastry is golden and the internal temperature reaches 52–55 °C for medium-rare."
+      "text": "Bake at {temp:200} for {timer:20-25}, until the pastry is golden and the internal temperature reaches {temp:52-55!} for medium-rare."
     },
     {
       "text": "Rest for {timer:15-20}. Slice the Wellington into thick portions and serve with the red wine sauce and Orange Asparagus."

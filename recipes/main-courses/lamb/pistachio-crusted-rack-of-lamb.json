@@ -122,7 +122,7 @@
       "text": "Press the pistachio and herb mixture firmly onto the mustard to form a thick crust."
     },
     {
-      "text": "Put the pan in the oven, or move the lamb to a roasting tray. Roast for {timer:18} for medium-rare (52–55 °C inside)."
+      "text": "Put the pan in the oven, or move the lamb to a roasting tray. Roast for {timer:18} for medium-rare ({temp:52-55!} inside)."
     },
     {
       "text": "Take out of the oven, cover loosely with foil and rest for {timer:8-10}."

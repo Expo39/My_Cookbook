@@ -134,7 +134,7 @@
       "text": "Preheat the oven to {temp:250}. Roast the porchetta for {timer:30}, until the skin starts to crackle."
     },
     {
-      "text": "Reduce the oven to {temp:120} and roast for another {timer:60}, until cooked through (70 °C inside)."
+      "text": "Reduce the oven to {temp:120} and roast for another {timer:60}, until cooked through ({temp:70!} inside)."
     },
     {
       "text": "Rest for {timer:15}. Remove the string, slice into thick rounds and serve hot."

@@ -2,6 +2,7 @@
   "title": "Pan-Seared Ribeye Steak",
   "summary": "A pan-seared ribeye for one. It takes longer than fillet, even though it is cooked less, because of its size and the fat that has to render.",
   "servings": 1,
+  "servingsNoun": { "one": "person", "other": "people" },
   "times": {
     "cook": 7,
     "rest": 5
@@ -79,7 +80,7 @@
       "text": "In the last {timer:1-2}, add the butter to the pan, with the thyme, garlic and rosemary if using. Tilt the pan and baste the steak continuously with the foaming butter, using a spoon."
     },
     {
-      "text": "Move to a plate and rest for at least {timer:5} before cutting. The internal temperature should be 52–55 °C for medium-rare."
+      "text": "Move to a plate and rest for at least {timer:5} before cutting. The internal temperature should be {temp:52-55!} for medium-rare."
     }
   ],
   "tips": [

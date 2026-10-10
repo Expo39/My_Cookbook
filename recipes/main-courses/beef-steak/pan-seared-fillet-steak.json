@@ -2,6 +2,7 @@
   "title": "Pan-Seared Fillet Steak",
   "summary": "A pan-seared fillet steak for one. It cooks faster than ribeye, even though you take it further, because it is leaner with less fat to render.",
   "servings": 1,
+  "servingsNoun": { "one": "person", "other": "people" },
   "times": {
     "cook": 10,
     "rest": 5
@@ -69,7 +70,7 @@
       "text": "Add the thyme, rosemary and garlic, if using, and baste the steak with the butter as it cooks, using a spoon."
     },
     {
-      "text": "Move to a plate and rest for {timer:5}. The internal temperature should be 57–60 °C for medium."
+      "text": "Move to a plate and rest for {timer:5}. The internal temperature should be {temp:57-60!} for medium."
     }
   ],
   "tips": [
