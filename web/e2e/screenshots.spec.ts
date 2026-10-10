@@ -1,4 +1,4 @@
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
 import { waitForCore } from './helpers';
@@ -58,7 +58,7 @@ test('writes screenshots of cook mode, the timer strip and the shopping list', a
 	await waitForCore(page).catch(() => page.waitForLoadState('networkidle'));
 	await page
 		.getByRole('dialog')
-		.getByRole('button', { name: /^Start 20–25 min timer/ })
+		.getByRole('button', { name: /^Start 20-25 min timer/ })
 		.click();
 	await page.screenshot({ path: join(out, 'cook-mode-375-dark.png') });
 
@@ -76,7 +76,7 @@ test('writes screenshots of cook mode, the timer strip and the shopping list', a
 	await page.goto(`${wellington}?serves=8`);
 	await waitForCore(page);
 	await page.getByRole('button', { name: /^Start 30 min timer/ }).click();
-	await page.getByRole('button', { name: /^Start 15–20 min timer/ }).click();
+	await page.getByRole('button', { name: /^Start 15-20 min timer/ }).click();
 	await page.screenshot({ path: join(out, 'timer-strip-1440-light.png') });
 	await page.setViewportSize({ width: 375, height: 812 });
 	await page.screenshot({ path: join(out, 'timer-strip-375-light.png') });
@@ -126,6 +126,13 @@ test('writes screenshots of the admin drawer and the editor', async ({ page }) =
 		salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
 		data: 'AAAA'
 	};
+	// The editor opens a recipe from GitHub, so serve the stored file the way the contents API does.
+	await page.route('https://api.github.com/**', (route) => {
+		const found = /\/contents\/recipes\/(.+)\.json$/.exec(new URL(route.request().url()).pathname);
+		if (!found) return route.fulfill({ status: 404, json: { message: 'Not Found' } });
+		const file = readFileSync(new URL(`../../recipes/${found[1]}.json`, import.meta.url));
+		return route.fulfill({ json: { sha: 'sha-stored', content: file.toString('base64') } });
+	});
 	const openDrawer = async () => {
 		await page.getByRole('button', { name: 'Settings' }).click();
 		await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
