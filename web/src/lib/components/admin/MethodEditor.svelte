@@ -14,19 +14,19 @@
 	let { ed }: { ed: EditorState } = $props();
 
 	/** Where the cursor was in each step's text when focus last left it. */
-	const cursors = new Map<string, { start: number; end: number }>();
+	const cursors: Record<string, { start: number; end: number }> = {};
 
 	function remember(uid: string, event: Event) {
 		const area = event.currentTarget as HTMLTextAreaElement;
-		cursors.set(uid, { start: area.selectionStart, end: area.selectionEnd });
+		cursors[uid] = { start: area.selectionStart, end: area.selectionEnd };
 	}
 
 	async function insert(index: number, token: string) {
 		const step = ed.form.steps[index];
-		const at = cursors.get(step.uid) ?? { start: step.text.length, end: step.text.length };
+		const at = cursors[step.uid] ?? { start: step.text.length, end: step.text.length };
 		const result = insertAt(step.text, at.start, at.end, token);
 		step.text = result.text;
-		cursors.set(step.uid, { start: result.caret, end: result.caret });
+		cursors[step.uid] = { start: result.caret, end: result.caret };
 		await tick();
 		const area = document.getElementById(fieldId(`steps[${index}].text`)) as HTMLTextAreaElement;
 		area?.focus();

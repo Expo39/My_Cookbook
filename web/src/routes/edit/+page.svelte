@@ -125,6 +125,7 @@
 	async function leave() {
 		leaving = true;
 		leaveDialog?.close();
+		// eslint-disable-next-line svelte/no-navigation-without-resolve -- SvelteKit already resolved this address
 		if (destination) await goto(destination);
 	}
 
