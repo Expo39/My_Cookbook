@@ -239,7 +239,7 @@ jobs:
   passed:
     name: CI passed
     if: always()
-    needs: [rust, content, core-artifacts, web, build, verify, e2e]
+    needs: [changes, rust, content, core-artifacts, web, build, verify, e2e]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
