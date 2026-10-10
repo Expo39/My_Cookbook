@@ -1,0 +1,143 @@
+{
+  "title": "Toni's Porchetta",
+  "summary": "Pork belly rolled around a rich filling of pork mince, chicken livers and herbs, then roasted to crisp crackling. For a special occasion or a Sunday roast.",
+  "servings": 6,
+  "times": {
+    "prep": 45,
+    "cook": 100,
+    "rest": 15
+  },
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1500,
+            "unit": "g"
+          },
+          "item": "pork belly",
+          "note": "skin scored"
+        },
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "g"
+          },
+          "item": "pork mince"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "chicken livers",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 50,
+            "unit": "g"
+          },
+          "item": "pine nuts"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "prefix": "Zest of",
+          "item": "lemon",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "onions",
+          "note": "finely chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 4
+          },
+          "item": "garlic cloves",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "fresh sage",
+          "note": "chopped"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "fresh rosemary",
+          "note": "chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh thyme leaves"
+        },
+        {
+          "food": "olive-oil",
+          "item": "Olive oil"
+        },
+        {
+          "item": "Salt and black pepper"
+        },
+        {
+          "item": "Kitchen string",
+          "note": "for tying"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Heat the olive oil in a frying pan and cook the onions and garlic until soft, about {timer:5}."
+    },
+    {
+      "text": "Add the pork mince and cook until browned. Add the chicken livers and cook for {timer:3-4}."
+    },
+    {
+      "text": "Stir in the pine nuts, lemon zest, sage, rosemary and thyme, and season well with salt and pepper. Take off the heat and leave to cool completely."
+    },
+    {
+      "text": "Lay the pork belly skin-side down on the work surface and lightly score the meat side with a knife."
+    },
+    {
+      "text": "Spread the cooled filling evenly over the meat, leaving a 2 cm border all round."
+    },
+    {
+      "text": "Roll up tightly from one long side, with the skin on the outside. Tie securely with kitchen string at 3 cm intervals."
+    },
+    {
+      "text": "Pat the skin very dry with kitchen paper. Slash it in a criss-cross pattern with a sharp knife, then rub it generously with salt and olive oil."
+    },
+    {
+      "text": "Set on a roasting rack and refrigerate, uncovered, for 2-4 hours or overnight to dry the skin further."
+    },
+    {
+      "text": "Preheat a fan oven to {temp:250}, or a conventional oven to its highest setting. Roast the porchetta for {timer:30}, until the skin starts to crackle."
+    },
+    {
+      "text": "Reduce the oven to {temp:140/120} and roast for another {timer:60}, until cooked through ({temp:70!} inside)."
+    },
+    {
+      "text": "Rest for {timer:15}. Remove the string, slice into thick rounds and serve hot."
+    }
+  ],
+  "tips": [
+    "The secret to good crackling is dry skin and a high initial heat. Pat the skin completely dry before scoring and salting. The overnight chill is optional but gives better crackling. Roll the belly tightly and make sure the string is secure at regular intervals. You can make the filling a day ahead. In Italy, porchetta is traditionally served at room temperature, which makes it ideal for gatherings."
+  ]
+}

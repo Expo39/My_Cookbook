@@ -1,0 +1,9 @@
+{
+  "title": "Broken soup",
+  "summary": "A soup with a colorful set of mistakes.",
+  "servings": 4,
+  "ingredientGroups": [
+    { "items": [{ "key": "stock", "amount": { "qty": 0, "unit": "l" }, "item": "stock" }] }
+  ],
+  "steps": [{ "text": "Heat {@broth}." }]
+}

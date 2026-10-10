@@ -1,0 +1,62 @@
+services:
+  dev:
+    image: my-cookbook-dev:local
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+      args:
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
+    working_dir: /work
+    volumes:
+      - .:/work
+      - cargo-registry:/home/dev/.cargo/registry
+      - cargo-git:/home/dev/.cargo/git
+      - cargo-target:/work/target
+      - pnpm-store:/home/dev/.local/share/pnpm
+      - web-node-modules:/work/web/node_modules
+    ports:
+      - "5173:5173"
+      - "8080:8080"
+    environment:
+      - BASE_PATH
+      - PUBLIC_BACKEND
+      - PUBLIC_SITE_URL
+      - PUBLIC_AI_ENDPOINT
+      - FULL_E2E
+      - CI
+      - GITHUB_SHA
+      - ADMIN_PASSWORD_HASH
+      - SESSION_SECRET
+      - GEMINI_API_KEY
+      - GEMINI_MODEL
+      - CLOUDFLARE_API_TOKEN
+      - CLOUDFLARE_ACCOUNT_ID
+      - npm_config_store_dir=/home/dev/.local/share/pnpm/store
+
+  selfhost:
+    profiles: [selfhost]
+    image: my-cookbook-server:local
+    build:
+      context: .
+      dockerfile: docker/server.Dockerfile
+      args:
+        HOST_UID: ${HOST_UID:-1000}
+        HOST_GID: ${HOST_GID:-1000}
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./recipes:/data/recipes
+      # To commit edits with git, set GIT_COMMIT=true and also mount the repository's history:
+      # - ./.git:/data/.git
+    ports:
+      - "${SELFHOST_PORT:-8080}:8080"
+    restart: unless-stopped
+
+volumes:
+  cargo-registry:
+  cargo-git:
+  cargo-target:
+  pnpm-store:
+  web-node-modules:

@@ -1,0 +1,11 @@
+# HTTPS in front of the self-hosted cookbook. Caddy fetches and renews the certificate by itself.
+# Replace the host name, and set TRUST_PROXY=true in .env so that rate limits see the real client address.
+cookbook.example.com {
+	reverse_proxy selfhost:8080
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Frame-Options "DENY"
+		Referrer-Policy "same-origin"
+	}
+}

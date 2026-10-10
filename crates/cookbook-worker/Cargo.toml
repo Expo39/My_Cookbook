@@ -1,0 +1,17 @@
+[package]
+name = "cookbook-worker"
+description = "Cloudflare Worker that proxies the sous-chef and the recipe importer to Gemini"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cookbook-ai = { path = "../cookbook-ai" }
+hmac = "=0.13.0"
+serde_json.workspace = true
+sha2 = "=0.11.0"
+worker = "=0.8.6"

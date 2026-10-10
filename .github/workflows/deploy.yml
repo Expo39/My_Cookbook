@@ -1,0 +1,56 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  actions: read
+
+jobs:
+  # A docs-only push skips the build jobs, so CI succeeds without a site to publish.
+  site:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    outputs:
+      built: ${{ steps.artifact.outputs.built }}
+    steps:
+      - id: artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.event.workflow_run.id }}/artifacts" \
+            --jq '[.artifacts[] | select(.name == "site" and (.expired | not))] | length')
+          echo "built=$([ "$count" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    needs: site
+    if: needs.site.outputs.built == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Take the site that CI built, tested and verified
+        uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: web/build
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: web/build
+      - id: deployment
+        uses: actions/deploy-pages@v5

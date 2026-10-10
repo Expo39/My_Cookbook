@@ -1,0 +1,81 @@
+{
+  "title": "Savoury Crepes",
+  "summary": "Thin French crepes with no sugar in the batter, unlike sweet dessert crepes. Use them to wrap a Beef Wellington or serve them with savoury fillings.",
+  "servings": 5,
+  "times": {
+    "prep": 10,
+    "cook": 25,
+    "rest": 30
+  },
+  "tags": [
+    "Savoury"
+  ],
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 125,
+            "unit": "g"
+          },
+          "item": "plain flour"
+        },
+        {
+          "food": "egg",
+          "amount": {
+            "qty": 2
+          },
+          "item": "eggs",
+          "scale": "discrete"
+        },
+        {
+          "food": "milk",
+          "amount": {
+            "qty": 250,
+            "unit": "ml"
+          },
+          "item": "milk"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 1.5,
+            "unit": "tbsp"
+          },
+          "item": "melted butter"
+        },
+        {
+          "item": "Pinch of salt"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Whisk the flour, eggs, milk, melted butter and salt in a bowl until smooth. Leave the batter to rest for {timer:30}."
+    },
+    {
+      "text": "Heat a non-stick frying pan over a medium-high heat and butter it lightly."
+    },
+    {
+      "text": "Pour a small ladleful of batter into the pan and swirl to coat the base thinly."
+    },
+    {
+      "text": "Cook for {timer:1-2}, until the edges start to brown, then flip and cook for another 30 seconds."
+    },
+    {
+      "text": "Stack the crepes on a plate with greaseproof paper between each one."
+    },
+    {
+      "text": "Leave to cool completely before using for a Wellington, or refrigerate overnight."
+    }
+  ],
+  "tips": [
+    "The key to thin crepes is to use very little batter and swirl it quickly. The first crepe is often imperfect; that is normal. You can make the crepes the day before and refrigerate them with greaseproof paper between each one. For a Wellington, you will need about 10 crepes to wrap a 1 kg fillet."
+  ],
+  "related": [
+    "main-courses/beef-steak/beef-wellington"
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "title": "Pan-Seared Ribeye Steak",
+  "summary": "A pan-seared ribeye for one. It takes longer than fillet, even though it is cooked less, because of its size and the fat that has to render.",
+  "servings": 1,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 5,
+    "cook": 7,
+    "rest": 5
+  },
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "g"
+          },
+          "item": "ribeye steak"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "vegetable or light olive oil"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "item": "Salt and black pepper"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "sprigs fresh thyme",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "sprigs rosemary",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "optional": true,
+          "scale": "discrete"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Take the steak out of the fridge {timer:30} before cooking. Pat it completely dry with kitchen paper and season both sides generously with salt and pepper."
+    },
+    {
+      "text": "Heat a frying pan over a medium-high heat with a light coat of oil until very hot."
+    },
+    {
+      "text": "Lay the steak in the pan and do not move it. Sear the first side for {timer:3-4}, until a deep brown crust forms."
+    },
+    {
+      "text": "Turn the steak and sear the second side for {timer:3}."
+    },
+    {
+      "text": "In the last {timer:1-2}, add the butter to the pan, with the thyme, garlic and rosemary if using. Tilt the pan and baste the steak continuously with the foaming butter, using a spoon."
+    },
+    {
+      "text": "Move to a plate and rest for at least {timer:5} before cutting. The internal temperature should be {temp:52-55!} for medium-rare."
+    }
+  ],
+  "tips": [
+    "Pat the steak completely dry before seasoning; moisture stops a good crust forming. Do not move the steak once it is in the pan. Basting with butter adds richness, and resting lets the juices redistribute. I love a large steak (300 g), but if you want to use smaller cuts, you can ask the AI assistant to adjust the cooking times."
+  ]
+}

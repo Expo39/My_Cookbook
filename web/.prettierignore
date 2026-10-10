@@ -1,0 +1,10 @@
+build/
+.svelte-kit/
+src/lib/wasm/
+playwright-report/
+test-results/
+pnpm-lock.yaml
+src/lib/types/recipe.ts
+static/data/
+static/cards/
+static/img/
