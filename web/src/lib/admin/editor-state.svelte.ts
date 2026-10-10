@@ -105,6 +105,11 @@ export class EditorState {
 	slug = $derived(this.form.slugTouched ? this.form.slug : slugify(this.form.title));
 	id = $derived(this.form.section ? `${this.form.section}/${this.slug}` : this.slug);
 
+	/** An existing recipe whose address, in the section or the slug, has been changed. */
+	get moving(): boolean {
+		return this.editing && this.id !== this.originalId;
+	}
+
 	/** The new folders the chosen section sits in, which are the only ones worth creating. */
 	neededSections = $derived(
 		this.form.newSections.filter(
@@ -152,7 +157,11 @@ export class EditorState {
 	}
 
 	built = $derived.by(() => {
-		const src = this.photo ? `${this.slug}.jpg` : undefined;
+		const src = this.photo
+			? `${this.slug}.jpg`
+			: this.moving && this.form.imageSrc
+				? `${this.slug}${this.form.imageSrc.slice(this.form.imageSrc.lastIndexOf('.'))}`
+				: undefined;
 		const { recipe, issues } = recipeFromForm(
 			$state.snapshot(this.form) as FormData,
 			src ? { src } : undefined
@@ -170,7 +179,7 @@ export class EditorState {
 			path,
 			recipe: id
 		}));
-		if (!this.editing && this.existingIds.includes(id)) {
+		if ((!this.editing || this.moving) && this.existingIds.includes(id)) {
 			local.push({
 				id: 'F-ID-EXISTS',
 				level: 'error',

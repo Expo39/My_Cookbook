@@ -1,8 +1,16 @@
 import { buildState, GitHubClient, type FileChange, type RepoRef } from '$lib/admin/github';
 import type { Recipe, Section } from '$lib/types/recipe';
 import { renderRecipe, renderSection } from './canonical';
+import { recipesLinkingTo, relink } from '$lib/admin/removal';
 import { RecipeNotFoundError } from './source';
-import { WriteError, type BuildStatus, type RecipeWriter, type SaveResult } from './writer';
+import { storedRecipes, type Site, type StoredRecipe } from './stored';
+import {
+	CHANGED_MESSAGE,
+	WriteError,
+	type BuildStatus,
+	type RecipeWriter,
+	type SaveResult
+} from './writer';
 
 const EXTENSIONS: Record<string, string> = {
 	'image/jpeg': 'jpg',
@@ -12,6 +20,12 @@ const EXTENSIONS: Record<string, string> = {
 
 const folderOf = (id: string) => id.slice(0, id.lastIndexOf('/'));
 const slugOf = (id: string) => id.slice(id.lastIndexOf('/') + 1);
+const extensionOf = (file: string) => file.slice(file.lastIndexOf('.'));
+
+const noSite = {
+	getIndex: async () => ({ sections: [] }),
+	getRecipe: () => Promise.reject(new Error('The deployed site is not available.'))
+};
 
 /**
  * Commits through the Git Data API, so a recipe, its photo and any new section land in a single
@@ -24,9 +38,16 @@ export class GitHubWriter implements RecipeWriter {
 	/** The blob sha each recipe had when it was read, which a later write must still find. */
 	#based = new Map<string, string>();
 
-	constructor(token: string, ref: RepoRef, fetcher?: typeof fetch) {
+	readonly #site: Site | undefined;
+
+	constructor(token: string, ref: RepoRef, fetcher?: typeof fetch, site?: Site) {
 		this.#client = new GitHubClient(token, fetcher);
 		this.#ref = ref;
+		this.#site = site;
+	}
+
+	readAll(): Promise<StoredRecipe[]> {
+		return storedRecipes(this.#client, this.#ref, this.#site ?? { source: noSite, built: '' });
 	}
 
 	async read(id: string): Promise<Recipe> {
@@ -42,7 +63,7 @@ export class GitHubWriter implements RecipeWriter {
 		if (current?.sha === expected) return;
 		throw new WriteError(
 			expected
-				? 'This recipe was changed on GitHub after you opened it. Nothing was saved. Reload the page and make the change again.'
+				? CHANGED_MESSAGE
 				: 'A recipe with this address already exists on GitHub. Nothing was saved. Change the address.',
 			'conflict'
 		);
@@ -89,6 +110,61 @@ export class GitHubWriter implements RecipeWriter {
 		this.#staged.clear();
 		this.#based.set(id, (await this.#client.file(this.#ref, path))?.sha ?? '');
 		return { id, commit };
+	}
+
+	async move(
+		from: string,
+		to: string,
+		recipe: Recipe,
+		extras: { previousImage?: string; photo?: Blob }
+	): Promise<SaveResult> {
+		await this.#expectUnchanged(from, this.#based.get(from));
+		await this.#expectUnchanged(to, undefined);
+
+		const oldFolder = `recipes/${folderOf(from)}`;
+		const newFolder = `recipes/${folderOf(to)}`;
+		const changes: FileChange[] = [];
+		let moved = recipe;
+		if (extras.photo) {
+			const { src } = await this.uploadImage(to, extras.photo);
+			moved = { ...recipe, image: { src, alt: recipe.image?.alt ?? '' } };
+		} else if (recipe.image && extras.previousImage) {
+			const src = `${slugOf(to)}${extensionOf(extras.previousImage)}`;
+			const photo = await this.#client.file(this.#ref, `${oldFolder}/${extras.previousImage}`);
+			if (!photo) {
+				throw new WriteError(
+					'The photo could not be found on GitHub. Nothing was moved.',
+					'failed'
+				);
+			}
+			changes.push({ path: `${newFolder}/${src}`, content: { sha: photo.sha } });
+			moved = { ...recipe, image: { ...recipe.image, src } };
+		}
+		if (extras.previousImage) {
+			changes.push({ path: `${oldFolder}/${extras.previousImage}`, content: null });
+		}
+
+		const linkers = recipesLinkingTo(from, await this.readAll());
+		for (const { id, recipe: linker } of linkers) {
+			changes.push({
+				path: `recipes/${id}.json`,
+				content: renderRecipe(relink(linker, from, to))
+			});
+		}
+		changes.push(
+			{ path: `recipes/${to}.json`, content: renderRecipe(moved) },
+			{ path: `recipes/${from}.json`, content: null }
+		);
+
+		const commit = await this.#client.commit(
+			this.#ref,
+			[...this.#staged.values(), ...changes],
+			`content(recipes): move ${recipe.title}`
+		);
+		this.#staged.clear();
+		this.#based.delete(from);
+		this.#based.set(to, (await this.#client.file(this.#ref, `recipes/${to}.json`))?.sha ?? '');
+		return { id: to, commit };
 	}
 
 	async remove(id: string, extras: { title: string; image?: string }): Promise<SaveResult> {

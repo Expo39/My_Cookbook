@@ -49,7 +49,7 @@ Settings → Editing also holds:
 
 The page has the details, where the recipe lives, a photo, ingredients, method, tips and related recipes, with a checklist and a live preview beside them. On a phone these are three tabs: Edit, Checks and Preview.
 
-- **Where it lives.** Pick a section from the tree, or add a new subsection (inside the chosen section or at the top level). New sections are created in the same commit as the recipe. The web address follows the title until you edit it. An existing recipe keeps its address and section; to move one, add it again and delete the old one.
+- **Where it lives.** Pick a section from the tree, or add a new subsection (inside the chosen section or at the top level). New sections are created in the same commit as the recipe. The web address follows the title until you edit it. Changing the section or the web address of an existing recipe moves it. The editor shows the old and new addresses, and one commit moves the file, renames its photo and points every recipe that listed it under related recipes at the new address. On the self-hosted server the same move is one request, followed by a save of any other edits.
 - **Photo.** Upload a JPEG, PNG or WebP. It is scaled to at most 1600 px wide and re-encoded as a JPEG in the browser, which also drops location data. Alt text is required. A photo narrower than 1200 px gets a warning.
 - **Ingredients.** Rows can be reordered by dragging or with the arrow buttons. **Paste ingredients** reads one ingredient per line with the same parser the site uses. Each row has a scaling mode, so salt can stay "to taste" and eggs stay whole.
 - **Method.** **Insert** adds an ingredient amount, a temperature or a timer to a step as a token (`{@flour}`, `{temp:180}`, `{timer:25}`). `docs/RECIPE_FORMAT.md` lists them.
@@ -69,7 +69,7 @@ If someone else pushed meanwhile, the editor builds on the newest commit and tri
 
 ### Deleting
 
-**Delete this recipe** first checks every other recipe. If any still lists it under related recipes, deleting is blocked and they are named, each with a link to edit it. Otherwise you type the recipe's title to confirm. The recipe file and its photo are removed in one commit; git keeps the history.
+**Delete this recipe** first checks every other recipe, as stored on GitHub now (the deployed data plus the recipes changed in commits that have not deployed yet), not only as the live site shows them. If any still lists it under related recipes, deleting is blocked and they are named, each with a link to edit it. Otherwise you type the recipe's title to confirm. The recipe file and its photo are removed in one commit; git keeps the history.
 
 ## Importing a recipe with AI
 
