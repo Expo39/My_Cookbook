@@ -15,7 +15,14 @@
 				<span>More recipes on Instagram <strong>{instagram.handle}</strong></span>
 			</a>
 		{/if}
-		<p class="copyright">Copyright 2026 Antonio</p>
+		<p class="copyright">
+			Copyright 2026 Antonio. Recipes and photos are shared under
+			<a
+				href="https://creativecommons.org/licenses/by-nc/4.0/"
+				rel="license noopener"
+				target="_blank">CC BY-NC 4.0</a
+			>.
+		</p>
 	</div>
 </footer>
 

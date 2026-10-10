@@ -19,6 +19,7 @@ Live site: <https://expo39.github.io/My_Cookbook/>
 - [Deployment](#deployment)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
+- [Licence](#licence)
 
 ## Overview
 
@@ -211,3 +212,7 @@ See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 ## Contributing
 
 Contributions go through a pull request into `main`, and the **CI passed** check must be green before a merge. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licence
+
+The source code is licensed under the [MIT licence](LICENSE). The recipes and photos in `recipes/` are licensed under [Creative Commons Attribution-NonCommercial 4.0](recipes/LICENSE.md) (CC BY-NC 4.0): they may be shared and adapted with credit for non-commercial purposes.

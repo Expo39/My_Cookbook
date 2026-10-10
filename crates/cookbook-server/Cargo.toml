@@ -3,6 +3,7 @@ name = "cookbook-server"
 description = "Axum server for self-hosting the cookbook with editing and the sous-chef"
 edition.workspace = true
 version.workspace = true
+license.workspace = true
 publish.workspace = true
 
 [dependencies]

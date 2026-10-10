@@ -3,6 +3,7 @@ name = "cookbook-ai"
 description = "Gemini request and response types and prompts, shared by the worker and the server"
 edition.workspace = true
 version.workspace = true
+license.workspace = true
 publish.workspace = true
 
 [dependencies]

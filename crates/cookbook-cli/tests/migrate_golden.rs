@@ -83,7 +83,7 @@ fn migrated() -> &'static BTreeMap<String, Vec<u8>> {
 
 fn parse_tree(tree: &BTreeMap<String, Vec<u8>>) -> BTreeMap<String, Recipe> {
     tree.iter()
-        .filter(|(path, _)| !path.ends_with("_section.json"))
+        .filter(|(path, _)| path.ends_with(".json") && !path.ends_with("_section.json"))
         .map(|(path, bytes)| {
             let id = path.strip_suffix(".json").unwrap().to_owned();
             let recipe = parse_recipe(std::str::from_utf8(bytes).unwrap()).unwrap();
