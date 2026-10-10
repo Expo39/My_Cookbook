@@ -248,6 +248,7 @@ fn convert(
     let mut steps: Vec<Step> = element
         .select(&selector(".method li"))
         .map(|li| Step {
+            heading: None,
             text: plain_text(li),
             key: (li.value().id() == Some("vanilla-method-step"))
                 .then(|| VANILLA_STEP_KEY.to_owned()),
@@ -256,6 +257,7 @@ fn convert(
         .collect();
     if steps.is_empty() {
         steps.push(Step {
+            heading: None,
             text: legacy_ids::NO_METHOD_STEP.to_owned(),
             key: None,
             time: None,

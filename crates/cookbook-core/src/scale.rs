@@ -172,6 +172,7 @@ pub struct ScaledGroup {
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ScaledStep {
+    pub heading: Option<String>,
     pub text: String,
     pub segments: Vec<RenderedSegment>,
     pub key: Option<String>,
@@ -521,6 +522,7 @@ pub fn scale(recipe: &Recipe, request: &ScaleRequest, options: &ScaleOptions) ->
                 step.time.is_some() || parsed.iter().any(|s| matches!(s, Segment::Timer { .. }));
             let segments = render_segments(&parsed, &flat, options.system);
             ScaledStep {
+                heading: step.heading.clone(),
                 text: render_text(&segments),
                 segments,
                 key: step.key.clone(),

@@ -180,6 +180,9 @@ pub enum ScaleMode {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct Step {
+    /// Starts a new titled stage of the method, e.g. "Day 1: the night before".
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub heading: Option<String>,
     pub text: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub key: Option<String>,

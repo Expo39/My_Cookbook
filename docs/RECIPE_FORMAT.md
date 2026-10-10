@@ -73,7 +73,7 @@ The Rust types in `crates/cookbook-core/src/schema.rs` are the source of truth. 
 Units: `g kg ml l tsp tbsp cup oz lb floz pinch`. With no unit the amount is a count, e.g. 2 eggs.
 
 ### Step
-`{ "text": string, "key"?: string, "time"?: { "active"?: minutes, "passive"?: minutes } }`. The per-step time drives the "serve at" planner. Inline tokens in `text`:
+`{ "heading"?: string, "text": string, "key"?: string, "time"?: { "active"?: minutes, "passive"?: minutes } }`. `heading` starts a titled stage of the method (e.g. "Day 1: the night before"); following steps belong to it until the next heading. The per-step time drives the "serve at" planner. Inline tokens in `text`:
 
 | token | renders as |
 |---|---|
