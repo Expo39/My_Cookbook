@@ -1,6 +1,9 @@
 import type { CheckResult, Recipe, Section } from '$lib/types/recipe';
 import { WriteError, type BuildStatus, type RecipeWriter, type SaveResult } from './writer';
 
+/** Photos already written, so a retry after a failed save does not send them again. */
+const written = new WeakMap<Blob, { id: string; src: string }>();
+
 /** Talks to `crates/cookbook-server`; the session cookie from `login` authorises each call. */
 export class ApiWriter implements RecipeWriter {
 	readonly #fetch: typeof fetch;
@@ -34,22 +37,34 @@ export class ApiWriter implements RecipeWriter {
 	}
 
 	async createSection(path: string, section: Section): Promise<void> {
-		await this.#send('/sections', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				path,
-				title: section.title,
-				...(section.order == null ? {} : { order: section.order }),
-				...(section.summary ? { summary: section.summary } : {})
-			})
-		});
+		try {
+			await this.#send('/sections', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					path,
+					title: section.title,
+					...(section.order == null ? {} : { order: section.order }),
+					...(section.summary ? { summary: section.summary } : {})
+				})
+			});
+		} catch (error) {
+			// A section written by an earlier attempt whose recipe then failed to save.
+			if (!(error instanceof WriteError && error.code === 'exists')) throw error;
+		}
 	}
 
 	async uploadImage(id: string, file: Blob): Promise<{ src: string }> {
+		const earlier = written.get(file);
+		if (earlier?.id === id) return { src: earlier.src };
 		const form = new FormData();
 		form.append('file', file, 'photo');
-		return this.#send<{ src: string }>(`/images/${id}`, { method: 'POST', body: form });
+		const { src } = await this.#send<{ src: string }>(`/images/${id}`, {
+			method: 'POST',
+			body: form
+		});
+		written.set(file, { id, src });
+		return { src };
 	}
 
 	async save(id: string, recipe: Recipe): Promise<SaveResult> {
