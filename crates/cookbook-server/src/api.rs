@@ -15,6 +15,7 @@ use cookbook_core::{
 };
 use serde::Deserialize;
 use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
 
 use crate::{
     auth,
@@ -69,6 +70,61 @@ fn relative(id: &str, suffix: &str) -> String {
     format!("recipes/{id}{suffix}")
 }
 
+/// The quoted hex SHA-256 of a file's bytes, which is the recipe's version.
+fn etag_of(bytes: &[u8]) -> String {
+    let digest = Sha256::digest(bytes);
+    let hex: String = digest.iter().map(|b| format!("{b:02x}")).collect();
+    format!("\"{hex}\"")
+}
+
+async fn current_etag(path: &FsPath) -> Option<String> {
+    tokio::fs::read(path)
+        .await
+        .ok()
+        .map(|bytes| etag_of(&bytes))
+}
+
+fn with_etag(etag: &str, response: Response) -> Response {
+    let mut response = response;
+    if let Ok(value) = etag.parse() {
+        response.headers_mut().insert(header::ETAG, value);
+    }
+    response
+}
+
+fn conflict() -> Failure {
+    Failure::new(
+        StatusCode::PRECONDITION_FAILED,
+        "conflict",
+        "This recipe was changed after you opened it. Nothing was saved. Reload the page and make the change again.",
+    )
+}
+
+fn header_text<'a>(headers: &'a HeaderMap, name: header::HeaderName) -> Option<&'a str> {
+    headers.get(name).map(|v| v.to_str().unwrap_or_default())
+}
+
+/// Applies `If-Match` and `If-None-Match: *` to the file's current ETag, `None` when it does not exist.
+fn check_preconditions(headers: &HeaderMap, current: Option<&str>) -> ApiResult<()> {
+    if let Some(wanted) = header_text(headers, header::IF_MATCH) {
+        let matches = current.is_some_and(|etag| {
+            wanted.split(',').map(str::trim).any(|candidate| {
+                candidate == "*" || candidate.strip_prefix("W/").unwrap_or(candidate) == etag
+            })
+        });
+        if !matches {
+            return Err(conflict());
+        }
+    }
+    if let Some(unwanted) = header_text(headers, header::IF_NONE_MATCH)
+        && current.is_some()
+        && unwanted.split(',').any(|candidate| candidate.trim() == "*")
+    {
+        return Err(conflict());
+    }
+    Ok(())
+}
+
 pub async fn index(State(state): Shared) -> Response {
     Json(&state.snapshot().site.index).into_response()
 }
@@ -84,7 +140,10 @@ pub async fn recipe(State(state): Shared, Path(id): Path<String>) -> ApiResult {
         .recipes
         .get(&id)
         .ok_or_else(Failure::not_found)?;
-    Ok(Json(data).into_response())
+    let bytes = tokio::fs::read(state.config.recipes_dir().join(format!("{id}.json")))
+        .await
+        .map_err(|_| Failure::not_found())?;
+    Ok(with_etag(&etag_of(&bytes), Json(data).into_response()))
 }
 
 #[derive(Deserialize)]
@@ -117,6 +176,7 @@ pub async fn put_recipe(
     State(state): Shared,
     _auth: Authed,
     Path(id): Path<String>,
+    headers: HeaderMap,
     body: Bytes,
 ) -> ApiResult {
     if !is_valid_path(&id) {
@@ -127,6 +187,8 @@ pub async fn put_recipe(
     let recipe = parse_recipe(text).map_err(|e| schema_failure(&id, &e.to_string()))?;
 
     let _guard = state.write_lock.lock().await;
+    let target = state.config.recipes_dir().join(format!("{id}.json"));
+    check_preconditions(&headers, current_etag(&target).await.as_deref())?;
     let mut collection = state.snapshot().collection.clone();
     let file = RecipeFile {
         path: format!("{id}.json"),
@@ -146,7 +208,7 @@ pub async fn put_recipe(
     }
 
     let rendered = cookbook_tree::render_json(&file.recipe).map_err(|_| Failure::internal())?;
-    write_atomic(&state.config.recipes_dir().join(&file.path), &rendered).await?;
+    write_atomic(&target, &rendered).await?;
     state.reload().await?;
     state
         .commit(
@@ -154,7 +216,10 @@ pub async fn put_recipe(
             &format!("content(recipes): save {id}"),
         )
         .await;
-    Ok(Json(json!({ "id": id, "results": results })).into_response())
+    Ok(with_etag(
+        &etag_of(rendered.as_bytes()),
+        Json(json!({ "id": id, "results": results })).into_response(),
+    ))
 }
 
 /// The photo (relative to the recipes folder) that only the recipe being removed uses.
@@ -180,12 +245,17 @@ pub async fn delete_recipe(
     State(state): Shared,
     _auth: Authed,
     Path(id): Path<String>,
+    headers: HeaderMap,
 ) -> ApiResult {
     if !is_valid_path(&id) {
         return Err(Failure::invalid_id());
     }
     let _guard = state.write_lock.lock().await;
+    let target = state.config.recipes_dir().join(format!("{id}.json"));
     let collection = state.snapshot().collection.clone();
+    if headers.contains_key(header::IF_MATCH) || headers.contains_key(header::IF_NONE_MATCH) {
+        check_preconditions(&headers, current_etag(&target).await.as_deref())?;
+    }
     if !collection.recipes.iter().any(|r| r.id() == id) {
         return Err(Failure::not_found());
     }
@@ -199,7 +269,7 @@ pub async fn delete_recipe(
         ));
     }
     let photo = orphaned_photo(&id, &collection);
-    tokio::fs::remove_file(state.config.recipes_dir().join(format!("{id}.json")))
+    tokio::fs::remove_file(&target)
         .await
         .map_err(|_| Failure::internal())?;
     let mut paths = vec![relative(&id, ".json")];

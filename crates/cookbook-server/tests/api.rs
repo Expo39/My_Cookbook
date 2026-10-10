@@ -170,6 +170,31 @@ impl Kitchen {
         self.send(builder.body(body).unwrap()).await
     }
 
+    async fn call_with(
+        &self,
+        method: Method,
+        uri: &str,
+        cookie: &str,
+        headers: &[(&str, &str)],
+        body: Option<Value>,
+    ) -> Reply {
+        let mut builder = Request::builder()
+            .method(method)
+            .uri(uri)
+            .header(header::COOKIE, cookie);
+        for (name, value) in headers {
+            builder = builder.header(*name, *value);
+        }
+        let body = match body {
+            Some(value) => {
+                builder = builder.header(header::CONTENT_TYPE, "application/json");
+                Body::from(value.to_string())
+            }
+            None => Body::empty(),
+        };
+        self.send(builder.body(body).unwrap()).await
+    }
+
     async fn get(&self, uri: &str) -> Reply {
         self.call(Method::GET, uri, None, None).await
     }
@@ -848,4 +873,138 @@ async fn the_site_is_served_with_a_spa_fallback_and_cache_headers() {
 
     let escape = k.get("/%2e%2e/%2e%2e/etc/passwd").await;
     assert!(!String::from_utf8_lossy(&escape.body).contains("root:"));
+}
+
+fn etag(reply: &Reply) -> String {
+    reply.headers[header::ETAG].to_str().unwrap().to_owned()
+}
+
+const CONFLICT: &str = "This recipe was changed after you opened it. Nothing was saved. Reload the page and make the change again.";
+
+#[tokio::test]
+async fn a_recipe_carries_an_etag_that_changes_when_it_is_saved() {
+    let k = kitchen();
+    let cookie = k.login().await;
+    let first = k.get("/api/recipes/mains/lentil-soup").await;
+    let tag = etag(&first);
+    let bytes = fs::read(k.path("recipes/mains/lentil-soup.json")).unwrap();
+    let digest: String = {
+        use sha2::{Digest, Sha256};
+        Sha256::digest(&bytes)
+            .iter()
+            .map(|b| format!("{b:02x}"))
+            .collect()
+    };
+    assert_eq!(tag, format!("\"{digest}\""));
+    assert_eq!(etag(&k.get("/api/recipes/mains/lentil-soup").await), tag);
+
+    let saved = k
+        .call(
+            Method::PUT,
+            "/api/recipes/mains/lentil-soup",
+            Some(&cookie),
+            Some(recipe(json!({ "title": "Lentil soup, again" }))),
+        )
+        .await;
+    assert_eq!(saved.status, StatusCode::OK);
+    let fresh = etag(&k.get("/api/recipes/mains/lentil-soup").await);
+    assert_ne!(fresh, tag);
+    assert_eq!(etag(&saved), fresh);
+}
+
+#[tokio::test]
+async fn a_stale_if_match_is_refused_for_saving_and_deleting() {
+    let k = kitchen();
+    let cookie = k.login().await;
+    let uri = "/api/recipes/mains/lentil-soup";
+    let tag = etag(&k.get(uri).await);
+    let before = fs::read(k.path("recipes/mains/lentil-soup.json")).unwrap();
+
+    let stale = "\"0000\"";
+    let put = k
+        .call_with(
+            Method::PUT,
+            uri,
+            &cookie,
+            &[("if-match", stale)],
+            Some(recipe(json!({ "title": "Changed" }))),
+        )
+        .await;
+    assert_eq!(put.status, StatusCode::PRECONDITION_FAILED);
+    assert_eq!(put.json()["error"], "conflict");
+    assert_eq!(put.json()["message"], CONFLICT);
+    let delete = k
+        .call_with(Method::DELETE, uri, &cookie, &[("if-match", stale)], None)
+        .await;
+    assert_eq!(delete.status, StatusCode::PRECONDITION_FAILED);
+    assert_eq!(delete.json()["error"], "conflict");
+    assert_eq!(
+        fs::read(k.path("recipes/mains/lentil-soup.json")).unwrap(),
+        before
+    );
+
+    let missing = k
+        .call_with(
+            Method::PUT,
+            "/api/recipes/mains/nothing-here",
+            &cookie,
+            &[("if-match", &tag)],
+            Some(recipe(json!({}))),
+        )
+        .await;
+    assert_eq!(missing.status, StatusCode::PRECONDITION_FAILED);
+    assert!(!k.path("recipes/mains/nothing-here.json").exists());
+
+    let put = k
+        .call_with(
+            Method::PUT,
+            uri,
+            &cookie,
+            &[("if-match", &tag)],
+            Some(recipe(json!({ "title": "Changed" }))),
+        )
+        .await;
+    assert_eq!(put.status, StatusCode::OK);
+    let delete = k
+        .call_with(Method::DELETE, uri, &cookie, &[("if-match", &tag)], None)
+        .await;
+    assert_eq!(delete.status, StatusCode::PRECONDITION_FAILED);
+    assert!(k.path("recipes/mains/lentil-soup.json").exists());
+    let delete = k
+        .call_with(
+            Method::DELETE,
+            uri,
+            &cookie,
+            &[("if-match", &etag(&put))],
+            None,
+        )
+        .await;
+    assert_eq!(delete.status, StatusCode::OK);
+}
+
+#[tokio::test]
+async fn if_none_match_star_creates_only_when_the_recipe_is_new() {
+    let k = kitchen();
+    let cookie = k.login().await;
+    let existing = k
+        .call_with(
+            Method::PUT,
+            "/api/recipes/mains/lentil-soup",
+            &cookie,
+            &[("if-none-match", "*")],
+            Some(recipe(json!({}))),
+        )
+        .await;
+    assert_eq!(existing.status, StatusCode::PRECONDITION_FAILED);
+    assert_eq!(existing.json()["error"], "conflict");
+    let created = k
+        .call_with(
+            Method::PUT,
+            "/api/recipes/mains/chickpea-stew",
+            &cookie,
+            &[("if-none-match", "*")],
+            Some(recipe(json!({}))),
+        )
+        .await;
+    assert_eq!(created.status, StatusCode::OK);
 }
