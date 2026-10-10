@@ -98,8 +98,11 @@ fn committed() -> BTreeMap<String, Recipe> {
     parse_tree(&read_tree(&root().join("recipes")))
 }
 
-/// The one recipe whose method was written after the migration: the legacy page had none.
-const CHARCUTERIE: &str = "first-courses/platters/charcuterie-board-for-10";
+/// Recipes renamed after the migration: (migrated id, committed id).
+const RENAMED: &[(&str, &str)] = &[(
+    "main-courses/rice-grain-bowls/korean-ground-beef-bowl",
+    "main-courses/rice-grain-bowls/korean-beef-mince-bowl",
+)];
 
 fn legacy_page() -> Html {
     Html::parse_document(&fs::read_to_string(root().join("index.html")).unwrap())
@@ -114,7 +117,11 @@ fn pairs<'a>(
         .map(|element| {
             let legacy = element.value().id().unwrap();
             let entry = LEGACY_RECIPES.iter().find(|r| r.legacy == legacy).unwrap();
-            (element, &migrated[entry.id], entry.legacy, entry.id)
+            let recipe = migrated.get(entry.id).unwrap_or_else(|| {
+                let (_, renamed) = RENAMED.iter().find(|(from, _)| *from == entry.id).unwrap();
+                &migrated[*renamed]
+            });
+            (element, recipe, entry.legacy, entry.id)
         })
         .collect()
 }
@@ -172,24 +179,19 @@ fn counts_match_the_legacy_page() {
     }
 }
 
-/// The copy edit may reword everything, but it keeps every ingredient and step. Tips can only
-/// grow (intro material moved out of the summary), and charcuterie gained a written method.
+/// Edits may reword everything and add ingredients, steps or tips, but never lose what the
+/// legacy page had.
 #[test]
 fn committed_recipes_keep_the_legacy_counts() {
     let (page, committed) = (legacy_page(), committed());
     assert_eq!(committed.len(), 19);
-    for (element, recipe, legacy, id) in pairs(&page, &committed) {
+    for (element, recipe, legacy, _) in pairs(&page, &committed) {
         let want = legacy_counts(element);
-        assert_eq!(
-            recipe.ingredients().count(),
-            want.ingredients,
+        assert!(
+            recipe.ingredients().count() >= want.ingredients,
             "{legacy}: ingredients"
         );
-        if id == CHARCUTERIE {
-            assert!(recipe.steps.len() >= want.steps, "{legacy}: steps");
-        } else {
-            assert_eq!(recipe.steps.len(), want.steps, "{legacy}: steps");
-        }
+        assert!(recipe.steps.len() >= want.steps, "{legacy}: steps");
         assert!(recipe.tips.len() >= want.tips, "{legacy}: tips");
     }
 }

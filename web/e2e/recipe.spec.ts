@@ -132,7 +132,7 @@ test('scaling to a pan and by an ingredient work from the extra controls', async
 	await page.getByLabel('Unit').selectOption('ml');
 	await page.getByRole('button', { name: 'Scale to this' }).click();
 	await expect(page.getByText('Scaled ×2')).toBeVisible();
-	await expect(page).toHaveURL(/have=heavy-cream:1000ml/);
+	await expect(page).toHaveURL(/have=double-cream:1000ml/);
 
 	await page.getByLabel('Amount').fill('');
 	await page.getByRole('button', { name: 'Scale to this' }).click();
@@ -144,7 +144,7 @@ test('the recipe page is structured data for search engines', async ({ page }) =
 	const ld = await page.locator('script[type="application/ld+json"]').textContent();
 	const parsed = JSON.parse(ld ?? '{}');
 	expect(parsed['@type']).toBe('Recipe');
-	expect(parsed.recipeIngredient).toContain('500 ml heavy cream');
+	expect(parsed.recipeIngredient).toContain('500 ml double cream');
 	await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', /creme-brulee$/);
 });
 
@@ -152,7 +152,7 @@ test('step text joins exactly as written around timers, and a redundant alt is n
 	page
 }) => {
 	await page.goto('main-courses/beef-steak/beef-wellington');
-	await expect(method(page)).toContainText('Chill for 15 min.');
+	await expect(method(page)).toContainText('chill for 15 min, until it has set.');
 	await expect(method(page)).toContainText('Rest for 15–20 min. Slice');
 	await expect(ingredients(page)).toContainText('1 kg chateaubriand beef fillet');
 	await expect(ingredients(page)).not.toContainText('(1 kg)');

@@ -3,6 +3,7 @@
   "summary": "The pasta cooks straight in the tomato sauce, a rustic method that gives a creamy dish and lets the pasta absorb all the flavour.",
   "servings": 4,
   "times": {
+    "prep": 10,
     "cook": 25
   },
   "tags": [

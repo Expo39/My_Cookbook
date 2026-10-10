@@ -3,6 +3,7 @@
   "summary": "Crisp breaded chicken cutlets with a rich Japanese curry sauce.",
   "servings": 2,
   "times": {
+    "prep": 20,
     "cook": 30
   },
   "tags": [
@@ -46,31 +47,35 @@
         },
         {
           "amount": {
-            "qty": 1,
+            "qty": 0.5,
             "unit": "tsp"
           },
           "item": "paprika"
         },
         {
           "amount": {
-            "qty": 1,
+            "qty": 0.5,
             "unit": "tsp"
           },
           "item": "turmeric"
         },
         {
           "amount": {
-            "qty": 1,
+            "qty": 0.5,
             "unit": "tsp"
           },
           "item": "garam masala"
         },
         {
           "amount": {
-            "qty": 1,
+            "qty": 0.5,
             "unit": "tsp"
           },
           "item": "curry powder"
+        },
+        {
+          "item": "Salt and black pepper",
+          "scale": "toTaste"
         }
       ]
     },
@@ -133,24 +138,72 @@
           "scale": "discrete"
         },
         {
-          "item": "Spices from the breading list",
-          "note": "paprika, turmeric, garam masala, curry powder"
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "curry powder"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "garam masala"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "paprika"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "turmeric"
+        }
+      ]
+    },
+    {
+      "name": "To serve",
+      "items": [
+        {
+          "amount": {
+            "qty": 160,
+            "unit": "g"
+          },
+          "item": "Japanese short-grain or jasmine rice",
+          "note": "uncooked, about 80 g per person"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "spring onions",
+          "note": "thinly sliced",
+          "scale": "discrete"
         }
       ]
     }
   ],
   "steps": [
     {
+      "text": "Rinse the rice until the water runs clear, then cook it according to the packet instructions and keep it warm."
+    },
+    {
       "text": "Butterfly the chicken breasts to make them thinner, and season with salt and pepper."
     },
     {
-      "text": "Set up a breading station: the flour mixed with the spices, the beaten eggs and the panko breadcrumbs."
+      "text": "Set up a breading station: the flour mixed with the breading spices, the beaten eggs and the panko breadcrumbs."
     },
     {
       "text": "Coat each piece of chicken in flour, then egg, then breadcrumbs, pressing firmly."
     },
     {
-      "text": "Set the breaded chicken on a rack over a baking tray. Bake at {temp:180} for {timer:15|katsu}, until golden and cooked through."
+      "text": "Set the breaded chicken on a rack over a baking tray. Bake at {temp:200/180} for {timer:15|katsu}, until golden and cooked through."
     },
     {
       "text": "For the curry, cook the onions in the butter with the ground cloves over a medium heat for at least {timer:20|onions}, stirring often, until deeply caramelised."
@@ -159,7 +212,7 @@
       "text": "Lift out the onions for now. Add the flour and butter to the pan and cook for {timer:2-3} to make a roux."
     },
     {
-      "text": "Add the spices (paprika, turmeric, garam masala and curry powder) and cook for {timer:1}, until fragrant."
+      "text": "Add the sauce spices (curry powder, garam masala, paprika and turmeric) and cook for {timer:1}, until fragrant."
     },
     {
       "text": "Return the onions to the pan, with the apple slices if using. Sauté together for {timer:2-3}."
@@ -171,7 +224,7 @@
       "text": "If the onions have not melted completely, blend the curry until smooth."
     },
     {
-      "text": "Slice the katsu and serve over rice with the curry sauce poured over. Garnish with spring onions, if you like."
+      "text": "Slice the katsu and serve over the rice with the curry sauce poured over. Scatter with the spring onions."
     }
   ],
   "tips": [

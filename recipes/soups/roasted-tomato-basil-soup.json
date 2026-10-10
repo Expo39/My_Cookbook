@@ -3,6 +3,7 @@
   "summary": "A make-ahead starter that tastes better the next day, once the flavours have melded. Light and acidic, it will not sit heavily before a rich main course.",
   "servings": 10,
   "times": {
+    "prep": 15,
     "cook": 55
   },
   "order": 1,
@@ -99,7 +100,7 @@
   ],
   "steps": [
     {
-      "text": "Preheat the oven to {temp:200}. Put the tomatoes cut-side up on a large baking tray and add the onions, red pepper and whole garlic bulb."
+      "text": "Preheat the oven to {temp:220/200}. Put the tomatoes cut-side up on a large baking tray and add the onions, red pepper and whole garlic bulb."
     },
     {
       "text": "Drizzle with the olive oil and balsamic vinegar, and sprinkle with the sugar, salt and pepper."

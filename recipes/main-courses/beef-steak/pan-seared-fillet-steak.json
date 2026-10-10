@@ -2,8 +2,12 @@
   "title": "Pan-Seared Fillet Steak",
   "summary": "A pan-seared fillet steak for one. It cooks faster than ribeye, even though you take it further, because it is leaner with less fat to render.",
   "servings": 1,
-  "servingsNoun": { "one": "person", "other": "people" },
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
   "times": {
+    "prep": 5,
     "cook": 10,
     "rest": 5
   },

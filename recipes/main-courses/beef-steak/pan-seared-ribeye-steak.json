@@ -2,8 +2,12 @@
   "title": "Pan-Seared Ribeye Steak",
   "summary": "A pan-seared ribeye for one. It takes longer than fillet, even though it is cooked less, because of its size and the fat that has to render.",
   "servings": 1,
-  "servingsNoun": { "one": "person", "other": "people" },
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
   "times": {
+    "prep": 5,
     "cook": 7,
     "rest": 5
   },

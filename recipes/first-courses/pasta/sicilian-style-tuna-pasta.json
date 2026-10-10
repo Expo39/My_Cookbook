@@ -3,6 +3,7 @@
   "summary": "A classic Sicilian combination with bold, briny flavours. The anchovies melt into the sauce and add depth without tasting fishy.",
   "servings": 2,
   "times": {
+    "prep": 10,
     "cook": 20
   },
   "tags": [

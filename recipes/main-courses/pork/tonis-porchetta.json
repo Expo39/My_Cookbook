@@ -3,6 +3,7 @@
   "summary": "Pork belly rolled around a rich filling of pork mince, chicken livers and herbs, then roasted to crisp crackling. For a special occasion or a Sunday roast.",
   "servings": 6,
   "times": {
+    "prep": 45,
     "cook": 100,
     "rest": 15
   },
@@ -121,16 +122,16 @@
       "text": "Roll up tightly from one long side, with the skin on the outside. Tie securely with kitchen string at 3 cm intervals."
     },
     {
-      "text": "Pat the skin very dry with kitchen paper and rub it generously with salt and olive oil. Slash the skin in a criss-cross pattern with a sharp knife."
+      "text": "Pat the skin very dry with kitchen paper. Slash it in a criss-cross pattern with a sharp knife, then rub it generously with salt and olive oil."
     },
     {
       "text": "Set on a roasting rack and refrigerate, uncovered, for 2–4 hours or overnight to dry the skin further."
     },
     {
-      "text": "Preheat the oven to {temp:250}. Roast the porchetta for {timer:30}, until the skin starts to crackle."
+      "text": "Preheat a fan oven to {temp:250}, or a conventional oven to its highest setting. Roast the porchetta for {timer:30}, until the skin starts to crackle."
     },
     {
-      "text": "Reduce the oven to {temp:120} and roast for another {timer:60}, until cooked through ({temp:70!} inside)."
+      "text": "Reduce the oven to {temp:140/120} and roast for another {timer:60}, until cooked through ({temp:70!} inside)."
     },
     {
       "text": "Rest for {timer:15}. Remove the string, slice into thick rounds and serve hot."

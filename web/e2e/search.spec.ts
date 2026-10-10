@@ -28,7 +28,7 @@ test('the ingredients mode ranks recipes by how much of them the cook has', asyn
 	await page.getByRole('radio', { name: 'I have these ingredients' }).check();
 	await page
 		.getByLabel('Ingredients you have')
-		.fill('heavy cream, egg yolks, caster sugar, vanilla');
+		.fill('double cream, egg yolks, caster sugar, vanilla');
 	const first = page.getByRole('article').first();
 	await expect(first.getByRole('link')).toHaveText('Crème Brûlée');
 	await expect(first.getByText(/\d+ of \d+/)).toBeVisible();

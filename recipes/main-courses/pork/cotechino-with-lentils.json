@@ -3,6 +3,7 @@
   "summary": "Italian tradition says lentils bring prosperity in the new year. The pairing is rich and satisfying, and a little cotechino goes a long way.",
   "servings": 4,
   "times": {
+    "prep": 10,
     "cook": 45
   },
   "order": 1,

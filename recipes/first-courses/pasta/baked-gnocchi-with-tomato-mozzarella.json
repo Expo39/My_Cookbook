@@ -3,6 +3,7 @@
   "summary": "Baked gnocchi that never turns watery. The secret is crushed tomatoes and a long simmer to concentrate the sauce before the gnocchi go in.",
   "servings": 4,
   "times": {
+    "prep": 10,
     "cook": 45
   },
   "tags": [

@@ -1,8 +1,9 @@
 {
   "title": "Savoury Crepes",
-  "summary": "Thin, delicate French crepes for wrapping a Beef Wellington or serving as a side. In a Wellington they form a moisture barrier between the duxelles and the pastry.",
+  "summary": "Thin French crepes with no sugar in the batter, unlike sweet dessert crepes. Use them to wrap a Beef Wellington or serve them with savoury fillings.",
   "servings": 5,
   "times": {
+    "prep": 10,
     "cook": 25,
     "rest": 30
   },
@@ -73,5 +74,8 @@
   ],
   "related": [
     "main-courses/beef-steak/beef-wellington"
+  ],
+  "tags": [
+    "Savoury"
   ]
 }

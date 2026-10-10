@@ -151,6 +151,9 @@
     }
   ],
   "tips": [
-    "Dips add variety and help stretch the portions. When the board is the main event, a total of 180–200 g per person ensures guests leave satisfied. Arrange everything in clusters rather than rows for visual appeal."
-  ]
+    "Dips add variety and help stretch the portions. When the board is the main event, 150–200 g per person ensures guests leave satisfied. Arrange everything in clusters rather than rows for visual appeal."
+  ],
+  "times": {
+    "prep": 30
+  }
 }

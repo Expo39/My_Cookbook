@@ -3,6 +3,7 @@
   "summary": "A showstopper for five. Most of the work is done the day before, so assembly day is manageable.",
   "servings": 5,
   "times": {
+    "prep": 60,
     "cook": 95,
     "rest": 20
   },
@@ -105,16 +106,16 @@
     },
     {
       "heading": "Day 2: assembly, 3–4 hours before serving",
-      "text": "Roll the puff pastry out into a large rectangle. If using crepes, lay them overlapping on a sheet of cling film."
+      "text": "Lay a large sheet of cling film on the work surface. If using crepes, lay them on it, overlapping."
     },
     {
-      "text": "Spread the duxelles over the pastry, or over the crepes if using, and lay the Parma ham slices on top."
+      "text": "Spread the duxelles over the cling film, or over the crepes if using, and lay the Parma ham slices on top."
     },
     {
-      "text": "Place the beef fillet in the centre and use the cling film to roll it tightly into a sausage shape. Chill for {timer:15}."
+      "text": "Place the beef fillet in the centre and use the cling film to roll everything tightly around it into a sausage shape. Twist the ends to seal and chill for {timer:15}, until it has set."
     },
     {
-      "text": "Unwrap it onto the pastry (if using crepes, place the crepe-wrapped beef on the pastry). Wrap the pastry around the beef, sealing the edges with egg wash, and score the top decoratively."
+      "text": "Roll the puff pastry out into a large rectangle. Unwrap the beef parcel onto the pastry, wrap the pastry around it, seal the edges with egg wash and score the top decoratively."
     },
     {
       "text": "Brush the whole surface with the remaining egg yolk. Refrigerate for {timer:30}."

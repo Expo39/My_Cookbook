@@ -3,6 +3,7 @@
   "summary": "Seared beef and tagliatelle in an indulgent Boursin sauce. Comfort food, elegant enough for guests.",
   "servings": 4,
   "times": {
+    "prep": 10,
     "cook": 25
   },
   "tags": [
@@ -62,7 +63,7 @@
             "unit": "g"
           },
           "item": "Boursin cheese",
-          "note": "or cream cheese"
+          "note": "or cream cheese or mascarpone"
         },
         {
           "amount": {
@@ -133,6 +134,6 @@
     }
   ],
   "tips": [
-    "Cream cheese is a good substitute for Boursin. Do not overcrowd the pan when searing: meat tastes better when it is well seared. Lift the pasta straight into the sauce with tongs; the pasta water binds everything together."
+    "Cream cheese or mascarpone are good substitutes for Boursin. Do not overcrowd the pan when searing: meat tastes better when it is well seared. Lift the pasta straight into the sauce with tongs; the pasta water binds everything together."
   ]
 }

@@ -3,6 +3,7 @@
   "summary": "Rack of lamb under a fragrant herb and pistachio crust. Quick to cook and impressive on the plate, for a special dinner. Serve with mashed potatoes and grilled asparagus.",
   "servings": 2,
   "times": {
+    "prep": 15,
     "cook": 25,
     "rest": 10
   },

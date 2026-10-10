@@ -3,6 +3,7 @@
   "summary": "Roasted asparagus with a bright orange glaze, made for Beef Wellington or any rich meat. It roasts in 10 minutes, while the meat rests.",
   "servings": 5,
   "times": {
+    "prep": 5,
     "cook": 10
   },
   "order": 1,
