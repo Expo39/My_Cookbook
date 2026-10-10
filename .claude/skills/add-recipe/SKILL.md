@@ -1,6 +1,6 @@
 ---
 name: add-recipe
-description: Add or update a recipe in Antonio's cookbook (Sapori ta' l-kċina). It turns pasted text, a web page, a photo of a handwritten or printed recipe, or a description from memory into a validated recipe JSON file under recipes/, then proposes a commit. Use it whenever someone wants to add, import, save, transcribe or put a recipe in the cookbook, even when they just paste a recipe or say "add my nanna's pastizzi" or "can you put this in the book". Also use it to fix or extend an existing recipe file, for example to add a photo, tokens or times.
+description: Add or update a recipe in the Sapori ta' l-kċina cookbook. It turns pasted text, a web page, a photo of a handwritten or printed recipe, or a description from memory into a validated recipe JSON file under recipes/, then proposes a commit. Use it whenever someone wants to add, import, save, transcribe or put a recipe in the cookbook, even when they just paste a recipe or say "add my nanna's pastizzi" or "can you put this in the book". Also use it to fix or extend an existing recipe file, for example to add a photo, tokens or times.
 ---
 
 # Add a recipe
@@ -17,20 +17,20 @@ Read `docs/RECIPE_FORMAT.md` before writing anything. It is the contract, and it
 - **A photo** of a card, book page or handwriting: read the image and transcribe it. Read amounts with care. If a number is ambiguous, say so instead of guessing.
 - **From memory or conversation:** if the amounts or the method are missing, ask for them first and write nothing yet. A file with no amounts still passes the checklist, so it would go live looking like a finished recipe. Write the file once there is enough to cook from.
 
-Never make up quantities, ingredients or techniques, and do not fill a gap with a plausible step such as "combine everything and bake". These are Antonio's recipes, and a wrong amount ruins someone's dinner. If a detail is missing or looks wrong in an otherwise complete recipe, write the file without it and list it in your reply as a question. Only quote a convention from the existing recipes (a credit, a name, a section) after you have seen it in the files.
+Never make up quantities, ingredients or techniques, and do not fill a gap with a plausible step such as "combine everything and bake". The recipes are cooked from as written, and a wrong amount ruins a meal. If a detail is missing or looks wrong in an otherwise complete recipe, write the file without it and list it in your reply as a question. Only quote a convention from the existing recipes (a credit, a name, a section) after you have seen it in the files.
 
 ## 2. Pick the section
-List the tree with `find recipes -name _section.json | sort`, and read the titles. Put the recipe in the best existing folder. Create a new subsection only when nothing fits: make a folder with a slug name and an `_section.json` file (`{"title": …, "order": n}`). Say which section you chose and why, in one line.
+List the tree with `find recipes -name _section.json | sort`, and read the titles. Put the recipe in the best existing folder. Create a new subsection only when nothing fits: make a folder with a slug name and an `_section.json` file (`{"title": ..., "order": n}`). Say which section you chose and why, in one line.
 
 The filename is the slug: lowercase letters, digits and hyphens, made from the title (`pastizzi-tal-irkotta.json`). The recipe id is the path without `.json`.
 
 ## 3. Write the JSON
 Write it to match the house style:
-- **British English, warm and plain:** imperative steps, articles ("Heat the oil in a large pan"), no exclamation marks, no filler such as "simply", "just" or "perfect". Use `titleLocal` for the Maltese or Italian name only when the source or Antonio gives one and it differs from `title`.
+- **British English, warm and plain:** imperative steps, articles ("Heat the oil in a large pan"), no exclamation marks, no filler such as "simply", "just" or "perfect". Use `titleLocal` for the Maltese or Italian name only when the source or the person adding the recipe gives one and it differs from `title`.
 - **`summary`:** one or two sentences, 200 characters at most. Anything extra goes into `tips`.
 - **Amounts:**
   - Keep the units as written, but prefer metric. If the source uses cups, convert dry goods with the density of their `food` id, and put the original in `alt` only when that helps.
-  - Ranges are `{"min", "max"}`, e.g. "2–3 cloves".
+  - Ranges are `{"min", "max"}`, e.g. "2-3 cloves".
   - Amounts like "Zest of 1 lemon" use `prefix`.
   - Lines with no amount ("Salt, to taste") have no `amount`. Use `"scale": "toTaste"` when the line says "to taste".
 - **Scaling mode per ingredient:**
@@ -51,7 +51,7 @@ Write it to match the house style:
 - **A dish photo:** copy it next to the recipe file and set `"image": {"src": "<file>", "alt": "<what is in the photo>"}`. The photo should be at least 1200 px wide. The build resizes it and draws the share cards.
 
 ## 4. Check, then fix
-Run `.claude/skills/add-recipe/scripts/check.sh recipes/<path>.json`. It runs `cookbook-cli check` in the Docker dev container; nothing gets installed on the host. Fix every ✗ error and run it again until it passes. Look at each ⚠ warning: fix it when you can (British spelling, unused keys, a missing time you can justify), and otherwise mention it.
+Run `.claude/skills/add-recipe/scripts/check.sh recipes/<path>.json`. It runs `cookbook-cli check` in the Docker dev container; nothing gets installed on the host. Fix every error and run it again until it passes. Look at each warning: fix it when you can (British spelling, unused keys, a missing time you can justify), and otherwise mention it.
 
 Common errors:
 - `E-TOKEN-UNRESOLVED`: a `{@key}` has no matching ingredient `key`.
@@ -64,11 +64,11 @@ If you changed anything outside `recipes/`, run `make test-fast` as well.
 ## 5. Report and propose the commit
 Reply briefly with:
 - where the file went (and any new section)
-- what you could not fill in, or estimated, as questions for Antonio
+- what you could not fill in, or estimated, as questions for the person who asked
 - the checklist result
 
 Then propose the commit. Do not make it unless asked. The repo's format is `<type>(<scope>): <phrase>` with **no trailers or co-author lines**:
 - `content(recipes): add Pastizzi tal-Irkotta`
 - `content(recipes): update Beef Wellington`
 
-Antonio can also add recipes in the site itself: Settings → Unlock editing opens the admin editor, which runs the same checklist in the browser. This skill is the route from the terminal.
+Recipes can also be added in the site itself: Settings > Unlock editing opens the admin editor, which runs the same checklist in the browser. This skill is the route from the terminal.
