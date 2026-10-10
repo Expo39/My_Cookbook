@@ -143,15 +143,16 @@ Put Caddy in front. `docker/Caddyfile.example` is a complete configuration: repl
 | method and path | session | purpose |
 |---|---|---|
 | `GET /api/index` | no | `SiteIndex` |
-| `GET /api/recipes/{id}` | no | `RecipeData` |
+| `GET /api/recipes/{id}` | no | `RecipeData`; the `ETag` header is the quoted SHA-256 of the file |
 | `GET /api/search?q=` | no | `SearchHit[]`; `?have=eggs,rice` gives `Coverage[]` |
 | `GET /api/search-index` | no | the `SearchIndex` that `search.json` holds |
 | `GET /api/images/{folder}/{file}` | no | an image from `recipes/` |
 | `GET /api/session` | no | `{ authenticated }` |
 | `POST /api/session` | no | `{ password }`; sets the cookie (5 failed attempts per 15 minutes per address) |
 | `DELETE /api/session` | no | clears the cookie |
-| `PUT /api/recipes/{id}` | yes | saves a `Recipe`; 422 with the checklist on errors |
-| `DELETE /api/recipes/{id}` | yes | 409 with the linking recipes if any remain |
+| `PUT /api/recipes/{id}` | yes | saves a `Recipe`; 422 with the checklist on errors; `If-Match` or `If-None-Match: *` give 412 `conflict` when the file differs, is missing or already exists; the new `ETag` is returned |
+| `DELETE /api/recipes/{id}` | yes | 409 with the linking recipes if any remain; `If-Match` works as for PUT |
+| `POST /api/recipes/{id}/move` | yes | `{ to }`; needs `If-Match` (428 without). Moves the file and its photo, rewrites `related` in other recipes, makes one commit. 404, 409 `exists`, 412 `conflict`, 422 `invalid` or `section_missing`, 400 `bad_request`; returns `{ id }` and the new `ETag` |
 | `POST /api/sections` | yes | `{ path, title, order?, summary? }` |
 | `POST /api/images/{id}` | yes | multipart, JPEG, PNG, WebP or GIF up to 8 MB; saved next to the recipe |
 | `POST /api/ai/chat` | no | as the Worker's `/chat`; 30 per hour per address |
