@@ -369,43 +369,6 @@ pub fn migrate(html: &str) -> Result<Migrated, String> {
     Ok(Migrated { sections, recipes })
 }
 
-/// serde_json writes whole floats as `2.0`; this drops the `.0` outside strings.
-fn trim_float_zeroes(json: &str) -> String {
-    let chars: Vec<char> = json.chars().collect();
-    let mut out = String::with_capacity(json.len());
-    let (mut in_string, mut escaped) = (false, false);
-    let mut i = 0;
-    while i < chars.len() {
-        let c = chars[i];
-        if in_string {
-            if escaped {
-                escaped = false;
-            } else if c == '\\' {
-                escaped = true;
-            } else if c == '"' {
-                in_string = false;
-            }
-        } else if c == '"' {
-            in_string = true;
-        } else if c == '.'
-            && chars.get(i + 1) == Some(&'0')
-            && !chars.get(i + 2).is_some_and(char::is_ascii_digit)
-            && out.ends_with(|d: char| d.is_ascii_digit())
-        {
-            i += 2;
-            continue;
-        }
-        out.push(c);
-        i += 1;
-    }
-    out
-}
-
-fn render<T: serde::Serialize>(value: &T) -> Result<String, String> {
-    let json = serde_json::to_string_pretty(value).map_err(|e| e.to_string())?;
-    Ok(trim_float_zeroes(&json) + "\n")
-}
-
 fn write(path: &Path, text: &str) -> Result<(), String> {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).map_err(|e| format!("{}: {e}", parent.display()))?;
@@ -418,10 +381,10 @@ pub fn run(html_path: &Path, out: &Path) -> Result<String, String> {
         fs::read_to_string(html_path).map_err(|e| format!("{}: {e}", html_path.display()))?;
     let migrated = migrate(&html)?;
     for (folder, section) in &migrated.sections {
-        write(&out.join(folder).join("_section.json"), &render(section)?)?;
+        write(&out.join(folder).join("_section.json"), &cookbook_tree::render_json(section).map_err(|e| e.to_string())?)?;
     }
     for (id, recipe) in &migrated.recipes {
-        write(&out.join(format!("{id}.json")), &render(recipe)?)?;
+        write(&out.join(format!("{id}.json")), &cookbook_tree::render_json(recipe).map_err(|e| e.to_string())?)?;
     }
     Ok(format!(
         "wrote {} recipes and {} sections to {}",
@@ -441,15 +404,6 @@ mod tests {
         assert_eq!(slugify("Crème Brûlée"), "creme-brulee");
         assert_eq!(slugify("Toni's Porchetta"), "tonis-porchetta");
         assert_eq!(slugify("Rice & Grain Bowls"), "rice-grain-bowls");
-    }
-
-    #[test]
-    fn whole_floats_lose_their_decimal_point_outside_strings() {
-        let text = r#"{"qty": 2.0, "x": 1.5, "s": "v2.0 and 3.0", "n": 10.0}"#;
-        assert_eq!(
-            trim_float_zeroes(text),
-            r#"{"qty": 2, "x": 1.5, "s": "v2.0 and 3.0", "n": 10}"#
-        );
     }
 
     #[test]

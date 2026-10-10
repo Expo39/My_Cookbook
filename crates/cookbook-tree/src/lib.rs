@@ -83,9 +83,56 @@ fn parse_failure(subject: &str, error: &serde_json::Error) -> CheckResult {
     }
 }
 
+/// Pretty JSON with a trailing newline and whole numbers written without `.0`, as the migration does.
+pub fn render_json<T: serde::Serialize>(value: &T) -> Result<String, serde_json::Error> {
+    let json = serde_json::to_string_pretty(value)?;
+    Ok(trim_float_zeroes(&json) + "\n")
+}
+
+/// serde_json writes whole floats as `2.0`; this drops the `.0` outside strings.
+pub fn trim_float_zeroes(json: &str) -> String {
+    let chars: Vec<char> = json.chars().collect();
+    let mut out = String::with_capacity(json.len());
+    let (mut in_string, mut escaped) = (false, false);
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if in_string {
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == '"' {
+                in_string = false;
+            }
+        } else if c == '"' {
+            in_string = true;
+        } else if c == '.'
+            && chars.get(i + 1) == Some(&'0')
+            && !chars.get(i + 2).is_some_and(char::is_ascii_digit)
+            && out.ends_with(|d: char| d.is_ascii_digit())
+        {
+            i += 2;
+            continue;
+        }
+        out.push(c);
+        i += 1;
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn whole_floats_lose_their_decimal_point_outside_strings() {
+        let text = r#"{"qty": 2.0, "x": 1.5, "s": "v2.0 and 3.0", "n": 10.0}"#;
+        assert_eq!(
+            trim_float_zeroes(text),
+            r#"{"qty": 2, "x": 1.5, "s": "v2.0 and 3.0", "n": 10}"#
+        );
+    }
 
     #[test]
     fn missing_directory_has_no_recipes() {
