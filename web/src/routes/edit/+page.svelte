@@ -207,7 +207,11 @@
 				const { src } = await writer.uploadImage(ed.id, ed.photo.blob);
 				recipe = { ...recipe, image: { src, alt: ed.form.imageAlt.trim() } };
 			}
-			const result = await writer.save(ed.id, recipe, { isNew: !ed.editing });
+			const result = await writer.save(ed.id, recipe, {
+				isNew: !ed.editing,
+				// A moved or renamed recipe leaves the original in place, and with it the original's photo.
+				previousImage: ed.originalId === ed.id ? ed.original?.image?.src : undefined
+			});
 			clearDraft(ed.draftId);
 			ed.markSaved();
 			outcome = { kind: 'saved', id: ed.id, title: recipe.title };

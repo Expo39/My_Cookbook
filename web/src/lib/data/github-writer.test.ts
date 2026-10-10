@@ -73,6 +73,41 @@ describe('GitHubWriter', () => {
 		});
 	});
 
+	it('deletes the old photo when a new one has a different name', async () => {
+		const api = github();
+		const withPhoto = { ...recipe, image: { src: 'lemon-tart.jpg', alt: 'A tart' } };
+		const writer = new GitHubWriter('t', ref, api.fetcher);
+		await writer.uploadImage('d/lemon-tart', new Blob(['x'], { type: 'image/jpeg' }));
+		await writer.save('d/lemon-tart', withPhoto, { isNew: false, previousImage: 'lemon-tart.png' });
+		expect(api.tree().map((entry) => [entry.path, entry.sha === null])).toEqual([
+			['recipes/d/lemon-tart.jpg', false],
+			['recipes/d/lemon-tart.json', false],
+			['recipes/d/lemon-tart.png', true]
+		]);
+	});
+
+	it('deletes the photo when the recipe no longer has one', async () => {
+		const api = github();
+		await new GitHubWriter('t', ref, api.fetcher).save('d/lemon-tart', recipe, {
+			isNew: false,
+			previousImage: 'lemon-tart.jpg'
+		});
+		expect(api.tree().map((entry) => [entry.path, entry.sha === null])).toEqual([
+			['recipes/d/lemon-tart.json', false],
+			['recipes/d/lemon-tart.jpg', true]
+		]);
+	});
+
+	it('keeps a photo that is still in use', async () => {
+		const api = github();
+		const withPhoto = { ...recipe, image: { src: 'lemon-tart.png', alt: 'A tart' } };
+		await new GitHubWriter('t', ref, api.fetcher).save('d/lemon-tart', withPhoto, {
+			isNew: false,
+			previousImage: 'lemon-tart.png'
+		});
+		expect(api.tree().map((entry) => entry.path)).toEqual(['recipes/d/lemon-tart.json']);
+	});
+
 	it('writes the recipe as the Rust tool would', async () => {
 		const api = github();
 		await new GitHubWriter('t', ref, api.fetcher).save('d/tart', recipe, { isNew: false });

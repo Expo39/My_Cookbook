@@ -11,8 +11,15 @@ export type BuildStatus = BuildState;
 
 /** Where an edited recipe goes. Sections and the photo must be handed over before `save`. */
 export interface RecipeWriter {
-	/** Writes the recipe, together with anything staged by `createSection` and `uploadImage`. */
-	save(id: string, recipe: Recipe, extras: { isNew: boolean }): Promise<SaveResult>;
+	/**
+	 * Writes the recipe, together with anything staged by `createSection` and `uploadImage`.
+	 * `previousImage` is the photo file the edit started from; it is deleted when the recipe no longer uses it.
+	 */
+	save(
+		id: string,
+		recipe: Recipe,
+		extras: { isNew: boolean; previousImage?: string }
+	): Promise<SaveResult>;
 	remove(id: string, extras: { title: string; image?: string }): Promise<SaveResult>;
 	/** `path` is the new folder, relative to `recipes/`. */
 	createSection(path: string, section: Section): Promise<void>;

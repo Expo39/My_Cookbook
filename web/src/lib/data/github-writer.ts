@@ -44,9 +44,19 @@ export class GitHubWriter implements RecipeWriter {
 		return { src };
 	}
 
-	async save(id: string, recipe: Recipe, extras: { isNew: boolean }): Promise<SaveResult> {
+	async save(
+		id: string,
+		recipe: Recipe,
+		extras: { isNew: boolean; previousImage?: string }
+	): Promise<SaveResult> {
 		const path = `recipes/${id}.json`;
-		const changes = [...this.#staged.values(), { path, content: renderRecipe(recipe) }];
+		const changes: FileChange[] = [
+			...this.#staged.values(),
+			{ path, content: renderRecipe(recipe) }
+		];
+		if (extras.previousImage && extras.previousImage !== recipe.image?.src) {
+			changes.push({ path: `recipes/${folderOf(id)}/${extras.previousImage}`, content: null });
+		}
 		const verb = extras.isNew ? 'add' : 'update';
 		const commit = await this.#client.commit(
 			this.#ref,
