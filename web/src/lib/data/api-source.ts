@@ -1,19 +1,32 @@
 import type { RecipeData, SiteIndex } from '$lib/types/recipe';
-import type { RecipeSource } from './source';
+import { RecipeNotFoundError, type RecipeSource } from './source';
 
-/** The self-hosted server backend; it is wired up in a later checkpoint. */
+/** Reads the self-hosted server's API, which serves the same shapes as the static build. */
 export class ApiSource implements RecipeSource {
-	getIndex(): Promise<SiteIndex> {
-		return Promise.reject(notConfigured());
+	readonly #fetch: typeof fetch;
+
+	constructor(fetcher: typeof fetch = fetch) {
+		this.#fetch = fetcher;
 	}
 
-	getRecipe(): Promise<RecipeData> {
-		return Promise.reject(notConfigured());
+	async #get(path: string): Promise<Response> {
+		const response = await this.#fetch(`/api${path}`, { credentials: 'include' });
+		if (!response.ok) throw new Error(`Could not read ${path} (${response.status}).`);
+		return response;
 	}
 
-	getSearchIndex(): Promise<string> {
-		return Promise.reject(notConfigured());
+	async getIndex(): Promise<SiteIndex> {
+		return (await this.#get('/index')).json();
+	}
+
+	async getRecipe(id: string): Promise<RecipeData> {
+		const response = await this.#fetch(`/api/recipes/${id}`, { credentials: 'include' });
+		if (response.status === 404) throw new RecipeNotFoundError(id);
+		if (!response.ok) throw new Error(`Could not read recipe ${id} (${response.status}).`);
+		return response.json();
+	}
+
+	async getSearchIndex(): Promise<string> {
+		return (await this.#get('/search-index')).text();
 	}
 }
-
-const notConfigured = () => new Error('The API backend is not configured.');

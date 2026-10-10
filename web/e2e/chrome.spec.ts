@@ -10,7 +10,7 @@ test('the theme choice applies at once and persists across reloads without a fla
 	const html = page.locator('html');
 	await page.getByRole('button', { name: 'Settings' }).click();
 	const drawer = page.getByRole('dialog', { name: 'Settings' });
-	await expect(drawer.getByText('Admin editing arrives soon')).toBeVisible();
+	await expect(drawer.getByRole('heading', { name: 'Editing' })).toBeVisible();
 
 	await drawer.getByRole('radio', { name: 'Dark' }).check();
 	await expect(html).toHaveAttribute('data-theme', 'dark');

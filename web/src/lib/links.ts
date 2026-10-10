@@ -11,3 +11,13 @@ export const favouritesHref = (): string => resolve('/favourites');
 
 export const searchHref = (query = ''): string =>
 	`${resolve('/search')}${query ? `?q=${encodeURIComponent(query)}` : ''}`;
+
+/** The editor: a recipe to change (`id`), or the folder a new recipe starts in (`section`). */
+export function editHref(target: { id?: string; section?: string } = {}): string {
+	const query = target.id
+		? `?id=${encodeURIComponent(target.id)}`
+		: target.section
+			? `?section=${encodeURIComponent(target.section)}`
+			: '';
+	return `${resolve('/edit')}${query}`;
+}

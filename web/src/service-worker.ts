@@ -12,7 +12,11 @@ const PAGES = 'pages-v1';
 const DATA = 'data-v1';
 
 // The recipe JSON is large and changes with the content, so it is cached as it is used, not up front.
-const assets = [...build, ...files.filter((file) => !/\/(data|cards)\//.test(file))];
+// admin.json must always be fetched fresh, or a new password would not unlock until the cache turned over.
+const assets = [
+	...build,
+	...files.filter((file) => !/\/(data|cards)\//.test(file) && !file.endsWith('/admin.json'))
+];
 const shellPages = ['/', '/offline', '/favourites', '/shopping-list', '/search'].map(
 	(path) => `${base}${path}`
 );
