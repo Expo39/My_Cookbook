@@ -14,11 +14,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
-
-env:
-  RUST_TOOLCHAIN: 1.98.1
-  NODE_VERSION: 24.21.0
-  WASM_BINDGEN_VERSION: 0.2.129
+  actions: read
 
 jobs:
   deploy:
@@ -28,36 +24,14 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    env:
-      BASE_PATH: /My_Cookbook
     steps:
-      - uses: actions/checkout@v7
+      - name: Take the site that CI built, tested and verified
+        uses: actions/download-artifact@v8
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: wasm-bindgen@${{ env.WASM_BINDGEN_VERSION }}
-      - run: cargo build -p cookbook-wasm --target wasm32-unknown-unknown --release
-      - run: wasm-bindgen --target web --out-dir web/src/lib/wasm target/wasm32-unknown-unknown/release/cookbook_wasm.wasm
-      - run: cargo run --quiet -p cookbook-cli -- build
-      - run: cargo run --quiet -p cookbook-cli -- cards
-      - uses: pnpm/action-setup@v6
-        with:
-          package_json_file: web/package.json
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
-      - run: pnpm install --frozen-lockfile
-        working-directory: web
-      - run: pnpm build
-        working-directory: web
+          name: site
+          path: web/build
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
       - uses: actions/upload-pages-artifact@v5
         with:
           path: web/build

@@ -179,6 +179,23 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  verify:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/download-artifact@v8
+        with:
+          name: site
+          path: web/build
+      - name: Every recipe is pre-rendered, searchable, and has JSON-LD and an Open Graph card
+        run: cargo run --quiet -p cookbook-cli -- verify-site web/build
+
   e2e:
     needs: build
     runs-on: ubuntu-24.04
@@ -221,7 +238,7 @@ jobs:
   passed:
     name: CI passed
     if: always()
-    needs: [rust, content, core-artifacts, web, build, e2e]
+    needs: [rust, content, core-artifacts, web, build, verify, e2e]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
