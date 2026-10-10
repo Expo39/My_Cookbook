@@ -7,7 +7,7 @@ use crate::{
     scale::{ScaleOptions, ScaleRequest, scale},
     schema::{Amount, Ingredient, Qty, Recipe, Section, Unit},
     tokens::{Segment, parse_tokens},
-    units::toggle_unit,
+    units::{convert, toggle_unit},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
@@ -679,7 +679,40 @@ impl Checker<'_> {
                 "the summary is over 200 characters and may not fit a share card",
             );
         }
+        self.redundant_alts();
         self.british_spelling();
+    }
+
+    /// An `alt` that restates the amount in an equivalent unit (1000 g and 1 kg) adds nothing.
+    fn redundant_alts(&mut self) {
+        let r = self.recipe;
+        for (g, group) in r.ingredient_groups.iter().enumerate() {
+            for (i, ing) in group.items.iter().enumerate() {
+                let (Some(amount), Some(alt)) = (&ing.amount, &ing.alt) else {
+                    continue;
+                };
+                let (Some(from), Some(to)) = (amount.unit, alt.unit) else {
+                    continue;
+                };
+                // Only a restatement in the same metric family is redundant; 60 ml (4 tbsp) is useful.
+                let family = from == to
+                    || matches!((from, to), (Unit::G, Unit::Kg) | (Unit::Kg, Unit::G))
+                    || matches!((from, to), (Unit::Ml, Unit::L) | (Unit::L, Unit::Ml));
+                if !family {
+                    continue;
+                }
+                let same = |a: f64, b: f64| {
+                    convert(a, from, to, None).is_some_and(|c| (c - b).abs() <= b.abs() * 1e-6)
+                };
+                if same(amount.qty.min(), alt.qty.min()) && same(amount.qty.max(), alt.qty.max()) {
+                    self.warn(
+                        "W-ALT-REDUNDANT",
+                        format!("ingredientGroups[{g}].items[{i}].alt"),
+                        "the alt is the same amount as the main one in another unit, so it can go",
+                    );
+                }
+            }
+        }
     }
 
     fn british_spelling(&mut self) {
@@ -1138,6 +1171,26 @@ mod tests {
                 codes(&results)
             );
         }
+    }
+
+    #[test]
+    fn a_redundant_alt_is_flagged_but_a_real_equivalent_is_not() {
+        let with_alt = |amount: &str, alt: &str| {
+            BASE.replace(
+                r#""key": "stock", "amount": { "qty": 1, "unit": "l" }"#,
+                &format!(r#""key": "stock", "amount": {amount}, "alt": {alt}"#),
+            )
+        };
+        let redundant = with_alt(
+            r#"{ "qty": 1000, "unit": "ml" }"#,
+            r#"{ "qty": 1, "unit": "l" }"#,
+        );
+        assert!(codes(&run("mains/soup.json", &redundant)).contains(&"W-ALT-REDUNDANT"));
+        let useful = with_alt(
+            r#"{ "qty": 60, "unit": "ml" }"#,
+            r#"{ "qty": 4, "unit": "tbsp" }"#,
+        );
+        assert!(!codes(&run("mains/soup.json", &useful)).contains(&"W-ALT-REDUNDANT"));
     }
 
     #[test]

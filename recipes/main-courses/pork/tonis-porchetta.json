@@ -15,10 +15,6 @@
             "qty": 1500,
             "unit": "g"
           },
-          "alt": {
-            "qty": 1.5,
-            "unit": "kg"
-          },
           "item": "pork belly",
           "note": "skin scored"
         },

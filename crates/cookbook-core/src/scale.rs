@@ -457,8 +457,9 @@ fn apply_amount(
     {
         std::mem::swap(&mut amount, alt);
     }
+    // An equivalent that reads the same as the main amount (1000 g and 1 kg) is not worth showing.
+    out.alt = alt.filter(|alt| alt.text != amount.text);
     out.amount = Some(amount);
-    out.alt = alt;
 }
 
 pub fn scale(recipe: &Recipe, request: &ScaleRequest, options: &ScaleOptions) -> ScaledRecipe {
@@ -706,6 +707,25 @@ mod tests {
             },
         );
         assert_eq!(line(&us, "oil").text, "130 ml (9 tbsp) olive oil");
+    }
+
+    #[test]
+    fn an_alt_that_reads_like_the_amount_is_dropped() {
+        let recipe = crate::schema::parse_recipe(
+            r#"{"title":"Roast","summary":"s","servings":2,
+            "ingredientGroups":[{"items":[{"key":"beef","amount":{"qty":1000,"unit":"g"},
+                "alt":{"qty":1,"unit":"kg"},"item":"beef fillet"}]}],
+            "steps":[{"text":"Roast {@beef}."}]}"#,
+        )
+        .unwrap();
+        let s = scale(
+            &recipe,
+            &ScaleRequest::Multiplier(1.0),
+            &ScaleOptions::default(),
+        );
+        let beef = &s.groups[0].items[0];
+        assert!(beef.alt.is_none());
+        assert_eq!(beef.text, "1 kg beef fillet");
     }
 
     #[test]
