@@ -43,7 +43,13 @@
 		</Field>
 	</div>
 	<div class="what">
-		<TextField id={fieldId(`${path}.prefix`)} label="Before the amount" bind:value={row.prefix} optional hint="As in “Zest of”" />
+		<TextField
+			id={fieldId(`${path}.prefix`)}
+			label="Before the amount"
+			bind:value={row.prefix}
+			optional
+			hint="As in “Zest of”"
+		/>
 		<TextField
 			id={fieldId(`${path}.item`)}
 			label="Ingredient"
@@ -51,11 +57,22 @@
 			error={ed.errorFor(`${path}.item`)}
 			onblur={() => ed.touch(`${path}.item`)}
 		/>
-		<TextField id={fieldId(`${path}.note`)} label="Note" bind:value={row.note} optional hint="Shown after a comma, as in “finely chopped”" />
+		<TextField
+			id={fieldId(`${path}.note`)}
+			label="Note"
+			bind:value={row.note}
+			optional
+			hint="Shown after a comma, as in “finely chopped”"
+		/>
 	</div>
 	<div class="more">
 		<Field id={fieldId(`${path}.scale`)} label="When the servings change" hint={mode?.help}>
-			<select class="control" id={fieldId(`${path}.scale`)} bind:value={row.scale} aria-describedby="{fieldId(`${path}.scale`)}-hint">
+			<select
+				class="control"
+				id={fieldId(`${path}.scale`)}
+				bind:value={row.scale}
+				aria-describedby="{fieldId(`${path}.scale`)}-hint"
+			>
 				{#each SCALE_MODES as option (option.value)}
 					<option value={option.value}>{option.label}</option>
 				{/each}

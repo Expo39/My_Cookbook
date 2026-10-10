@@ -29,7 +29,10 @@
 		announcement = `Moved ${noun} ${from + 1} to position ${to + 1} of ${items.length}.`;
 		await tick();
 		const target = document.getElementById(`${uid}-${button}`) as HTMLButtonElement | null;
-		(target && !target.disabled ? target : document.getElementById(`${uid}-${button === 'up' ? 'down' : 'up'}`))?.focus();
+		(target && !target.disabled
+			? target
+			: document.getElementById(`${uid}-${button === 'up' ? 'down' : 'up'}`)
+		)?.focus();
 	}
 
 	function start(event: DragEvent, index: number) {

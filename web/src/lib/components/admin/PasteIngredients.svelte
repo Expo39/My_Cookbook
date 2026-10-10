@@ -4,11 +4,12 @@
 	import { rowFromIngredient, type IngredientRow } from '$lib/admin/recipe-form';
 	import type { Ingredient } from '$lib/types/recipe';
 	import Icon from '../Icon.svelte';
+	import Modal from './Modal.svelte';
 
 	let { ready, onadd }: { ready: boolean; onadd: (rows: IngredientRow[]) => void } = $props();
 
 	const id = $props.id();
-	let dialog: HTMLDialogElement;
+	let modal: Modal;
 	let text = $state('');
 	let reviewed = $state<{ line: string; parsed?: Ingredient; problem?: string }[] | null>(null);
 
@@ -18,7 +19,7 @@
 	export function show() {
 		text = '';
 		reviewed = null;
-		dialog.showModal();
+		modal.show();
 	}
 
 	function review() {
@@ -44,7 +45,7 @@
 			text = failed.map((entry) => entry.line).join('\n');
 			reviewed = null;
 		} else {
-			dialog.close();
+			modal.close();
 		}
 	}
 
@@ -61,14 +62,8 @@
 			.join(' ');
 </script>
 
-<dialog bind:this={dialog} aria-labelledby="{id}-title">
-	<form method="dialog" class="panel" onsubmit={(event) => event.preventDefault()}>
-		<div class="head">
-			<h2 id="{id}-title">Paste ingredients</h2>
-			<button type="button" class="icon-btn" aria-label="Close" onclick={() => dialog.close()}>
-				<Icon name="x" />
-			</button>
-		</div>
+<Modal bind:this={modal} title="Paste ingredients">
+	<form onsubmit={(event) => event.preventDefault()}>
 		<label for="{id}-text">One ingredient per line</label>
 		<textarea
 			id="{id}-text"
@@ -116,47 +111,21 @@
 				Review
 			</button>
 			<button type="button" class="btn primary" disabled={!good.length} onclick={add}>
-				Add {good.length || ''} {good.length === 1 ? 'ingredient' : 'ingredients'}
+				Add {good.length || ''}
+				{good.length === 1 ? 'ingredient' : 'ingredients'}
 			</button>
 		</div>
 	</form>
-</dialog>
+</Modal>
 
 <style>
-	dialog {
-		inline-size: min(36rem, calc(100vw - 2 * var(--space-4)));
-		max-block-size: calc(100dvh - 2 * var(--space-4));
-		padding: 0;
-		border: 1px solid var(--colour-line);
-		border-radius: var(--radius-m);
-		background: var(--colour-surface);
-		color: var(--colour-ink);
-		box-shadow: var(--shadow-float);
-	}
-
-	dialog::backdrop {
-		background: var(--colour-scrim);
-	}
-
-	.panel {
+	form {
 		display: grid;
 		gap: var(--space-3);
-		padding: var(--space-5);
-	}
-
-	.head {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
 	}
 
 	label {
 		font-weight: 700;
-	}
-
-	.help {
-		color: var(--colour-muted);
-		font-size: var(--text-s);
 	}
 
 	.results {
@@ -176,16 +145,13 @@
 	}
 
 	li :global(svg) {
+		flex: none;
+		margin-block-start: 0.2em;
 		color: var(--colour-success);
 	}
 
 	li.bad :global(svg) {
 		color: var(--colour-danger);
-	}
-
-	li :global(svg) {
-		flex: none;
-		margin-block-start: 0.2em;
 	}
 
 	.why {

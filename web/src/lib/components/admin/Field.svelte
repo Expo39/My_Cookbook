@@ -20,7 +20,9 @@
 </script>
 
 <div class="field">
-	<label for={id}>{label}{#if optional}<span class="opt">optional</span>{/if}</label>
+	<label for={id}
+		>{label}{#if optional}<span class="opt">optional</span>{/if}</label
+	>
 	{@render children()}
 	{#if hint}<p class="hint" id="{id}-hint">{hint}</p>{/if}
 	{#if error}

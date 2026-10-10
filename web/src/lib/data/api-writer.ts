@@ -95,5 +95,7 @@ export async function serverLogin(
 }
 
 export async function serverLogout(fetcher: typeof fetch = (...a) => fetch(...a)): Promise<void> {
-	await fetcher('/api/session', { method: 'DELETE', credentials: 'include' }).catch(() => undefined);
+	await fetcher('/api/session', { method: 'DELETE', credentials: 'include' }).catch(
+		() => undefined
+	);
 }

@@ -39,7 +39,9 @@
 		Write each step on its own. A heading starts a titled stage, such as “Day 1: the night before”.
 	</p>
 	{#if ed.errorFor('steps')}
-		<p class="error" role="alert" id="f-steps"><Icon name="alert" size={16} />{ed.errorFor('steps')}</p>
+		<p class="error" role="alert" id="f-steps">
+			<Icon name="alert" size={16} />{ed.errorFor('steps')}
+		</p>
 	{/if}
 	<RowList
 		items={ed.form.steps}
@@ -120,18 +122,6 @@
 	.times {
 		display: grid;
 		gap: var(--space-3);
-	}
-
-	.help {
-		color: var(--colour-muted);
-		font-size: var(--text-s);
-	}
-
-	.error {
-		display: flex;
-		gap: var(--space-1);
-		color: var(--colour-danger);
-		font-weight: 700;
 	}
 
 	.add {

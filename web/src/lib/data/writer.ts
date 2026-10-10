@@ -7,9 +7,7 @@ export interface SaveResult {
 }
 
 export type BuildStatus =
-	| { state: 'building' }
-	| { state: 'live' }
-	| { state: 'failed'; url: string };
+	{ state: 'building' } | { state: 'live' } | { state: 'failed'; url: string };
 
 /** Where an edited recipe goes. Sections and the photo must be handed over before `save`. */
 export interface RecipeWriter {

@@ -34,7 +34,7 @@
 		counter?: number;
 		readonly?: boolean;
 		numeric?: boolean;
-		autocomplete?: string;
+		autocomplete?: 'off' | 'on' | 'current-password' | 'new-password';
 		list?: string;
 		onblur?: (event: FocusEvent) => void;
 		oninput?: () => void;

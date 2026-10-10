@@ -78,3 +78,15 @@ textarea.control {
 .icon-btn:disabled {
 	opacity: 0.35;
 }
+
+.help {
+	color: var(--colour-muted);
+	font-size: var(--text-s);
+}
+
+.error {
+	display: flex;
+	gap: var(--space-1);
+	color: var(--colour-danger);
+	font-weight: 700;
+}

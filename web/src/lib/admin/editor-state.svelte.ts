@@ -1,13 +1,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 import { checkRecipe, isCoreLoaded } from '$lib/core';
-import { allRecipes } from '$lib/data/tree';
-import type {
-	CheckResult,
-	Recipe,
-	RecipeData,
-	SectionNode,
-	SiteIndex
-} from '$lib/types/recipe';
+import { allRecipes, findRecipe } from '$lib/data/tree';
+import type { CheckResult, Recipe, RecipeData, SectionNode, SiteIndex } from '$lib/types/recipe';
 import {
 	emptyForm,
 	formFromRecipe,
@@ -21,6 +15,13 @@ import { slugify, suggestKey } from './slug';
 export interface Photo {
 	blob: Blob;
 	url: string;
+	width: number;
+}
+
+export interface SectionOption {
+	path: string;
+	label: string;
+	depth: number;
 }
 
 export const fieldId = (path: string): string =>
@@ -28,6 +29,12 @@ export const fieldId = (path: string): string =>
 
 const folders = (nodes: SectionNode[]): string[] =>
 	nodes.flatMap((node) => [node.path, ...folders(node.sections)]);
+
+const outline = (nodes: SectionNode[], depth = 0): SectionOption[] =>
+	nodes.flatMap((node) => [
+		{ path: node.path, label: node.title, depth },
+		...outline(node.sections, depth + 1)
+	]);
 
 /** Gives every row a fresh id, so rows restored from a draft cannot clash with rows added later. */
 function reissue(form: FormData): FormData {
@@ -45,6 +52,8 @@ export class EditorState {
 	readonly editing: boolean;
 	readonly originalId: string | undefined;
 	readonly original: Recipe | undefined;
+	readonly existingIds: string[];
+	readonly existingFolders: string[];
 
 	form = $state<FormData>(emptyForm());
 	photo = $state<Photo | null>(null);
@@ -53,13 +62,10 @@ export class EditorState {
 	readonly touched = new SvelteSet<string>();
 	#baseline = '';
 
-	constructor(options: {
-		index: SiteIndex;
-		id?: string;
-		data?: RecipeData;
-		section?: string;
-	}) {
+	constructor(options: { index: SiteIndex; id?: string; data?: RecipeData; section?: string }) {
 		this.index = options.index;
+		this.existingIds = $derived(allRecipes(this.index).map((card) => card.id));
+		this.existingFolders = $derived(folders(this.index.sections));
 		this.editing = options.data !== undefined && options.id !== undefined;
 		this.originalId = options.id;
 		this.original = options.data?.recipe;
@@ -72,6 +78,11 @@ export class EditorState {
 
 	#snapshot(): string {
 		return JSON.stringify($state.snapshot(this.form)) + (this.photo ? 'photo' : '');
+	}
+
+	/** The index entry of the recipe being edited, which knows the measured sizes of its photo. */
+	get originalCard() {
+		return this.originalId ? findRecipe(this.index, this.originalId) : undefined;
 	}
 
 	/** The key a draft is stored under. */
@@ -94,12 +105,55 @@ export class EditorState {
 	slug = $derived(this.form.slugTouched ? this.form.slug : slugify(this.form.title));
 	id = $derived(this.form.section ? `${this.form.section}/${this.slug}` : this.slug);
 
-	existingIds = $derived(allRecipes(this.index).map((card) => card.id));
-	existingFolders = $derived(folders(this.index.sections));
+	/** The new folders the chosen section sits in, which are the only ones worth creating. */
+	neededSections = $derived(
+		this.form.newSections.filter(
+			({ path }) => this.form.section === path || this.form.section.startsWith(`${path}/`)
+		)
+	);
+
+	sectionOptions = $derived.by<SectionOption[]>(() => {
+		const options = outline(this.index.sections);
+		for (const added of this.form.newSections) {
+			const slash = added.path.lastIndexOf('/');
+			const parent = slash < 0 ? '' : added.path.slice(0, slash);
+			const last = options.findLastIndex(
+				({ path }) => parent !== '' && (path === parent || path.startsWith(`${parent}/`))
+			);
+			options.splice(last < 0 ? options.length : last + 1, 0, {
+				path: added.path,
+				label: `${added.title || 'New section'} (new)`,
+				depth: parent ? parent.split('/').length : 0
+			});
+		}
+		return options;
+	});
+
+	/** Adds a folder under `parent` (`''` for the top level) and chooses it. */
+	addSection(parent: string, title: string): string | undefined {
+		const slug = slugify(title);
+		if (!slug) return undefined;
+		const path = parent ? `${parent}/${slug}` : slug;
+		const known =
+			this.existingFolders.includes(path) || this.form.newSections.some((s) => s.path === path);
+		if (!known) this.form.newSections.push({ path, title: title.trim() });
+		this.form.section = path;
+		return path;
+	}
+
+	removeSection(path: string): void {
+		this.form.newSections = this.form.newSections.filter(
+			(added) => added.path !== path && !added.path.startsWith(`${path}/`)
+		);
+		if (this.form.section === path || this.form.section.startsWith(`${path}/`)) {
+			const slash = path.lastIndexOf('/');
+			this.form.section = slash < 0 ? '' : path.slice(0, slash);
+		}
+	}
 
 	built = $derived.by(() => {
 		const src = this.photo ? `${this.slug}.jpg` : undefined;
-		return recipeFromForm(this.form, src ? { src } : undefined);
+		return recipeFromForm($state.snapshot(this.form) as FormData, src ? { src } : undefined);
 	});
 
 	results = $derived.by<CheckResult[]>(() => {
@@ -120,7 +174,7 @@ export class EditorState {
 				recipe: id
 			});
 		}
-		for (const added of this.form.newSections) {
+		for (const added of this.neededSections) {
 			if (!added.title.trim()) {
 				local.push({
 					id: 'F-SECTION-TITLE',
@@ -135,7 +189,14 @@ export class EditorState {
 		try {
 			const checked = checkRecipe(this.built.recipe, id, {
 				knownIds: this.existingIds,
-				sectionFolders: [...this.existingFolders, ...this.form.newSections.map((s) => s.path)]
+				sectionFolders: [...this.existingFolders, ...this.neededSections.map((s) => s.path)],
+				...(this.photo
+					? {
+							imageWidths: {
+								[`${this.form.section}/${this.slug}.jpg`.replace(/^\//, '')]: this.photo.width
+							}
+						}
+					: {})
 			});
 			return [...local, ...checked];
 		} catch (error) {

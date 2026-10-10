@@ -108,7 +108,12 @@
 					</div>
 					<div>
 						<label for="{id}-deg-to">Up to (°C), optional</label>
-						<input id="{id}-deg-to" class="control num" inputmode="decimal" bind:value={degreesTo} />
+						<input
+							id="{id}-deg-to"
+							class="control num"
+							inputmode="decimal"
+							bind:value={degreesTo}
+						/>
 					</div>
 				</div>
 				<label for="{id}-fan">Fan oven (°C), optional</label>
@@ -118,8 +123,8 @@
 					<span>Food temperature, such as the inside of a steak</span>
 				</label>
 				<p class="help">
-					Shown in the unit each reader chooses. Oven temperatures are rounded to oven settings; food
-					temperatures stay exact.
+					Shown in the unit each reader chooses. Oven temperatures are rounded to oven settings;
+					food temperatures stay exact.
 				</p>
 			{:else}
 				<div class="pair">
@@ -140,7 +145,9 @@
 				</select>
 				<label for="{id}-name">Name, optional</label>
 				<input id="{id}-name" class="control" bind:value={name} />
-				<p class="help">Readers can tap the time to start a timer. A name such as “pasta” labels it.</p>
+				<p class="help">
+					Readers can tap the time to start a timer. A name such as “pasta” labels it.
+				</p>
 			{/if}
 
 			{#if problem}

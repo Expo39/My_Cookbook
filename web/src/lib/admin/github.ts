@@ -82,8 +82,7 @@ export class GitHubClient {
 			changes.map(async (change) => {
 				if (change.content === null) return { path: change.path, sha: null };
 				const { sha } = await this.request<{ sha: string }>('POST', `/repos/${repo}/git/blobs`, {
-					content:
-						typeof change.content === 'string' ? change.content : toBase64(change.content),
+					content: typeof change.content === 'string' ? change.content : toBase64(change.content),
 					encoding: typeof change.content === 'string' ? 'utf-8' : 'base64'
 				});
 				return { path: change.path, sha };
@@ -131,7 +130,8 @@ export class GitHubClient {
 }
 
 function explain(status: number, detail?: string): string {
-	if (status === 401) return 'GitHub did not accept the token. It may have expired or been revoked.';
+	if (status === 401)
+		return 'GitHub did not accept the token. It may have expired or been revoked.';
 	if (status === 403) return `GitHub refused the request${detail ? `: ${detail}` : ''}.`;
 	if (status === 404) {
 		return 'GitHub could not find the repository. Check the token covers this repository.';
@@ -140,15 +140,14 @@ function explain(status: number, detail?: string): string {
 }
 
 export type BuildState =
-	| { state: 'building' }
-	| { state: 'live' }
-	| { state: 'failed'; url: string };
+	{ state: 'building' } | { state: 'live' } | { state: 'failed'; url: string };
 
 /** Reads the CI and Deploy runs for a commit: the site is live once Deploy has succeeded. */
 export function buildState(runs: WorkflowRun[]): BuildState {
 	const failed = runs.find(
 		(run) =>
-			run.status === 'completed' && !['success', 'skipped', 'neutral'].includes(run.conclusion ?? '')
+			run.status === 'completed' &&
+			!['success', 'skipped', 'neutral'].includes(run.conclusion ?? '')
 	);
 	if (failed) return { state: 'failed', url: failed.html_url };
 	const deploy = runs.find((run) => run.name === 'Deploy');
