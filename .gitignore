@@ -1,9 +1,3 @@
-# ============================================
-# GITIGNORE FOR COOKBOOK PROJECT
-# Files and folders to exclude from Git
-# ============================================
-
-# Operating System Files
 .DS_Store
 .DS_Store?
 ._*
@@ -13,7 +7,6 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 
-# Editor Files
 .vscode/
 .idea/
 *.swp
@@ -22,35 +15,40 @@ Desktop.ini
 .project
 .settings/
 
-# Backup Files
 *.bak
 *.backup
 *.tmp
 *.temp
 
-# Log Files
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Personal Notes (optional)
 notes.txt
 TODO.md
 personal_notes/
 
-# API Keys (if you ever store them separately)
 secrets.txt
 api_keys.txt
 .env
 .env.local
 
-# Build Files (if you ever add build process)
 dist/
 build/
 node_modules/
 
-# Compressed Files
 *.zip
 *.tar.gz
 *.rar
+
+target/
+web/node_modules/
+web/build/
+web/.svelte-kit/
+web/test-results/
+web/playwright-report/
+web/src/lib/wasm/
+.serena/
+CLAUDE.md
+.pnpm-store/

@@ -1,0 +1,6 @@
+build/
+.svelte-kit/
+src/lib/wasm/
+playwright-report/
+test-results/
+pnpm-lock.yaml
