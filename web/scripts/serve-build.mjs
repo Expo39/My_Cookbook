@@ -14,7 +14,8 @@ const types = {
 	'.svg': 'image/svg+xml',
 	'.wasm': 'application/wasm',
 	'.png': 'image/png',
-	'.ico': 'image/x-icon'
+	'.ico': 'image/x-icon',
+	'.woff2': 'font/woff2'
 };
 
 createServer((req, res) => {
@@ -23,17 +24,23 @@ createServer((req, res) => {
 		res.writeHead(404).end();
 		return;
 	}
-	let file = join(root, normalize(path.slice(base.length)));
-	if (!file.startsWith(root)) {
+	const target = join(root, normalize(path.slice(base.length)));
+	if (!target.startsWith(root)) {
 		res.writeHead(403).end();
 		return;
 	}
-	if (existsSync(file) && statSync(file).isDirectory()) file = join(file, 'index.html');
-	else if (!existsSync(file) && existsSync(`${file}.html`)) file = `${file}.html`;
+	// Like GitHub Pages: a file, then page.html for /page, then a folder's index.html, then 404.html.
+	const candidates = [target, `${target}.html`, join(target, 'index.html')];
+	const found = candidates.find(
+		(candidate) => existsSync(candidate) && statSync(candidate).isFile()
+	);
+	const file = found ?? join(root, '404.html');
 	if (!existsSync(file)) {
 		res.writeHead(404).end();
 		return;
 	}
-	res.writeHead(200, { 'content-type': types[extname(file)] ?? 'application/octet-stream' });
+	res.writeHead(found ? 200 : 404, {
+		'content-type': types[extname(file)] ?? 'application/octet-stream'
+	});
 	createReadStream(file).pipe(res);
 }).listen(port, '0.0.0.0');

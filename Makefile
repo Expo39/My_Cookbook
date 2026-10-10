@@ -10,7 +10,7 @@ DATA_STAMP := $(DATA_OUT)/manifest.json
 RUST_SRC := Cargo.toml Cargo.lock $(shell find crates/cookbook-core crates/cookbook-wasm crates/cookbook-cli -type f \( -name '*.rs' -o -name Cargo.toml \) -not -path '*/tests/*')
 RECIPE_SRC := $(shell find recipes -type f -name '*.json' 2>/dev/null)
 
-.PHONY: image dev test-fast test check build wasm data types fmt lint shell install
+.PHONY: screenshots image dev test-fast test check build wasm data types fmt lint shell install
 
 image:
 	docker compose build dev
@@ -46,7 +46,7 @@ build: install data wasm
 	$(RUN) pnpm --dir web build
 
 test: test-fast build
-	$(RUN) pnpm --dir web e2e
+	docker compose run --rm -e E2E_PREBUILT=1 dev pnpm --dir web e2e
 
 fmt:
 	$(RUN) sh -c 'cargo fmt --all && pnpm --dir web format'
@@ -56,3 +56,9 @@ lint:
 
 shell:
 	$(RUN) bash
+
+# Writes review screenshots of the built site into $(SHOTS), e.g. make screenshots SHOTS=/tmp/shots
+SHOTS ?= $(CURDIR)/web/test-results/shots
+screenshots: build
+	mkdir -p $(SHOTS)
+	docker compose run --rm -v $(SHOTS):/shots -e SHOTS_DIR=/shots -e SCREENSHOTS=1 -e E2E_PREBUILT=1 dev pnpm --dir web e2e

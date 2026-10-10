@@ -21,10 +21,31 @@ export default defineConfig({
 		reducedMotion: 'reduce',
 		trace: 'retain-on-failure'
 	},
-	projects: [
-		{ name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-		...(process.env.FULL_E2E ? [{ name: 'mobile-webkit', use: { ...devices['iPhone 14'] } }] : [])
-	],
+	projects: process.env.SCREENSHOTS
+		? [
+				{
+					name: 'screenshots',
+					testMatch: '**/screenshots.spec.ts',
+					use: { ...devices['Desktop Chrome'] }
+				}
+			]
+		: [
+				{
+					name: 'chromium',
+					testIgnore: ['**/mobile.spec.ts', '**/screenshots.spec.ts'],
+					use: { ...devices['Desktop Chrome'] }
+				},
+				{ name: 'mobile', testMatch: '**/mobile.spec.ts', use: { ...devices['Pixel 7'] } },
+				...(process.env.FULL_E2E
+					? [
+							{
+								name: 'mobile-webkit',
+								testMatch: '**/mobile.spec.ts',
+								use: { ...devices['iPhone 14'] }
+							}
+						]
+					: [])
+			],
 	webServer: {
 		command,
 		url: `http://localhost:${port}${basePath}/`,
