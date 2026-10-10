@@ -1,0 +1,83 @@
+{
+  "title": "Pan-Seared Fillet Steak",
+  "summary": "A pan-seared fillet steak for one. It cooks faster than ribeye, even though you take it further, because it is leaner with less fat to render.",
+  "servings": 1,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 5,
+    "cook": 10,
+    "rest": 5
+  },
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 200,
+            "unit": "g"
+          },
+          "item": "fillet steak"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "item": "Salt and black pepper"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "sprigs fresh thyme",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "sprigs rosemary",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "optional": true,
+          "scale": "discrete"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Take the steak out of the fridge {timer:30} before cooking. Pat it completely dry and season generously with salt and pepper."
+    },
+    {
+      "text": "Heat a frying pan over a medium heat with the butter. Fillet is leaner and cooks faster, so a medium heat stops the outside burning before the inside is cooked."
+    },
+    {
+      "text": "Once the butter foams, add the steak. Sear for about {timer:4} per side for a 200 g fillet cooked to medium."
+    },
+    {
+      "text": "Add the thyme, rosemary and garlic, if using, and baste the steak with the butter as it cooks, using a spoon."
+    },
+    {
+      "text": "Move to a plate and rest for {timer:5}. The internal temperature should be {temp:57-60!} for medium."
+    }
+  ],
+  "tips": [
+    "Fillet has less marbling than ribeye, so use butter throughout cooking. A medium heat is crucial. For accuracy, use a meat thermometer: 52-55 °C for medium-rare, 57-60 °C for medium, 63-66 °C for medium-well. If you want to change the weight of the fillet, you can ask the AI assistant to adjust the cooking times and temperatures."
+  ]
+}

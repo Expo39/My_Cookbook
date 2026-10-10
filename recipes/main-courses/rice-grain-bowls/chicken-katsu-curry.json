@@ -1,0 +1,233 @@
+{
+  "title": "Chicken Katsu Curry",
+  "summary": "Crisp breaded chicken cutlets with a rich Japanese curry sauce.",
+  "servings": 2,
+  "times": {
+    "prep": 20,
+    "cook": 30
+  },
+  "tags": [
+    "Asian-Inspired"
+  ],
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "name": "Breaded chicken",
+      "items": [
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "chicken breasts",
+          "scale": "discrete"
+        },
+        {
+          "food": "egg",
+          "amount": {
+            "qty": 2
+          },
+          "item": "eggs",
+          "note": "beaten",
+          "scale": "discrete"
+        },
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 100,
+            "unit": "g"
+          },
+          "item": "plain flour"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "panko breadcrumbs"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "paprika"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "turmeric"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "garam masala"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "curry powder"
+        },
+        {
+          "item": "Salt and black pepper",
+          "scale": "toTaste"
+        }
+      ]
+    },
+    {
+      "name": "Katsu curry sauce",
+      "items": [
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "plain flour"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "ground cloves"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "MSG",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "ml"
+          },
+          "item": "chicken stock"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "large onions",
+          "note": "extremely finely chopped (or blended)",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "apple",
+          "note": "finely sliced",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "curry powder"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "garam masala"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "paprika"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "turmeric"
+        }
+      ]
+    },
+    {
+      "name": "To serve",
+      "items": [
+        {
+          "amount": {
+            "qty": 160,
+            "unit": "g"
+          },
+          "item": "Japanese short-grain or jasmine rice",
+          "note": "uncooked, about 80 g per person"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "spring onions",
+          "note": "thinly sliced",
+          "scale": "discrete"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Rinse the rice until the water runs clear, then cook it according to the packet instructions and keep it warm."
+    },
+    {
+      "text": "Butterfly the chicken breasts to make them thinner, and season with salt and pepper."
+    },
+    {
+      "text": "Set up a breading station: the flour mixed with the breading spices, the beaten eggs and the panko breadcrumbs."
+    },
+    {
+      "text": "Coat each piece of chicken in flour, then egg, then breadcrumbs, pressing firmly."
+    },
+    {
+      "text": "Set the breaded chicken on a rack over a baking tray. Bake at {temp:200/180} for {timer:15|katsu}, until golden and cooked through."
+    },
+    {
+      "text": "For the curry, cook the onions in the butter with the ground cloves over a medium heat for at least {timer:20|onions}, stirring often, until deeply caramelised."
+    },
+    {
+      "text": "Lift out the onions for now. Add the flour and butter to the pan and cook for {timer:2-3} to make a roux."
+    },
+    {
+      "text": "Add the sauce spices (curry powder, garam masala, paprika and turmeric) and cook for {timer:1}, until fragrant."
+    },
+    {
+      "text": "Return the onions to the pan, with the apple slices if using. Sauté together for {timer:2-3}."
+    },
+    {
+      "text": "Gradually add the chicken stock, stirring constantly, until the curry emulsifies and thickens."
+    },
+    {
+      "text": "If the onions have not melted completely, blend the curry until smooth."
+    },
+    {
+      "text": "Slice the katsu and serve over the rice with the curry sauce poured over. Scatter with the spring onions."
+    }
+  ],
+  "tips": [
+    "This is Antonio's favourite dish. The secret is patience: caramelising the onions properly, for at least 20 minutes, creates great depth. The apple adds a subtle sweetness that balances the spices, and you can add shredded pear along with it. Baking the katsu rather than frying it is the healthier option, but frying is just as good, if not better. An air fryer also works."
+  ]
+}

@@ -1,0 +1,156 @@
+{
+  "title": "Baked Gnocchi with Tomato & Mozzarella",
+  "summary": "Baked gnocchi that never turns watery. The secret is crushed tomatoes and a long simmer to concentrate the sauce before the gnocchi go in.",
+  "servings": 4,
+  "times": {
+    "prep": 10,
+    "cook": 45
+  },
+  "tags": [
+    "Italian Classics"
+  ],
+  "order": 5,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 475,
+            "unit": "g"
+          },
+          "item": "potato gnocchi",
+          "note": "1 packet"
+        },
+        {
+          "key": "oil",
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "alt": {
+            "qty": 30,
+            "unit": "ml"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "amount": {
+            "qty": 0.5
+          },
+          "item": "medium onion",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "item": "Pinch of chilli flakes",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 800,
+            "unit": "g"
+          },
+          "item": "crushed tomatoes",
+          "note": "one 28 oz tin"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "dried oregano"
+        },
+        {
+          "food": "sugar",
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "sugar"
+        },
+        {
+          "amount": {
+            "qty": 170,
+            "unit": "g"
+          },
+          "alt": {
+            "qty": 6,
+            "unit": "oz"
+          },
+          "item": "fresh mozzarella",
+          "note": "torn"
+        },
+        {
+          "amount": {
+            "qty": 40,
+            "unit": "g"
+          },
+          "item": "freshly grated Parmesan"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh parsley",
+          "note": "chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh basil",
+          "note": "chopped"
+        },
+        {
+          "item": "Kosher salt and black pepper to taste",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Heat {@oil} in a large ovenproof frying pan over a medium heat. Add the onion and sauté for {timer:1}."
+    },
+    {
+      "text": "Add the garlic, and the chilli flakes if using. Cook for another {timer:4}, until soft and fragrant."
+    },
+    {
+      "text": "Stir in the crushed tomatoes, oregano and sugar, and season with salt and pepper. Bring to the boil."
+    },
+    {
+      "text": "Reduce the heat to low and simmer, partially covered, for {timer:30|sauce}, stirring occasionally. This thickens the sauce and stops it turning watery."
+    },
+    {
+      "text": "Meanwhile, bring a large pan of salted water to the boil and add the gnocchi. Drain them as soon as they float, after {timer:2-3|gnocchi}."
+    },
+    {
+      "text": "Stir the parsley and basil into the thickened sauce."
+    },
+    {
+      "text": "Add the drained gnocchi to the sauce and stir gently to coat."
+    },
+    {
+      "text": "Top with the torn mozzarella and grated Parmesan."
+    },
+    {
+      "text": "Put the pan under the grill for {timer:5-7}, until the cheese is golden, bubbling and slightly crisp on top."
+    },
+    {
+      "text": "Leave to rest for {timer:2-3} before serving."
+    }
+  ],
+  "tips": [
+    "The 30-minute simmer is crucial: it evaporates excess liquid and concentrates the flavour. Crushed tomatoes, rather than diced, make a thicker, creamier sauce that clings to the gnocchi. Boiling and draining the gnocchi separately, rather than cooking them in the sauce, keeps extra water out. The grill dries out the top and gives it a golden crust."
+  ]
+}

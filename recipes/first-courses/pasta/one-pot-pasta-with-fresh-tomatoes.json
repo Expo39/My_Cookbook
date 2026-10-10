@@ -1,0 +1,103 @@
+{
+  "title": "One-Pot Pasta with Fresh Tomatoes",
+  "summary": "The pasta cooks straight in the tomato sauce, a rustic method that gives a creamy dish and lets the pasta absorb all the flavour.",
+  "servings": 4,
+  "times": {
+    "prep": 10,
+    "cook": 25
+  },
+  "tags": [
+    "Italian Classics"
+  ],
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 600,
+            "unit": "g"
+          },
+          "item": "short pasta",
+          "note": "such as penne or rigatoni"
+        },
+        {
+          "amount": {
+            "qty": 1200,
+            "unit": "g"
+          },
+          "item": "polpa pelati",
+          "note": "crushed tomatoes"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 6,
+              "max": 7
+            }
+          },
+          "item": "garlic cloves",
+          "note": "thinly sliced",
+          "scale": "discrete"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 130,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 9,
+            "unit": "tbsp"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "item": "Fresh basil leaves"
+        },
+        {
+          "item": "Salt to taste",
+          "scale": "toTaste"
+        },
+        {
+          "item": "Chilli flakes",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 875,
+            "unit": "ml"
+          },
+          "item": "water or vegetable stock"
+        },
+        {
+          "item": "Parmesan cheese",
+          "note": "for serving"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Heat the olive oil in a large, wide pan over a medium heat. Add the sliced garlic, and the chilli flakes if using. Cook for {timer:1}, until fragrant; do not let the garlic brown."
+    },
+    {
+      "text": "Add the polpa pelati and crush any larger pieces with a wooden spoon. Season with salt and add some torn basil. Simmer for {timer:5} to develop the flavour."
+    },
+    {
+      "text": "Add the raw pasta straight to the sauce, stirring to coat each piece. Add just enough water or stock to cover the pasta; the liquid should be level with it."
+    },
+    {
+      "text": "Cook at a steady simmer, stirring often to stop it sticking and to release the starch. Add a splash of water whenever it looks dry. Cook for {timer:12-15}, until al dente."
+    },
+    {
+      "text": "When the pasta is al dente and the sauce clings nicely, take the pan off the heat. Stir in more fresh basil and a drizzle of olive oil."
+    },
+    {
+      "text": "Serve straight away with freshly grated Parmesan."
+    }
+  ],
+  "tips": [
+    "Success depends on frequent stirring and adjusting the liquid. Use a wide pan so the pasta cooks evenly. Slice the garlic rather than mince it: the slices soften as they cook and give a milder, sweeter flavour. The starch the pasta releases is what makes the dish creamy."
+  ]
+}

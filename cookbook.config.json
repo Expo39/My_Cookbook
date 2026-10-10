@@ -1,0 +1,15 @@
+{
+  "site": {
+    "url": "https://expo39.github.io",
+    "basePath": "/My_Cookbook"
+  },
+  "social": {
+    "instagram": {
+      "enabled": true,
+      "handle": "tonys_foods"
+    }
+  },
+  "ai": {
+    "endpoint": "https://sapori-ai.antoniogaldes2.workers.dev"
+  }
+}

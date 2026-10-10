@@ -1,0 +1,159 @@
+{
+  "title": "Charcuterie Board for 10",
+  "summary": "A board for ten to serve as the main event. Allow 150-200 g of food per person, with roughly as much cheese as meat.",
+  "servings": 10,
+  "times": {
+    "prep": 30
+  },
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "name": "Cheese",
+      "total": {
+        "qty": 1150,
+        "unit": "g"
+      },
+      "items": [
+        {
+          "item": "A mix of hard (Parmesan, Pecorino), semi-soft (Gouda, Cheddar), soft (Brie, goat's cheese) and blue cheeses"
+        }
+      ]
+    },
+    {
+      "name": "Charcuterie",
+      "total": {
+        "qty": {
+          "min": 700,
+          "max": 850
+        },
+        "unit": "g"
+      },
+      "items": [
+        {
+          "amount": {
+            "qty": 180,
+            "unit": "g"
+          },
+          "item": "prosciutto crudo"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 100,
+              "max": 150
+            },
+            "unit": "g"
+          },
+          "item": "additional prosciutto or salami"
+        },
+        {
+          "amount": {
+            "qty": 120,
+            "unit": "g"
+          },
+          "item": "mortadella"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "coppa or capocollo"
+        },
+        {
+          "amount": {
+            "qty": 80,
+            "unit": "g"
+          },
+          "item": "bresaola"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 150,
+              "max": 200
+            },
+            "unit": "g"
+          },
+          "item": "salami variety"
+        }
+      ]
+    },
+    {
+      "name": "Crackers & Bread",
+      "items": [
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "g"
+          },
+          "item": "crackers or breadsticks"
+        },
+        {
+          "item": "Fresh bread",
+          "note": "such as baguette, ciabatta or focaccia"
+        }
+      ]
+    },
+    {
+      "name": "Accompaniments",
+      "items": [
+        {
+          "amount": {
+            "qty": {
+              "min": 200,
+              "max": 300
+            },
+            "unit": "g"
+          },
+          "item": "dip",
+          "note": "such as hummus, pesto or olive tapenade"
+        },
+        {
+          "item": "Mixed olives"
+        },
+        {
+          "item": "Pickled vegetables",
+          "note": "such as cornichons and peppers"
+        },
+        {
+          "item": "Fresh fruit",
+          "note": "such as grapes, figs or dried apricots"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 200,
+              "max": 250
+            },
+            "unit": "g"
+          },
+          "item": "nuts and dried fruit"
+        },
+        {
+          "item": "Honey or fruit preserves"
+        },
+        {
+          "item": "Mustards"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Start with the cheeses, a mix of hard, semi-soft, soft and blue. Arrange them on the board in clusters rather than rows."
+    },
+    {
+      "text": "Add the charcuterie in clusters of its own, keeping the amount of meat close to the amount of cheese."
+    },
+    {
+      "text": "Fill in around them with the crackers, breadsticks and bread, then the dip, olives, pickled vegetables, fresh fruit, and nuts and dried fruit."
+    },
+    {
+      "text": "Finish with the honey or fruit preserves and the mustards."
+    }
+  ],
+  "tips": [
+    "Dips add variety and help stretch the portions. When the board is the main event, 150-200 g per person ensures guests leave satisfied. Arrange everything in clusters rather than rows for visual appeal."
+  ]
+}

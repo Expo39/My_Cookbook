@@ -1,0 +1,22 @@
+# Recipe page: overrides
+
+- **Header:** title (display 2.2-3rem), `titleLocal` in italic muted, meta row (prep / cook / rest / difficulty, numerals in `--font-num`), tags, favourite and share buttons.
+- **Servings bar:**
+  - a tint panel with a minus/plus stepper (output in `--font-num` 1.15rem) and a multiplier menu (half, 2x, 3x)
+  - "I have..." scaling and a Metric/US switch
+  - when scaled, the amounts that changed are shown in `--colour-primary`
+- **Desktop (>= 64rem):** two columns. Ingredients go in a sticky left column (`top: var(--space-5)`, 22rem wide); the method goes on the right with numbered steps.
+- **Tablet (>= 48rem):** the same two columns, without the sticky column.
+- **Mobile:**
+  - Ingredients | Method segmented tabs
+  - a bottom action bar fixed at `padding-bottom: env(safe-area-inset-bottom)` holding Servings, Start cooking and Share
+  - content is padded so nothing sits under the bar
+- **Ingredients:**
+  - a grid of checkbox, amount (`--font-num`, right-aligned, 5.5rem), then item and muted note
+  - dashed `--colour-line` row rules; group names in uppercase labels
+  - ticking strikes the row through and fades it to muted, with an "x of y ready" counter and a Reset button
+- **Method:** step numbers in `--font-num`. Inline amounts from `{@...}` tokens show in bold primary, and timers are accent pills that start a timer when tapped. Steps can be ticked too.
+- **Hints and tips:**
+  - Scaling hints ("check from the original time", "cook in batches") appear as small warning-coloured notes under the affected step.
+  - The chef's tip is a surface panel with an accent uppercase label.
+- **Footer:** related recipes as compact cards; "Ask the sous-chef" (when AI is configured) opens a side drawer on desktop and a bottom sheet on mobile.

@@ -1,0 +1,163 @@
+{
+  "title": "Braised Beef Short Ribs",
+  "summary": "Beef short ribs slow-cooked in wine and stock until they melt in the mouth, with a rich, concentrated gravy. Serve with polenta or mashed potatoes.",
+  "servings": 4,
+  "times": {
+    "prep": 20,
+    "cook": 300
+  },
+  "order": 4,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1600,
+            "unit": "g"
+          },
+          "item": "beef short ribs",
+          "note": "400 g per person"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "onions",
+          "note": "roughly chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "carrots",
+          "note": "roughly chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "celery stalks",
+          "note": "roughly chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 6
+          },
+          "item": "garlic cloves",
+          "note": "smashed",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 3,
+            "unit": "tbsp"
+          },
+          "item": "tomato paste",
+          "note": "kunserva"
+        },
+        {
+          "amount": {
+            "qty": 750,
+            "unit": "ml"
+          },
+          "item": "red wine",
+          "note": "anywhere from 500 to 1000 ml works"
+        },
+        {
+          "amount": {
+            "qty": 1000,
+            "unit": "ml"
+          },
+          "item": "beef stock",
+          "note": "enough to submerge ribs"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "bay leaves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tsp"
+          },
+          "item": "fresh thyme"
+        },
+        {
+          "food": "olive-oil",
+          "item": "Olive oil"
+        },
+        {
+          "item": "Salt and black pepper"
+        }
+      ]
+    },
+    {
+      "name": "To serve",
+      "items": [
+        {
+          "item": "Polenta or mashed potatoes",
+          "note": "to serve",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 400,
+            "unit": "g"
+          },
+          "item": "tenderstem broccoli",
+          "note": "as a side"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Preheat the oven to {temp:160/140}. Pat the short ribs dry and season generously with salt and pepper."
+    },
+    {
+      "text": "Heat the olive oil in a large, heavy-based pan over a high heat. Sear the short ribs on all sides until deeply browned, {timer:3-4} per side. Lift out the ribs and set aside."
+    },
+    {
+      "text": "Lower the heat to medium and add the onions, carrots, celery and garlic to the same pan. Sauté for {timer:8-10}, until the vegetables soften and start to colour."
+    },
+    {
+      "text": "Add the tomato paste and cook, stirring, for {timer:2-3}, until it darkens."
+    },
+    {
+      "text": "Pour in the red wine, scraping up the browned bits from the bottom of the pan. Let it reduce by half, {timer:5-7}."
+    },
+    {
+      "text": "Transfer the wine and vegetables to a large ovenproof dish or casserole. Nestle the short ribs into the vegetables."
+    },
+    {
+      "text": "Add beef stock until the ribs are completely submerged, then add the bay leaves and thyme."
+    },
+    {
+      "text": "Cover tightly with a lid or foil and braise in the oven for {timer:240}, until the meat is falling off the bone."
+    },
+    {
+      "text": "Lift the ribs out carefully, as they will be very tender, and keep them warm."
+    },
+    {
+      "text": "Strain the braising liquid through a fine sieve, pressing the vegetables to extract all the flavour. Discard the solids."
+    },
+    {
+      "text": "Pour the liquid into a saucepan and bring to the boil. Reduce for {timer:15-20}, until thickened to a gravy. Season to taste."
+    },
+    {
+      "text": "While the gravy reduces, toss the broccoli with a little olive oil and salt, and char it in a very hot griddle pan for {timer:6-8|broccoli}, turning once."
+    },
+    {
+      "text": "Serve the short ribs with the reduced gravy, polenta or mashed potatoes, and the grilled broccoli on the side."
+    }
+  ],
+  "tips": [
+    "The key to tender short ribs is low, slow cooking, so do not rush the braise. The meat should be tender enough to fall apart under a fork. Searing the ribs well adds a great deal of flavour to the sauce. The dish is even better made a day ahead: refrigerate it overnight, skim the fat from the surface, then reheat gently. The reduced gravy should be rich and glossy. For a traditional Italian finish, serve with soft polenta and a gremolata of lemon zest, parsley and garlic."
+  ]
+}

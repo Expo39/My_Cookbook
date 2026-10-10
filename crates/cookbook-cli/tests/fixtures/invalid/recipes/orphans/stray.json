@@ -1,0 +1,8 @@
+{
+  "title": "Stray",
+  "summary": "Lives in a folder without a section file.",
+  "servings": 1,
+  "times": { "cook": 1 },
+  "ingredientGroups": [{ "items": [{ "item": "water" }] }],
+  "steps": [{ "text": "Boil." }]
+}

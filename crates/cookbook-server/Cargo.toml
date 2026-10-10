@@ -1,0 +1,26 @@
+[package]
+name = "cookbook-server"
+description = "Axum server for self-hosting the cookbook with editing and the sous-chef"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+argon2 = "=0.6.0"
+axum = { version = "=0.8.9", features = ["multipart"] }
+cookbook-ai = { path = "../cookbook-ai" }
+cookbook-core = { path = "../cookbook-core" }
+cookbook-tree = { path = "../cookbook-tree" }
+hmac = "=0.13.0"
+reqwest = { version = "=0.13.5", default-features = false, features = ["json", "rustls"] }
+serde.workspace = true
+serde_json.workspace = true
+sha2 = "=0.11.0"
+tower = { version = "=0.5.3", features = ["util"] }
+tokio = { version = "=1.53.1", features = ["fs", "macros", "process", "rt-multi-thread", "signal"] }
+tower-http = { version = "=0.7.1", features = ["compression-br", "compression-gzip", "fs", "set-header"] }
+
+[dev-dependencies]
+http-body-util = "=0.1.5"
+tempfile = "=3.27.0"

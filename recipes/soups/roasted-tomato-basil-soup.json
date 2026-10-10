@@ -1,0 +1,130 @@
+{
+  "title": "Roasted Tomato & Basil Soup",
+  "summary": "A make-ahead starter that tastes better the next day, once the flavours have melded. Light and acidic, it will not sit heavily before a rich main course.",
+  "servings": 10,
+  "times": {
+    "prep": 15,
+    "cook": 55
+  },
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 3000,
+            "unit": "g"
+          },
+          "item": "ripe tomatoes",
+          "note": "halved"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "large onions",
+          "note": "chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "garlic bulb",
+          "note": "top sliced off",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "red pepper",
+          "note": "chopped",
+          "scale": "discrete"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 6,
+            "unit": "tbsp"
+          },
+          "alt": {
+            "qty": 90,
+            "unit": "ml"
+          },
+          "item": "olive oil"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "balsamic vinegar"
+        },
+        {
+          "food": "sugar",
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "sugar"
+        },
+        {
+          "amount": {
+            "qty": 1000,
+            "unit": "ml"
+          },
+          "item": "stock"
+        },
+        {
+          "item": "Large handful of fresh basil"
+        },
+        {
+          "item": "Salt and pepper"
+        },
+        {
+          "food": "cream",
+          "amount": {
+            "qty": 100,
+            "unit": "ml"
+          },
+          "item": "cream",
+          "optional": true
+        },
+        {
+          "item": "Crusty bread",
+          "note": "for serving"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Preheat the oven to {temp:220/200}. Put the tomatoes cut-side up on a large baking tray and add the onions, red pepper and whole garlic bulb."
+    },
+    {
+      "text": "Drizzle with the olive oil and balsamic vinegar, and sprinkle with the sugar, salt and pepper."
+    },
+    {
+      "text": "Roast for {timer:40-45}, until the tomatoes have collapsed and the edges are caramelised."
+    },
+    {
+      "text": "Squeeze the roasted garlic cloves out of their skins into a bowl."
+    },
+    {
+      "text": "Transfer everything to a large pan and add the stock and most of the basil."
+    },
+    {
+      "text": "Simmer for {timer:10}, then blend until smooth."
+    },
+    {
+      "text": "Stir in the cream, if using, and reheat gently before serving."
+    },
+    {
+      "text": "Garnish with fresh basil and a drizzle of olive oil, and serve with crusty bread."
+    }
+  ],
+  "tips": [
+    "Roasting concentrates the tomato flavour and adds a smoky sweetness. Make it 1-2 days ahead; the flavour deepens. Reheat gently, and do not let it boil once the cream is in."
+  ]
+}

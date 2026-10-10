@@ -1,0 +1,139 @@
+{
+  "title": "Creamy Steak Pasta",
+  "summary": "Seared beef and tagliatelle in an indulgent Boursin sauce. Comfort food, elegant enough for guests.",
+  "servings": 4,
+  "times": {
+    "prep": 10,
+    "cook": 25
+  },
+  "tags": [
+    "Creamy & Rich"
+  ],
+  "order": 3,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 415,
+            "unit": "g"
+          },
+          "item": "cube-roll ribeye"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "vegetable oil"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 2.5,
+            "unit": "tbsp"
+          },
+          "item": "butter"
+        },
+        {
+          "amount": {
+            "qty": 550,
+            "unit": "g"
+          },
+          "item": "tagliatelle"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "white onion",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 325,
+            "unit": "ml"
+          },
+          "item": "chicken stock"
+        },
+        {
+          "amount": {
+            "qty": 425,
+            "unit": "g"
+          },
+          "item": "Boursin cheese",
+          "note": "or cream cheese or mascarpone"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 2,
+              "max": 3
+            }
+          },
+          "item": "garlic cloves",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "parsley",
+          "note": "chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "thyme",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 55,
+            "unit": "g"
+          },
+          "item": "Parmesan",
+          "note": "grated"
+        },
+        {
+          "item": "Salt and pepper to taste",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Mix the cheese with the garlic, parsley, thyme (if using), salt and pepper. Set aside at room temperature."
+    },
+    {
+      "text": "Pat the steak completely dry and season generously with salt and pepper."
+    },
+    {
+      "text": "Heat a large frying pan over a high heat and add the oil. Sear the steak whole for {timer:2-3} per side, until well browned and cooked to your liking. Move it to a plate, rest for {timer:5}, then slice into strips. Lower the heat to medium."
+    },
+    {
+      "text": "Cook the pasta in boiling salted water until al dente. Do not drain it."
+    },
+    {
+      "text": "Add the onion to the steak pan and fry for {timer:3-4}, until soft and golden."
+    },
+    {
+      "text": "Pour in the stock and bring to a simmer. Stir in the cheese mixture until melted, then add the Parmesan, parsley and the steak's resting juices. Simmer gently."
+    },
+    {
+      "text": "Lift the pasta into the pan with tongs, bringing some of its cooking water with it. Toss vigorously until the sauce clings, adding more water for a silky consistency."
+    },
+    {
+      "text": "Add the steak strips and toss gently. Finish with Parmesan and parsley and serve straight away."
+    }
+  ],
+  "tips": [
+    "Cream cheese or mascarpone are good substitutes for Boursin. Do not overcrowd the pan when searing: meat tastes better when it is well seared. Lift the pasta straight into the sauce with tongs; the pasta water binds everything together."
+  ]
+}

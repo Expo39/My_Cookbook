@@ -1,0 +1,21 @@
+{
+  "title": "Lentil soup",
+  "titleLocal": "Soppa tal-għads",
+  "summary": "A thick, warming soup from a store cupboard.",
+  "servings": 4,
+  "times": { "prep": 10, "cook": 35 },
+  "image": { "src": "lentil-soup.jpg", "alt": "A bowl of orange lentil soup on a pale table" },
+  "ingredientGroups": [
+    {
+      "items": [
+        { "key": "lentils", "food": "lentils", "amount": { "qty": 250, "unit": "g" }, "item": "red lentils" },
+        { "key": "stock", "amount": { "qty": 1, "unit": "l" }, "item": "vegetable stock" },
+        { "key": "salt", "amount": { "qty": 1, "unit": "tsp" }, "item": "salt", "scale": "seasoning" }
+      ]
+    }
+  ],
+  "steps": [
+    { "text": "Simmer {@lentils} in {@stock} for {timer:25-30}." },
+    { "text": "Season with {@salt}." }
+  ]
+}

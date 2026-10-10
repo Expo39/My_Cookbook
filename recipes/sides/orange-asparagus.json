@@ -1,0 +1,85 @@
+{
+  "title": "Orange Asparagus",
+  "summary": "Roasted asparagus with a bright orange glaze, made for Beef Wellington or any rich meat. It roasts in 10 minutes, while the meat rests.",
+  "servings": 5,
+  "times": {
+    "prep": 5,
+    "cook": 10
+  },
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 750,
+            "unit": "g"
+          },
+          "item": "asparagus",
+          "note": "woody ends trimmed"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "amount": {
+            "qty": 60,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 4,
+            "unit": "tbsp"
+          },
+          "item": "fresh orange juice"
+        },
+        {
+          "food": "honey",
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "honey"
+        },
+        {
+          "item": "Salt and black pepper"
+        },
+        {
+          "item": "Orange zest",
+          "note": "for garnish",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Preheat the oven to {temp:200/180} and line a baking tray with greaseproof paper."
+    },
+    {
+      "text": "Toss the asparagus with the olive oil, salt and pepper on the tray."
+    },
+    {
+      "text": "Roast for {timer:8-10|asparagus}, until tender but still bright green, with slightly charred tips."
+    },
+    {
+      "text": "Mix the orange juice and honey in a small bowl."
+    },
+    {
+      "text": "Take the asparagus out of the oven and drizzle with the orange and honey glaze while still hot."
+    },
+    {
+      "text": "Toss gently to coat and garnish with orange zest, if you like. Serve straight away."
+    }
+  ],
+  "tips": [
+    "The asparagus should keep a slight bite; overcooked, it turns mushy. The orange glaze adds a brightness that cuts through rich dishes like Wellington. For the best timing, put the asparagus in the oven as the Wellington comes out to rest. Thicker spears may need an extra 2-3 minutes."
+  ],
+  "related": [
+    "main-courses/beef-steak/beef-wellington"
+  ]
+}

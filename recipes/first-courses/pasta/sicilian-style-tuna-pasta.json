@@ -1,0 +1,142 @@
+{
+  "title": "Sicilian-Style Tuna Pasta",
+  "summary": "A classic Sicilian combination with bold, briny flavours. The anchovies melt into the sauce and add depth without tasting fishy.",
+  "servings": 2,
+  "times": {
+    "prep": 10,
+    "cook": 20
+  },
+  "tags": [
+    "Italian Classics"
+  ],
+  "order": 2,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 250,
+            "unit": "g"
+          },
+          "item": "casarecce or short pasta"
+        },
+        {
+          "amount": {
+            "qty": 175,
+            "unit": "g"
+          },
+          "item": "tuna in olive oil"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2.5,
+            "unit": "tbsp"
+          },
+          "alt": {
+            "qty": 37,
+            "unit": "ml"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "small white onion",
+          "note": "finely chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 4
+          },
+          "item": "anchovy fillets in oil",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 3
+          },
+          "item": "garlic cloves",
+          "note": "thinly sliced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 4.5,
+            "unit": "tbsp"
+          },
+          "item": "sliced olives"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "capers",
+          "note": "rinsed"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "small dried chilli",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 50,
+            "unit": "ml"
+          },
+          "item": "white wine",
+          "optional": true
+        },
+        {
+          "item": "Fresh parsley",
+          "note": "chopped"
+        },
+        {
+          "item": "Salt and black pepper to taste",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Bring a large pan of salted water to the boil for the pasta."
+    },
+    {
+      "text": "Heat the olive oil in a large frying pan over a medium heat. Add the chopped onion and cook for {timer:5-7}, until soft and translucent."
+    },
+    {
+      "text": "Add the anchovies and mash them with a wooden spoon until they dissolve into the oil, {timer:1-2}."
+    },
+    {
+      "text": "Add the sliced garlic and cook until just golden, about {timer:1}. Watch it carefully so it does not burn."
+    },
+    {
+      "text": "Add the olives, capers, and the chilli if using. Stir and cook for {timer:1-2} to bring the flavours together."
+    },
+    {
+      "text": "If using wine, add it now and let it bubble for {timer:1}, until slightly reduced."
+    },
+    {
+      "text": "Add the tuna with its oil, breaking it up gently. Do not over-mix; keep some chunks. Cook for {timer:2-3} to warm through."
+    },
+    {
+      "text": "Cook the pasta until al dente. Reserve 1 cup of pasta water before draining."
+    },
+    {
+      "text": "Add the drained pasta to the tuna mixture. Add the pasta water a little at a time, starting with 3-4 tbsp, and toss until glossy and well coated."
+    },
+    {
+      "text": "Take off the heat and add the chopped parsley and black pepper. Taste: it may not need more salt. Serve straight away, without cheese."
+    }
+  ],
+  "tips": [
+    "If your tuna is packed in good olive oil (Italian or Spanish brands), use that oil and reduce the starting oil to match. The twisted shape of casarecce catches the chunky bits. Use parsley or basil, never rosemary or thyme, which overpower the delicate tuna."
+  ]
+}

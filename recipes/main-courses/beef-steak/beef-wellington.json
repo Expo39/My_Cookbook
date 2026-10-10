@@ -1,0 +1,138 @@
+{
+  "title": "Beef Wellington",
+  "summary": "A showstopper for five. Most of the work is done the day before, so assembly day is manageable.",
+  "servings": 5,
+  "times": {
+    "prep": 60,
+    "cook": 95,
+    "rest": 20
+  },
+  "order": 3,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1000,
+            "unit": "g"
+          },
+          "item": "chateaubriand beef fillet"
+        },
+        {
+          "food": "olive-oil",
+          "item": "Olive oil"
+        },
+        {
+          "amount": {
+            "qty": 2.5,
+            "unit": "tbsp"
+          },
+          "item": "Dijon mustard"
+        },
+        {
+          "amount": {
+            "qty": 625,
+            "unit": "g"
+          },
+          "item": "mushrooms",
+          "note": "finely chopped"
+        },
+        {
+          "item": "Fresh thyme"
+        },
+        {
+          "amount": {
+            "qty": 10
+          },
+          "item": "slices Parma ham",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 450,
+            "unit": "g"
+          },
+          "item": "puff pastry"
+        },
+        {
+          "amount": {
+            "qty": 3
+          },
+          "item": "egg yolks",
+          "scale": "discrete"
+        },
+        {
+          "item": "Beef trimmings",
+          "note": "for the sauce"
+        },
+        {
+          "amount": {
+            "qty": 5
+          },
+          "item": "shallots",
+          "note": "finely chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 750,
+            "unit": "ml"
+          },
+          "item": "red wine"
+        },
+        {
+          "amount": {
+            "qty": 940,
+            "unit": "ml"
+          },
+          "item": "beef stock"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Day 1: the night before",
+      "text": "Sear the beef fillet all over in a hot pan with olive oil, {timer:2} per side, until golden. Leave to cool completely, brush with the Dijon mustard and refrigerate."
+    },
+    {
+      "text": "For the duxelles, finely chop the mushrooms and cook them in batches over a high heat with the thyme and olive oil, until all the moisture has evaporated and the mixture is dry. Leave to cool, then refrigerate."
+    },
+    {
+      "text": "For the red wine sauce, roast the beef trimmings, add the chopped shallots and deglaze with the red wine. Reduce by half, then add the beef stock and simmer for {timer:60|sauce}. Strain and refrigerate."
+    },
+    {
+      "text": "If you are wrapping the beef in savoury crepes, make them now (see the Savoury Crepes recipe)."
+    },
+    {
+      "heading": "Day 2: assembly, 3-4 hours before serving",
+      "text": "Lay a large sheet of cling film on the work surface. If using crepes, lay them on it, overlapping."
+    },
+    {
+      "text": "Spread the duxelles over the cling film, or over the crepes if using, and lay the Parma ham slices on top."
+    },
+    {
+      "text": "Place the beef fillet in the centre and use the cling film to roll everything tightly around it into a sausage shape. Twist the ends to seal and chill for {timer:15}, until it has set."
+    },
+    {
+      "text": "Roll the puff pastry out into a large rectangle. Unwrap the beef parcel onto the pastry, wrap the pastry around it, seal the edges with egg wash and score the top decoratively."
+    },
+    {
+      "text": "Brush the whole surface with the remaining egg yolk. Refrigerate for {timer:30}."
+    },
+    {
+      "text": "Bake at {temp:200} for {timer:20-25}, until the pastry is golden and the internal temperature reaches {temp:52-55!} for medium-rare."
+    },
+    {
+      "text": "Rest for {timer:15-20}. Slice the Wellington into thick portions and serve with the red wine sauce and Orange Asparagus."
+    }
+  ],
+  "tips": [
+    "Temperature is critical: aim for 52-55 °C inside for medium-rare, and use a meat thermometer. A single fillet cooks slightly faster than two separate ones. A traditional Wellington uses savoury crepes as a moisture barrier between the duxelles and the pastry, but they are optional. Pair it with a full-bodied red such as Cabernet Sauvignon, Bordeaux or Syrah. For clean slices, use a very sharp knife and wipe it between cuts.",
+    "Serve with Orange Asparagus, and use Savoury Crepes for wrapping if you like."
+  ],
+  "related": [
+    "sides/orange-asparagus",
+    "desserts/french-classics/savoury-crepes"
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "title": "Crème Brûlée",
+  "summary": "Silky vanilla custard under a crackling caramelised sugar top. Make it ahead for a dinner party: the custard needs at least 6 hours to chill.",
+  "servings": 4,
+  "times": {
+    "prep": 20,
+    "cook": 40,
+    "rest": 360
+  },
+  "order": 1,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "food": "cream",
+          "amount": {
+            "qty": 500,
+            "unit": "ml"
+          },
+          "item": "double cream"
+        },
+        {
+          "key": "vanilla",
+          "amount": {
+            "qty": 2,
+            "unit": "tsp"
+          },
+          "item": "vanilla extract"
+        },
+        {
+          "amount": {
+            "qty": 5
+          },
+          "item": "egg yolks",
+          "scale": "discrete"
+        },
+        {
+          "food": "sugar-caster",
+          "amount": {
+            "qty": 50,
+            "unit": "g"
+          },
+          "item": "caster sugar"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "sugar per ramekin",
+          "note": "topping",
+          "scale": "fixed"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Pour the cream into a saucepan and heat until it just starts to simmer. Take it off the heat straight away and stir in {@vanilla}. Leave to cool to lukewarm, {timer:15-20}.",
+      "key": "infuse"
+    },
+    {
+      "text": "Preheat the oven to {temp:130/120}. Set the ramekins in a deep baking tin and boil the kettle."
+    },
+    {
+      "text": "Whisk the egg yolks and sugar until just combined. Do not over-whisk."
+    },
+    {
+      "text": "Pour the lukewarm cream into the egg mixture and stir gently."
+    },
+    {
+      "text": "Divide evenly between the ramekins."
+    },
+    {
+      "text": "Pour boiling water into the tin until it comes halfway up the sides of the ramekins."
+    },
+    {
+      "text": "Bake for {timer:35-40}, until set but still slightly wobbly in the centre."
+    },
+    {
+      "text": "Lift the ramekins out of the water bath and leave to cool. Refrigerate for at least 6 hours; overnight is best."
+    },
+    {
+      "text": "To caramelise, sprinkle ½ tsp sugar over each custard and blowtorch until caramelised."
+    }
+  ],
+  "tips": [
+    "The water bath stops the custard curdling. The wobble test is key: the centre should jiggle like jelly when gently shaken. For the best results, make the custards the day before and caramelise the sugar just before serving."
+  ],
+  "variants": [
+    {
+      "key": "vanilla",
+      "label": "Vanilla",
+      "options": [
+        {
+          "key": "extract",
+          "label": "Extract",
+          "default": true
+        },
+        {
+          "key": "essence",
+          "label": "Essence",
+          "ingredients": {
+            "vanilla": {
+              "amount": {
+                "qty": 1.5,
+                "unit": "tsp"
+              },
+              "item": "vanilla essence"
+            }
+          },
+          "steps": {
+            "infuse": "Pour the cream into a saucepan and heat until it just starts to simmer. Take it off the heat straight away and stir in {@vanilla}. Leave to cool to lukewarm, {timer:15-20}."
+          },
+          "tips": [
+            "Vanilla essence is more concentrated than extract, so you use less. The water bath stops the custard curdling. The wobble test is key: the centre should jiggle like jelly when gently shaken."
+          ]
+        },
+        {
+          "key": "pods",
+          "label": "Pods",
+          "ingredients": {
+            "vanilla": {
+              "amount": {
+                "qty": 1
+              },
+              "item": "vanilla pod",
+              "note": "split and scraped",
+              "scale": "discrete"
+            }
+          },
+          "steps": {
+            "infuse": "Split the vanilla pod lengthwise and scrape out the seeds. Put the cream, pod and seeds in a saucepan and heat until it just starts to simmer. Take it off the heat and leave to infuse for {timer:15}. Remove the pod, reheat gently if needed, then leave to cool to lukewarm."
+          },
+          "tips": [
+            "Vanilla pods give the most authentic flavour, with vanilla specks all through the custard. Once you have removed the pod, rinse and dry it to make vanilla sugar. The water bath stops the custard curdling. The wobble test is key: the centre should jiggle like jelly when gently shaken."
+          ]
+        }
+      ]
+    }
+  ]
+}
