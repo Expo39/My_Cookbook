@@ -99,5 +99,15 @@ Each option replaces the ingredients and steps by key. If `tips` is given, it re
 ## Scaling rules
 Times, temperatures and cookware are never scaled automatically. When the scale changes, the method shows "check from the original time" beside timed steps, and from 2× upwards a "cook in batches" hint appears. The rounding tables per unit are in `docs/research/FEATURES.md`.
 
+## Details the checklist and scaling engine rely on
+- A recipe has to sit inside a section folder; a file directly under `recipes/` has no section and fails `E-SECTION-MISSING`.
+- `pan.size` is `[diameter]` for round, `[width, length]` for rect, and `[side]` or `[width, length]` for square. `loaf` is not a shape yet.
+- `scaling.min` and `scaling.max` are servings. `image.alt` may be omitted in the file, but then `E-IMAGE-ALT` fails.
+- A variant option replaces a whole ingredient (its `key` is taken from the map key) and may only name keys that exist in the recipe.
+- `seasoning` above 1× shows `max(base, 0.75 × base × f)` to `base × f`; at or below 1× it is plain linear.
+- `discrete` rounds to the nearest whole piece (minimum 1). Only when the recipe is `precise` and the ingredient has `each` does a fractional part of 0.25 to 0.75 show as a half with its weight, e.g. "1½ (75 g) eggs".
+- A cup is 240 ml, a tablespoon 15 ml, a teaspoon 5 ml and a US fluid ounce 30 ml. An ingredient with an `alt` is shown in its authored units and never converted.
+- Token modifiers combine as `{@key:amount*1/2}`. `{timer:12-15|name}` takes both a range and a name.
+
 ## Validation
 `cookbook-cli check` runs the recipe checklist (see `docs/ARCHITECTURE.md`). The same rules run in the admin editor (WASM), in CI and on the self-host server.
