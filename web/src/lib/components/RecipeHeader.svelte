@@ -13,7 +13,8 @@
 		hydrated,
 		cookHref,
 		onshare,
-		onaddlist
+		onaddlist,
+		onask
 	}: {
 		card: RecipeCard;
 		model: RecipeModel;
@@ -21,6 +22,7 @@
 		cookHref: string;
 		onshare: () => void;
 		onaddlist: () => void;
+		onask?: () => void;
 	} = $props();
 
 	const recipe = $derived(model.data.recipe);
@@ -91,6 +93,11 @@
 		<button type="button" disabled={!hydrated} onclick={onshare}>
 			<Icon name="share" />Share
 		</button>
+		{#if onask}
+			<button type="button" disabled={!hydrated} onclick={onask}>
+				<Icon name="hat" />Ask the sous-chef
+			</button>
+		{/if}
 	</div>
 </header>
 

@@ -20,7 +20,6 @@ use cookbook_core::{
 use image::{DynamicImage, codecs::jpeg::JpegEncoder, imageops::FilterType};
 use layout::{Content, Layout, Line, Op, compose};
 use resvg::{tiny_skia, usvg};
-use serde::Deserialize;
 use text::{Face, Metrics};
 
 use crate::{build::BuildError, images};
@@ -30,28 +29,6 @@ pub const FORMATS: [&str; 3] = ["og", "portrait", "story"];
 /// Bumped when the rendering code changes in a way the inputs do not show.
 const RENDERER: &str = "1";
 const STATE_FILE: &str = ".state.json";
-const SITE_JSON: &str = include_str!("../../../../site.json");
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct SiteConfig {
-    url: String,
-    base_path: String,
-}
-
-/// The deployed address cards link to: `PUBLIC_SITE_URL` with `BASE_PATH`, or the defaults in `site.json`.
-pub fn site_root() -> String {
-    let config: SiteConfig = serde_json::from_str(SITE_JSON).expect("site.json is valid");
-    let (url, base) = match std::env::var("PUBLIC_SITE_URL") {
-        Ok(url) if !url.is_empty() => (url, std::env::var("BASE_PATH").unwrap_or_default()),
-        _ => (config.url, config.base_path),
-    };
-    format!(
-        "{}{}",
-        url.trim_end_matches('/'),
-        base.trim_end_matches('/')
-    )
-}
 
 #[derive(Debug, Default)]
 pub struct Summary {
@@ -97,6 +74,7 @@ fn content(
     url: &str,
     short: &str,
     has_photo: bool,
+    instagram: Option<&str>,
 ) -> Content {
     let recipe = &data.recipe;
     Content {
@@ -114,6 +92,7 @@ fn content(
         qr: qr_matrix(url),
         url_text: short.to_owned(),
         has_photo,
+        instagram: instagram.map(str::to_owned),
     }
 }
 
@@ -190,6 +169,7 @@ fn render_job(
     options: &usvg::Options,
     job: &Job,
     root_url: &str,
+    instagram: Option<&str>,
     out: &Path,
 ) -> Result<(), BuildError> {
     let url = format!("{root_url}/{}", job.id);
@@ -201,7 +181,7 @@ fn render_job(
         .as_ref()
         .map(|path| images::open(path).map(downscale))
         .transpose()?;
-    let content = content(job.data, job.card, &url, short, photo.is_some());
+    let content = content(job.data, job.card, &url, short, photo.is_some(), instagram);
     for name in FORMATS {
         let format = &layout.formats[name];
         let png = render(layout, metrics, options, format, &content, photo.as_ref())
@@ -216,7 +196,12 @@ fn render_job(
 }
 
 /// Renders the cards that are missing or out of date and removes those of recipes that are gone.
-pub fn run(root: &Path, out: &Path, site_root: &str) -> Result<Summary, BuildError> {
+pub fn run(
+    root: &Path,
+    out: &Path,
+    site_root: &str,
+    instagram: Option<&str>,
+) -> Result<Summary, BuildError> {
     let started = Instant::now();
     let (loaded, _) = crate::build::load_checked(root)?;
     let site = build_site(&loaded.collection);
@@ -233,6 +218,7 @@ pub fn run(root: &Path, out: &Path, site_root: &str) -> Result<Summary, BuildErr
     let mut base: Vec<&[u8]> = vec![
         layout::LAYOUT_JSON.as_bytes(),
         site_root.as_bytes(),
+        instagram.unwrap_or_default().as_bytes(),
         RENDERER.as_bytes(),
     ];
     base.extend(fonts);
@@ -297,7 +283,9 @@ pub fn run(root: &Path, out: &Path, site_root: &str) -> Result<Summary, BuildErr
                     loop {
                         let index = next.fetch_add(1, Ordering::Relaxed);
                         let Some(job) = todo.get(index) else { break };
-                        results.push(render_job(&layout, &metrics, &options, job, site_root, out));
+                        results.push(render_job(
+                            &layout, &metrics, &options, job, site_root, instagram, out,
+                        ));
                     }
                     results
                 })

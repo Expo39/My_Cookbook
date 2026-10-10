@@ -87,6 +87,7 @@ pub struct Sheet {
     pub wordmark_size: f64,
     pub note_size: f64,
     pub note_step: f64,
+    pub glyph_gap: f64,
 }
 
 #[derive(Debug, Deserialize)]
@@ -98,6 +99,8 @@ pub struct Banner {
     pub label_size: f64,
     pub label_gap: f64,
     pub title_sizes: Vec<f64>,
+    /// Smaller sizes, so the title block leaves room for the photo above it.
+    pub photo_title_sizes: Vec<f64>,
     pub title_lines: usize,
     pub leading: f64,
     pub local_size: f64,
@@ -110,8 +113,8 @@ pub struct Banner {
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Layout {
+    pub glyphs: Glyphs,
     pub palette: Palette,
-    pub scrim_opacity: f64,
     pub fonts: Fonts,
     pub formats: BTreeMap<String, Format>,
     pub sheet: Sheet,
@@ -121,6 +124,13 @@ pub struct Layout {
     pub text_leading: f64,
     pub wordmark: String,
     pub qr_note: String,
+}
+
+/// Icons drawn as strokes in a 24 by 24 box.
+#[derive(Debug, Deserialize)]
+pub struct Glyphs {
+    pub instagram: Vec<String>,
+    pub stroke: f64,
 }
 
 impl Layout {
@@ -146,6 +156,8 @@ pub struct Content {
     pub qr: Option<QrMatrix>,
     pub url_text: String,
     pub has_photo: bool,
+    /// "@handle", when the site shows its Instagram account.
+    pub instagram: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -172,6 +184,12 @@ pub enum Op {
         size: f64,
         fill: String,
         end: bool,
+    },
+    Glyph {
+        x: f64,
+        y: f64,
+        size: f64,
+        stroke: String,
     },
     Qr {
         x: i32,
@@ -278,7 +296,14 @@ fn banner(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measu
     let (title_size, title_lines) = fit_lines(
         measure,
         Face::Display,
-        &scaled(&b.title_sizes, u),
+        &scaled(
+            if content.has_photo {
+                &b.photo_title_sizes
+            } else {
+                &b.title_sizes
+            },
+            u,
+        ),
         &content.title,
         inner,
         b.title_lines,
@@ -303,9 +328,9 @@ fn banner(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measu
             x: 0.0,
             y: 0.0,
             w,
-            h,
+            h: block_y,
         });
-        pen.rect(0.0, block_y, w, block_h, &p.ink, layout.scrim_opacity);
+        pen.rect(0.0, block_y, w, block_h, &p.ink, 1.0);
         block_y + pad
     } else {
         pen.rect(0.0, 0.0, w, h, &p.primary, 1.0);
@@ -419,16 +444,15 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
 
     let (header_bottom, text_top) = if content.has_photo {
         let block_h = pad + content_h + pad;
-        let photo_h = (format.photo_share * h).max(block_h + 0.1 * h);
-        let block_y = photo_h - block_h;
+        let photo_h = (format.photo_share * h).round();
         pen.ops.push(Op::Photo {
             x: 0.0,
             y: 0.0,
             w,
             h: photo_h,
         });
-        pen.rect(0.0, block_y, w, block_h, &p.ink, layout.scrim_opacity);
-        (photo_h, block_y + pad)
+        pen.rect(0.0, photo_h, w, block_h, &p.ink, 1.0);
+        (photo_h + block_h, photo_h + pad)
     } else {
         let top = format.safe_top.max(pad);
         let block_h = top + content_h + pad;
@@ -584,7 +608,12 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
     let wordmark = s.wordmark_size * u;
     let note = s.note_size * u;
     let note_step = s.note_step * u;
-    let stack_h = wordmark * layout.label_leading + 2.0 * note_step;
+    let lines = if content.instagram.is_some() {
+        3.0
+    } else {
+        2.0
+    };
+    let stack_h = wordmark * layout.label_leading + lines * note_step;
     let mut y = qr_y + (qr_box - stack_h) / 2.0;
     let left_width = qr_x - margin - s.footer_gap * u;
     let mark = ellipsize(
@@ -628,4 +657,26 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
         &p.muted,
         false,
     );
+    if let Some(handle) = &content.instagram {
+        y += note_step;
+        let glyph = note;
+        let gap = s.glyph_gap * u;
+        pen.ops.push(Op::Glyph {
+            x: margin,
+            y: y + (note_step - glyph) / 2.0,
+            size: glyph,
+            stroke: p.muted.clone(),
+        });
+        let handle = ellipsize(measure, Face::Body, note, handle, left_width - glyph - gap);
+        pen.text(
+            margin + glyph + gap,
+            y,
+            note_step / note,
+            &handle,
+            Face::Body,
+            note,
+            &p.muted,
+            false,
+        );
+    }
 }

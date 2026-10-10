@@ -1,4 +1,6 @@
 export interface SiteConfig {
+	site?: { url?: string; basePath?: string };
+	ai?: { endpoint?: string };
 	social?: {
 		instagram?: { enabled?: boolean; handle?: string };
 	};

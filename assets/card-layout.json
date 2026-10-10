@@ -8,7 +8,6 @@
 		"primary": "#45552a",
 		"onPrimary": "#f5efe2"
 	},
-	"scrimOpacity": 0.86,
 	"fonts": {
 		"display": { "family": "Bitter", "weight": 800 },
 		"body": { "family": "Atkinson Hyperlegible", "weight": 400 },
@@ -17,9 +16,9 @@
 	},
 	"formats": {
 		"og": { "kind": "banner", "width": 1200, "height": 630, "photoShare": 1, "safeTop": 0, "safeBottom": 0 },
-		"portrait": { "kind": "sheet", "width": 1080, "height": 1350, "photoShare": 0.42, "safeTop": 0, "safeBottom": 0 },
-		"story": { "kind": "sheet", "width": 1080, "height": 1920, "photoShare": 0.34, "safeTop": 250, "safeBottom": 250 },
-		"pin": { "kind": "sheet", "width": 1000, "height": 1500, "photoShare": 0.42, "safeTop": 0, "safeBottom": 0 }
+		"portrait": { "kind": "sheet", "width": 1080, "height": 1350, "photoShare": 0.3, "safeTop": 0, "safeBottom": 0 },
+		"story": { "kind": "sheet", "width": 1080, "height": 1920, "photoShare": 0.26, "safeTop": 250, "safeBottom": 250 },
+		"pin": { "kind": "sheet", "width": 1000, "height": 1500, "photoShare": 0.3, "safeTop": 0, "safeBottom": 0 }
 	},
 	"sheet": {
 		"designWidth": 1080,
@@ -47,7 +46,8 @@
 		"qrQuiet": 16,
 		"wordmarkSize": 46,
 		"noteSize": 28,
-		"noteStep": 40
+		"noteStep": 40,
+		"glyphGap": 10
 	},
 	"banner": {
 		"designWidth": 1200,
@@ -56,6 +56,7 @@
 		"labelSize": 26,
 		"labelGap": 16,
 		"titleSizes": [96, 84, 72, 62],
+		"photoTitleSizes": [72, 64, 56],
 		"titleLines": 2,
 		"leading": 1.08,
 		"localSize": 38,
@@ -63,6 +64,14 @@
 		"metaGap": 22,
 		"metaSize": 38,
 		"wordmarkSize": 34
+	},
+	"glyphs": {
+		"stroke": 1.75,
+		"instagram": [
+			"M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5z",
+			"M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z",
+			"M17.5 6.5h.01"
+		]
 	},
 	"ascent": 0.8,
 	"labelLeading": 1.2,
