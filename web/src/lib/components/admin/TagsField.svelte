@@ -38,7 +38,7 @@
 	{id}
 	label="Tags"
 	optional
-	hint="Groupings such as “Italian Classics”. Press Enter or a comma after each one."
+	hint="Groupings such as 'Italian Classics'. Press Enter or a comma after each one."
 >
 	{#if ed.form.tags.length}
 		<ul class="chips">

@@ -53,7 +53,7 @@
 		[
 			ingredient.prefix,
 			ingredient.amount
-				? `${typeof ingredient.amount.qty === 'number' ? ingredient.amount.qty : `${ingredient.amount.qty.min}–${ingredient.amount.qty.max}`} ${ingredient.amount.unit ?? ''}`.trim()
+				? `${typeof ingredient.amount.qty === 'number' ? ingredient.amount.qty : `${ingredient.amount.qty.min}-${ingredient.amount.qty.max}`} ${ingredient.amount.unit ?? ''}`.trim()
 				: '',
 			ingredient.item,
 			ingredient.note ? `(${ingredient.note})` : ''
@@ -74,7 +74,7 @@
 			oninput={() => (reviewed = null)}
 		></textarea>
 		<p class="help" id="{id}-help">
-			For example “200 g plain flour” or “2 tbsp olive oil, plus extra”. You can fix anything on the
+			For example "200 g plain flour" or "2 tbsp olive oil, plus extra". You can fix anything on the
 			next screen.
 		</p>
 
@@ -94,7 +94,7 @@
 						{#each failed as entry (entry.line)}
 							<li class="bad">
 								<Icon name="xCircle" size={18} />
-								<span>“{entry.line}”<br /><span class="why">{entry.problem}</span></span>
+								<span>"{entry.line}"<br /><span class="why">{entry.problem}</span></span>
 							</li>
 						{/each}
 					</ul>

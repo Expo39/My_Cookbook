@@ -95,7 +95,7 @@ describe('the sheet layout', () => {
 			texts(compose(format, content(extra), measure)).find(
 				(op) => op.face === 'num' && /servings/.test(op.text)
 			);
-		expect(meta()?.text).toBe('1 h 55 min  ·  5 servings');
+		expect(meta()?.text).toBe('1 h 55 min  |  5 servings');
 		expect(meta({ total: undefined })?.text).toBe('5 servings');
 	});
 });
@@ -111,7 +111,7 @@ describe('the banner layout', () => {
 	it('sets the times and servings in the numeral face', () => {
 		const meta = texts(banner).find((op) => op.text.includes('servings'));
 		expect(meta?.face).toBe('num');
-		expect(meta?.text).toBe('1 h 55 min  ·  5 servings');
+		expect(meta?.text).toBe('1 h 55 min  |  5 servings');
 	});
 });
 

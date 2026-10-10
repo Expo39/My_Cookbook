@@ -48,7 +48,7 @@
 			label="Before the amount"
 			bind:value={row.prefix}
 			optional
-			hint="As in “Zest of”"
+			hint="As in 'Zest of'"
 		/>
 		<TextField
 			id={fieldId(`${path}.item`)}
@@ -62,7 +62,7 @@
 			label="Note"
 			bind:value={row.note}
 			optional
-			hint="Shown after a comma, as in “finely chopped”"
+			hint="Shown after a comma, as in 'finely chopped'"
 		/>
 	</div>
 	<div class="more">
@@ -89,7 +89,7 @@
 		/>
 		{#if !row.key && suggestion}
 			<button type="button" class="btn suggest" onclick={() => (row.key = suggestion)}>
-				Use “{suggestion}” as the key
+				Use "{suggestion}" as the key
 			</button>
 		{/if}
 		<label class="check">

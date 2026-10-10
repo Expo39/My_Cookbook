@@ -76,7 +76,7 @@ fn parse_range(s: &str) -> Option<(f64, f64, &str)> {
     let (lo, rest) = parse_quantity(s)?;
     let after = rest.trim_start();
     let hi = after
-        .strip_prefix(['-', '–', '—'])
+        .strip_prefix(['-', '\u{2013}', '\u{2014}'])
         .or_else(|| after.strip_prefix("to "))
         .and_then(parse_quantity);
     match hi {
@@ -196,7 +196,7 @@ const PREFIXES: &[&str] = &[
 pub fn parse_ingredient_line(line: &str) -> Result<Ingredient, IngredientParseError> {
     let collapsed = line.split_whitespace().collect::<Vec<_>>().join(" ");
     let mut text = collapsed
-        .trim_start_matches(['-', '•', '*'])
+        .trim_start_matches(['-', '\u{2022}', '*'])
         .trim()
         .to_owned();
     if text.is_empty() {
@@ -263,8 +263,8 @@ pub fn parse_ingredient_line(line: &str) -> Result<Ingredient, IngredientParseEr
         } else {
             parsed_amount = Some(amount(lo, hi, None));
             let rest = rest.trim_start();
-            item = match rest.strip_prefix(['x', '×']) {
-                Some(tail) if tail.starts_with(' ') => format!("× {}", tail.trim_start()),
+            item = match rest.strip_prefix(['x', '\u{00d7}']) {
+                Some(tail) if tail.starts_with(' ') => format!("x {}", tail.trim_start()),
                 _ => rest.to_owned(),
             };
             scale = Some(ScaleMode::Discrete);
@@ -339,11 +339,11 @@ mod tests {
             ),
             (
                 "1 x 400g tin tomatoes",
-                json!({"amount": {"qty": 1}, "item": "× 400g tin tomatoes", "scale": "discrete"}),
+                json!({"amount": {"qty": 1}, "item": "x 400g tin tomatoes", "scale": "discrete"}),
             ),
             (
                 "2 x 400 g tins chopped tomatoes",
-                json!({"amount": {"qty": 2}, "item": "× 400 g tins chopped tomatoes", "scale": "discrete"}),
+                json!({"amount": {"qty": 2}, "item": "x 400 g tins chopped tomatoes", "scale": "discrete"}),
             ),
             (
                 "2 eggs",
@@ -390,7 +390,7 @@ mod tests {
                 json!({"item": "salt and pepper", "scale": "toTaste"}),
             ),
             (
-                "3–4 sprigs thyme",
+                "3\u{2013}4 sprigs thyme",
                 json!({"amount": {"qty": {"min": 3, "max": 4}}, "item": "sprigs thyme", "scale": "discrete"}),
             ),
             (

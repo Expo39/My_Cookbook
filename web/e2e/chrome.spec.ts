@@ -59,7 +59,7 @@ test('the ingredients column stays in view while the method scrolls on a wide sc
 	await expect(page.getByRole('tablist')).toBeHidden();
 	const column = page.locator('[id$="panel-ingredients"]');
 	await method(page)
-		.getByRole('heading', { name: 'Day 2: assembly, 3–4 hours before serving' })
+		.getByRole('heading', { name: 'Day 2: assembly, 3-4 hours before serving' })
 		.scrollIntoViewIfNeeded();
 	await page.evaluate(() => scrollBy(0, 300));
 	const box = await column.boundingBox();

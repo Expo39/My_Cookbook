@@ -52,7 +52,7 @@ pub fn slugify(text: &str) -> String {
     let mut slug = String::new();
     let mut gap = false;
     for c in text.to_lowercase().chars() {
-        if matches!(c, '\'' | '’') {
+        if matches!(c, '\'' | '\u{2019}') {
             continue;
         }
         match fold(c) {

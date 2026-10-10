@@ -24,7 +24,7 @@ fn run(args: &[&str], root: PathBuf) -> (i32, String) {
 fn a_valid_tree_passes() {
     let (code, out) = run(&["check", "--all"], fixture("valid"));
     assert_eq!(code, 0, "{out}");
-    assert!(out.contains("✓ mains/lentil-soup"), "{out}");
+    assert!(out.contains("ok    mains/lentil-soup"), "{out}");
     assert!(out.contains("1 checked, 0 with errors"), "{out}");
 }
 
@@ -33,7 +33,7 @@ fn an_invalid_tree_fails_with_stable_codes() {
     let (code, out) = run(&["check", "--all"], fixture("invalid"));
     assert_eq!(code, 1, "{out}");
     for expected in [
-        "✗ mains/broken-soup",
+        "error mains/broken-soup",
         "E-QTY-POSITIVE",
         "E-TOKEN-UNRESOLVED",
         "W-BRITISH-SPELLING",

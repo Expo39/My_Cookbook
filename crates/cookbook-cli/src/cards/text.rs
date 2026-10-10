@@ -105,12 +105,12 @@ pub fn ellipsize(measure: &dyn Measure, face: Face, size: f64, text: &str, max: 
     }
     let mut kept: Vec<char> = text.chars().collect();
     while kept.pop().is_some() {
-        let candidate: String = kept.iter().collect::<String>().trim_end().to_owned() + "…";
+        let candidate: String = kept.iter().collect::<String>().trim_end().to_owned() + "...";
         if measure.width(face, size, &candidate) <= max {
             return candidate;
         }
     }
-    "…".to_owned()
+    "...".to_owned()
 }
 
 /// The first of `sizes` at which `text` fits in `max_lines`; the last size with an ellipsis when none does.
@@ -177,7 +177,7 @@ mod tests {
 
     #[test]
     fn long_text_is_shortened_with_an_ellipsis() {
-        assert_eq!(ellipsize(&Mono, Face::Body, 1.0, "abcdefgh", 5.0), "abcd…");
+        assert_eq!(ellipsize(&Mono, Face::Body, 1.0, "abcdefgh", 5.0), "ab...");
         assert_eq!(ellipsize(&Mono, Face::Body, 1.0, "abc", 5.0), "abc");
     }
 
@@ -195,7 +195,7 @@ mod tests {
         );
         assert_eq!(size, 1.0);
         assert_eq!(lines.len(), 2);
-        assert!(lines[1].ends_with('…'));
+        assert!(lines[1].ends_with("..."));
     }
 
     #[test]

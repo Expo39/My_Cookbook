@@ -44,7 +44,7 @@ describe('formatting', () => {
 		expect(formatShown(17.64, 17.64, 'oz')).toBe('17½ oz');
 		expect(formatShown(1.33, 1.33, 'cup')).toBe('1⅓ cups');
 		expect(formatShown(0.97, 0.97, 'cup')).toBe('1 cup');
-		expect(formatShown(2.1, 3.2, 'tbsp')).toBe('2–3¼ tbsp');
+		expect(formatShown(2.1, 3.2, 'tbsp')).toBe('2-3¼ tbsp');
 		expect(formatShown(4, 4, 'floz')).toBe('4 fl oz');
 		expect(formatShown(0.01, 0.01, 'g')).toBe('0.5 g');
 	});

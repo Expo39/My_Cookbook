@@ -15,7 +15,7 @@
 
 {#if enough}
 	<details>
-		<summary>Plan backwards from…</summary>
+		<summary>Plan backwards from...</summary>
 		<div class="panel">
 			<label for="{id}-time">Serve at</label>
 			<input id="{id}-time" type="time" bind:value={serveAt} />

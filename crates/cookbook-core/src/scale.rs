@@ -476,7 +476,7 @@ pub fn scale(recipe: &Recipe, request: &ScaleRequest, options: &ScaleOptions) ->
                 crate::format::format_number(servings, None)
             );
             if let (Some(min), Some(max)) = (scaling.min, scaling.max) {
-                message.push_str(&format!(" of {min}–{max}"));
+                message.push_str(&format!(" of {min}-{max}"));
             }
             message.push('.');
             if let Some(note) = &scaling.note {
@@ -673,7 +673,7 @@ mod tests {
     #[test]
     fn seasoning_is_a_range_with_a_hint() {
         let s = run(ScaleRequest::Multiplier(2.0));
-        assert_eq!(amount(&s, "salt"), "1½–2 tsp");
+        assert_eq!(amount(&s, "salt"), "1½-2 tsp");
         assert_eq!(
             line(&s, "salt").hint.as_deref(),
             Some("start low, then taste")
@@ -806,7 +806,7 @@ mod tests {
             .iter()
             .find(|w| w.code == "scaling-range")
             .unwrap();
-        assert!(w.message.contains("2–12") && w.message.contains("dry out"));
+        assert!(w.message.contains("2-12") && w.message.contains("dry out"));
         assert!(
             run(ScaleRequest::Servings(6.0))
                 .warnings
@@ -848,7 +848,7 @@ mod tests {
         );
         assert_eq!(
             s.steps[1].text,
-            "Bake at 200 °C (180 °C fan) for 25–30 min."
+            "Bake at 200 °C (180 °C fan) for 25-30 min."
         );
         let us = scale(
             &recipe(),

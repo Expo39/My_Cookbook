@@ -70,7 +70,7 @@ fn unit_of(name: &str) -> Option<Unit> {
 /// A range shown as text ("6-7", "100-150g").
 fn displayed_range(text: &str) -> Option<(f64, f64)> {
     let (min, rest) = leading_number(text)?;
-    let rest = rest.trim_start().strip_prefix(['-', '–'])?;
+    let rest = rest.trim_start().strip_prefix(['-', '\u{2013}'])?;
     let (max, _) = leading_number(rest.trim_start())?;
     (min < max).then_some((min, max))
 }

@@ -129,7 +129,7 @@ test.describe('timers', () => {
 	test('a step timer shows in the strip, survives a reload and finishes', async ({ page }) => {
 		await page.goto(brulee);
 		await waitForCore(page);
-		await page.getByRole('button', { name: /^Start 15–20 min timer/ }).click();
+		await page.getByRole('button', { name: /^Start 15-20 min timer/ }).click();
 
 		await expect(strip(page)).toContainText('Crème Brûlée, step 1');
 		await expect(strip(page).locator('.time')).toHaveText(/^1[45]:\d\d$/);
@@ -161,8 +161,8 @@ test.describe('timers', () => {
 	test('timers can be paused, resumed and run side by side across pages', async ({ page }) => {
 		await page.goto(brulee);
 		await waitForCore(page);
-		await page.getByRole('button', { name: /^Start 15–20 min timer/ }).click();
-		await page.getByRole('button', { name: /^Start 35–40 min timer/ }).click();
+		await page.getByRole('button', { name: /^Start 15-20 min timer/ }).click();
+		await page.getByRole('button', { name: /^Start 35-40 min timer/ }).click();
 		await expect(strip(page).getByRole('listitem')).toHaveCount(2);
 
 		const first = strip(page).getByRole('listitem').first();
@@ -182,7 +182,7 @@ test.describe('timers', () => {
 	}) => {
 		await page.goto(`${brulee}?cook=1`);
 		const dialog = cookDialog(page);
-		await dialog.getByRole('button', { name: /^Start 15–20 min timer/ }).click();
+		await dialog.getByRole('button', { name: /^Start 15-20 min timer/ }).click();
 		await expect(dialog.getByRole('region', { name: 'Timers' })).toContainText('step 1');
 		await expect(page.getByRole('region', { name: 'Timers' })).toHaveCount(1);
 		await dialog.getByRole('button', { name: /^Show the .* timer/ }).click();
@@ -322,7 +322,7 @@ test.describe('favourites, recent and notes', () => {
 		await waitForCore(page);
 		await page.getByRole('button', { name: 'Favourite' }).click();
 		await page.getByLabel('Your notes').fill('kept for the visit');
-		await page.getByRole('button', { name: /^Start 15–20 min timer/ }).click();
+		await page.getByRole('button', { name: /^Start 15-20 min timer/ }).click();
 		await expect(strip(page)).toBeVisible();
 		await page.getByRole('button', { name: 'Add to shopping list' }).click();
 		await expect(page.getByText('Added 5 ingredients')).toBeVisible();
@@ -333,7 +333,7 @@ test.describe('favourites, recent and notes', () => {
 test.describe('the planner', () => {
 	test('works back from the serving time when the steps carry timings', async ({ page }) => {
 		await page.goto(wellington);
-		await page.getByText('Plan backwards from…').click();
+		await page.getByText('Plan backwards from...').click();
 		await page.getByLabel('Serve at').fill('19:30');
 		await expect(page.getByText(/^Start by/)).toBeVisible();
 		await expect(
@@ -343,7 +343,7 @@ test.describe('the planner', () => {
 
 	test('is not offered when the recipe has too little timing', async ({ page }) => {
 		await page.goto('desserts/french-classics/savoury-crepes');
-		await expect(page.getByText('Plan backwards from…')).toHaveCount(0);
+		await expect(page.getByText('Plan backwards from...')).toHaveCount(0);
 	});
 });
 

@@ -45,25 +45,25 @@ impl Report {
         let mut out = String::new();
         for (subject, results) in &self.entries {
             let mark = if results.iter().any(|r| r.level == Level::Error) {
-                "✗"
+                "error"
             } else if results.is_empty() {
-                "✓"
+                "ok"
             } else {
-                "⚠"
+                "warn"
             };
-            let _ = writeln!(out, "{mark} {subject}");
+            let _ = writeln!(out, "{mark:<5} {subject}");
             for r in results {
                 let mark = if r.level == Level::Error {
-                    "✗"
+                    "error"
                 } else {
-                    "⚠"
+                    "warn"
                 };
                 let at = if r.path.is_empty() {
                     String::new()
                 } else {
                     format!(" {}", r.path)
                 };
-                let _ = writeln!(out, "    {mark} {}{at}: {}", r.id, r.message);
+                let _ = writeln!(out, "    {mark:<5} {}{at}: {}", r.id, r.message);
             }
         }
         let failing = self
@@ -132,10 +132,10 @@ mod tests {
         );
         let text = report.text();
         assert!(
-            text.contains("✓ a")
-                && text.contains("⚠ b")
-                && text.contains("✗ c")
-                && text.contains("✗ folder")
+            text.contains("ok    a")
+                && text.contains("warn  b")
+                && text.contains("error c")
+                && text.contains("error folder")
         );
         assert!(text.ends_with("4 checked, 2 with errors; 2 errors, 1 warnings"));
         assert_eq!(report.errors(), 2);

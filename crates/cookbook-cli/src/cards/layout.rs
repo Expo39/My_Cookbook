@@ -269,13 +269,13 @@ pub fn compose(
     pen.ops
 }
 
-/// "1 h 55 min  ·  5 servings", leaving out the time when the recipe has none.
+/// "1 h 55 min  |  5 servings", leaving out the time when the recipe has none.
 fn meta_line(content: &Content) -> String {
     [content.total.clone(), Some(content.serves.clone())]
         .into_iter()
         .flatten()
         .collect::<Vec<_>>()
-        .join("  ·  ")
+        .join("  |  ")
 }
 
 fn banner(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measure) {

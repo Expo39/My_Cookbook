@@ -36,7 +36,7 @@
 
 <FieldSet legend="Method">
 	<p class="help">
-		Write each step on its own. A heading starts a titled stage, such as “Day 1: the night before”.
+		Write each step on its own. A heading starts a titled stage, such as "Day 1: the night before".
 	</p>
 	{#if ed.errorFor('steps')}
 		<p class="error" role="alert" id="f-steps">

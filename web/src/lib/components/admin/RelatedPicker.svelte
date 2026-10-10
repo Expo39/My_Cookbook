@@ -44,7 +44,7 @@
 				</label>
 			</li>
 		{:else}
-			<li class="help">No recipe matches “{query}”.</li>
+			<li class="help">No recipe matches "{query}".</li>
 		{/each}
 		{#each missing as id (id)}
 			<li>

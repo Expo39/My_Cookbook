@@ -43,7 +43,7 @@ These are read when the site or its data is built. The values are baked into the
 | `BASE_PATH` | web build, `cookbook-cli cards`, e2e | empty | The path prefix the site is served under, for example `/My_Cookbook` on GitHub Pages and empty when self-hosted. CI sets it in `.github/workflows/ci.yml`. |
 | `SOURCE_DATE_EPOCH` | `cookbook-cli build` | the current time | Fixes the build timestamp written by `build`, for reproducible output. |
 
-The `dev` service in `docker-compose.yml` passes `BASE_PATH` and `PUBLIC_SITE_URL` through from the host, so `BASE_PATH=/My_Cookbook make build` works. `PUBLIC_BACKEND` and `PUBLIC_AI_ENDPOINT` are not passed through; set them inside `make shell`, or use `ai.endpoint` for the AI endpoint. The server image (`docker/server.Dockerfile`) sets `PUBLIC_BACKEND=server` and `BASE_PATH=""` itself.
+The `dev` service in `docker-compose.yml` passes `BASE_PATH`, `PUBLIC_BACKEND`, `PUBLIC_SITE_URL`, `PUBLIC_AI_ENDPOINT` and `GITHUB_SHA` through from the host, so `BASE_PATH=/My_Cookbook make build` and `PUBLIC_BACKEND=server make build` work as written. The server image (`docker/server.Dockerfile`) sets `PUBLIC_BACKEND=server` and `BASE_PATH=""` itself.
 
 ## Test and tooling variables
 

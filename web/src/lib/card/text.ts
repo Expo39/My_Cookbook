@@ -30,10 +30,10 @@ export function ellipsize(measure: Measure, face: Face, size: number, text: stri
 	if (measure(face, size, text) <= max) return text;
 	const kept = [...text];
 	while (kept.pop() !== undefined) {
-		const candidate = `${kept.join('').trimEnd()}…`;
+		const candidate = `${kept.join('').trimEnd()}...`;
 		if (measure(face, size, candidate) <= max) return candidate;
 	}
-	return '…';
+	return '...';
 }
 
 /** The first of `sizes` at which `text` fits in `maxLines`; the last size with an ellipsis when none does. */

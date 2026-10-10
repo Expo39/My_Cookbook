@@ -16,7 +16,7 @@
 			{summarise(ed.errors.length, ed.warnings.length)}
 		</p>
 	{:else}
-		<p class="summary" role="status">Loading the checks…</p>
+		<p class="summary" role="status">Loading the checks...</p>
 	{/if}
 
 	<ul class="groups">

@@ -6,7 +6,7 @@
 <footer>
 	<div class="inner">
 		<blockquote>
-			<p>Cooking is like love — it should be entered into with abandon or not at all.</p>
+			<p>Cooking is like love - it should be entered into with abandon or not at all.</p>
 			<cite>Harriet Van Horne</cite>
 		</blockquote>
 		{#if instagram}
@@ -15,7 +15,7 @@
 				<span>More recipes on Instagram <strong>{instagram.handle}</strong></span>
 			</a>
 		{/if}
-		<p class="copyright">© 2026 Antonio</p>
+		<p class="copyright">Copyright 2026 Antonio</p>
 	</div>
 </footer>
 
@@ -56,7 +56,7 @@
 	}
 
 	cite::before {
-		content: '— ';
+		content: '- ';
 	}
 
 	.social {

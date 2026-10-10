@@ -13,10 +13,10 @@
 	const recipe = $derived(model.data.recipe);
 	const choices = $derived(haveChoices(model.keyed));
 	const multipliers = [
-		{ value: '0.5', label: '½×' },
-		{ value: '1', label: '1×' },
-		{ value: '2', label: '2×' },
-		{ value: '3', label: '3×' }
+		{ value: '0.5', label: '½x' },
+		{ value: '1', label: '1x' },
+		{ value: '2', label: '2x' },
+		{ value: '3', label: '3x' }
 	];
 
 	const activeMultiplier = $derived(
@@ -42,7 +42,7 @@
 	const panDescription = $derived.by(() => {
 		const pan = recipe.pan;
 		if (!pan) return '';
-		const sizes = pan.size.join(' × ');
+		const sizes = pan.size.join(' x ');
 		return `Written for a ${sizes} cm ${pan.shape === 'rect' ? 'rectangular' : pan.shape} tin${pan.depth ? `, ${pan.depth} cm deep` : ''}.`;
 	});
 
@@ -107,7 +107,7 @@
 	<details class="panel" bind:open>
 		<summary class="fold">
 			<span class="num">{servingsText(model.view.servings, recipe.servingsNoun)}</span>
-			<span aria-hidden="true">·</span>
+			<span aria-hidden="true">|</span>
 			<span>{model.effectiveSystem === 'us' ? 'US' : 'Metric'}</span>
 			<span class="scale-label">Scale<Icon name="chevronDown" size={18} /></span>
 		</summary>
@@ -157,7 +157,7 @@
 					<div class="more">
 						{#if choices.length}
 							<form onsubmit={applyHave} novalidate>
-								<h3 class="label">I have…</h3>
+								<h3 class="label">I have...</h3>
 								<div class="inputs">
 									<label>
 										<span>Ingredient</span>
@@ -243,7 +243,7 @@
 
 	{#if model.scaled}
 		<p class="scaled">
-			<span>Scaled <span class="num">×{Number(model.view.factor.toFixed(2))}</span></span>
+			<span>Scaled <span class="num">x{Number(model.view.factor.toFixed(2))}</span></span>
 			<button type="button" onclick={() => model.resetScale()}>
 				<Icon name="reset" size={16} />Reset
 			</button>

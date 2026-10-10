@@ -109,7 +109,7 @@ pub fn toggle_unit(qty: f64, unit: JsValue) -> Result<JsValue, JsError> {
     }
 }
 
-/// Renders a temperature such as "200 °C (180 °C fan)" or "52–55 °C" for the chosen system ("metric" or "us").
+/// Renders a temperature such as "200 °C (180 °C fan)" or "52-55 °C" for the chosen system ("metric" or "us").
 /// `internal` marks a meat or food temperature, which converts to the nearest degree.
 #[wasm_bindgen]
 pub fn format_temperature(

@@ -80,7 +80,7 @@
 	<h1>Shopping list</h1>
 
 	{#if !ready}
-		<p class="empty" role="status">Loading your list…</p>
+		<p class="empty" role="status">Loading your list...</p>
 	{:else if merged.length === 0}
 		<p class="empty">Your list is empty. Add ingredients from any recipe.</p>
 		<p><a href={homeHref()}>Find a recipe</a></p>

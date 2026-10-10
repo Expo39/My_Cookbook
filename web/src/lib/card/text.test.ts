@@ -20,12 +20,12 @@ describe('wrap', () => {
 
 describe('ellipsize', () => {
 	it('cuts to the width and leaves short text alone', () => {
-		expect(ellipsize(mono, 'body', 1, 'abcdefgh', 5)).toBe('abcd…');
+		expect(ellipsize(mono, 'body', 1, 'abcdefgh', 5)).toBe('ab...');
 		expect(ellipsize(mono, 'body', 1, 'abc', 5)).toBe('abc');
 	});
 
 	it('does not leave a space before the ellipsis', () => {
-		expect(ellipsize(mono, 'body', 1, 'ab cdefgh', 4)).toBe('ab…');
+		expect(ellipsize(mono, 'body', 1, 'ab cdefgh', 4)).toBe('a...');
 	});
 });
 
@@ -40,7 +40,7 @@ describe('fitLines', () => {
 		const fitted = fitLines(mono, 'display', [2, 1], 'aaaa bbbb cccc dddd eeee', 10, 2);
 		expect(fitted.size).toBe(1);
 		expect(fitted.lines).toHaveLength(2);
-		expect(fitted.lines[1].endsWith('…')).toBe(true);
+		expect(fitted.lines[1].endsWith('...')).toBe(true);
 	});
 
 	it('keeps the biggest size that fits', () => {

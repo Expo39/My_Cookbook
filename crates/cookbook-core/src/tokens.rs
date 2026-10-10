@@ -2,7 +2,7 @@ use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::{
-    format::{EN_DASH, format_minutes},
+    format::{RANGE_DASH, format_minutes},
     scale::ScaledIngredient,
     units::{TempKind, UnitSystem, fahrenheit, gas_mark},
 };
@@ -101,7 +101,7 @@ fn parse_fraction(text: &str) -> Option<f64> {
     }
 }
 
-const RANGE_DASHES: [char; 2] = ['-', '–'];
+const RANGE_DASHES: [char; 2] = ['-', '\u{2013}'];
 
 /// Separates a trailing unit letter (`s`, `m` or `h`) from a duration, as minutes per unit.
 fn split_duration(text: &str) -> (&str, Option<f64>) {
@@ -265,7 +265,7 @@ pub fn temp_text(
     };
     let show = |c: f64| format!("{} {unit}", number(c));
     match (max_celsius, fan) {
-        (Some(max), _) => format!("{}{EN_DASH}{} {unit}", number(celsius), number(max)),
+        (Some(max), _) => format!("{}{RANGE_DASH}{} {unit}", number(celsius), number(max)),
         (None, Some(fan)) => format!("{} ({} fan)", show(celsius), show(fan)),
         (None, None) => show(celsius),
     }
@@ -413,7 +413,7 @@ mod tests {
                 },
             ),
             (
-                "{temp:180–200}",
+                "{temp:180\u{2013}200}",
                 Segment::Temp {
                     celsius: 180.0,
                     max_celsius: Some(200.0),
@@ -486,7 +486,7 @@ mod tests {
                 },
             ),
             (
-                "{timer:12–15|roast}",
+                "{timer:12\u{2013}15|roast}",
                 Segment::Timer {
                     min: 12.0,
                     max: Some(15.0),
@@ -557,7 +557,7 @@ mod tests {
             "400 °F (350 °F fan)"
         );
         assert_eq!(temp_text(180.0, None, None, oven, us), "350 °F");
-        assert_eq!(temp_text(180.0, Some(200.0), None, oven, us), "350–400 °F");
+        assert_eq!(temp_text(180.0, Some(200.0), None, oven, us), "350-400 °F");
     }
 
     #[test]
@@ -565,11 +565,11 @@ mod tests {
         let internal = TempKind::Internal;
         assert_eq!(
             temp_text(52.0, Some(55.0), None, internal, UnitSystem::Metric),
-            "52–55 °C"
+            "52-55 °C"
         );
         assert_eq!(
             temp_text(52.0, Some(55.0), None, internal, UnitSystem::Us),
-            "126–131 °F"
+            "126-131 °F"
         );
         assert_eq!(
             temp_text(63.0, None, None, internal, UnitSystem::Us),
@@ -613,7 +613,7 @@ mod tests {
     #[test]
     fn temperature_ranges_carry_both_ends() {
         let rendered = render_segments(&kinds("{temp:52-55!}"), &[], UnitSystem::Metric);
-        assert_eq!(render_text(&rendered), "52–55 °C");
+        assert_eq!(render_text(&rendered), "52-55 °C");
         match &rendered[0] {
             RenderedSegment::Temp {
                 fahrenheit,
@@ -631,7 +631,7 @@ mod tests {
     #[test]
     fn timers_render_with_an_en_dash() {
         let rendered = render_segments(&kinds("{timer:12-15|pasta}"), &[], UnitSystem::Metric);
-        assert_eq!(render_text(&rendered), "12–15 min");
+        assert_eq!(render_text(&rendered), "12-15 min");
     }
 
     #[test]
@@ -642,6 +642,6 @@ mod tests {
         assert_eq!(text("{timer:240}"), "4 h");
         assert_eq!(text("{timer:4h}"), "4 h");
         assert_eq!(text("{timer:90}"), "1 h 30 min");
-        assert_eq!(text("{timer:3-4h}"), "3–4 h");
+        assert_eq!(text("{timer:3-4h}"), "3-4 h");
     }
 }

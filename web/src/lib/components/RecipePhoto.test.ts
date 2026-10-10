@@ -33,7 +33,7 @@ describe('RecipePhoto', () => {
 		expect(image?.getAttribute('src')).toBe('/img/mains/soup/960.jpg');
 	});
 
-	it('reserves the photo’s space with its dimensions', () => {
+	it("reserves the photo's space with its dimensions", () => {
 		const image = render(false).querySelector('img');
 		expect(image?.getAttribute('width')).toBe('2000');
 		expect(image?.getAttribute('height')).toBe('1333');

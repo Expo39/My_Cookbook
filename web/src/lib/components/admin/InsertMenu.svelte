@@ -84,7 +84,7 @@
 				{#if rows.length}
 					<label for="{id}-ingredient">Ingredient</label>
 					<select id="{id}-ingredient" class="control" bind:value={ingredient}>
-						<option value="">Choose…</option>
+						<option value="">Choose...</option>
 						{#each rows as row (row.uid)}
 							<option value={row.uid}>{row.item}</option>
 						{/each}
@@ -94,8 +94,8 @@
 						<span>The amount only, without the name</span>
 					</label>
 					<p class="help">
-						The page shows the amount for the number of servings being cooked, such as “600 g short
-						pasta”.
+						The page shows the amount for the number of servings being cooked, such as "600 g short
+						pasta".
 					</p>
 				{:else}
 					<p class="help">Add some ingredients first, then they can be mentioned here.</p>
@@ -146,7 +146,7 @@
 				<label for="{id}-name">Name, optional</label>
 				<input id="{id}-name" class="control" bind:value={name} />
 				<p class="help">
-					Readers can tap the time to start a timer. A name such as “pasta” labels it.
+					Readers can tap the time to start a timer. A name such as "pasta" labels it.
 				</p>
 			{/if}
 

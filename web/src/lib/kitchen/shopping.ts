@@ -76,7 +76,7 @@ function inSystem(line: ShoppingLine, system: UnitSystem, convert: Convert): voi
 export function normalise(text: string): string {
 	return text
 		.normalize('NFD')
-		.replace(/[̀-ͯ]/g, '')
+		.replace(/[\u0300-\u036f]/g, '')
 		.toLowerCase()
 		.replace(/[^a-z0-9 ]+/g, ' ')
 		.split(/\s+/)
@@ -208,12 +208,12 @@ function pick(item: ShoppingItem) {
 	};
 }
 
-/** "2 cups", "300–400 g" or "3" for a count; empty for a line with no quantity. */
+/** "2 cups", "300-400 g" or "3" for a count; empty for a line with no quantity. */
 export function quantityText(line: Pick<ShoppingLine, 'min' | 'max' | 'unit'>): string {
 	if (line.min === undefined || line.max === undefined) return '';
 	if (line.unit) return formatShown(line.min, line.max, line.unit);
 	const [low, high] = [formatNumber(line.min), formatNumber(line.max)];
-	return low === high ? high : `${low}–${high}`;
+	return low === high ? high : `${low}-${high}`;
 }
 
 export function lineText(line: ShoppingLine): string {

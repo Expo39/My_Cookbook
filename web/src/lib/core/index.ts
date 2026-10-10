@@ -119,7 +119,7 @@ export function toggleUnit(qty: number, unit: Unit): { qty: number; unit: Unit }
 }
 
 export interface TemperatureOptions {
-	/** The top of a range, rendered "52–55 °C". */
+	/** The top of a range, rendered "52-55 °C". */
 	maxCelsius?: number;
 	/** A meat or food temperature: exact degrees, never oven steps. */
 	internal?: boolean;

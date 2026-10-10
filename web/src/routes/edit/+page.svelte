@@ -268,7 +268,7 @@
 <svelte:window onbeforeunload={(event) => ed?.dirty && event.preventDefault()} />
 
 {#if phase === 'loading'}
-	<p class="page-note" role="status">Loading the editor…</p>
+	<p class="page-note" role="status">Loading the editor...</p>
 {:else if phase === 'locked'}
 	<section class="locked">
 		<h1>Editing is locked</h1>
@@ -322,7 +322,7 @@
 						<strong>{outcome.title}</strong> was deleted.
 					{/if}
 					{#if status?.state === 'building'}
-						<Icon name="clock" size={18} />Building… the site is live in about a minute.
+						<Icon name="clock" size={18} />Building... the site is live in about a minute.
 					{:else if status?.state === 'live'}
 						<Icon name="checkCircle" size={18} />Live.
 					{:else if status?.state === 'superseded'}
@@ -406,14 +406,14 @@
 							label="One serving is called"
 							bind:value={editor.form.nounOne}
 							optional
-							hint="Such as “person”."
+							hint="Such as 'person'."
 						/>
 						<TextField
 							id="noun-other"
 							label="Several are called"
 							bind:value={editor.form.nounOther}
 							optional
-							hint="Such as “people” or “boards”."
+							hint="Such as 'people' or 'boards'."
 						/>
 					</div>
 					<div class="row">
@@ -491,7 +491,7 @@
 				<MethodEditor ed={editor} />
 
 				<FieldSet legend="Tips" id={fieldId('tips')}>
-					<p class="help">Shown as the “Chef's tip” beside the method.</p>
+					<p class="help">Shown as the "Chef's tip" beside the method.</p>
 					<RowList
 						items={editor.form.tips}
 						noun="tip"
@@ -543,7 +543,7 @@
 				<div class="bar">
 					<p class="bar-summary" role="status">
 						{#if !editor.coreReady}
-							Loading the checks…
+							Loading the checks...
 						{:else if editor.errors.length}
 							{editor.errors.length} to fix before saving
 						{:else}

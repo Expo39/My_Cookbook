@@ -73,7 +73,7 @@
 	const cookHref = $derived(model.search('?cook'));
 	const description = $derived(
 		data.recipe.summary.length > 155
-			? `${data.recipe.summary.slice(0, 152).trimEnd()}…`
+			? `${data.recipe.summary.slice(0, 152).trimEnd()}...`
 			: data.recipe.summary
 	);
 	const photo = $derived(photoOf(card.image));

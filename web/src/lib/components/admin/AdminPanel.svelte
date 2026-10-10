@@ -105,7 +105,7 @@
 	<h3 id="{uid}-title" class="label">Editing</h3>
 
 	{#if admin.configured === null && !admin.unlocked}
-		<p class="help">Looking for the editing key…</p>
+		<p class="help">Looking for the editing key...</p>
 	{:else if admin.unlocked}
 		<p class="state"><Icon name="lock" size={18} />Editing is unlocked.</p>
 		<a class="btn primary" href={editHref()} onclick={onnavigate}>
@@ -181,7 +181,7 @@
 				autocomplete="current-password"
 			/>
 			<button class="btn primary" disabled={busy}>
-				<Icon name="lock" size={18} />{busy ? 'Unlocking…' : 'Unlock editing'}
+				<Icon name="lock" size={18} />{busy ? 'Unlocking...' : 'Unlock editing'}
 			</button>
 		</form>
 	{:else}
@@ -220,7 +220,9 @@
 				optional
 				hint="Only if the recipe importer is set up on the Worker."
 			/>
-			<button class="btn primary" disabled={busy}>{busy ? 'Setting up…' : 'Set up editing'}</button>
+			<button class="btn primary" disabled={busy}
+				>{busy ? 'Setting up...' : 'Set up editing'}</button
+			>
 		</form>
 	{/if}
 

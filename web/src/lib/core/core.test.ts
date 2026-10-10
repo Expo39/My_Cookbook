@@ -99,10 +99,10 @@ describe('the WASM core', () => {
 		expect(formatTemperature(200, 'metric', 180)).toBe('200 °C (180 °C fan)');
 		expect(formatTemperature(200, 'us')).toMatch(/°F$/);
 		expect(formatTemperature(52, 'metric', undefined, { maxCelsius: 55, internal: true })).toBe(
-			'52–55 °C'
+			'52-55 °C'
 		);
 		expect(formatTemperature(52, 'us', undefined, { maxCelsius: 55, internal: true })).toBe(
-			'126–131 °F'
+			'126-131 °F'
 		);
 	});
 

@@ -52,7 +52,7 @@
 	/** Draws the card for what the reader sees now: their servings, units and variants. */
 	async function make(): Promise<Made | null> {
 		busy = true;
-		status = 'Making your card…';
+		status = 'Making your card...';
 		try {
 			const search = model.search('');
 			let qr = null;

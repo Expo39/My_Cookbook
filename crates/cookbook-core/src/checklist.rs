@@ -574,9 +574,9 @@ impl Checker<'_> {
             }
         }
         let requests = [
-            (ScaleRequest::Multiplier(0.5), "0.5×"),
-            (ScaleRequest::Multiplier(1.0), "1×"),
-            (ScaleRequest::Multiplier(2.0), "2×"),
+            (ScaleRequest::Multiplier(0.5), "0.5x"),
+            (ScaleRequest::Multiplier(1.0), "1x"),
+            (ScaleRequest::Multiplier(2.0), "2x"),
             (ScaleRequest::Servings(50.0), "50 servings"),
         ];
         let mut seen = BTreeSet::new();

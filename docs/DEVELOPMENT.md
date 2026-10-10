@@ -52,6 +52,7 @@ Every target runs inside the `dev` container unless noted.
 | `make lint` | `cargo fmt --check`, `cargo clippy -D warnings`, `svelte-check --fail-on-warnings`, Prettier and ESLint. |
 | `make screenshots` | Builds the site and writes review screenshots into `SHOTS` (default `web/test-results/shots`). |
 | `make shell` | Opens a bash shell in the `dev` container. |
+| `make ascii` | Fails on non-ASCII text outside accented letters, the degree sign and fraction glyphs. `make lint` runs it, and so does CI. |
 | `make worker-build` | Builds the Cloudflare Worker without deploying it. |
 | `make server` | Runs `cookbook-server` in the `dev` container on port 8080, serving `web/build`. |
 | `make selfhost` | Builds and starts the `selfhost` service (`docker/server.Dockerfile`) on the host. |

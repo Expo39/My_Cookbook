@@ -252,7 +252,7 @@ fn main() -> ExitCode {
             }
             Ok(problems) => {
                 for problem in &problems {
-                    println!("✗ {problem}");
+                    println!("error {problem}");
                 }
                 eprintln!("{} problems in the built site", problems.len());
                 ExitCode::FAILURE

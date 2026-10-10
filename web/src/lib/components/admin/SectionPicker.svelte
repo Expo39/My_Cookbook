@@ -41,7 +41,7 @@
 		>
 			<option value="" disabled>Choose a section</option>
 			{#each ed.sectionOptions as option (option.path)}
-				<option value={option.path}>{' '.repeat(option.depth)}{option.label}</option>
+				<option value={option.path}>{'\u2003'.repeat(option.depth)}{option.label}</option>
 			{/each}
 		</select>
 	</Field>

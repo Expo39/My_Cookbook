@@ -134,10 +134,10 @@
 				Type a recipe name{mode === 'have' ? ' or the ingredients in your kitchen' : ''} to begin.
 			</p>
 		{:else if !engine}
-			<p class="status">Loading search…</p>
+			<p class="status">Loading search...</p>
 		{:else if results.length === 0}
 			<p class="status">
-				Nothing matches “{query.trim()}”. Try fewer words, or switch to the ingredients you have.
+				Nothing matches "{query.trim()}". Try fewer words, or switch to the ingredients you have.
 			</p>
 		{:else}
 			<p class="status">

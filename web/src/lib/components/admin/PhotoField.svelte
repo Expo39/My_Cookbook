@@ -77,7 +77,7 @@
 			id={fieldId('image.alt')}
 			label="Describe the photo"
 			bind:value={ed.form.imageAlt}
-			hint="For people who cannot see it, such as “A golden pie cut open to show the layers”."
+			hint="For people who cannot see it, such as 'A golden pie cut open to show the layers'."
 			error={ed.errorFor('image.alt')}
 			onblur={() => ed.touch('image.alt')}
 		/>

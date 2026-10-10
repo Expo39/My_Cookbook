@@ -93,17 +93,17 @@ function roundFor(value: number, unit: Unit): number {
 	}
 }
 
-/** Text for an amount shown in a unit the recipe was not written in, e.g. "1½ cups" or "2–3 tbsp". */
+/** Text for an amount shown in a unit the recipe was not written in, e.g. "1½ cups" or "2-3 tbsp". */
 export function formatShown(min: number, max: number, unit: Unit): string {
 	const decimal = unit === 'g' || unit === 'kg' || unit === 'ml' || unit === 'l';
 	const [low, high] = [roundFor(min, unit), roundFor(max, unit)];
 	const number = (value: number) => formatNumber(value, decimal);
 	const label = unit === 'cup' && high > 1 ? 'cups' : unitLabel(unit);
-	return low === high ? `${number(high)} ${label}` : `${number(low)}–${number(high)} ${label}`;
+	return low === high ? `${number(high)} ${label}` : `${number(low)}-${number(high)} ${label}`;
 }
 
 const AMOUNT =
-	/(?:\d[\d.,]*|[⅛¼⅓½⅔¾])[⅛¼⅓½⅔¾]?(?:\s?[–-]\s?(?:\d[\d.,]*|[⅛¼⅓½⅔¾])[⅛¼⅓½⅔¾]?)?(?:\s?(?:g|kg|ml|l|tsp|tbsp|cups?|oz|lb|fl oz|pinch(?:es)?)\b)?/;
+	/(?:\d[\d.,]*|[⅛¼⅓½⅔¾])[⅛¼⅓½⅔¾]?(?:\s?[\u2013-]\s?(?:\d[\d.,]*|[⅛¼⅓½⅔¾])[⅛¼⅓½⅔¾]?)?(?:\s?(?:g|kg|ml|l|tsp|tbsp|cups?|oz|lb|fl oz|pinch(?:es)?)\b)?/;
 
 /** Splits a line around its first amount, so the amount can use the numeral face. */
 export function splitAmount(text: string): [string, string, string] {

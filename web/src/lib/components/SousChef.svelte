@@ -107,7 +107,7 @@
 			{#if sending}
 				<li class="model typing" aria-live="polite">
 					<span class="who">Sous-chef</span>
-					<p>Thinking…</p>
+					<p>Thinking...</p>
 				</li>
 			{/if}
 		</ol>

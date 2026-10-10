@@ -82,7 +82,7 @@ describe('merging by food and by wording', () => {
 		});
 		const [line] = mergeLines([recipe('a', [range(50, 60)]), recipe('b', [range(100, 100)])]);
 		expect(line).toMatchObject({ min: 150, max: 160 });
-		expect(lineText(line)).toBe('150–160 g sugar');
+		expect(lineText(line)).toBe('150-160 g sugar');
 	});
 
 	it('merges lines with no food id by wording and unit, ignoring case, accents and plurals', () => {

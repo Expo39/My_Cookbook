@@ -100,9 +100,9 @@ class Pen {
 	}
 }
 
-/** "1 h 55 min  ·  5 servings", leaving out the time when the recipe has none. */
+/** "1 h 55 min  |  5 servings", leaving out the time when the recipe has none. */
 const metaLine = (content: Content) =>
-	[content.total, content.serves].filter(Boolean).join('  ·  ');
+	[content.total, content.serves].filter(Boolean).join('  |  ');
 
 const scaled = (sizes: number[], u: number) => sizes.map((size) => size * u);
 

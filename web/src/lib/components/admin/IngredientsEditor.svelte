@@ -25,7 +25,7 @@
 
 <FieldSet legend="Ingredients">
 	<p class="help">
-		Split the list into groups when the recipe has parts, such as “For the sauce”. A group with one
+		Split the list into groups when the recipe has parts, such as "For the sauce". A group with one
 		part needs no name.
 	</p>
 	{#if ed.errorFor('ingredientGroups')}
@@ -49,7 +49,7 @@
 						label="Group name"
 						bind:value={group.name}
 						optional
-						hint="Such as “For the sauce”"
+						hint="Such as 'For the sauce'"
 					/>
 					<TextField
 						id="f-ingredientGroups-{g}-total-qty"

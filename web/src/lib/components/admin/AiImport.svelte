@@ -60,7 +60,7 @@
 			<p class="error" role="alert"><Icon name="alert" size={16} />{problem}</p>
 		{/if}
 		<button class="btn primary" disabled={busy || !text.trim() || needsSecret}>
-			{busy ? 'Reading the recipe…' : 'Fill in the form'}
+			{busy ? 'Reading the recipe...' : 'Fill in the form'}
 		</button>
 	</form>
 </Modal>

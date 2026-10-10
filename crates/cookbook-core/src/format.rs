@@ -6,7 +6,7 @@ use crate::{
     units::{UnitSystem, convert, density, nearest_cup, normalise},
 };
 
-pub(crate) const EN_DASH: char = '–';
+pub(crate) const RANGE_DASH: char = '-';
 
 #[derive(Debug, Clone, Copy)]
 pub struct DisplayCtx<'a> {
@@ -166,7 +166,7 @@ pub fn display_amount(min: f64, max: f64, unit: Option<Unit>, ctx: &DisplayCtx) 
         range_with_unit(lo, hi, hi_unit)
     } else {
         format!(
-            "{}{EN_DASH}{}",
+            "{}{RANGE_DASH}{}",
             with_unit(lo, lo_unit),
             with_unit(hi, hi_unit)
         )
@@ -210,7 +210,7 @@ fn range_with_unit(lo: f64, hi: f64, unit: Unit) -> String {
 
 fn range_number(lo: f64, hi: f64, unit: Option<Unit>) -> String {
     format!(
-        "{}{EN_DASH}{}",
+        "{}{RANGE_DASH}{}",
         format_number(lo, unit),
         format_number(hi, unit)
     )
@@ -265,7 +265,7 @@ fn minutes_text(minutes: f64) -> String {
     }
 }
 
-/// "30 sec", "12 min", "1 h 30 min", or a range such as "12–15 min" and "3–4 h".
+/// "30 sec", "12 min", "1 h 30 min", or a range such as "12-15 min" and "3-4 h".
 pub fn format_minutes(min: f64, max: Option<f64>) -> String {
     let Some(max) = max.filter(|max| (max - min).abs() > 1e-9) else {
         return minutes_text(min);
@@ -273,19 +273,19 @@ pub fn format_minutes(min: f64, max: Option<f64>) -> String {
     let (lo, hi) = (min.min(max), min.max(max));
     if hi < 1.0 - 1e-9 {
         let secs = |m: f64| (m * 60.0).round() as i64;
-        return format!("{}{EN_DASH}{} sec", secs(lo), secs(hi));
+        return format!("{}{RANGE_DASH}{} sec", secs(lo), secs(hi));
     }
     if lo >= 1.0 - 1e-9 && hi < 60.0 - 1e-9 {
-        return format!("{}{EN_DASH}{} min", trim_decimal(lo), trim_decimal(hi));
+        return format!("{}{RANGE_DASH}{} min", trim_decimal(lo), trim_decimal(hi));
     }
     if lo >= 60.0 - 1e-9 && lo % 30.0 < 1e-9 && hi % 30.0 < 1e-9 {
         return format!(
-            "{}{EN_DASH}{} h",
+            "{}{RANGE_DASH}{} h",
             trim_decimal(lo / 60.0),
             trim_decimal(hi / 60.0)
         );
     }
-    format!("{}{EN_DASH}{}", minutes_text(lo), minutes_text(hi))
+    format!("{}{RANGE_DASH}{}", minutes_text(lo), minutes_text(hi))
 }
 
 /// "4 people", "1 person" or, with no noun, "4 servings".
@@ -403,14 +403,14 @@ mod tests {
             precise: false,
             food: None,
         };
-        assert_eq!(display_amount(6.0, 7.0, None, &ctx).text, "6–7");
+        assert_eq!(display_amount(6.0, 7.0, None, &ctx).text, "6-7");
         assert_eq!(
             display_amount(1.5, 2.0, Some(Unit::Tsp), &ctx).text,
-            "1½–2 tsp"
+            "1½-2 tsp"
         );
         assert_eq!(
             display_amount(800.0, 1200.0, Some(Unit::G), &ctx).text,
-            "800 g–1.2 kg"
+            "800 g-1.2 kg"
         );
         assert_eq!(
             display_amount(2.0, 2.2, Some(Unit::Tsp), &ctx).text,
@@ -450,15 +450,15 @@ mod tests {
     #[test]
     fn minutes() {
         assert_eq!(format_minutes(12.0, None), "12 min");
-        assert_eq!(format_minutes(12.0, Some(15.0)), "12–15 min");
+        assert_eq!(format_minutes(12.0, Some(15.0)), "12-15 min");
         assert_eq!(format_minutes(1.5, None), "1.5 min");
     }
 
     #[test]
     fn short_timers_read_in_seconds() {
         assert_eq!(format_minutes(0.5, None), "30 sec");
-        assert_eq!(format_minutes(0.25, Some(0.75)), "15–45 sec");
-        assert_eq!(format_minutes(0.5, Some(2.0)), "30 sec–2 min");
+        assert_eq!(format_minutes(0.25, Some(0.75)), "15-45 sec");
+        assert_eq!(format_minutes(0.5, Some(2.0)), "30 sec-2 min");
     }
 
     #[test]
@@ -466,9 +466,9 @@ mod tests {
         assert_eq!(format_minutes(60.0, None), "1 h");
         assert_eq!(format_minutes(90.0, None), "1 h 30 min");
         assert_eq!(format_minutes(240.0, None), "4 h");
-        assert_eq!(format_minutes(180.0, Some(240.0)), "3–4 h");
-        assert_eq!(format_minutes(90.0, Some(120.0)), "1.5–2 h");
-        assert_eq!(format_minutes(45.0, Some(90.0)), "45 min–1 h 30 min");
+        assert_eq!(format_minutes(180.0, Some(240.0)), "3-4 h");
+        assert_eq!(format_minutes(90.0, Some(120.0)), "1.5-2 h");
+        assert_eq!(format_minutes(45.0, Some(90.0)), "45 min-1 h 30 min");
         assert_eq!(format_minutes(59.0, None), "59 min");
     }
 

@@ -46,7 +46,7 @@ test('the view state survives a reload and loads from a shared link', async ({ p
 test('a shared link can scale by multiplier', async ({ page }) => {
 	await page.goto(`${brulee}?x=2`);
 	await waitForCore(page);
-	await expect(page.getByText('Scaled ×2')).toBeVisible();
+	await expect(page.getByText('Scaled x2')).toBeVisible();
 	await expect(ingredients(page).getByText('1 l')).toBeVisible();
 	await expect(page.getByText('Cook in batches')).toBeVisible();
 	await expect(method(page).getByText('Check from the original time').first()).toBeVisible();
@@ -106,7 +106,7 @@ test('a timer pill starts a timer that counts down and can be dismissed from the
 }) => {
 	await page.goto(brulee);
 	await waitForCore(page);
-	const pill = method(page).getByRole('button', { name: /Start 15–20 min timer/ });
+	const pill = method(page).getByRole('button', { name: /Start 15-20 min timer/ });
 	await pill.click();
 	const shown = method(page).getByRole('button', { name: /^Show the .* timer/ });
 	await expect(shown).toHaveText(/^\s*1[45]:\d\d$/);
@@ -133,7 +133,7 @@ test('scaling to a pan and by an ingredient work from the extra controls', async
 	await page.getByLabel('Amount').fill('1000');
 	await page.getByLabel('Unit').selectOption('ml');
 	await page.getByRole('button', { name: 'Scale to this' }).click();
-	await expect(page.getByText('Scaled ×2')).toBeVisible();
+	await expect(page.getByText('Scaled x2')).toBeVisible();
 	await expect(page).toHaveURL(/have=double-cream:1000ml/);
 
 	await page.getByLabel('Amount').fill('');
@@ -155,7 +155,7 @@ test('step text joins exactly as written around timers, and a redundant alt is n
 }) => {
 	await page.goto('main-courses/beef-steak/beef-wellington');
 	await expect(method(page)).toContainText('chill for 15 min, until it has set.');
-	await expect(method(page)).toContainText('Rest for 15–20 min. Slice');
+	await expect(method(page)).toContainText('Rest for 15-20 min. Slice');
 	await expect(ingredients(page)).toContainText('1 kg chateaubriand beef fillet');
 	await expect(ingredients(page)).not.toContainText('(1 kg)');
 });

@@ -61,7 +61,7 @@
 
 <Modal bind:this={modal} title="Delete this recipe">
 	{#if phase === 'checking'}
-		<p role="status">Checking whether other recipes link to it…</p>
+		<p role="status">Checking whether other recipes link to it...</p>
 	{:else if phase === 'blocked'}
 		<p>
 			<strong>{title}</strong> cannot be deleted yet. {linked.length === 1
@@ -92,7 +92,7 @@
 				hint={title}
 			/>
 			<button class="btn danger" disabled={!matches || busy}>
-				<Icon name="trash" size={18} />{busy ? 'Deleting…' : 'Delete the recipe'}
+				<Icon name="trash" size={18} />{busy ? 'Deleting...' : 'Delete the recipe'}
 			</button>
 		</form>
 	{/if}
