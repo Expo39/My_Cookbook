@@ -1,6 +1,7 @@
 use cookbook_ai::{
-    AiError, ApiError, GeminiConfig, Request as GeminiRequest, Response as GeminiResponse,
+    AiError, ApiError, GeminiConfig, Recipe, Request as GeminiRequest, Response as GeminiResponse,
     chat_request, endpoint, import_request, parse_chat, parse_import, parse_import_response,
+    parse_site_recipe, site_recipe_url, unknown_recipe,
 };
 use serde_json::json;
 use worker::{Date, Env, Fetch, Headers, Method, Request, RequestInit, Response, Result};
@@ -132,7 +133,8 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
     let body = match kind {
         Route::Chat => {
             let input = parse_chat(declared, &body)?;
-            let request = chat_request(&config, &input.recipe, &input.history, &input.question);
+            let recipe = site_recipe(env, &input.recipe_id).await?;
+            let request = chat_request(&config, &recipe, &input.history, &input.question);
             let reply = gemini(env, &config, &request)
                 .await?
                 .reply()
@@ -193,6 +195,22 @@ async fn rate_limit(req: &Request, env: &Env, kind: Route) -> std::result::Resul
             ),
         )
         .retry_after(wait)),
+    }
+}
+
+/// The recipe comes from the deployed site's public data, never from the request body.
+async fn site_recipe(env: &Env, recipe_id: &str) -> std::result::Result<Recipe, ApiError> {
+    let site = text_var(env, "SITE_URL").ok_or_else(unavailable)?;
+    let outgoing =
+        Request::new(&site_recipe_url(&site, recipe_id), Method::Get).map_err(|_| unavailable())?;
+    let mut response = Fetch::Request(outgoing)
+        .send()
+        .await
+        .map_err(|_| from_ai(&AiError::Unavailable))?;
+    match response.status_code() {
+        200 => parse_site_recipe(&response.text().await.map_err(|_| unavailable())?),
+        404 => Err(unknown_recipe()),
+        _ => Err(from_ai(&AiError::Unavailable)),
     }
 }
 
