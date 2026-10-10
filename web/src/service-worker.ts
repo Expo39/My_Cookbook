@@ -15,7 +15,11 @@ const DATA = 'data-v1';
 // admin.json must always be fetched fresh, or a new password would not unlock until the cache turned over.
 const assets = [
 	...build,
-	...files.filter((file) => !/\/(data|cards)\//.test(file) && !file.endsWith('/admin.json'))
+	// Hidden files such as .gitkeep never reach the deployed artifact, and one missing file fails the install.
+	...files.filter(
+		(file) =>
+			!/\/(data|cards)\//.test(file) && !file.endsWith('/admin.json') && !/\/\.[^/]*$/.test(file)
+	)
 ];
 const shellPages = ['/', '/offline', '/favourites', '/shopping-list', '/search'].map(
 	(path) => `${base}${path}`
