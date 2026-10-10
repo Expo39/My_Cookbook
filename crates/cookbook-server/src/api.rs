@@ -10,7 +10,8 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use cookbook_core::{
-    CheckResult, Level, RecipeFile, Section, check_recipe, check_removal, has_errors, parse_recipe,
+    CheckResult, Collection, Level, RecipeFile, Section, check_recipe, check_removal, has_errors,
+    parse_recipe,
 };
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -156,6 +157,25 @@ pub async fn put_recipe(
     Ok(Json(json!({ "id": id, "results": results })).into_response())
 }
 
+/// The photo (relative to the recipes folder) that only the recipe being removed uses.
+fn orphaned_photo(id: &str, collection: &Collection) -> Option<String> {
+    let photo = |recipe_id: &str, src: &str| {
+        let path = format!("{}/{src}", parent(recipe_id)?);
+        (is_valid_file_path(&path) && content_type(&path).is_some()).then_some(path)
+    };
+    let own = collection.recipes.iter().find(|r| r.id() == id)?;
+    let own = photo(id, &own.recipe.image.as_ref()?.src)?;
+    let shared = collection.recipes.iter().any(|r| {
+        r.id() != id
+            && r.recipe
+                .image
+                .as_ref()
+                .and_then(|image| photo(&r.id(), &image.src))
+                .is_some_and(|other| other == own)
+    });
+    (!shared).then_some(own)
+}
+
 pub async fn delete_recipe(
     State(state): Shared,
     _auth: Authed,
@@ -178,15 +198,21 @@ pub async fn delete_recipe(
             &linked,
         ));
     }
+    let photo = orphaned_photo(&id, &collection);
     tokio::fs::remove_file(state.config.recipes_dir().join(format!("{id}.json")))
         .await
         .map_err(|_| Failure::internal())?;
+    let mut paths = vec![relative(&id, ".json")];
+    if let Some(photo) = photo {
+        match tokio::fs::remove_file(state.config.recipes_dir().join(&photo)).await {
+            Ok(()) => paths.push(format!("recipes/{photo}")),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(_) => return Err(Failure::internal()),
+        }
+    }
     state.reload().await?;
     state
-        .commit(
-            &[relative(&id, ".json")],
-            &format!("content(recipes): remove {id}"),
-        )
+        .commit(&paths, &format!("content(recipes): remove {id}"))
         .await;
     Ok(Json(json!({ "id": id })).into_response())
 }

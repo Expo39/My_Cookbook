@@ -594,6 +594,41 @@ async fn sections_can_be_added_once() {
 }
 
 #[tokio::test]
+async fn deleting_a_recipe_removes_its_photo() {
+    let k = kitchen();
+    let cookie = k.login().await;
+    k.upload("/api/images/mains/pictured", &cookie, PNG).await;
+    let saved = k
+        .call(
+            Method::PUT,
+            "/api/recipes/mains/pictured",
+            Some(&cookie),
+            Some(recipe(
+                json!({ "image": { "src": "pictured.png", "alt": "A stew" } }),
+            )),
+        )
+        .await;
+    assert_eq!(saved.status, StatusCode::OK);
+    assert!(k.path("recipes/mains/pictured.png").exists());
+
+    let removed = k
+        .call(
+            Method::DELETE,
+            "/api/recipes/mains/pictured",
+            Some(&cookie),
+            None,
+        )
+        .await;
+    assert_eq!(removed.status, StatusCode::OK);
+    assert!(!k.path("recipes/mains/pictured.json").exists());
+    assert!(!k.path("recipes/mains/pictured.png").exists());
+    assert_eq!(
+        k.get("/api/images/mains/pictured.png").await.status,
+        StatusCode::NOT_FOUND
+    );
+}
+
+#[tokio::test]
 async fn images_must_be_images_and_small() {
     let k = kitchen();
     let cookie = k.login().await;
