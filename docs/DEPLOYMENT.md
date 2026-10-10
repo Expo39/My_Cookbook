@@ -4,7 +4,16 @@ GitHub Pages is the main way to publish the cookbook. Self-hosting is the fallba
 
 ## GitHub Pages
 
-_To be written._
+The site goes live from `main` only. Work happens on other branches, which CI does not run on.
+
+1. In the repository's **Settings → Pages**, set the source to **GitHub Actions**.
+2. CI (`.github/workflows/ci.yml`) runs on pull requests into `main` and on pushes to `main`. Its last job, **CI passed**, fails if any other job failed.
+3. Deploy (`.github/workflows/deploy.yml`) runs only after CI succeeds on a push to `main`, so a failing test or checklist never ships.
+
+### Nothing reaches `main` until everything passes
+
+- **Locally:** run `make hooks` once per clone. The pre-push hook then runs `make test` before any push to `main` and refuses the push if anything fails. Other branches push without it.
+- **On GitHub:** in **Settings → Rules → Rulesets**, add a branch ruleset targeting `main` with **Require a pull request before merging** and **Require status checks to pass**, adding the **CI passed** check. Turn on **Block force pushes**. A change then reaches `main` only through a pull request whose CI is green.
 
 ## The AI proxy (Cloudflare Worker)
 

@@ -13,7 +13,7 @@ CARDS_OUT := web/static/cards
 CARDS_STAMP := $(CARDS_OUT)/.state.json
 CARD_SRC := cookbook.config.json $(shell find assets -type f)
 
-.PHONY: screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
+.PHONY: hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
 
 image:
 	docker compose build dev
@@ -79,3 +79,7 @@ server:
 
 selfhost:
 	docker compose --profile selfhost up --build selfhost
+
+# The pre-push hook runs `make test` before any push to main.
+hooks:
+	git config core.hooksPath .githooks

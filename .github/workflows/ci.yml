@@ -2,8 +2,9 @@ name: CI
 
 on:
   pull_request:
+    branches: [main]
   push:
-    branches: [main, overhaul/v2]
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -215,3 +216,15 @@ jobs:
       - if: steps.browsers.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
       - run: pnpm e2e --project=chromium
+
+  # The one check branch protection requires: a skipped job (docs-only change) counts as a pass.
+  passed:
+    name: CI passed
+    if: always()
+    needs: [rust, content, core-artifacts, web, build, e2e]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - run: echo "Every CI job passed or was skipped."

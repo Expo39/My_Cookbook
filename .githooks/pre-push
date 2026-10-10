@@ -1,0 +1,16 @@
+#!/bin/sh
+# Refuses a push to main unless the whole suite passes. Other branches push freely.
+set -eu
+
+pushes_main=false
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+	[ "$remote_ref" = "refs/heads/main" ] && pushes_main=true
+done
+
+[ "$pushes_main" = true ] || exit 0
+
+echo "pre-push: pushing to main, so running make test first..."
+if ! make test; then
+	echo "pre-push: tests failed, so the push to main was refused." >&2
+	exit 1
+fi
