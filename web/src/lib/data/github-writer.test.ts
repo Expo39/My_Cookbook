@@ -208,6 +208,19 @@ describe('build status', () => {
 		});
 	});
 
+	it('treats a cancelled run as superseded by a later build, not as a failure', () => {
+		expect(buildState([run('CI', 'completed', 'cancelled')])).toEqual({ state: 'superseded' });
+		expect(
+			buildState([run('CI', 'completed', 'success'), run('Deploy', 'completed', 'cancelled')])
+		).toEqual({ state: 'superseded' });
+	});
+
+	it('still reports a failure alongside a cancelled run', () => {
+		expect(
+			buildState([run('CI', 'completed', 'cancelled'), run('Deploy', 'completed', 'failure')])
+		).toMatchObject({ state: 'failed' });
+	});
+
 	it('links the run that failed', () => {
 		expect(buildState([run('CI', 'completed', 'failure')])).toEqual({
 			state: 'failed',

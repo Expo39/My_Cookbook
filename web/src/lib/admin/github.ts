@@ -140,16 +140,24 @@ function explain(status: number, detail?: string): string {
 }
 
 export type BuildState =
-	{ state: 'building' } | { state: 'live' } | { state: 'failed'; url: string };
+	| { state: 'building' }
+	| { state: 'live' }
+	| { state: 'superseded' }
+	| { state: 'failed'; url: string };
 
-/** Reads the CI and Deploy runs for a commit: the site is live once Deploy has succeeded. */
+/**
+ * Reads the CI and Deploy runs for a commit: the site is live once Deploy has succeeded. CI cancels
+ * a run when a later push to the same branch replaces it, so a cancelled run is superseded, not failed.
+ */
 export function buildState(runs: WorkflowRun[]): BuildState {
-	const failed = runs.find(
-		(run) =>
-			run.status === 'completed' &&
-			!['success', 'skipped', 'neutral'].includes(run.conclusion ?? '')
+	const done = runs.filter((run) => run.status === 'completed');
+	const failed = done.find(
+		(run) => !['success', 'skipped', 'neutral', 'cancelled'].includes(run.conclusion ?? '')
 	);
 	if (failed) return { state: 'failed', url: failed.html_url };
 	const deploy = runs.find((run) => run.name === 'Deploy');
-	return deploy?.status === 'completed' ? { state: 'live' } : { state: 'building' };
+	if (deploy?.status === 'completed' && deploy.conclusion !== 'cancelled') return { state: 'live' };
+	return done.some((run) => run.conclusion === 'cancelled')
+		? { state: 'superseded' }
+		: { state: 'building' };
 }

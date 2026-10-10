@@ -174,7 +174,7 @@
 			} catch {
 				status = null;
 			}
-			if (status?.state === 'live' || status?.state === 'failed') return;
+			if (status && status.state !== 'building') return;
 			await new Promise((resolve) => setTimeout(resolve, POLL_MILLISECONDS));
 		}
 	}
@@ -297,6 +297,9 @@
 						<Icon name="clock" size={18} />Building… the site is live in about a minute.
 					{:else if status?.state === 'live'}
 						<Icon name="checkCircle" size={18} />Live.
+					{:else if status?.state === 'superseded'}
+						<Icon name="clock" size={18} />A later save replaced this build. The change goes live
+						with that one.
 					{:else if status?.state === 'failed'}
 						<Icon name="xCircle" size={18} />The build failed.
 						<a href={status.url} rel="external noreferrer">See what went wrong</a>
