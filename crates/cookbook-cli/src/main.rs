@@ -4,6 +4,7 @@ mod config;
 mod images;
 mod migrate;
 mod report;
+mod verify;
 
 use std::{
     path::{Path, PathBuf},
@@ -73,6 +74,12 @@ enum Command {
         /// The address the cards link to; defaults to `PUBLIC_SITE_URL` and `BASE_PATH`, then the `site` settings
         #[arg(long)]
         site_root: Option<String>,
+    },
+    /// Check a built site: every recipe is listed, pre-rendered, searchable, has JSON-LD and an Open Graph card
+    VerifySite {
+        /// The built site
+        #[arg(default_value = "web/build")]
+        build: PathBuf,
     },
     /// Print the JSON Schema for recipes and sections
     Schema {
@@ -236,6 +243,23 @@ fn main() -> ExitCode {
             Err(build::BuildError::Other(message)) => {
                 eprintln!("build failed: {message}");
                 ExitCode::FAILURE
+            }
+        },
+        Command::VerifySite { build } => match verify::run(&cli.root, &build) {
+            Ok(problems) if problems.is_empty() => {
+                println!("verified the site in {}", build.display());
+                ExitCode::SUCCESS
+            }
+            Ok(problems) => {
+                for problem in &problems {
+                    println!("✗ {problem}");
+                }
+                eprintln!("{} problems in the built site", problems.len());
+                ExitCode::FAILURE
+            }
+            Err(message) => {
+                eprintln!("verify-site failed: {message}");
+                ExitCode::from(2)
             }
         },
         Command::Schema { kind } => schema(kind),

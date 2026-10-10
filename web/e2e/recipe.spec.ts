@@ -62,13 +62,13 @@ test('an amount cycles through its units on click, and the hint can be dismissed
 	await expect(page.getByText('Tap an amount to change its unit')).toBeVisible();
 
 	const cream = ingredients(page)
-		.getByRole('button', { name: /^Show in/ })
+		.getByRole('button', { name: /, show in / })
 		.first();
 	await expect(cream).toHaveText('500 ml');
-	await expect(cream).toHaveAttribute('aria-label', 'Show in l');
+	await expect(cream).toHaveAttribute('aria-label', '500 ml, show in l');
 	await cream.click();
 	await expect(cream).toHaveText('0.5 l');
-	await expect(cream).toHaveAttribute('aria-label', 'Show in tsp');
+	await expect(cream).toHaveAttribute('aria-label', '0.5 l, show in tsp');
 	await expect(page.getByText('Tap an amount to change its unit')).toHaveCount(0);
 
 	await page.reload();

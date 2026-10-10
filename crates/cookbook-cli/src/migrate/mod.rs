@@ -17,7 +17,7 @@ const RENAMED_SUBSECTIONS: &[(&str, &str)] = &[("Miscellaneous", "Platters")];
 const VANILLA_KEY: &str = "vanilla";
 const VANILLA_STEP_KEY: &str = "infuse";
 
-// The wording of `updateVanillaType()` in `js/scaling.js`.
+// The wording of the legacy `updateVanillaType()`.
 const EXTRACT_STEP: &str = "Pour cream into saucepan, heat until just starts to simmer. Remove immediately. Stir in vanilla extract. Let cool to lukewarm (15-20 minutes).";
 const ESSENCE_STEP: &str = "Pour cream into saucepan, heat until just starts to simmer. Remove immediately. Stir in vanilla essence. Let cool to lukewarm (15-20 minutes).";
 const ESSENCE_TIP: &str = "Vanilla essence is more concentrated than extract, so use less. Water bath prevents custard from curdling. The wobble test is key - center should jiggle like jelly when gently shaken.";

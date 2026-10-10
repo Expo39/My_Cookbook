@@ -1,4 +1,4 @@
-//! Runs the legacy migration on the real `index.html` and checks that nothing is lost.
+//! Runs the legacy migration on the archived `legacy-index.html` and checks that nothing is lost.
 
 #[allow(dead_code)]
 #[path = "../src/migrate/legacy_ids.rs"]
@@ -18,6 +18,10 @@ use scraper::{ElementRef, Html, Selector};
 
 fn root() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("../..")
+}
+
+fn fixture() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/legacy-index.html")
 }
 
 fn selector(css: &str) -> Selector {
@@ -61,7 +65,7 @@ fn migrated() -> &'static BTreeMap<String, Vec<u8>> {
         let _ = fs::remove_dir_all(&out);
         let status = Command::new(env!("CARGO_BIN_EXE_cookbook-cli"))
             .arg("migrate-legacy")
-            .arg(root().join("index.html"))
+            .arg(fixture())
             .arg("--out")
             .arg(&out)
             .output()
@@ -105,7 +109,7 @@ const RENAMED: &[(&str, &str)] = &[(
 )];
 
 fn legacy_page() -> Html {
-    Html::parse_document(&fs::read_to_string(root().join("index.html")).unwrap())
+    Html::parse_document(&fs::read_to_string(fixture()).unwrap())
 }
 
 /// Each legacy recipe with its migrated counterpart.

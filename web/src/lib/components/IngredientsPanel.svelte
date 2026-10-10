@@ -26,10 +26,11 @@
 			.trim();
 	}
 
+	/** Starts with the visible amount, so voice control can say what it sees. */
 	function label(position: string, item: ScaledIngredient): string {
-		if (!model.ready) return 'Change unit';
-		const next = model.nextUnit(position, item);
-		return next ? `Show in ${unitLabel(next)}` : 'Change unit';
+		const amount = model.amountText(position, item);
+		const next = model.ready ? model.nextUnit(position, item) : undefined;
+		return next ? `${amount}, show in ${unitLabel(next)}` : `${amount}, change unit`;
 	}
 
 	function cycle(position: string, item: ScaledIngredient) {

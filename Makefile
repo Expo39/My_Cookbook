@@ -13,7 +13,7 @@ CARDS_OUT := web/static/cards
 CARDS_STAMP := $(CARDS_OUT)/.state.json
 CARD_SRC := cookbook.config.json $(shell find assets -type f)
 
-.PHONY: hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
+.PHONY: verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
 
 image:
 	docker compose build dev
@@ -53,7 +53,10 @@ test-fast: install data wasm
 build: install data cards wasm
 	$(RUN) pnpm --dir web build
 
-test: test-fast build
+verify: build
+	$(RUN) cargo run --quiet -p cookbook-cli -- verify-site web/build
+
+test: test-fast verify
 	docker compose run --rm -e E2E_PREBUILT=1 dev pnpm --dir web e2e
 
 fmt:
