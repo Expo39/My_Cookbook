@@ -48,7 +48,8 @@
             "unit": "tsp"
           },
           "item": "sugar per ramekin",
-          "note": "topping"
+          "note": "topping",
+          "scale": "fixed"
         }
       ]
     }
