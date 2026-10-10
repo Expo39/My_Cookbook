@@ -6,6 +6,7 @@ ARG HOST_UID=1000
 ARG HOST_GID=1000
 ARG NEXTEST_VERSION=0.9.148
 ARG WASM_BINDGEN_VERSION=0.2.129
+ARG BINARYEN_VERSION=128
 ARG PNPM_VERSION=10.34.6
 ARG PLAYWRIGHT_VERSION=1.64.0
 
@@ -31,6 +32,9 @@ RUN npm install --global "playwright@${PLAYWRIGHT_VERSION}" \
 
 RUN corepack enable && corepack prepare "pnpm@${PNPM_VERSION}" --activate \
  && mkdir -p /opt/corepack && cp -r /root/.cache/node/corepack/. /opt/corepack/
+
+RUN curl -fsSL "https://github.com/WebAssembly/binaryen/releases/download/version_${BINARYEN_VERSION}/binaryen-version_${BINARYEN_VERSION}-x86_64-linux.tar.gz" \
+    | tar -xz --strip-components=2 -C /usr/local/bin "binaryen-version_${BINARYEN_VERSION}/bin/wasm-opt"
 
 RUN groupadd --gid "${HOST_GID}" dev \
  && useradd --uid "${HOST_UID}" --gid "${HOST_GID}" --create-home --shell /bin/bash dev \

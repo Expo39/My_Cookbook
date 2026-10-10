@@ -12,3 +12,6 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 cookbook-core = { path = "../cookbook-core" }
 wasm-bindgen.workspace = true
+serde.workspace = true
+serde-wasm-bindgen.workspace = true
+serde_json.workspace = true
