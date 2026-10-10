@@ -4,7 +4,7 @@
 - **Ingredients for the step:** listed above the step text with their amounts.
 - **Desktop:** the full ingredient list is in a left column.
 - **Navigation:**
-  - large Previous / Next buttons at the bottom; swipe on touch; ←/→ keys
+  - large Previous / Next buttons at the bottom; swipe on touch; left and right arrow keys
   - Space starts the step's timer; Esc exits
   - progress is shown as "Step 3 of 8" in `--font-num`
 - **Timers:**

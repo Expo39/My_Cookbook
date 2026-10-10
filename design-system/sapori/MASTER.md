@@ -1,6 +1,6 @@
 # Sapori design system: master
 
-Page files in `pages/` override this file where they differ. This file was seeded with the `ui-ux-pro-max` skill and then replaced with the direction Antonio chose: "Limestone" with Literata numerals. The reference specimen is https://claude.ai/artifact/LBhVBdgGfa3YLDKYJaHLey.
+Page files in `pages/` override this file where they differ. This file was seeded with the `ui-ux-pro-max` skill and then replaced with the chosen direction: "Limestone" with Literata numerals. The reference specimen is https://claude.ai/artifact/LBhVBdgGfa3YLDKYJaHLey.
 
 **Concept:** a Maltese kitchen, with honey-coloured globigerina limestone, capers and prickly pears. The tone is editorial and food-first. It is warm without being rustic, and there are no blog flourishes.
 
@@ -31,16 +31,16 @@ All fonts are self-hosted as woff2 under `web/static/fonts/`, subset to Latin + 
 
 | Token | Family | Use |
 |---|---|---|
-| `--font-display` | Bitter 800, tracking −0.02em | titles, section and recipe headings |
+| `--font-display` | Bitter 800, tracking -0.02em | titles, section and recipe headings |
 | `--font-body` | Atkinson Hyperlegible 400/700 | all running text and UI |
 | `--font-num` | Literata 600, `tabular-nums` | **every numeral that is data**: amounts, times, servings, timers, step numbers |
 
-- Type scale (rem): 0.82 · 0.9 · 1 · 1.15 · 1.35 · 1.7 · 2.2 · 3 (display only). The body is 1rem/1.6 with a line length of at most 68ch.
+- Type scale (rem): 0.82, 0.9, 1, 1.15, 1.35, 1.7, 2.2 and 3 (display only). The body is 1rem/1.6 with a line length of at most 68ch.
 - Headings use `text-wrap: balance`. Uppercase labels are 0.78rem with +0.08em tracking.
 - Banned fonts: Inter, Roboto, Poppins, Montserrat, Space Grotesk, Playfair, Fraunces, and a system-ui stack as the brand face (it is allowed only as a fallback).
 
 ## Space, shape, depth
-- Spacing (rem): `--space-1` 0.25 · `-2` 0.5 · `-3` 0.75 · `-4` 1 · `-5` 1.5 · `-6` 2 · `-7` 3 · `-8` 4. Lay out with gap (flex or grid), not with margins between siblings.
+- Spacing (rem): `--space-1` 0.25, `-2` 0.5, `-3` 0.75, `-4` 1, `-5` 1.5, `-6` 2, `-7` 3, `-8` 4. Lay out with gap (flex or grid), not with margins between siblings.
 - Radius: `--radius-s` 4px for controls and chips, `--radius-m` 6px for cards, and 999px for pills and timers only. The style is not "rounded everything".
 - Depth comes from lines and tints, not shadows. Only floating layers (the drawer, the cook-mode timer strip, toasts) get `--shadow-float`.
 - Page gutter: at least 16px at every width. Content max-width is 72rem, and the reading column is 68ch.
@@ -54,8 +54,8 @@ All fonts are self-hosted as woff2 under `web/static/fonts/`, subset to Latin + 
 - Use Lucide-style inline SVG at a 1.75 stroke, `currentColor`, through one `Icon.svelte`. No emoji anywhere in the UI.
 - Icon-only buttons need an `aria-label`.
 
-## Interaction and accessibility (from ui-ux-pro-max priorities 1–9)
-- Touch targets are at least 44×44 px, with at least 8 px between them. `cursor: pointer` on everything clickable.
+## Interaction and accessibility (from ui-ux-pro-max priorities 1-9)
+- Touch targets are at least 44x44 px, with at least 8 px between them. `cursor: pointer` on everything clickable.
 - Focus is visible everywhere as a 2 px `--colour-primary` outline with a 2 px offset. Never remove it.
 - Labels are visible on every input and never placeholder-only. Errors sit next to their field and say how to fix the problem.
 - Deep links everywhere: recipe view state goes in the URL (`?serves=6&u=us&v=vanilla:pods`). Back always behaves predictably.
