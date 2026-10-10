@@ -1,6 +1,6 @@
 # Home: overrides
 
-- **Opening:** the cookbook name in Bitter at display size, the subtitle "Antonio's recipes from a Maltese kitchen", and the search field straight underneath. It is sized to its content, not 100vh.
+- **Opening:** the cookbook name in Bitter at display size, the subtitle (set in `web/src/routes/+page.svelte`), and the search field straight underneath. It is sized to its content, not 100vh.
 - **Sections:**
   - one card per top-level section (First Courses, Main Courses, Soups, Desserts, Sides), with the recipe count in `--font-num`
   - subsections are listed inside each card as links
