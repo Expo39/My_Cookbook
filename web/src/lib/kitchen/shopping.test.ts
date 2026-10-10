@@ -118,6 +118,55 @@ describe('merging by food and by wording', () => {
 	});
 });
 
+describe("merged amounts stay in the reader's unit system", () => {
+	const spoons = (qty: number, unit: Unit): ShoppingItem => ({
+		item: 'Dijon mustard',
+		food: 'mustard',
+		min: qty,
+		max: qty,
+		unit
+	});
+	const two = [recipe('a', [spoons(2.5, 'tbsp')]), recipe('b', [spoons(2.5, 'tbsp')])];
+
+	it('sums spoons as spoons in metric, never stepping up to cups', () => {
+		const [line] = mergeLines(two, convert, 'metric');
+		expect(lineText(line)).toBe('5 tbsp Dijon mustard');
+		const [big] = mergeLines([recipe('a', [spoons(8, 'tbsp')])], convert, 'metric');
+		expect(big.unit).toBe('tbsp');
+	});
+
+	it('steps up to cups in the US system from a quarter cup', () => {
+		const [five] = mergeLines(two, convert, 'us');
+		expect(lineText(five)).toBe('⅓ cup Dijon mustard');
+		const [few] = mergeLines([recipe('a', [spoons(2, 'tbsp')])], convert, 'us');
+		expect(few.unit).toBe('tbsp');
+	});
+
+	it('adds a cup and a tablespoon and shows metric in tablespoons', () => {
+		const [line] = mergeLines(
+			[recipe('a', [spoons(0.25, 'cup')]), recipe('b', [spoons(1, 'tbsp')])],
+			convert,
+			'metric'
+		);
+		expect(lineText(line)).toBe('5 tbsp Dijon mustard');
+	});
+
+	it('shows small amounts in teaspoons', () => {
+		const [line] = mergeLines([recipe('a', [spoons(1, 'tsp')]), recipe('b', [spoons(1, 'tsp')])]);
+		expect(lineText(line)).toBe('2 tsp Dijon mustard');
+	});
+
+	it('turns ounces into grams in metric but leaves them in US', () => {
+		const oz = (qty: number): ShoppingItem => ({ item: 'cheese', min: qty, max: qty, unit: 'oz' });
+		const toGrams: Convert = (qty, from, to) =>
+			from === 'oz' && to === 'g' ? qty * 28 : undefined;
+		const [metric] = mergeLines([recipe('a', [oz(2)])], toGrams, 'metric');
+		expect(metric).toMatchObject({ unit: 'g', min: 56 });
+		const [us] = mergeLines([recipe('a', [oz(2)])], toGrams, 'us');
+		expect(us.unit).toBe('oz');
+	});
+});
+
 describe('keys and wording', () => {
 	it('uses the food id when there is one, and the wording plus unit when there is not', () => {
 		expect(lineKey(flour(1))).toBe('food:flour-00');

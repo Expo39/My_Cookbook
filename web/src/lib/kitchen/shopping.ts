@@ -1,5 +1,5 @@
 import { formatNumber, formatShown } from '$lib/recipe/format';
-import type { ScaledGroup, Unit } from '$lib/types/recipe';
+import type { ScaledGroup, Unit, UnitSystem } from '$lib/types/recipe';
 
 export interface ShoppingItem {
 	food?: string | null;
@@ -34,6 +34,43 @@ export interface ShoppingLine {
 export type Convert = (qty: number, from: Unit, to: Unit, food?: string) => number | undefined;
 
 const noConversion: Convert = () => undefined;
+
+/** Teaspoons in each spoon-sized unit (a US cup is 240 ml and a teaspoon 5 ml). */
+const SPOON: Partial<Record<Unit, number>> = { tsp: 1, tbsp: 3, cup: 48 };
+
+function spoonsTo(qty: number, from: Unit, to: Unit): number | undefined {
+	const [a, b] = [SPOON[from], SPOON[to]];
+	return a && b ? (qty * a) / b : undefined;
+}
+
+const METRIC_OF: Partial<Record<Unit, Unit>> = { oz: 'g', lb: 'g', floz: 'ml', cup: 'ml' };
+
+/**
+ * Puts a merged line in the reader's unit system. Spoons stay spoons, stepping up to cups only in
+ * the US system and from a quarter cup; metric never shows cups, ounces or pounds.
+ */
+function inSystem(line: ShoppingLine, system: UnitSystem, convert: Convert): void {
+	const unit = line.unit;
+	if (!unit || line.min === undefined || line.max === undefined) return;
+	if (SPOON[unit]) {
+		const [min, max] = [line.min * (SPOON[unit] ?? 1), line.max * (SPOON[unit] ?? 1)];
+		const to: Unit = system === 'us' && min >= 12 ? 'cup' : max >= 3 ? 'tbsp' : 'tsp';
+		if (to !== unit) {
+			line.min = spoonsTo(line.min, unit, to) as number;
+			line.max = spoonsTo(line.max, unit, to) as number;
+			line.unit = to;
+		}
+		return;
+	}
+	const target = system === 'metric' ? METRIC_OF[unit] : undefined;
+	if (!target) return;
+	const [min, max] = [
+		convert(line.min, unit, target, line.food ?? undefined),
+		convert(line.max, unit, target, line.food ?? undefined)
+	];
+	if (min === undefined || max === undefined) return;
+	Object.assign(line, { min, max, unit: target });
+}
 
 /** Lower case, no accents or punctuation, and a crude singular so "eggs" meets "egg". */
 export function normalise(text: string): string {
@@ -83,7 +120,8 @@ const hasQuantity = (line: { min?: number }) => line.min !== undefined;
 /** Merges every recipe's items into one list. Quantities add only when the units are compatible. */
 export function mergeLines(
 	recipes: ShoppingRecipe[],
-	convert: Convert = noConversion
+	convert: Convert = noConversion,
+	system: UnitSystem = 'metric'
 ): ShoppingLine[] {
 	const byKey = new Map<string, ShoppingLine[]>();
 	const order: ShoppingLine[] = [];
@@ -121,10 +159,16 @@ export function mergeLines(
 					line.max = (line.max as number) + amount.max;
 					merged = true;
 				} else if (line.unit && item.unit) {
-					const [min, max] = [
-						convert(amount.min, item.unit, line.unit, item.food ?? undefined),
-						convert(amount.max, item.unit, line.unit, item.food ?? undefined)
-					];
+					const spoons = SPOON[line.unit] && SPOON[item.unit];
+					const [min, max] = spoons
+						? [
+								spoonsTo(amount.min, item.unit, line.unit),
+								spoonsTo(amount.max, item.unit, line.unit)
+							]
+						: [
+								convert(amount.min, item.unit, line.unit, item.food ?? undefined),
+								convert(amount.max, item.unit, line.unit, item.food ?? undefined)
+							];
 					if (min !== undefined && max !== undefined) {
 						line.min = (line.min as number) + min;
 						line.max = (line.max as number) + max;
@@ -144,6 +188,7 @@ export function mergeLines(
 			}
 		}
 	}
+	for (const line of order) inSystem(line, system, convert);
 	return order;
 }
 
@@ -236,11 +281,15 @@ export function groupByAisle(lines: ShoppingLine[]): LineGroup[] {
 }
 
 /** One group per recipe, each with that recipe's own items (not merged), in the order they were added. */
-export function groupByRecipe(recipes: ShoppingRecipe[], convert?: Convert): LineGroup[] {
+export function groupByRecipe(
+	recipes: ShoppingRecipe[],
+	convert?: Convert,
+	system?: UnitSystem
+): LineGroup[] {
 	return recipes.map((recipe) => ({
 		id: recipe.id,
 		label: `${recipe.title} (${recipe.serves})`,
-		lines: mergeLines([recipe], convert)
+		lines: mergeLines([recipe], convert, system)
 	}));
 }
 

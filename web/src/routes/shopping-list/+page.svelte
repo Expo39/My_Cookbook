@@ -15,6 +15,7 @@
 	} from '$lib/kitchen/shopping';
 	import { homeHref } from '$lib/links';
 	import { chrome } from '$lib/stores/chrome.svelte';
+	import { preferences } from '$lib/stores/preferences.svelte';
 	import { shopping } from '$lib/stores/shopping.svelte';
 
 	type View = 'type' | 'recipe';
@@ -29,13 +30,16 @@
 	let confirmTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const converter = $derived(coreReady ? convert : undefined);
-	const merged = $derived(mergeLines(shopping.recipes, converter));
+	const merged = $derived(mergeLines(shopping.recipes, converter, preferences.units));
 	const groups = $derived(
-		view === 'type' ? groupByAisle(merged) : groupByRecipe(shopping.recipes, converter)
+		view === 'type'
+			? groupByAisle(merged)
+			: groupByRecipe(shopping.recipes, converter, preferences.units)
 	);
 	const tickedCount = $derived(merged.filter((line) => shopping.isTicked(line.key)).length);
 
 	onMount(() => {
+		preferences.load();
 		shopping.load();
 		loadCore()
 			.then(() => (coreReady = true))

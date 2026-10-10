@@ -425,8 +425,13 @@
 
 	@media (min-width: 64rem) {
 		.body {
-			grid-template-columns: minmax(16rem, 22rem) 1fr;
-			gap: var(--space-7);
+			grid-template-columns: 22rem minmax(0, 1fr);
+			gap: var(--space-6);
+			padding-inline: max(var(--gutter), calc((100% - var(--page-max)) / 2));
+		}
+
+		.step {
+			justify-items: start;
 		}
 
 		aside {
@@ -444,12 +449,15 @@
 		}
 
 		aside li {
-			padding-block: var(--space-1);
+			padding: var(--space-1) var(--space-2);
 			border-block-end: 1px dashed var(--colour-line);
+			border-inline-start: 3px solid transparent;
 			color: var(--colour-muted);
 		}
 
 		aside .current {
+			border-inline-start-color: var(--colour-primary);
+			background: var(--colour-tint);
 			color: var(--colour-ink);
 			font-weight: 700;
 		}
