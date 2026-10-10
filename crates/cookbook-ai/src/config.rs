@@ -28,7 +28,11 @@ impl GeminiConfig {
     /// so each host can supply its own environment. Blank or unparsable values fall back to the defaults.
     pub fn from_lookup(lookup: impl Fn(&str) -> Option<String>) -> Self {
         let defaults = Self::default();
-        let value = |name: &str| lookup(name).map(|v| v.trim().to_owned()).filter(|v| !v.is_empty());
+        let value = |name: &str| {
+            lookup(name)
+                .map(|v| v.trim().to_owned())
+                .filter(|v| !v.is_empty())
+        };
         Self {
             model: value("GEMINI_MODEL").unwrap_or(defaults.model),
             temperature: value("GEMINI_TEMPERATURE")

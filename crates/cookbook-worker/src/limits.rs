@@ -78,7 +78,8 @@ mod tests {
 
     #[test]
     fn the_environment_can_change_them() {
-        let limits = Limits::from_lookup(|name| (name == "RATE_LIMIT_CHAT").then(|| "7".to_owned()));
+        let limits =
+            Limits::from_lookup(|name| (name == "RATE_LIMIT_CHAT").then(|| "7".to_owned()));
         assert_eq!((limits.chat, limits.import), (7, 5));
         assert_eq!(limits.for_route(Route::Chat), 7);
     }
@@ -88,7 +89,10 @@ mod tests {
         let a = window_key(Route::Chat, "1.2.3.4", 7_200);
         assert_ne!(a, window_key(Route::Import, "1.2.3.4", 7_200));
         assert_ne!(a, window_key(Route::Chat, "1.2.3.5", 7_200));
-        assert_ne!(a, window_key(Route::Chat, "1.2.3.4", 7_200 + WINDOW_SECONDS));
+        assert_ne!(
+            a,
+            window_key(Route::Chat, "1.2.3.4", 7_200 + WINDOW_SECONDS)
+        );
         assert_eq!(a, window_key(Route::Chat, "1.2.3.4", 7_200 + 3_599));
     }
 

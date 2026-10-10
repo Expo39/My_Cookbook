@@ -236,7 +236,11 @@ mod tests {
                     }
                     for (key, child) in map {
                         if key == "properties" {
-                            child.as_object().into_iter().flat_map(Map::values).for_each(check);
+                            child
+                                .as_object()
+                                .into_iter()
+                                .flat_map(Map::values)
+                                .for_each(check);
                         } else {
                             check(child);
                         }

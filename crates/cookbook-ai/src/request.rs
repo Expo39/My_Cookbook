@@ -1,4 +1,7 @@
-use cookbook_ai::{MESSAGE_CHARS, Turn};
+use crate::{
+    error::AiError,
+    prompts::{MESSAGE_CHARS, Turn},
+};
 use cookbook_core::Recipe;
 use serde::Deserialize;
 use serde_json::json;
@@ -38,6 +41,12 @@ impl ApiError {
     }
 }
 
+impl From<&AiError> for ApiError {
+    fn from(error: &AiError) -> Self {
+        Self::new(error.http_status(), error.code(), error.message())
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct ChatBody {
@@ -65,7 +74,10 @@ fn too_large(limit: usize) -> ApiError {
     ApiError::new(
         413,
         "too_large",
-        format!("That request is too large. The limit is {} KB.", limit / 1024),
+        format!(
+            "That request is too large. The limit is {} KB.",
+            limit / 1024
+        ),
     )
 }
 
@@ -83,9 +95,12 @@ fn check_size(declared: Option<usize>, body: &[u8], limit: usize) -> Result<(), 
 fn valid_id(id: &str) -> bool {
     !id.is_empty()
         && id.chars().count() <= ID_MAX_CHARS
-        && id
-            .split('/')
-            .all(|part| !part.is_empty() && part.chars().all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-'))
+        && id.split('/').all(|part| {
+            !part.is_empty()
+                && part
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+        })
 }
 
 /// `declared` is the `Content-Length` header, when present.
@@ -139,7 +154,11 @@ mod tests {
 
     #[test]
     fn a_good_chat_request_parses() {
-        let input = parse_chat(None, chat_json(r#","history":[{"role":"user","text":"hi"}]"#).as_bytes()).unwrap();
+        let input = parse_chat(
+            None,
+            chat_json(r#","history":[{"role":"user","text":"hi"}]"#).as_bytes(),
+        )
+        .unwrap();
         assert_eq!(input.recipe_id, "mains/soup");
         assert_eq!(input.history.len(), 1);
         assert_eq!(input.question, "Can I freeze it?");
@@ -154,29 +173,48 @@ mod tests {
     fn chat_bodies_over_32_kb_are_refused() {
         let big = vec![b' '; CHAT_MAX_BYTES + 1];
         assert_eq!(parse_chat(None, &big).unwrap_err().status, 413);
-        assert_eq!(parse_chat(Some(CHAT_MAX_BYTES + 1), b"{}").unwrap_err().status, 413);
+        assert_eq!(
+            parse_chat(Some(CHAT_MAX_BYTES + 1), b"{}")
+                .unwrap_err()
+                .status,
+            413
+        );
     }
 
     #[test]
     fn import_bodies_over_20_kb_are_refused() {
         let big = format!(r#"{{"text":"{}"}}"#, "a".repeat(IMPORT_MAX_BYTES));
         assert_eq!(parse_import(None, big.as_bytes()).unwrap_err().status, 413);
-        assert_eq!(parse_import(Some(IMPORT_MAX_BYTES + 1), b"{}").unwrap_err().error, "too_large");
+        assert_eq!(
+            parse_import(Some(IMPORT_MAX_BYTES + 1), b"{}")
+                .unwrap_err()
+                .error,
+            "too_large"
+        );
     }
 
     #[test]
     fn malformed_json_and_blank_fields_are_bad_requests() {
         assert_eq!(parse_chat(None, b"nope").unwrap_err().status, 400);
         let blank = chat_json("").replace("Can I freeze it?", "   ");
-        assert_eq!(parse_chat(None, blank.as_bytes()).unwrap_err().error, "bad_request");
-        assert_eq!(parse_import(None, br#"{"text":"  "}"#).unwrap_err().status, 400);
+        assert_eq!(
+            parse_chat(None, blank.as_bytes()).unwrap_err().error,
+            "bad_request"
+        );
+        assert_eq!(
+            parse_import(None, br#"{"text":"  "}"#).unwrap_err().status,
+            400
+        );
     }
 
     #[test]
     fn recipe_ids_must_be_clean_paths() {
         for bad in ["", "../x", "a//b", "A/b", "a/b ", "/a", "a\\b"] {
             let body = chat_json("").replace("mains/soup", bad.replace('\\', "\\\\").as_str());
-            assert!(parse_chat(None, body.as_bytes()).is_err(), "{bad:?} should fail");
+            assert!(
+                parse_chat(None, body.as_bytes()).is_err(),
+                "{bad:?} should fail"
+            );
         }
     }
 

@@ -38,7 +38,9 @@ struct Detail {
 impl AiError {
     /// Maps a non-success Gemini response onto an error.
     pub fn from_response(status: u16, body: &str) -> Self {
-        let detail = serde_json::from_str::<Body>(body).ok().and_then(|b| b.error);
+        let detail = serde_json::from_str::<Body>(body)
+            .ok()
+            .and_then(|b| b.error);
         let (reported, message, has_key_reason) = detail.map_or_else(
             || (String::new(), String::new(), false),
             |d| {
@@ -95,7 +97,10 @@ mod tests {
 
     #[test]
     fn a_429_is_the_daily_limit() {
-        let e = AiError::from_response(429, r#"{"error":{"code":429,"status":"RESOURCE_EXHAUSTED"}}"#);
+        let e = AiError::from_response(
+            429,
+            r#"{"error":{"code":429,"status":"RESOURCE_EXHAUSTED"}}"#,
+        );
         assert_eq!(e, AiError::Quota);
         assert_eq!(
             e.message(),
@@ -114,7 +119,8 @@ mod tests {
     fn a_bad_key_is_recognised_by_reason_message_or_status() {
         let by_reason = r#"{"error":{"code":400,"message":"x","status":"INVALID_ARGUMENT","details":[{"reason":"API_KEY_INVALID"}]}}"#;
         assert_eq!(AiError::from_response(400, by_reason), AiError::InvalidKey);
-        let by_message = r#"{"error":{"message":"API key not valid. Please pass a valid API key."}}"#;
+        let by_message =
+            r#"{"error":{"message":"API key not valid. Please pass a valid API key."}}"#;
         assert_eq!(AiError::from_response(400, by_message), AiError::InvalidKey);
         assert_eq!(AiError::from_response(403, "{}"), AiError::InvalidKey);
     }
@@ -127,7 +133,10 @@ mod tests {
 
     #[test]
     fn anything_else_is_a_busy_service() {
-        assert_eq!(AiError::from_response(503, "not json"), AiError::Unavailable);
+        assert_eq!(
+            AiError::from_response(503, "not json"),
+            AiError::Unavailable
+        );
         assert_eq!(AiError::from_response(500, "{}"), AiError::Unavailable);
     }
 

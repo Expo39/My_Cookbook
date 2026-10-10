@@ -177,10 +177,20 @@ mod tests {
 
     #[test]
     fn the_system_instruction_sets_the_persona_and_carries_the_recipe() {
-        let request = chat_request(&GeminiConfig::default(), &recipe(), &[], "Can I use brown rice?");
+        let request = chat_request(
+            &GeminiConfig::default(),
+            &recipe(),
+            &[],
+            "Can I use brown rice?",
+        );
         let system = &request.system_instruction.as_ref().unwrap().parts[0].text;
         assert!(system.starts_with("You are the sous-chef for Antonio's cookbook"));
-        for phrase in ["British English", "two to four sentences", "substitution", "medical"] {
+        for phrase in [
+            "British English",
+            "two to four sentences",
+            "substitution",
+            "medical",
+        ] {
             assert!(system.contains(phrase), "missing {phrase}");
         }
         assert!(system.contains(r#""title":"Soup""#));
@@ -191,7 +201,12 @@ mod tests {
     #[test]
     fn history_keeps_the_last_ten_turns() {
         let history: Vec<Turn> = (0..14)
-            .map(|i| turn(if i % 2 == 0 { Role::User } else { Role::Model }, &format!("m{i}")))
+            .map(|i| {
+                turn(
+                    if i % 2 == 0 { Role::User } else { Role::Model },
+                    &format!("m{i}"),
+                )
+            })
             .collect();
         let request = chat_request(&GeminiConfig::default(), &recipe(), &history, "now");
         let sent = texts(&request);
@@ -210,7 +225,12 @@ mod tests {
     #[test]
     fn messages_are_cut_by_characters_not_bytes() {
         let long = "é".repeat(MESSAGE_CHARS + 50);
-        let request = chat_request(&GeminiConfig::default(), &recipe(), &[turn(Role::User, &long)], &long);
+        let request = chat_request(
+            &GeminiConfig::default(),
+            &recipe(),
+            &[turn(Role::User, &long)],
+            &long,
+        );
         for text in texts(&request) {
             assert_eq!(text.chars().count(), MESSAGE_CHARS);
         }
@@ -223,7 +243,9 @@ mod tests {
             max_output_tokens: 77,
             ..GeminiConfig::default()
         };
-        let generation = chat_request(&config, &recipe(), &[], "q").generation_config.unwrap();
+        let generation = chat_request(&config, &recipe(), &[], "q")
+            .generation_config
+            .unwrap();
         assert_eq!(generation.max_output_tokens, Some(77));
         assert_eq!(generation.temperature, Some(0.9));
         assert!(generation.response_schema.is_none());
@@ -239,7 +261,10 @@ mod tests {
     fn imports_ask_for_structured_json() {
         let request = import_request(&GeminiConfig::default(), "  Pasta: boil it.  ");
         let generation = request.generation_config.clone().unwrap();
-        assert_eq!(generation.response_mime_type.as_deref(), Some("application/json"));
+        assert_eq!(
+            generation.response_mime_type.as_deref(),
+            Some("application/json")
+        );
         assert_eq!(generation.response_schema.unwrap()["type"], "object");
         assert!(generation.max_output_tokens.unwrap() >= 8192);
         assert_eq!(texts(&request), ["Pasta: boil it."]);
@@ -250,7 +275,11 @@ mod tests {
         let json = serde_json::to_string(&recipe()).unwrap();
         let imported = parse_import_response(&json).unwrap();
         assert_eq!(imported.recipe.title, "Soup");
-        assert!(!imported.checks.iter().any(|c| c.level == Level::Error), "{:?}", imported.checks);
+        assert!(
+            !imported.checks.iter().any(|c| c.level == Level::Error),
+            "{:?}",
+            imported.checks
+        );
     }
 
     #[test]

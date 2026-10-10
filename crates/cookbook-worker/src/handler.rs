@@ -1,6 +1,6 @@
 use cookbook_ai::{
-    AiError, GeminiConfig, Request as GeminiRequest, Response as GeminiResponse, chat_request,
-    endpoint, import_request, parse_import_response,
+    AiError, ApiError, GeminiConfig, Request as GeminiRequest, Response as GeminiResponse,
+    chat_request, endpoint, import_request, parse_chat, parse_import, parse_import_response,
 };
 use serde_json::json;
 use worker::{Date, Env, Fetch, Headers, Method, Request, RequestInit, Response, Result};
@@ -9,7 +9,6 @@ use crate::{
     auth::{self, AuthError},
     cors,
     limits::{self, Limits, Route},
-    validate::{self, ApiError},
 };
 
 const KV_BINDING: &str = "RATE_LIMIT";
@@ -20,7 +19,7 @@ fn text_var(env: &Env, name: &str) -> Option<String> {
 }
 
 fn from_ai(error: &AiError) -> ApiError {
-    ApiError::new(error.http_status(), error.code(), error.message())
+    ApiError::from(error)
 }
 
 fn unavailable() -> ApiError {
@@ -33,7 +32,9 @@ fn unavailable() -> ApiError {
 
 fn json_response(status: u16, body: &str) -> Result<Response> {
     let mut response = Response::ok(body)?.with_status(status);
-    response.headers_mut().set("Content-Type", "application/json")?;
+    response
+        .headers_mut()
+        .set("Content-Type", "application/json")?;
     response.headers_mut().set("Cache-Control", "no-store")?;
     Ok(response)
 }
@@ -77,7 +78,9 @@ pub async fn handle(mut req: Request, env: Env) -> Result<Response> {
         Err(error) => {
             let mut response = error_response(&error)?;
             if let Some(seconds) = error.retry_after {
-                response.headers_mut().set("Retry-After", &seconds.to_string())?;
+                response
+                    .headers_mut()
+                    .set("Retry-After", &seconds.to_string())?;
             }
             response
         }
@@ -105,7 +108,9 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
         let secret = text_var(env, "ADMIN_IMPORT_SECRET").ok_or_else(unavailable)?;
         let proof = req.headers().get("X-Admin-Proof").ok().flatten();
         auth::verify(&secret, proof.as_deref(), now_ms()).map_err(|e| match e {
-            AuthError::Expired => ApiError::new(401, "proof_expired", "Unlock editing again and retry."),
+            AuthError::Expired => {
+                ApiError::new(401, "proof_expired", "Unlock editing again and retry.")
+            }
             _ => ApiError::new(401, "unauthorised", "Importing is for the editor only."),
         })?;
     }
@@ -126,7 +131,7 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
 
     let body = match kind {
         Route::Chat => {
-            let input = validate::parse_chat(declared, &body)?;
+            let input = parse_chat(declared, &body)?;
             let request = chat_request(&config, &input.recipe, &input.history, &input.question);
             let reply = gemini(env, &config, &request)
                 .await?
@@ -135,7 +140,7 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
             json!({ "reply": reply.text, "truncated": reply.truncated })
         }
         Route::Import => {
-            let text = validate::parse_import(declared, &body)?;
+            let text = parse_import(declared, &body)?;
             let request = import_request(&config, &text);
             let reply = gemini(env, &config, &request)
                 .await?
@@ -201,20 +206,28 @@ async fn gemini(
         .map_err(|_| unavailable())?
         .to_string();
     let headers = Headers::new();
-    headers.set("Content-Type", "application/json").map_err(|_| unavailable())?;
-    headers.set("x-goog-api-key", &key).map_err(|_| unavailable())?;
+    headers
+        .set("Content-Type", "application/json")
+        .map_err(|_| unavailable())?;
+    headers
+        .set("x-goog-api-key", &key)
+        .map_err(|_| unavailable())?;
     let payload = serde_json::to_string(request).map_err(|_| unavailable())?;
     let mut init = RequestInit::new();
     init.with_method(Method::Post)
         .with_headers(headers)
         .with_body(Some(payload.into()));
-    let outgoing = Request::new_with_init(&endpoint(&config.model), &init).map_err(|_| unavailable())?;
+    let outgoing =
+        Request::new_with_init(&endpoint(&config.model), &init).map_err(|_| unavailable())?;
     let mut response = Fetch::Request(outgoing)
         .send()
         .await
         .map_err(|_| from_ai(&AiError::Unavailable))?;
     let status = response.status_code();
-    let text = response.text().await.map_err(|_| from_ai(&AiError::Unavailable))?;
+    let text = response
+        .text()
+        .await
+        .map_err(|_| from_ai(&AiError::Unavailable))?;
     if !(200..300).contains(&status) {
         return Err(from_ai(&AiError::from_response(status, &text)));
     }

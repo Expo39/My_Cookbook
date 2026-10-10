@@ -4,14 +4,18 @@
 mod config;
 mod error;
 mod prompts;
+mod request;
 mod schema;
 mod types;
 
 pub use config::{DEFAULT_MODEL, GeminiConfig, endpoint};
 pub use error::AiError;
 pub use prompts::{
-    HISTORY_TURNS, MESSAGE_CHARS, Imported, Role, Turn, chat_request, import_request,
+    HISTORY_TURNS, Imported, MESSAGE_CHARS, Role, Turn, chat_request, import_request,
     parse_import_response,
+};
+pub use request::{
+    ApiError, CHAT_MAX_BYTES, ChatInput, IMPORT_MAX_BYTES, parse_chat, parse_import,
 };
 pub use schema::import_schema;
 pub use types::{

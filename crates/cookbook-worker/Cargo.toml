@@ -11,9 +11,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 cookbook-ai = { path = "../cookbook-ai" }
-cookbook-core = { path = "../cookbook-core" }
 hmac = "=0.13.0"
-serde.workspace = true
 serde_json.workspace = true
 sha2 = "=0.11.0"
 worker = "=0.8.6"

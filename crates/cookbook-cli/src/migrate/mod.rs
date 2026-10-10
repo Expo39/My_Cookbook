@@ -381,10 +381,16 @@ pub fn run(html_path: &Path, out: &Path) -> Result<String, String> {
         fs::read_to_string(html_path).map_err(|e| format!("{}: {e}", html_path.display()))?;
     let migrated = migrate(&html)?;
     for (folder, section) in &migrated.sections {
-        write(&out.join(folder).join("_section.json"), &cookbook_tree::render_json(section).map_err(|e| e.to_string())?)?;
+        write(
+            &out.join(folder).join("_section.json"),
+            &cookbook_tree::render_json(section).map_err(|e| e.to_string())?,
+        )?;
     }
     for (id, recipe) in &migrated.recipes {
-        write(&out.join(format!("{id}.json")), &cookbook_tree::render_json(recipe).map_err(|e| e.to_string())?)?;
+        write(
+            &out.join(format!("{id}.json")),
+            &cookbook_tree::render_json(recipe).map_err(|e| e.to_string())?,
+        )?;
     }
     Ok(format!(
         "wrote {} recipes and {} sections to {}",

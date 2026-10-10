@@ -65,7 +65,10 @@ mod tests {
     #[test]
     fn the_origin_is_echoed_and_cached_per_origin() {
         let headers = response_headers("https://expo39.github.io");
-        assert!(headers.contains(&("Access-Control-Allow-Origin", "https://expo39.github.io".to_owned())));
+        assert!(headers.contains(&(
+            "Access-Control-Allow-Origin",
+            "https://expo39.github.io".to_owned()
+        )));
         assert!(headers.iter().any(|(k, v)| *k == "Vary" && v == "Origin"));
     }
 

@@ -117,7 +117,10 @@ impl Response {
         {
             return Err(AiError::Blocked);
         }
-        if self.finish_reason().is_some_and(|r| BLOCKED_FINISH.contains(&r)) {
+        if self
+            .finish_reason()
+            .is_some_and(|r| BLOCKED_FINISH.contains(&r))
+        {
             return Err(AiError::Blocked);
         }
         let text: String = self

@@ -17,8 +17,8 @@ pub enum AuthError {
 }
 
 fn mac(secret: &str, timestamp: &str) -> Hmac<Sha256> {
-    let mut mac = Hmac::<Sha256>::new_from_slice(secret.as_bytes())
-        .expect("HMAC accepts keys of any length");
+    let mut mac =
+        Hmac::<Sha256>::new_from_slice(secret.as_bytes()).expect("HMAC accepts keys of any length");
     mac.update(timestamp.as_bytes());
     mac
 }
@@ -45,7 +45,10 @@ pub fn sign(secret: &str, timestamp_ms: u64) -> String {
 }
 
 pub fn verify(secret: &str, header: Option<&str>, now_ms: u64) -> Result<(), AuthError> {
-    let header = header.map(str::trim).filter(|h| !h.is_empty()).ok_or(AuthError::Missing)?;
+    let header = header
+        .map(str::trim)
+        .filter(|h| !h.is_empty())
+        .ok_or(AuthError::Missing)?;
     let (timestamp, tag) = header.split_once('.').ok_or(AuthError::Malformed)?;
     let stamped: u64 = timestamp.parse().map_err(|_| AuthError::Malformed)?;
     let tag = hex_decode(tag).ok_or(AuthError::Malformed)?;
@@ -68,7 +71,9 @@ mod tests {
     #[test]
     fn the_hmac_matches_a_known_vector() {
         // HMAC-SHA256("key", "The quick brown fox jumps over the lazy dog")
-        let tag = mac("key", "The quick brown fox jumps over the lazy dog").finalize().into_bytes();
+        let tag = mac("key", "The quick brown fox jumps over the lazy dog")
+            .finalize()
+            .into_bytes();
         assert_eq!(
             hex_encode(&tag),
             "f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8"
@@ -77,7 +82,10 @@ mod tests {
 
     #[test]
     fn a_fresh_proof_is_accepted() {
-        assert_eq!(verify("s3cret", Some(&sign("s3cret", NOW)), NOW + 1_000), Ok(()));
+        assert_eq!(
+            verify("s3cret", Some(&sign("s3cret", NOW)), NOW + 1_000),
+            Ok(())
+        );
     }
 
     #[test]
@@ -92,7 +100,10 @@ mod tests {
 
     #[test]
     fn proofs_from_the_future_are_refused_beyond_a_small_skew() {
-        assert_eq!(verify("s3cret", Some(&sign("s3cret", NOW + 10_000)), NOW), Ok(()));
+        assert_eq!(
+            verify("s3cret", Some(&sign("s3cret", NOW + 10_000)), NOW),
+            Ok(())
+        );
         assert_eq!(
             verify("s3cret", Some(&sign("s3cret", NOW + 120_000)), NOW),
             Err(AuthError::Expired)
@@ -105,7 +116,10 @@ mod tests {
         assert_eq!(verify("other", Some(&proof), NOW), Err(AuthError::Invalid));
         let (_, tag) = proof.split_once('.').unwrap();
         let forged = format!("{}.{tag}", NOW + 1);
-        assert_eq!(verify("s3cret", Some(&forged), NOW + 1), Err(AuthError::Invalid));
+        assert_eq!(
+            verify("s3cret", Some(&forged), NOW + 1),
+            Err(AuthError::Invalid)
+        );
     }
 
     #[test]
@@ -120,6 +134,9 @@ mod tests {
 
     #[test]
     fn hex_round_trips() {
-        assert_eq!(hex_decode(&hex_encode(&[0, 15, 255])), Some(vec![0, 15, 255]));
+        assert_eq!(
+            hex_decode(&hex_encode(&[0, 15, 255])),
+            Some(vec![0, 15, 255])
+        );
     }
 }
