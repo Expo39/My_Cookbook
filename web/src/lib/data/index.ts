@@ -5,6 +5,7 @@ import { GitHubWriter } from './github-writer';
 import type { RecipeWriter } from './writer';
 import type { RecipeSource } from './source';
 import { StaticSource } from './static-source';
+import { uncached } from './uncached';
 
 export { RecipeNotFoundError, type RecipeSource } from './source';
 
@@ -28,5 +29,8 @@ export function createWriter(
 ): RecipeWriter {
 	if (backend === 'api' || backend === 'server') return new ApiWriter(fetcher);
 	if (!token) throw new Error('Editing is locked.');
-	return new GitHubWriter(token, adminRepo, fetcher);
+	return new GitHubWriter(token, adminRepo, fetcher, {
+		source: new StaticSource(uncached),
+		built: __BUILD_SHA__
+	});
 }

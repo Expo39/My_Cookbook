@@ -1,5 +1,11 @@
 import type { BuildState } from '$lib/admin/github';
 import type { CheckResult, Recipe, Section } from '$lib/types/recipe';
+import type { StoredRecipe } from './stored';
+
+export const CHANGED_MESSAGE =
+	'This recipe was changed on GitHub after you opened it. Nothing was saved. Reload the page and make the change again.';
+export const CHANGED_SERVER_MESSAGE =
+	'This recipe was changed after you opened it. Nothing was saved. Reload the page and make the change again.';
 
 export interface SaveResult {
 	id: string;
@@ -25,6 +31,20 @@ export interface RecipeWriter {
 		recipe: Recipe,
 		extras: { isNew: boolean; previousImage?: string }
 	): Promise<SaveResult>;
+	/**
+	 * Moves the recipe to a new address, with its photo, and points every recipe that listed it under
+	 * `related` at the new address. `recipe` carries the edits; `photo` replaces the photo when given.
+	 * Anything staged by `createSection` is written too. Throws `WriteError` with code `conflict` when
+	 * the recipe changed since it was read or the new address is taken.
+	 */
+	move(
+		from: string,
+		to: string,
+		recipe: Recipe,
+		extras: { previousImage?: string; photo?: Blob }
+	): Promise<SaveResult>;
+	/** Every recipe as it is stored now, which the link and address checks read. */
+	readAll(): Promise<StoredRecipe[]>;
 	remove(id: string, extras: { title: string; image?: string }): Promise<SaveResult>;
 	/** `path` is the new folder, relative to `recipes/`. */
 	createSection(path: string, section: Section): Promise<void>;

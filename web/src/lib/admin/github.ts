@@ -6,10 +6,21 @@ export interface RepoRef {
 	branch: string;
 }
 
-/** A file to write, or `null` content to delete it. */
+/** A file to write, `null` content to delete it, or `{ sha }` to place a blob that is already in the repository. */
 export interface FileChange {
 	path: string;
-	content: string | Uint8Array | null;
+	content: string | Uint8Array | { sha: string } | null;
+}
+
+export interface CompareResult {
+	status: string;
+	files: { filename: string; status: string; previous_filename?: string }[];
+}
+
+export interface TreeEntry {
+	path: string;
+	type: string;
+	sha: string;
 }
 
 export class GitHubError extends Error {
@@ -95,12 +106,32 @@ export class GitHubClient {
 		}
 	}
 
+	/** The files that differ between `base` and the branch's head. GitHub lists at most 300. */
+	compare({ repo, branch }: RepoRef, base: string): Promise<CompareResult> {
+		return this.request('GET', `/repos/${repo}/compare/${base}...${branch}`);
+	}
+
+	/** Every path on the branch. `truncated` is set when GitHub could not list them all. */
+	tree({ repo, branch }: RepoRef): Promise<{ truncated: boolean; tree: TreeEntry[] }> {
+		return this.request(
+			'GET',
+			`/repos/${repo}/git/trees/${encodeURIComponent(branch)}?recursive=1`
+		);
+	}
+
+	async blob({ repo }: RepoRef, sha: string): Promise<string> {
+		const found = await this.request<{ content: string }>('GET', `/repos/${repo}/git/blobs/${sha}`);
+		return new TextDecoder().decode(fromBase64(found.content.replace(/\s/g, '')));
+	}
+
 	/** Commits every change at once and returns the commit's sha. */
 	async commit(ref: RepoRef, changes: FileChange[], message: string): Promise<string> {
 		const { repo, branch } = ref;
 		const blobs = await Promise.all(
 			changes.map(async (change) => {
 				if (change.content === null) return { path: change.path, sha: null };
+				if (typeof change.content === 'object' && 'sha' in change.content)
+					return { path: change.path, sha: change.content.sha };
 				const { sha } = await this.request<{ sha: string }>('POST', `/repos/${repo}/git/blobs`, {
 					content: typeof change.content === 'string' ? change.content : toBase64(change.content),
 					encoding: typeof change.content === 'string' ? 'utf-8' : 'base64'

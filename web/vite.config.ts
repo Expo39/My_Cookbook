@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
@@ -11,6 +12,16 @@ function siteConfig(): { site?: { url?: string }; ai?: { endpoint?: string } } {
 	}
 }
 
+/** The commit the site is built from: CI sets `GITHUB_SHA`; elsewhere git is asked, and empty means unknown. */
+function builtCommit(): string {
+	if (process.env.GITHUB_SHA) return process.env.GITHUB_SHA;
+	try {
+		return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', stdio: 'pipe' }).trim();
+	} catch {
+		return '';
+	}
+}
+
 const config = siteConfig();
 
 export default defineConfig(({ mode }) => ({
@@ -19,6 +30,7 @@ export default defineConfig(({ mode }) => ({
 	resolve: mode === 'test' ? { conditions: ['browser'] } : {},
 	define: {
 		__BACKEND__: JSON.stringify(process.env.PUBLIC_BACKEND ?? 'static'),
+		__BUILD_SHA__: JSON.stringify(builtCommit()),
 		__SITE_CONFIG__: JSON.stringify(config),
 		__SITE_URL__: JSON.stringify(
 			process.env.PUBLIC_SITE_URL || config.site?.url || 'https://expo39.github.io'

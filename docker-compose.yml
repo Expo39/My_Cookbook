@@ -23,6 +23,7 @@ services:
       - PUBLIC_SITE_URL
       - FULL_E2E
       - CI
+      - GITHUB_SHA
       - ADMIN_PASSWORD_HASH
       - SESSION_SECRET
       - GEMINI_API_KEY

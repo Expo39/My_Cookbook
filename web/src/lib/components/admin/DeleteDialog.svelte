@@ -2,14 +2,21 @@
 	import '$lib/styles/admin.css';
 	import type { EditorState } from '$lib/admin/editor-state.svelte';
 	import { recipesLinkingTo } from '$lib/admin/removal';
-	import { createSource } from '$lib/data';
-	import { uncached } from '$lib/data/uncached';
+	import type { StoredRecipe } from '$lib/data/stored';
 	import { editHref, pageHref } from '$lib/links';
 	import Icon from '../Icon.svelte';
 	import Modal from './Modal.svelte';
 	import TextField from './TextField.svelte';
 
-	let { ed, ondelete }: { ed: EditorState; ondelete: () => Promise<void> } = $props();
+	let {
+		ed,
+		ondelete,
+		readAll
+	}: {
+		ed: EditorState;
+		ondelete: () => Promise<void>;
+		readAll: () => Promise<StoredRecipe[]>;
+	} = $props();
 
 	let modal: Modal;
 	let phase = $state<'checking' | 'blocked' | 'confirm' | 'failed'>('checking');
@@ -26,7 +33,10 @@
 		typed = problem = '';
 		modal.show();
 		try {
-			linked = await recipesLinkingTo(ed.originalId ?? '', ed.index, createSource(uncached));
+			linked = recipesLinkingTo(ed.originalId ?? '', await readAll()).map(({ id, recipe }) => ({
+				id,
+				title: recipe.title
+			}));
 			phase = linked.length ? 'blocked' : 'confirm';
 		} catch {
 			phase = 'failed';
