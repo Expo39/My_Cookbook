@@ -7,7 +7,8 @@
 	import { createAiClient } from '$lib/ai';
 	import { loadCore, qrMatrix } from '$lib/core';
 	import { sectionTrail } from '$lib/data/tree';
-	import { homeHref, pageHref } from '$lib/links';
+	import { admin } from '$lib/admin/session.svelte';
+	import { editHref, homeHref, pageHref } from '$lib/links';
 	import { photoOf, photoUrl } from '$lib/photo';
 	import { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { buildRecipeJsonLd, toScriptJson } from '$lib/seo/recipe-jsonld';
@@ -254,6 +255,7 @@
 		onshare={share}
 		onaddlist={addToList}
 		onask={ai ? () => chef?.show() : undefined}
+		edithref={admin.unlocked ? editHref({ id: card.id }) : undefined}
 	/>
 	<ServingsBar {model} />
 

@@ -1,7 +1,14 @@
 import { base } from '$app/paths';
 import { serverLogin, serverLogout, serverSession } from '$lib/data/api-writer';
 import { adminRepo, serverMode } from './config';
-import { decryptSecrets, encryptSecrets, MIN_PASSWORD, WrongPasswordError, type AdminBlob, type Secrets } from './crypto';
+import {
+	decryptSecrets,
+	encryptSecrets,
+	MIN_PASSWORD,
+	WrongPasswordError,
+	type AdminBlob,
+	type Secrets
+} from './crypto';
 import { GitHubClient } from './github';
 
 const TOKEN_KEY = 'sapori:admin-token';
@@ -119,11 +126,21 @@ class AdminSession {
 		await this.#publish(secrets, next, 'change the editing password');
 	}
 
-	async replaceToken(password: string, token: string): Promise<void> {
+	/** A blank token or secret keeps the one already stored. */
+	async replaceSecrets(
+		password: string,
+		input: { token?: string; aiImportSecret?: string }
+	): Promise<void> {
 		const blob = await this.fetchBlob();
 		const previous = blob ? await decryptSecrets(blob, password) : undefined;
-		const secrets: Secrets = { ...previous, token: token.trim() };
-		await this.#publish(secrets, password, 'replace the editing token');
+		const token = input.token?.trim() || previous?.token;
+		if (!token) throw new Error('Paste the GitHub token.');
+		const secrets: Secrets = {
+			...previous,
+			token,
+			...(input.aiImportSecret?.trim() ? { aiImportSecret: input.aiImportSecret.trim() } : {})
+		};
+		await this.#publish(secrets, password, 'replace the editing secrets');
 		this.#open(secrets);
 	}
 

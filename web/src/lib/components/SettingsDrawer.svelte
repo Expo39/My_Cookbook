@@ -2,6 +2,7 @@
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { theme, type Theme } from '$lib/stores/theme.svelte';
 	import type { UnitSystem } from '$lib/types/recipe';
+	import AdminPanel from './admin/AdminPanel.svelte';
 	import Icon from './Icon.svelte';
 	import Segmented from './Segmented.svelte';
 
@@ -57,10 +58,7 @@
 			<p class="help">Recipes open in these units. A shared link can still choose its own.</p>
 		</div>
 
-		<section class="group">
-			<h3 class="label">Editing</h3>
-			<p class="help">Admin editing arrives soon</p>
-		</section>
+		<AdminPanel onnavigate={() => dialog.close()} />
 	</div>
 </dialog>
 
@@ -120,10 +118,6 @@
 	.group {
 		display: grid;
 		gap: var(--space-2);
-	}
-
-	.group .label {
-		color: var(--colour-muted);
 	}
 
 	.help {

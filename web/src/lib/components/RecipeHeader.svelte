@@ -14,7 +14,8 @@
 		cookHref,
 		onshare,
 		onaddlist,
-		onask
+		onask,
+		edithref
 	}: {
 		card: RecipeCard;
 		model: RecipeModel;
@@ -23,6 +24,7 @@
 		onshare: () => void;
 		onaddlist: () => void;
 		onask?: () => void;
+		edithref?: string;
 	} = $props();
 
 	const recipe = $derived(model.data.recipe);
@@ -98,6 +100,9 @@
 				<Icon name="hat" />Ask the sous-chef
 			</button>
 		{/if}
+		{#if edithref}
+			<a class="edit" href={edithref}><Icon name="pencil" />Edit</a>
+		{/if}
 	</div>
 </header>
 
@@ -166,7 +171,8 @@
 	}
 
 	button,
-	.cook {
+	.cook,
+	.edit {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-2);
@@ -180,6 +186,10 @@
 		transition: background-color var(--duration-micro);
 	}
 
+	.edit {
+		text-decoration: none;
+	}
+
 	.cook {
 		border-color: var(--colour-primary);
 		background: var(--colour-primary);
@@ -187,7 +197,8 @@
 		text-decoration: none;
 	}
 
-	button:hover:not(:disabled) {
+	button:hover:not(:disabled),
+	.edit:hover {
 		background: var(--colour-tint);
 	}
 
