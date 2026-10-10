@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Fails on non-ASCII text in tracked files. Allowed: accented Latin letters (names such as
 // "kċina" or "crème brûlée"), the degree sign and vulgar fraction glyphs. Parsers that must
-// accept other typography write it as an escape (–) so the source stays ASCII.
+// accept other typography write it as an escape (\u2013) so the source stays ASCII.
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 

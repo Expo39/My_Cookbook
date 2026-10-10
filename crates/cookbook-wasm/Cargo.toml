@@ -3,7 +3,6 @@ name = "cookbook-wasm"
 description = "wasm-bindgen bindings for the web app"
 edition.workspace = true
 version.workspace = true
-license.workspace = true
 publish.workspace = true
 
 [lib]

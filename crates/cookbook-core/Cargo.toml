@@ -3,7 +3,6 @@ name = "cookbook-core"
 description = "Schema, scaling and search for the cookbook"
 edition.workspace = true
 version.workspace = true
-license.workspace = true
 publish.workspace = true
 
 [dependencies]

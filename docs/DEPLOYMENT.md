@@ -56,10 +56,17 @@ flowchart TB
 
 Nothing should reach `main` until everything passes.
 
-- **On GitHub:** in **Settings > Rules > Rulesets**, add a branch ruleset targeting `main` with **Require a pull request before merging** and **Require status checks to pass**, adding the **CI passed** check. Turn on **Block force pushes**. A change then reaches `main` only through a pull request whose CI is green.
+- **On GitHub:** in **Settings > Rules > Rulesets**, create a branch ruleset:
+  1. Set **Enforcement status** to **Active** and target the default branch (`main`).
+  2. Turn on **Require a pull request before merging**.
+  3. Turn on **Require status checks to pass** and add the **CI passed** check.
+  4. Turn on **Block force pushes**.
+  5. Under **Bypass list**, add the **Repository admin** role, allowed **Always**.
+
+  Contributors then reach `main` only through a pull request whose CI is green.
 - **Locally:** run `make hooks` once per clone. It sets `core.hooksPath` to `.githooks`, whose `pre-push` hook runs `make test` before any push to `main` and refuses the push if anything fails. Pushes to other branches are not checked.
 
-The in-site editor commits directly to the configured branch with the editor's token. If the ruleset blocks direct pushes to `main` for that account, either add the account to the ruleset's bypass list or point `admin.branch` at a branch that is merged by pull request.
+The bypass exists for the in-site editor. Its saves are direct commits to `main` made with the repository owner's token, and without the bypass the ruleset would reject every one. The bypass does not let untested work go live: CI still runs on every push to `main`, and Deploy runs only after CI succeeds, so a save that breaks the checklist or a test stays off the site until it is fixed. Direct pushes from a clone are still covered by the pre-push hook.
 
 ## The AI proxy (Cloudflare Worker)
 
