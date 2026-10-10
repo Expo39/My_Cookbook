@@ -66,6 +66,12 @@ test('writes screenshots of cook mode, the timer strip and the shopping list', a
 	await page.setViewportSize({ width: 1440, height: 900 });
 	await page.goto(`${wellington}?cook=5`);
 	await page.screenshot({ path: join(out, 'cook-mode-1440-light.png') });
+	await page.goto('desserts/french-classics/creme-brulee?cook=1');
+	await waitForCore(page);
+	await page.screenshot({ path: join(out, 'cook-mode-1440-light-ingredients.png') });
+	await page.setViewportSize({ width: 1024, height: 768 });
+	await page.screenshot({ path: join(out, 'cook-mode-1024-light.png') });
+	await page.setViewportSize({ width: 1440, height: 900 });
 
 	await page.goto(`${wellington}?serves=8`);
 	await waitForCore(page);
