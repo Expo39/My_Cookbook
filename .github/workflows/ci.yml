@@ -16,6 +16,7 @@ env:
   RUST_TOOLCHAIN: 1.98.1
   NODE_VERSION: 24.21.0
   WASM_BINDGEN_VERSION: 0.2.129
+  BINARYEN_VERSION: '128'
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -67,8 +68,53 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo run --quiet -p cookbook-cli -- check --all
 
-  web:
+  core-artifacts:
     needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-bindgen@${{ env.WASM_BINDGEN_VERSION }}
+      - name: Install wasm-opt
+        run: |
+          curl -fsSL "https://github.com/WebAssembly/binaryen/releases/download/version_${BINARYEN_VERSION}/binaryen-version_${BINARYEN_VERSION}-x86_64-linux.tar.gz" \
+            | sudo tar -xz --strip-components=2 -C /usr/local/bin "binaryen-version_${BINARYEN_VERSION}/bin/wasm-opt"
+      - run: sh scripts/build-wasm.sh
+      - run: cargo run --quiet -p cookbook-cli -- build
+      - uses: pnpm/action-setup@v6
+        with:
+          package_json_file: web/package.json
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: web
+      - name: Generated types are up to date
+        run: |
+          pnpm gen:types
+          git diff --exit-code -- web/src/lib/types/recipe.ts
+        working-directory: web
+      - uses: actions/upload-artifact@v7
+        with:
+          name: core
+          path: |
+            web/src/lib/wasm
+            web/static/data
+          if-no-files-found: error
+          retention-days: 1
+
+  web:
+    needs: [changes, core-artifacts]
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -86,12 +132,16 @@ jobs:
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        with:
+          name: core
+          path: web
       - run: pnpm check
       - run: pnpm lint
       - run: pnpm test
 
   build:
-    needs: changes
+    needs: [changes, core-artifacts]
     if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -99,16 +149,6 @@ jobs:
       BASE_PATH: /My_Cookbook
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.RUST_TOOLCHAIN }}
-          targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/install-action@v2
-        with:
-          tool: wasm-bindgen@${{ env.WASM_BINDGEN_VERSION }}
-      - run: cargo build -p cookbook-wasm --target wasm32-unknown-unknown --release
-      - run: wasm-bindgen --target web --out-dir web/src/lib/wasm target/wasm32-unknown-unknown/release/cookbook_wasm.wasm
       - uses: pnpm/action-setup@v6
         with:
           package_json_file: web/package.json
@@ -119,6 +159,10 @@ jobs:
           cache-dependency-path: web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
         working-directory: web
+      - uses: actions/download-artifact@v8
+        with:
+          name: core
+          path: web
       - run: pnpm build
         working-directory: web
       - uses: actions/upload-artifact@v7

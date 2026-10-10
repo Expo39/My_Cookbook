@@ -52,3 +52,6 @@ web/src/lib/wasm/
 .serena/
 CLAUDE.md
 .pnpm-store/
+
+# built from recipes/ by `make data`
+web/static/data/
