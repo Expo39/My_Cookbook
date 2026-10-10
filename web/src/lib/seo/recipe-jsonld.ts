@@ -1,3 +1,4 @@
+import { instagram } from '$lib/config';
 import { isoDuration, servingsText } from '$lib/recipe/format';
 import type { Recipe, ScaledRecipe, ScaledStep } from '$lib/types/recipe';
 
@@ -18,7 +19,7 @@ export interface RecipeJsonLd {
 	name: string;
 	url: string;
 	description: string;
-	author: { '@type': 'Person'; name: string };
+	author: { '@type': 'Person'; name: string; sameAs?: string[] };
 	recipeYield: string[];
 	recipeCategory?: string;
 	keywords?: string;
@@ -68,7 +69,11 @@ export function buildRecipeJsonLd({ recipe, view, section, url, image }: Input):
 		name: recipe.title,
 		url,
 		description: recipe.summary,
-		author: { '@type': 'Person', name: 'Antonio' },
+		author: {
+			'@type': 'Person',
+			name: 'Antonio',
+			...(instagram ? { sameAs: [instagram.url] } : {})
+		},
 		recipeYield: [String(recipe.servings), servingsText(recipe.servings, recipe.servingsNoun)],
 		...(section[0] ? { recipeCategory: section[0] } : {}),
 		...(recipe.tags?.length ? { keywords: recipe.tags.join(', ') } : {}),

@@ -5,6 +5,7 @@ declare global {
 	const __BACKEND__: string;
 	/** The deployed origin, without the base path. Set with PUBLIC_SITE_URL at build time. */
 	const __SITE_URL__: string;
+	const __SITE_CONFIG__: import('$lib/config').SiteConfig;
 	/** Ids of the share cards present in static/cards when the build started. */
 	const __CARDS__: string[];
 }

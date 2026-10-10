@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 
@@ -13,11 +13,21 @@ function cardIds(): string[] {
 	}
 }
 
+/** Site settings from the repo root; missing or unreadable means every optional feature is off. */
+function siteConfig(): unknown {
+	try {
+		return JSON.parse(readFileSync('../cookbook.config.json', 'utf8'));
+	} catch {
+		return {};
+	}
+}
+
 export default defineConfig({
 	plugins: [sveltekit()],
 	define: {
 		__BACKEND__: JSON.stringify(process.env.PUBLIC_BACKEND ?? 'static'),
 		__CARDS__: JSON.stringify(cardIds()),
+		__SITE_CONFIG__: JSON.stringify(siteConfig()),
 		__SITE_URL__: JSON.stringify(process.env.PUBLIC_SITE_URL ?? 'https://expo39.github.io')
 	},
 	server: { port: 5173, strictPort: true },

@@ -1,9 +1,20 @@
+<script lang="ts">
+	import { instagram } from '$lib/config';
+	import Icon from './Icon.svelte';
+</script>
+
 <footer>
 	<div class="inner">
 		<blockquote>
 			<p>Cooking is like love — it should be entered into with abandon or not at all.</p>
 			<cite>Harriet Van Horne</cite>
 		</blockquote>
+		{#if instagram}
+			<a class="social" href={instagram.url} rel="me noopener" target="_blank">
+				<Icon name="instagram" />
+				<span>More recipes on Instagram <strong>{instagram.handle}</strong></span>
+			</a>
+		{/if}
 		<p class="copyright">© 2026 Antonio</p>
 	</div>
 </footer>
@@ -46,6 +57,22 @@
 
 	cite::before {
 		content: '— ';
+	}
+
+	.social {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		justify-self: start;
+		min-block-size: 44px;
+		color: var(--colour-primary);
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.social:hover strong,
+	.social:focus-visible strong {
+		text-decoration: underline;
 	}
 
 	.copyright {

@@ -91,3 +91,9 @@ test('every control can be reached and used from the keyboard', async ({ page })
 	await page.keyboard.press('Space');
 	await expect(ingredients(page).getByText(/^1 of/)).toBeVisible();
 });
+
+test('the footer links to Instagram when the site config turns it on', async ({ page }) => {
+	await page.goto('./');
+	const link = page.getByRole('link', { name: /More recipes on Instagram/ });
+	await expect(link).toHaveAttribute('href', 'https://www.instagram.com/tonys_foods/');
+});

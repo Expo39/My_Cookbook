@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { instagram } from '$lib/config';
 import type { Recipe, ScaledRecipe } from '$lib/types/recipe';
 import { buildRecipeJsonLd, toScriptJson } from './recipe-jsonld';
 
@@ -61,7 +62,11 @@ describe('the recipe JSON-LD', () => {
 			'@type': 'Recipe',
 			name: 'Beef Wellington',
 			url: input.url,
-			author: { '@type': 'Person', name: 'Antonio' },
+			author: {
+				'@type': 'Person',
+				name: 'Antonio',
+				...(instagram ? { sameAs: [instagram.url] } : {})
+			},
 			recipeCategory: 'Main Courses',
 			keywords: 'Dinner party, Classics',
 			recipeYield: ['5', '5 servings']
