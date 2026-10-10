@@ -23,7 +23,7 @@ interface Request {
 }
 
 /** A stand-in for the parts of the GitHub API the editor uses, recording what it is sent. */
-async function mockGitHub(page: Page, options: { build?: 'live' | 'failed' } = {}) {
+async function mockGitHub(page: Page, options: { build?: 'live' | 'failed'; photo?: string } = {}) {
 	const requests: Request[] = [];
 	const changed = new Set<string>();
 	const blobs = new Map<string, string>();
@@ -41,9 +41,36 @@ async function mockGitHub(page: Page, options: { build?: 'live' | 'failed' } = {
 		const body = request.postDataJSON() as Record<string, unknown> | null;
 		requests.push({ method: request.method(), path, body: body ?? undefined });
 
+		if (options.photo && path === `/contents/recipes/${options.photo}.jpg`) {
+			return route.fulfill({ json: { sha: 'photo-sha', content: '' } });
+		}
+		if (path.startsWith('/compare/')) {
+			return route.fulfill({ json: { status: 'identical', files: [] } });
+		}
+		if (path.startsWith('/git/trees/')) {
+			return route.fulfill({
+				json: {
+					truncated: false,
+					tree: recipeIds.map((id) => ({ path: `recipes/${id}.json`, type: 'blob', sha: id }))
+				}
+			});
+		}
+		if (path.startsWith('/git/blobs/')) {
+			const id = path.replace('/git/blobs/', '');
+			return route.fulfill({ json: { content: Buffer.from(original(id)).toString('base64') } });
+		}
 		if (path.startsWith('/contents/')) {
 			const id = path.replace(/^\/contents\/recipes\//, '').replace(/\.json$/, '');
-			const text = recipeIds.includes(id) ? original(id) : undefined;
+			const stored = (name: string) =>
+				name === options.photo
+					? `${JSON.stringify({ ...JSON.parse(original(name)), image: { src: `${name.split('/').pop()}.jpg`, alt: 'A photo' } }, null, '\t')}\n`
+					: original(name);
+			const committed = tree().find((entry) => entry.path === `recipes/${id}.json`)?.sha;
+			const text = committed
+				? blobs.get(committed)
+				: recipeIds.includes(id)
+					? stored(id)
+					: undefined;
 			if (text === undefined) return route.fulfill({ status: 404, json: { message: 'Not Found' } });
 			return route.fulfill({
 				json: {
@@ -403,6 +430,70 @@ test.describe('deleting', () => {
 			.map((entry) => entry.path);
 		expect(removed).toContain(`recipes/${unlinked}.json`);
 		expect(github.tree().every((entry) => entry.sha === null)).toBe(true);
+	});
+});
+
+test.describe('moving', () => {
+	test('moves a linked recipe, its photo and the links to it in one commit', async ({ page }) => {
+		const github = await mockGitHub(page, { photo: linked });
+		await unlocked(page);
+		const { recipe } = recipeData(linked);
+		await page.goto(`edit?id=${linked}`);
+		await expect(saveButton(page)).toBeEnabled();
+
+		await page.getByLabel('New section').fill('Specials');
+		await page.getByRole('button', { name: 'Add at the top level' }).click();
+		await page.getByLabel('Web address').fill('house-special');
+		const notice = page.getByRole('status').filter({ hasText: 'This moves the recipe.' });
+		await expect(notice).toContainText(`/${linked}`);
+		await expect(notice).toContainText('/specials/house-special');
+		await page.getByRole('button', { name: 'Move and save' }).click();
+		await expect(page.getByText('was moved to')).toBeVisible({ timeout: 10_000 });
+		await expect(page.getByText('Live.')).toBeVisible();
+
+		expect(github.commits()).toHaveLength(1);
+		expect(github.commits()[0].body?.message).toBe(`content(recipes): move ${recipe.title}`);
+		const old = `recipes/${linked}`;
+		const photo = (folder: string, name: string) => `recipes/${folder}/${name}.jpg`;
+		const folder = linked.slice(0, linked.lastIndexOf('/'));
+		const written = github.tree().filter((entry) => entry.sha !== null);
+		const removed = github.tree().filter((entry) => entry.sha === null);
+		expect(removed.map((entry) => entry.path).sort()).toEqual(
+			[`${old}.json`, photo(folder, linked.split('/').pop() as string)].sort()
+		);
+		expect(written.map((entry) => entry.path).sort()).toEqual(
+			[
+				'recipes/specials/_section.json',
+				'recipes/specials/house-special.json',
+				photo('specials', 'house-special'),
+				...linkers.map((id) => `recipes/${id}.json`)
+			].sort()
+		);
+		expect(written.find((entry) => entry.path.endsWith('.jpg'))?.sha).toBe('photo-sha');
+		expect(
+			JSON.parse(github.contentAt('recipes/specials/house-special.json') as string)
+		).toMatchObject({ title: recipe.title, image: { src: 'house-special.jpg' } });
+		for (const id of linkers) {
+			const related = JSON.parse(github.contentAt(`recipes/${id}.json`) as string).related;
+			expect(related).toContain('specials/house-special');
+			expect(related).not.toContain(linked);
+		}
+		await expect(page.getByLabel('Web address')).toHaveValue('house-special');
+		await expect(page).toHaveURL(/edit\?id=specials%2Fhouse-special$/);
+	});
+
+	test('refuses an address another recipe already has', async ({ page }) => {
+		const github = await mockGitHub(page);
+		await unlocked(page);
+		await page.goto(`edit?id=${unlinked}`);
+		await expect(saveButton(page)).toBeEnabled();
+		await page.getByLabel('Web address').fill(linked.split('/').pop() as string);
+		await page
+			.getByLabel('Section', { exact: true })
+			.selectOption(linked.slice(0, linked.lastIndexOf('/')));
+		await page.getByRole('button', { name: 'Move and save' }).click();
+		await expect(page.getByText('already exists').first()).toBeVisible();
+		expect(github.commits()).toHaveLength(0);
 	});
 });
 

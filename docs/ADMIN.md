@@ -147,6 +147,8 @@ A recipe's section and web address can be changed in **Where it lives**. Saving 
 - moves its photo with it, and
 - updates every recipe that lists it under related recipes, so their links follow the new address.
 
+While a recipe is being moved, the editor shows its old and new addresses and the save button reads **Move and save**. On the self-hosted server the move is one request, followed by a save of any other edits; if those edits fail, the editor says the recipe has already moved and names its new address.
+
 The recipe's id is its path, so moving it changes its URL.
 
 ## Conflict protection

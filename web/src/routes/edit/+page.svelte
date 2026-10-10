@@ -52,7 +52,9 @@
 	let draft = $state<Draft<FormData> | null>(null);
 	let saving = $state(false);
 	let problem = $state('');
-	let outcome = $state<{ kind: 'saved' | 'deleted'; id: string; title: string } | null>(null);
+	let outcome = $state<{ kind: 'saved' | 'moved' | 'deleted'; id: string; title: string } | null>(
+		null
+	);
 	let status = $state<BuildStatus | null>(null);
 	let stopped = false;
 	let leaving = false;
@@ -205,24 +207,42 @@
 				await target.createSection(added.path, { title: added.title });
 			}
 			let recipe = ed.built.recipe;
-			if (ed.photo) {
+			if (ed.photo && !ed.moving) {
 				const { src } = await target.uploadImage(ed.id, ed.photo.blob);
 				recipe = { ...recipe, image: { src, alt: ed.form.imageAlt.trim() } };
 			}
-			const result = await target.save(ed.id, recipe, {
-				isNew: !ed.editing,
-				// A moved or renamed recipe leaves the original in place, and with it the original's photo.
-				previousImage: ed.originalId === ed.id ? ed.original?.image?.src : undefined
-			});
+			const moved = ed.moving && ed.originalId !== undefined;
+			const result = moved
+				? await target.move(ed.originalId as string, ed.id, recipe, {
+						previousImage: ed.original?.image?.src,
+						photo: ed.photo?.blob
+					})
+				: await target.save(ed.id, recipe, {
+						isNew: !ed.editing,
+						previousImage: ed.original?.image?.src
+					});
 			clearDraft(ed.draftId);
 			ed.markSaved();
-			outcome = { kind: 'saved', id: ed.id, title: recipe.title };
+			outcome = { kind: moved ? 'moved' : 'saved', id: result.id, title: recipe.title };
 			chrome.notify('Saved. It goes live once the build finishes');
 			void watch(target, result);
+			if (moved) await reopen(target, result.id);
 		} catch (error) {
 			problem = failure(error);
 		} finally {
 			saving = false;
+		}
+	}
+
+	/** Continues editing the moved recipe at its new address. */
+	async function reopen(target: RecipeWriter, id: string) {
+		try {
+			const state = new EditorState({ index: data.index, id, recipe: await target.read(id) });
+			state.coreReady = true;
+			ed = state;
+			history.replaceState(history.state, '', editHref({ id }));
+		} catch {
+			problem = 'The recipe was moved, but it could not be opened again. Reload the page.';
 		}
 	}
 
@@ -296,6 +316,8 @@
 				<p>
 					{#if outcome.kind === 'saved'}
 						<strong>{outcome.title}</strong> was saved.
+					{:else if outcome.kind === 'moved'}
+						<strong>{outcome.title}</strong> was moved to <code>/{outcome.id}</code>.
 					{:else}
 						<strong>{outcome.title}</strong> was deleted.
 					{/if}
@@ -314,7 +336,7 @@
 					{/if}
 				</p>
 				<div class="notice-actions">
-					{#if outcome.kind === 'saved' && status?.state === 'live'}
+					{#if outcome.kind !== 'deleted' && status?.state === 'live'}
 						<a class="btn" href={pageHref(outcome.id)}>View the recipe</a>
 					{/if}
 					<a class="btn" href={editHref()} data-sveltekit-reload>New recipe</a>
@@ -446,13 +468,22 @@
 								editor.form.slugTouched = true;
 							}
 						}
-						readonly={editor.editing}
 						hint={editor.editing
-							? `The address stays as it is: /${editor.id}`
+							? `Changing this moves the recipe. It is at /${editor.originalId} now.`
 							: `Follows the title until you change it: /${editor.id}`}
 						error={editor.errorFor('slug')}
 						onblur={() => editor.touch('slug')}
 					/>
+					{#if editor.moving}
+						<p class="notice" role="status">
+							<span>
+								<strong>This moves the recipe.</strong> The photo and the links from other recipes move
+								with it.
+							</span>
+							<span>From <code>/{editor.originalId}</code></span>
+							<span>To <code>/{editor.id}</code></span>
+						</p>
+					{/if}
 				</FieldSet>
 
 				<PhotoField ed={editor} />
@@ -520,7 +551,11 @@
 						{/if}
 					</p>
 					<button class="btn primary" disabled={saving || !editor.coreReady}>
-						<Icon name="check" size={18} />{saving ? 'Saving…' : 'Save recipe'}
+						<Icon name="check" size={18} />{saving
+							? 'Saving...'
+							: editor.moving
+								? 'Move and save'
+								: 'Save recipe'}
 					</button>
 				</div>
 				{#if problem}
@@ -543,7 +578,12 @@
 		<AiImport bind:this={aiImport} ed={editor} client={ai} onimported={() => (pane = 'edit')} />
 	{/if}
 	{#if editor.editing}
-		<DeleteDialog bind:this={deleteDialog} ed={editor} ondelete={remove} />
+		<DeleteDialog
+			bind:this={deleteDialog}
+			ed={editor}
+			ondelete={remove}
+			readAll={() => (writer ??= createWriter(admin.token)).readAll()}
+		/>
 	{/if}
 	<Modal bind:this={leaveDialog} title="Leave without saving?">
 		<p>

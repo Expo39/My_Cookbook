@@ -137,3 +137,40 @@ describe('unsaved changes', () => {
 		expect(fieldId('title')).toBe('f-title');
 	});
 });
+
+describe('moving an existing recipe', () => {
+	const stored = {
+		title: 'Steak',
+		summary: 'A steak.',
+		servings: 2,
+		ingredientGroups: [],
+		steps: [{ text: 'Cook.' }],
+		image: { src: 'steak.jpg', alt: 'A steak' }
+	};
+	const opened = () => new EditorState({ index, id: 'mains/beef/steak', recipe: stored });
+
+	it('is not a move until the address changes', () => {
+		expect(opened().moving).toBe(false);
+	});
+
+	it('is a move when the section or the slug changes, and renames the photo to match', () => {
+		const ed = opened();
+		ed.form.section = 'soups';
+		expect(ed.moving).toBe(true);
+		expect(ed.id).toBe('soups/steak');
+		ed.form.slug = 'beef-steak';
+		expect(ed.id).toBe('soups/beef-steak');
+		expect(ed.built.recipe.image?.src).toBe('beef-steak.jpg');
+	});
+
+	it('keeps the photo name when the recipe stays where it is', () => {
+		expect(opened().built.recipe.image?.src).toBe('steak.jpg');
+	});
+
+	it('refuses an address another recipe already has', () => {
+		const ed = opened();
+		ed.form.section = 'soups';
+		ed.form.slug = 'tomato';
+		expect(ed.results.map((result) => result.id)).toContain('F-ID-EXISTS');
+	});
+});

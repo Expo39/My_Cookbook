@@ -1,24 +1,12 @@
-import { checkRemoval } from '$lib/core';
-import type { RecipeSource } from '$lib/data';
-import { allRecipes } from '$lib/data/tree';
-import type { CheckResult, RecipeFile, SiteIndex } from '$lib/types/recipe';
+import type { StoredRecipe } from '$lib/data/stored';
+import type { Recipe } from '$lib/types/recipe';
 
-/** The other recipes that still list `id` under `related`; deleting it would leave those links dangling. */
-export async function recipesLinkingTo(
-	id: string,
-	index: SiteIndex,
-	source: Pick<RecipeSource, 'getRecipe'>
-): Promise<{ id: string; title: string; result: CheckResult }[]> {
-	const cards = allRecipes(index).filter((card) => card.id !== id);
-	const files: RecipeFile[] = await Promise.all(
-		cards.map(async (card) => ({
-			path: `${card.id}.json`,
-			recipe: (await source.getRecipe(card.id)).recipe
-		}))
-	);
-	return checkRemoval(id, files).map((result) => ({
-		id: result.recipe,
-		title: cards.find((card) => card.id === result.recipe)?.title ?? result.recipe,
-		result
-	}));
+/** The other recipes that list `id` under `related`; removing or moving it would leave those links dangling. */
+export const recipesLinkingTo = (id: string, recipes: StoredRecipe[]): StoredRecipe[] =>
+	recipes.filter((entry) => entry.id !== id && entry.recipe.related?.includes(id));
+
+/** The recipe with its link to `from` pointed at `to`, without listing `to` twice. */
+export function relink(recipe: Recipe, from: string, to: string): Recipe {
+	const related = [...new Set((recipe.related ?? []).map((id) => (id === from ? to : id)))];
+	return { ...recipe, related };
 }
