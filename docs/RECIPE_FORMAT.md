@@ -109,6 +109,7 @@ Times, temperatures and cookware are never scaled automatically. When the scale 
 - A recipe has to sit inside a section folder; a file directly under `recipes/` has no section and fails `E-SECTION-MISSING`.
 - `pan.size` is `[diameter]` for round, `[width, length]` for rect, and `[side]` or `[width, length]` for square. `loaf` is not a shape yet.
 - `scaling.min` and `scaling.max` are servings. `image.alt` may be omitted in the file, but then `E-IMAGE-ALT` fails.
+- `image.src` must be a JPEG, PNG or WebP file (`E-IMAGE-FORMAT`), and a photo narrower than 1200 px gets `W-IMAGE-SMALL`. `cookbook-cli build` writes it at 480, 960 and 1600 px (never above its own width) as WebP and JPEG to `web/static/img/<id>/<width>.<ext>`, and records its size so the page can reserve the space. `cookbook-cli cards` draws the recipe's share cards to `web/static/cards/<id>/` (`og.png`, `portrait.png` and `story.png`), with the photo at the top when there is one.
 - A variant option replaces a whole ingredient (its `key` is taken from the map key) and may only name keys that exist in the recipe.
 - `seasoning` above 1× shows `max(base, 0.75 × base × f)` to `base × f`; at or below 1× it is plain linear.
 - `discrete` rounds to the nearest whole piece (minimum 1). Only when the recipe is `precise` and the ingredient has `each` does a fractional part of 0.25 to 0.75 show as a half with its weight, e.g. "1½ (75 g) eggs".

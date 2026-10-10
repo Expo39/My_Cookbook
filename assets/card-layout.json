@@ -6,8 +6,7 @@
 		"ink": "#2a2419",
 		"muted": "#5f5440",
 		"primary": "#45552a",
-		"onPrimary": "#f5efe2",
-		"line": "#d3c6aa"
+		"onPrimary": "#f5efe2"
 	},
 	"scrimOpacity": 0.86,
 	"fonts": {
@@ -18,9 +17,9 @@
 	},
 	"formats": {
 		"og": { "kind": "banner", "width": 1200, "height": 630, "photoShare": 1, "safeTop": 0, "safeBottom": 0 },
-		"portrait": { "kind": "sheet", "width": 1080, "height": 1350, "photoShare": 0.48, "safeTop": 0, "safeBottom": 0 },
-		"story": { "kind": "sheet", "width": 1080, "height": 1920, "photoShare": 0.36, "safeTop": 250, "safeBottom": 250 },
-		"pin": { "kind": "sheet", "width": 1000, "height": 1500, "photoShare": 0.46, "safeTop": 0, "safeBottom": 0 }
+		"portrait": { "kind": "sheet", "width": 1080, "height": 1350, "photoShare": 0.42, "safeTop": 0, "safeBottom": 0 },
+		"story": { "kind": "sheet", "width": 1080, "height": 1920, "photoShare": 0.34, "safeTop": 250, "safeBottom": 250 },
+		"pin": { "kind": "sheet", "width": 1000, "height": 1500, "photoShare": 0.42, "safeTop": 0, "safeBottom": 0 }
 	},
 	"sheet": {
 		"designWidth": 1080,
@@ -34,12 +33,8 @@
 		"localSize": 40,
 		"localGap": 14,
 		"bodyGap": 48,
-		"metaLabelSize": 24,
-		"metaValueSize": 46,
-		"metaGap": 8,
-		"metaColumn": 0.46,
-		"ruleGap": 32,
-		"ruleWidth": 2,
+		"metaGap": 22,
+		"metaSize": 42,
 		"listLabelSize": 24,
 		"listGap": 18,
 		"lineSize": 34,

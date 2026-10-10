@@ -101,3 +101,18 @@ test('the header and breadcrumb stay on one line, and the servings panel starts 
 	await panel.getByText('Scale', { exact: true }).click();
 	await expect(stepper).toBeVisible();
 });
+
+test('the share sheet is a bottom sheet on a phone', async ({ page }) => {
+	await page.goto(wellington);
+	await waitForCore(page);
+	await page.getByRole('button', { name: 'Share this recipe' }).click();
+	const sheet = page.getByRole('dialog', { name: 'Share this recipe' });
+	await expect(sheet).toBeVisible();
+	const box = await sheet.boundingBox();
+	const viewport = page.viewportSize();
+	expect(box && viewport && Math.abs(box.y + box.height - viewport.height) < 1).toBe(true);
+	expect(box && viewport && box.width === viewport.width).toBe(true);
+	for (const button of await sheet.getByRole('button').all()) {
+		expect((await button.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+	}
+});

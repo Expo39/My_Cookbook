@@ -97,6 +97,10 @@ class Pen {
 	}
 }
 
+/** "1 h 55 min  ·  5 servings", leaving out the time when the recipe has none. */
+const metaLine = (content: Content) =>
+	[content.total, content.serves].filter(Boolean).join('  ·  ');
+
 const scaled = (sizes: number[], u: number) => sizes.map((size) => size * u);
 
 /** The operations for one card, in painting order. */
@@ -126,7 +130,7 @@ function banner(pen: Pen, format: Format, content: Content, measure: Measure) {
 	);
 	const localSize = b.localSize * u;
 	const metaSize = b.metaSize * u;
-	const meta = [content.total, content.serves].filter(Boolean).join('  ·  ');
+	const meta = metaLine(content);
 
 	const labelH = labelSize * spec.labelLeading;
 	const titleH = title.lines.length * title.size * b.leading;
@@ -183,11 +187,13 @@ function sheet(pen: Pen, format: Format, content: Content, measure: Measure) {
 		s.titleLines
 	);
 	const localSize = s.localSize * u;
+	const metaSize = s.metaSize * u;
 
 	const labelH = labelSize * spec.labelLeading;
 	const titleH = title.lines.length * title.size * s.leading;
 	const localH = content.titleLocal ? s.localGap * u + localSize * spec.textLeading : 0;
-	const contentH = labelH + s.labelGap * u + titleH + localH;
+	const contentH =
+		labelH + s.labelGap * u + titleH + localH + s.metaGap * u + metaSize * spec.textLeading;
 
 	let headerBottom: number;
 	let textTop: number;
@@ -219,25 +225,12 @@ function sheet(pen: Pen, format: Format, content: Content, measure: Measure) {
 		y += s.localGap * u;
 		const local = ellipsize(measure, 'body', localSize, content.titleLocal, inner);
 		pen.text(margin, y, spec.textLeading, local, 'body', localSize, on);
+		y += localSize * spec.textLeading;
 	}
+	y += s.metaGap * u;
+	pen.text(margin, y, spec.textLeading, metaLine(content), 'num', metaSize, on);
 
 	let cursor = headerBottom + s.bodyGap * u;
-	const metaLabel = s.metaLabelSize * u;
-	const metaValue = s.metaValueSize * u;
-	const stats: [string, string][] = [];
-	if (content.total) stats.push(['TOTAL', content.total]);
-	stats.push(['SERVES', content.serves]);
-	stats.forEach(([name, value], i) => {
-		const x = margin + i * s.metaColumn * inner;
-		pen.text(x, cursor, spec.labelLeading, name, 'bodyBold', metaLabel, p.muted);
-		const valueTop = cursor + metaLabel * spec.labelLeading + s.metaGap * u;
-		pen.text(x, valueTop, spec.labelLeading, value, 'num', metaValue, p.ink);
-	});
-	cursor += metaLabel * spec.labelLeading + s.metaGap * u + metaValue * spec.labelLeading;
-	cursor += s.ruleGap * u;
-	const rule = Math.max(1, s.ruleWidth * u);
-	pen.rect(margin, cursor, inner, rule, p.line);
-	cursor += rule + s.ruleGap * u;
 	const listLabel = s.listLabelSize * u;
 	pen.text(margin, cursor, spec.labelLeading, 'INGREDIENTS', 'bodyBold', listLabel, p.primary);
 	cursor += listLabel * spec.labelLeading + s.listGap * u;

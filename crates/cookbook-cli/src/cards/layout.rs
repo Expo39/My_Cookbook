@@ -18,7 +18,6 @@ pub struct Palette {
     pub muted: String,
     pub primary: String,
     pub on_primary: String,
-    pub line: String,
     pub bg: String,
 }
 
@@ -73,12 +72,8 @@ pub struct Sheet {
     pub local_size: f64,
     pub local_gap: f64,
     pub body_gap: f64,
-    pub meta_label_size: f64,
-    pub meta_value_size: f64,
     pub meta_gap: f64,
-    pub meta_column: f64,
-    pub rule_gap: f64,
-    pub rule_width: f64,
+    pub meta_size: f64,
     pub list_label_size: f64,
     pub list_gap: f64,
     pub line_size: f64,
@@ -256,6 +251,15 @@ pub fn compose(
     pen.ops
 }
 
+/// "1 h 55 min  ·  5 servings", leaving out the time when the recipe has none.
+fn meta_line(content: &Content) -> String {
+    [content.total.clone(), Some(content.serves.clone())]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+        .join("  ·  ")
+}
+
 fn banner(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measure) {
     let layout = pen.layout;
     let (b, p) = (&layout.banner, &layout.palette);
@@ -281,11 +285,7 @@ fn banner(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measu
     );
     let local_size = b.local_size * u;
     let meta_size = b.meta_size * u;
-    let meta = [content.total.clone(), Some(content.serves.clone())]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join("  ·  ");
+    let meta = meta_line(content);
 
     let label_h = label_size * layout.label_leading;
     let title_h = title_lines.len() as f64 * title_size * b.leading;
@@ -401,6 +401,8 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
         s.title_lines,
     );
     let local_size = s.local_size * u;
+    let meta_size = s.meta_size * u;
+    let meta = meta_line(content);
 
     let label_h = label_size * layout.label_leading;
     let title_h = title_lines.len() as f64 * title_size * s.leading;
@@ -408,7 +410,12 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
         .title_local
         .as_ref()
         .map_or(0.0, |_| s.local_gap * u + local_size * layout.text_leading);
-    let content_h = label_h + s.label_gap * u + title_h + local_h;
+    let content_h = label_h
+        + s.label_gap * u
+        + title_h
+        + local_h
+        + s.meta_gap * u
+        + meta_size * layout.text_leading;
 
     let (header_bottom, text_top) = if content.has_photo {
         let block_h = pad + content_h + pad;
@@ -468,45 +475,21 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
             on,
             false,
         );
+        y += local_size * layout.text_leading;
     }
+    y += s.meta_gap * u;
+    pen.text(
+        margin,
+        y,
+        layout.text_leading,
+        &meta,
+        Face::Num,
+        meta_size,
+        on,
+        false,
+    );
 
     let mut cursor = header_bottom + s.body_gap * u;
-    let (meta_label, meta_value) = (s.meta_label_size * u, s.meta_value_size * u);
-    let mut stats = Vec::new();
-    if let Some(total) = &content.total {
-        stats.push(("TOTAL", total));
-    }
-    stats.push(("SERVES", &content.serves));
-    for (i, (name, value)) in stats.iter().enumerate() {
-        let x = margin + i as f64 * s.meta_column * inner;
-        pen.text(
-            x,
-            cursor,
-            layout.label_leading,
-            name,
-            Face::BodyBold,
-            meta_label,
-            &p.muted,
-            false,
-        );
-        let value_top = cursor + meta_label * layout.label_leading + s.meta_gap * u;
-        pen.text(
-            x,
-            value_top,
-            layout.label_leading,
-            value,
-            Face::Num,
-            meta_value,
-            &p.ink,
-            false,
-        );
-    }
-    cursor +=
-        meta_label * layout.label_leading + s.meta_gap * u + meta_value * layout.label_leading;
-    cursor += s.rule_gap * u;
-    let rule = (s.rule_width * u).max(1.0);
-    pen.rect(margin, cursor, inner, rule, &p.line, 1.0);
-    cursor += rule + s.rule_gap * u;
     let list_label = s.list_label_size * u;
     pen.text(
         margin,

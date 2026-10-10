@@ -88,12 +88,13 @@ describe('the sheet layout', () => {
 		expect(ops[0]).toMatchObject({ kind: 'rect', fill: layout.palette.primary });
 	});
 
-	it('leaves out the total when the recipe has no times', () => {
-		const lines = texts(compose(format, content({ total: undefined }), measure)).map(
-			(op) => op.text
-		);
-		expect(lines).toContain('SERVES');
-		expect(lines).not.toContain('TOTAL');
+	it('sets the total time and servings in the numeral face, and drops a missing time', () => {
+		const meta = (extra?: Partial<Content>) =>
+			texts(compose(format, content(extra), measure)).find(
+				(op) => op.face === 'num' && /servings/.test(op.text)
+			);
+		expect(meta()?.text).toBe('1 h 55 min  ·  5 servings');
+		expect(meta({ total: undefined })?.text).toBe('5 servings');
 	});
 });
 
