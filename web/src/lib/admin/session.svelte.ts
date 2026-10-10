@@ -12,6 +12,7 @@ import {
 import { GitHubClient } from './github';
 
 const TOKEN_KEY = 'sapori:admin-token';
+const SECRET_KEY = 'sapori:admin-import-secret';
 export const BLOB_PATH = 'web/static/admin.json';
 
 export class NotSetUpError extends Error {
@@ -20,26 +21,26 @@ export class NotSetUpError extends Error {
 	}
 }
 
-function remembered(): string | null {
+function stored(key: string): string | null {
 	try {
-		return sessionStorage.getItem(TOKEN_KEY);
+		return sessionStorage.getItem(key);
 	} catch {
 		return null;
 	}
 }
 
-function remember(token: string | null): void {
+function store(key: string, value: string | null | undefined): void {
 	try {
-		if (token) sessionStorage.setItem(TOKEN_KEY, token);
-		else sessionStorage.removeItem(TOKEN_KEY);
+		if (value) sessionStorage.setItem(key, value);
+		else sessionStorage.removeItem(key);
 	} catch {
 		/* the unlock then lasts until the page is reloaded */
 	}
 }
 
 /**
- * Whether editing is unlocked in this tab. The GitHub token lives in memory and in `sessionStorage`
- * (this tab only), never in `localStorage`.
+ * Whether editing is unlocked in this tab. The GitHub token and the import secret live in memory and
+ * in `sessionStorage` (this tab only), never in `localStorage`.
  */
 class AdminSession {
 	unlocked = $state(false);
@@ -57,9 +58,10 @@ class AdminSession {
 			this.configured = true;
 			return;
 		}
-		const token = remembered();
+		const token = stored(TOKEN_KEY);
 		if (token) {
 			this.token = token;
+			this.aiImportSecret = stored(SECRET_KEY);
 			this.unlocked = true;
 		}
 	}
@@ -96,7 +98,8 @@ class AdminSession {
 		this.token = secrets.token;
 		this.aiImportSecret = secrets.aiImportSecret ?? null;
 		this.unlocked = true;
-		remember(secrets.token);
+		store(TOKEN_KEY, secrets.token);
+		store(SECRET_KEY, secrets.aiImportSecret);
 	}
 
 	lock(): void {
@@ -104,7 +107,8 @@ class AdminSession {
 		this.token = null;
 		this.aiImportSecret = null;
 		this.unlocked = false;
-		remember(null);
+		store(TOKEN_KEY, null);
+		store(SECRET_KEY, null);
 	}
 
 	/** Checks the token against the repository, encrypts it and commits `admin.json` with it. */
