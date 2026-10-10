@@ -405,38 +405,40 @@ pub async fn login(
     Json(login): Json<Login>,
 ) -> ApiResult {
     let now = Instant::now();
-    if let Some(wait) = state
-        .logins
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner)
-        .blocked_for(&ip, now)
     {
-        return Err(Failure::limited(
-            wait,
-            &format!(
-                "Too many attempts. Try again in {} minutes.",
-                wait.div_ceil(60)
-            ),
-        ));
+        // Counting the attempt before the slow hash keeps parallel guesses inside the limit.
+        let mut logins = state
+            .logins
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if let Some(wait) = logins.blocked_for(&ip, now) {
+            return Err(Failure::limited(
+                wait,
+                &format!(
+                    "Too many attempts. Try again in {} minutes.",
+                    wait.div_ceil(60)
+                ),
+            ));
+        }
+        logins.record(&ip, now);
     }
     let hash = state.config.password_hash.clone();
     let password = login.password.chars().take(256).collect::<String>();
     let correct = tokio::task::spawn_blocking(move || auth::check_password(&hash, &password))
         .await
         .map_err(|_| Failure::internal())?;
-    let mut logins = state
-        .logins
-        .lock()
-        .unwrap_or_else(std::sync::PoisonError::into_inner);
     if !correct {
-        logins.record(&ip, now);
         return Err(Failure::new(
             StatusCode::UNAUTHORIZED,
             "unauthorised",
             "That password is not right.",
         ));
     }
-    logins.clear(&ip);
+    state
+        .logins
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clear(&ip);
     let token = auth::issue(&state.config.session_secret, now_seconds());
     Ok((
         [(

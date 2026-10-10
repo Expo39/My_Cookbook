@@ -266,6 +266,31 @@ async fn a_wrong_password_is_rejected_and_repeated_guesses_are_limited() {
 }
 
 #[tokio::test]
+async fn parallel_guesses_count_against_the_limit_before_they_are_verified() {
+    let k = kitchen();
+    let mut guesses = Vec::new();
+    for _ in 0..40 {
+        let app = k.app.clone();
+        let request = Request::builder()
+            .method(Method::POST)
+            .uri("/api/session")
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(json!({ "password": "nope" }).to_string()))
+            .unwrap();
+        guesses.push(tokio::spawn(async move {
+            app.oneshot(request).await.unwrap().status()
+        }));
+    }
+    let mut verified = 0;
+    for guess in guesses {
+        if guess.await.unwrap() == StatusCode::UNAUTHORIZED {
+            verified += 1;
+        }
+    }
+    assert_eq!(verified, 5);
+}
+
+#[tokio::test]
 async fn the_right_password_sets_a_hardened_twelve_hour_cookie_that_logout_clears() {
     let k = kitchen();
     let reply = k
