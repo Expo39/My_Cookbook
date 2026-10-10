@@ -1,3 +1,4 @@
+mod migrate;
 mod report;
 mod tree;
 
@@ -38,6 +39,14 @@ enum Command {
         json: bool,
         /// Recipe files or folders to report on
         paths: Vec<PathBuf>,
+    },
+    /// Convert the legacy single-page site into a recipe tree
+    MigrateLegacy {
+        /// The legacy `index.html`
+        html: PathBuf,
+        /// The folder to write the recipe tree into
+        #[arg(long, default_value = "recipes")]
+        out: PathBuf,
     },
     /// Print the JSON Schema for recipes and sections
     Schema {
@@ -128,6 +137,16 @@ fn main() -> ExitCode {
     let cli = Cli::parse();
     match cli.command {
         Command::Check { all, json, paths } => check(&cli.root, all, json, &paths),
+        Command::MigrateLegacy { html, out } => match migrate::run(&html, &out) {
+            Ok(summary) => {
+                println!("{summary}");
+                ExitCode::SUCCESS
+            }
+            Err(error) => {
+                eprintln!("migration failed: {error}");
+                ExitCode::FAILURE
+            }
+        },
         Command::Schema { kind } => schema(kind),
     }
 }
