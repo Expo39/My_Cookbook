@@ -1,0 +1,12 @@
+[package]
+name = "cookbook-tree"
+description = "Loads the recipe tree from disc and renders recipe JSON"
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+cookbook-core = { path = "../cookbook-core" }
+serde.workspace = true
+serde_json.workspace = true

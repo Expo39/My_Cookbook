@@ -1,7 +1,6 @@
 mod build;
 mod migrate;
 mod report;
-mod tree;
 
 use std::{
     path::{Path, PathBuf},
@@ -83,11 +82,11 @@ fn selected(subject: &str, selectors: &[String]) -> bool {
 }
 
 fn check(root: &Path, all: bool, json: bool, paths: &[PathBuf]) -> ExitCode {
-    if !tree::has_recipes(root) {
+    if !cookbook_tree::has_recipes(root) {
         println!("no recipes");
         return ExitCode::SUCCESS;
     }
-    let loaded = match tree::load(root) {
+    let loaded = match cookbook_tree::load(root) {
         Ok(loaded) => loaded,
         Err(error) => {
             eprintln!("cannot read {}: {error}", root.display());

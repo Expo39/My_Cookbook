@@ -7,10 +7,10 @@ WASM_BIN := $(WASM_OUT)/cookbook_wasm_bg.wasm
 DATA_OUT := web/static/data
 DATA_STAMP := $(DATA_OUT)/manifest.json
 
-RUST_SRC := Cargo.toml Cargo.lock $(shell find crates/cookbook-core crates/cookbook-wasm crates/cookbook-cli -type f \( -name '*.rs' -o -name Cargo.toml \) -not -path '*/tests/*')
+RUST_SRC := Cargo.toml Cargo.lock $(shell find crates/cookbook-core crates/cookbook-wasm crates/cookbook-cli crates/cookbook-tree -type f \( -name '*.rs' -o -name Cargo.toml \) -not -path '*/tests/*')
 RECIPE_SRC := $(shell find recipes -type f -name '*.json' 2>/dev/null)
 
-.PHONY: screenshots image dev test-fast test check build wasm data types fmt lint shell install
+.PHONY: screenshots image dev test-fast test check build wasm data types fmt lint shell install worker-build server selfhost
 
 image:
 	docker compose build dev
@@ -62,3 +62,12 @@ SHOTS ?= $(CURDIR)/web/test-results/shots
 screenshots: build
 	mkdir -p $(SHOTS)
 	docker compose run --rm -v $(SHOTS):/shots -e SHOTS_DIR=/shots -e SCREENSHOTS=1 -e E2E_PREBUILT=1 dev pnpm --dir web e2e
+
+worker-build:
+	$(RUN) sh -c 'cd crates/cookbook-worker && worker-build --release'
+
+server:
+	docker compose run --rm --service-ports -e COOKBOOK_ROOT=/work -e WEB_DIR=/work/web/build -e COOKIE_SECURE=false dev cargo run -p cookbook-server
+
+selfhost:
+	docker compose --profile selfhost up --build selfhost

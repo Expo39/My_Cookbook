@@ -9,7 +9,7 @@ use cookbook_core::{
 };
 use serde::Serialize;
 
-use crate::{report::Report, tree};
+use crate::report::Report;
 
 #[derive(Debug)]
 pub enum BuildError {
@@ -120,13 +120,13 @@ pub struct Built {
 }
 
 pub fn run(root: &Path, out: &Path) -> Result<Built, BuildError> {
-    if !tree::has_recipes(root) {
+    if !cookbook_tree::has_recipes(root) {
         return Err(BuildError::Other(format!(
             "no recipes in {}",
             root.display()
         )));
     }
-    let loaded = tree::load(root)?;
+    let loaded = cookbook_tree::load(root)?;
     let mut subjects: Vec<String> = loaded
         .collection
         .recipes

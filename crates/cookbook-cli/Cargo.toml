@@ -9,6 +9,7 @@ publish.workspace = true
 [dependencies]
 clap.workspace = true
 cookbook-core = { path = "../cookbook-core" }
+cookbook-tree = { path = "../cookbook-tree" }
 schemars = "1"
 scraper = "0.27.0"
 serde.workspace = true
