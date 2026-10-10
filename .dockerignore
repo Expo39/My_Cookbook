@@ -1,0 +1,9 @@
+.git
+.claude
+.env
+target
+web/node_modules
+web/build
+web/.svelte-kit
+web/src/lib/wasm
+web/static/data

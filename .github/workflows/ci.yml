@@ -47,6 +47,7 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           components: clippy, rustfmt
+          targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
       - uses: taiki-e/install-action@v2
         with:
@@ -54,6 +55,8 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo nextest run --workspace
+      - name: The worker builds for Workers
+        run: cargo build -p cookbook-worker -p cookbook-ai --target wasm32-unknown-unknown
 
   content:
     needs: changes
