@@ -2,6 +2,8 @@
 class Chrome {
 	toast = $state('');
 	hasActionBar = $state(false);
+	/** Cook mode has its own timer strip, so the page's one steps aside while it is open. */
+	cooking = $state(false);
 	#timer: ReturnType<typeof setTimeout> | undefined;
 
 	notify(message: string, milliseconds = 2600): void {

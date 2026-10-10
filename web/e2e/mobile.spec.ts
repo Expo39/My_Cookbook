@@ -101,3 +101,37 @@ test('the header and breadcrumb stay on one line, and the servings panel starts 
 	await panel.getByText('Scale', { exact: true }).click();
 	await expect(stepper).toBeVisible();
 });
+
+test('cook mode steps with a swipe on touch', async ({ page }) => {
+	await page.goto(wellington);
+	await waitForCore(page);
+	await page.getByRole('link', { name: 'Start cooking' }).click();
+	const dialog = page.getByRole('dialog', { name: /Wellington/ });
+	await expect(dialog.getByText('Step 1 of 11')).toBeVisible();
+
+	const client = await page.context().newCDPSession(page);
+	const swipe = async (from: number, to: number) => {
+		const touch = (x: number) => [{ x, y: 380 }];
+		await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: touch(from) });
+		for (const step of [0.25, 0.5, 0.75, 1]) {
+			await client.send('Input.dispatchTouchEvent', {
+				type: 'touchMove',
+				touchPoints: touch(from + (to - from) * step)
+			});
+		}
+		await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+	};
+
+	await swipe(320, 80);
+	await expect(dialog.getByText('Step 2 of 11')).toBeVisible();
+	await swipe(80, 320);
+	await expect(dialog.getByText('Step 1 of 11')).toBeVisible();
+	await swipe(200, 230);
+	await expect(dialog.getByText('Step 1 of 11')).toBeVisible();
+
+	for (const button of await dialog.getByRole('button').all()) {
+		const box = await button.boundingBox();
+		expect(box?.height ?? 0).toBeGreaterThanOrEqual(43.5);
+		expect(box?.width ?? 0).toBeGreaterThanOrEqual(43.5);
+	}
+});

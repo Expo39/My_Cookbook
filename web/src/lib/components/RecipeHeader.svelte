@@ -9,8 +9,17 @@
 		card,
 		model,
 		hydrated,
-		onshare
-	}: { card: RecipeCard; model: RecipeModel; hydrated: boolean; onshare: () => void } = $props();
+		cookHref,
+		onshare,
+		onaddlist
+	}: {
+		card: RecipeCard;
+		model: RecipeModel;
+		hydrated: boolean;
+		cookHref: string;
+		onshare: () => void;
+		onaddlist: () => void;
+	} = $props();
 
 	const recipe = $derived(model.data.recipe);
 	const times = $derived(card.times);
@@ -59,6 +68,9 @@
 	{#if recipe.origin}<p class="origin">From {recipe.origin}</p>{/if}
 
 	<div class="actions">
+		{#if hydrated}<a class="cook" href={cookHref} data-sveltekit-keepfocus
+				><Icon name="play" size={18} />Start cooking</a
+			>{/if}
 		<button
 			type="button"
 			aria-pressed={saved}
@@ -66,6 +78,9 @@
 			onclick={() => favourites.toggle(card.id)}
 		>
 			<Icon name="heart" />{saved ? 'Favourited' : 'Favourite'}
+		</button>
+		<button type="button" disabled={!hydrated || !model.ready} onclick={onaddlist}>
+			<Icon name="basket" />Add to shopping list
 		</button>
 		<button type="button" disabled={!hydrated} onclick={onshare}>
 			<Icon name="share" />Share
@@ -137,7 +152,8 @@
 		gap: var(--space-2);
 	}
 
-	button {
+	button,
+	.cook {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-2);
@@ -149,6 +165,13 @@
 		color: var(--colour-primary);
 		font-weight: 700;
 		transition: background-color var(--duration-micro);
+	}
+
+	.cook {
+		border-color: var(--colour-primary);
+		background: var(--colour-primary);
+		color: var(--colour-on-primary);
+		text-decoration: none;
 	}
 
 	button:hover:not(:disabled) {
@@ -166,6 +189,13 @@
 
 	button:disabled {
 		opacity: 0.6;
+	}
+
+	/* The fixed bar carries this link on a phone. */
+	@media (max-width: 47.99rem) {
+		.cook {
+			display: none;
+		}
 	}
 
 	@media print {

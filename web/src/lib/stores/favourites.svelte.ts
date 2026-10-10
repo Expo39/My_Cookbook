@@ -10,6 +10,11 @@ class Favourites {
 		for (const id of readList(FAVOURITES_KEY)) this.#ids.add(id);
 	}
 
+	/** In the order they were saved, oldest first. */
+	get ids(): string[] {
+		return [...this.#ids];
+	}
+
 	has(id: string): boolean {
 		return this.#ids.has(id);
 	}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { homeHref, pageHref, searchHref } from '$lib/links';
+	import { favouritesHref, homeHref, pageHref, searchHref, shoppingHref } from '$lib/links';
 	import { siteTitle } from '$lib/title';
 	import Icon from './Icon.svelte';
 	import SearchForm from './SearchForm.svelte';
@@ -9,6 +9,8 @@
 		sections,
 		onsettings
 	}: { sections: { title: string; path: string }[]; onsettings: () => void } = $props();
+
+	const here = (href: string) => (page.url.pathname === href ? 'page' : undefined);
 
 	const current = (path: string) => {
 		const href = pageHref(path);
@@ -27,6 +29,22 @@
 			<a class="icon" href={searchHref()} aria-label="Search recipes">
 				<Icon name="search" />
 			</a>
+			<a
+				class="tool"
+				href={favouritesHref()}
+				aria-label="Favourites"
+				aria-current={here(favouritesHref())}
+			>
+				<Icon name="heart" />
+			</a>
+			<a
+				class="tool"
+				href={shoppingHref()}
+				aria-label="Shopping list"
+				aria-current={here(shoppingHref())}
+			>
+				<Icon name="basket" />
+			</a>
 			<button class="icon" type="button" aria-label="Settings" onclick={onsettings}>
 				<Icon name="sliders" />
 			</button>
@@ -41,6 +59,12 @@
 						>
 					</li>
 				{/each}
+				<li class="utility">
+					<a href={favouritesHref()} aria-current={here(favouritesHref())}>Favourites</a>
+				</li>
+				<li class="utility">
+					<a href={shoppingHref()} aria-current={here(shoppingHref())}>Shopping list</a>
+				</li>
 			</ul>
 		</nav>
 	</div>
@@ -83,7 +107,8 @@
 		order: 1;
 	}
 
-	.icon {
+	.icon,
+	.tool {
 		display: grid;
 		place-items: center;
 		inline-size: var(--target);
@@ -95,8 +120,14 @@
 		color: var(--colour-primary);
 	}
 
-	.icon:hover {
+	.icon:hover,
+	.tool:hover,
+	.tool[aria-current='page'] {
 		background: var(--colour-tint);
+	}
+
+	.tool {
+		display: none;
 	}
 
 	.desktop-search {
@@ -172,6 +203,14 @@
 		}
 
 		.icon[href] {
+			display: none;
+		}
+
+		.tool {
+			display: grid;
+		}
+
+		.utility {
 			display: none;
 		}
 	}
