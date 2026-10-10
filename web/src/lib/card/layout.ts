@@ -37,6 +37,8 @@ export interface Content {
 	qr: QrMatrix | null;
 	urlText: string;
 	hasPhoto: boolean;
+	/** "@handle", when the site shows its Instagram account. */
+	instagram?: string;
 }
 
 export type Op =
@@ -52,6 +54,7 @@ export type Op =
 			fill: string;
 			end: boolean;
 	  }
+	| { kind: 'glyph'; x: number; y: number; size: number; stroke: string }
 	| { kind: 'qr'; x: number; y: number; module: number; fill: string };
 
 /** An ingredient line split into its amount and the rest, as the cards set them in two columns. */
@@ -123,7 +126,7 @@ function banner(pen: Pen, format: Format, content: Content, measure: Measure) {
 	const title = fitLines(
 		measure,
 		'display',
-		scaled(b.titleSizes, u),
+		scaled(content.hasPhoto ? b.photoTitleSizes : b.titleSizes, u),
 		content.title,
 		inner,
 		b.titleLines
@@ -142,8 +145,8 @@ function banner(pen: Pen, format: Format, content: Content, measure: Measure) {
 	if (content.hasPhoto) {
 		const blockH = pad + contentH + pad;
 		const blockY = h - blockH;
-		pen.ops.push({ kind: 'photo', x: 0, y: 0, w, h });
-		pen.rect(0, blockY, w, blockH, p.ink, spec.scrimOpacity);
+		pen.ops.push({ kind: 'photo', x: 0, y: 0, w, h: blockY });
+		pen.rect(0, blockY, w, blockH, p.ink);
 		y = blockY + pad;
 	} else {
 		pen.rect(0, 0, w, h, p.primary);
@@ -199,12 +202,11 @@ function sheet(pen: Pen, format: Format, content: Content, measure: Measure) {
 	let textTop: number;
 	if (content.hasPhoto) {
 		const blockH = pad + contentH + pad;
-		const photoH = Math.max(format.photoShare * h, blockH + 0.1 * h);
-		const blockY = photoH - blockH;
+		const photoH = Math.round(format.photoShare * h);
 		pen.ops.push({ kind: 'photo', x: 0, y: 0, w, h: photoH });
-		pen.rect(0, blockY, w, blockH, p.ink, spec.scrimOpacity);
-		headerBottom = photoH;
-		textTop = blockY + pad;
+		pen.rect(0, photoH, w, blockH, p.ink);
+		headerBottom = photoH + blockH;
+		textTop = photoH + pad;
 	} else {
 		const top = Math.max(format.safeTop, pad);
 		const blockH = top + contentH + pad;
@@ -286,7 +288,7 @@ function sheet(pen: Pen, format: Format, content: Content, measure: Measure) {
 	const wordmark = s.wordmarkSize * u;
 	const note = s.noteSize * u;
 	const noteStep = s.noteStep * u;
-	const stackH = wordmark * spec.labelLeading + 2 * noteStep;
+	const stackH = wordmark * spec.labelLeading + (content.instagram ? 3 : 2) * noteStep;
 	let ny = qrY + (qrBox - stackH) / 2;
 	const leftWidth = qrX - margin - s.footerGap * u;
 	const mark = ellipsize(measure, 'display', wordmark, spec.wordmark, leftWidth);
@@ -297,4 +299,17 @@ function sheet(pen: Pen, format: Format, content: Content, measure: Measure) {
 	ny += noteStep;
 	const url = ellipsize(measure, 'body', note, content.urlText, leftWidth);
 	pen.text(margin, ny, noteStep / note, url, 'body', note, p.muted);
+	if (content.instagram) {
+		ny += noteStep;
+		const gap = s.glyphGap * u;
+		pen.ops.push({
+			kind: 'glyph',
+			x: margin,
+			y: ny + (noteStep - note) / 2,
+			size: note,
+			stroke: p.muted
+		});
+		const handle = ellipsize(measure, 'body', note, content.instagram, leftWidth - note - gap);
+		pen.text(margin + note + gap, ny, noteStep / note, handle, 'body', note, p.muted);
+	}
 }

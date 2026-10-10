@@ -24,6 +24,7 @@ const textOf = (content: Content): string =>
 		content.urlText,
 		layout.wordmark,
 		layout.qrNote,
+		content.instagram ?? '',
 		...content.ingredients.flatMap((line) => [line.amount, line.rest])
 	].join(' ');
 
@@ -67,6 +68,16 @@ function draw(
 			ctx.fillStyle = op.fill;
 			ctx.textAlign = op.end ? 'right' : 'left';
 			ctx.fillText(op.text, op.x, op.y);
+		} else if (op.kind === 'glyph') {
+			ctx.save();
+			ctx.translate(op.x, op.y);
+			ctx.scale(op.size / 24, op.size / 24);
+			ctx.strokeStyle = op.stroke;
+			ctx.lineWidth = layout.glyphs.stroke;
+			ctx.lineCap = 'round';
+			ctx.lineJoin = 'round';
+			for (const d of layout.glyphs.instagram) ctx.stroke(new Path2D(d));
+			ctx.restore();
 		} else if (qr) {
 			ctx.fillStyle = op.fill;
 			for (let row = 0; row < qr.size; row++) {

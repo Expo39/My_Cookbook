@@ -76,6 +76,19 @@ pub fn to_svg(
                     escape(text),
                 ));
             }
+            Op::Glyph { x, y, size, stroke } => {
+                svg.push_str(&format!(
+                    r#"<g transform="translate({} {}) scale({})" fill="none" stroke="{stroke}" stroke-width="{}" stroke-linecap="round" stroke-linejoin="round">"#,
+                    number(*x),
+                    number(*y),
+                    number(*size / 24.0),
+                    layout.glyphs.stroke,
+                ));
+                for d in &layout.glyphs.instagram {
+                    svg.push_str(&format!(r#"<path d="{d}"/>"#));
+                }
+                svg.push_str("</g>");
+            }
             Op::Qr { x, y, module, fill } => {
                 if let Some(qr) = qr {
                     svg.push_str(&format!(

@@ -12,12 +12,22 @@ export interface ContentInput {
 	section: string[];
 	qr: QrMatrix | null;
 	hasPhoto: boolean;
+	/** "@handle" when the site shows its Instagram account. */
+	instagram?: string;
 }
 
 /** The short address printed on the card for people who will not scan the code. */
 export const shortUrl = (root = siteRoot): string => root.replace(/^[a-z]+:\/\//, '');
 
-export function cardContent({ card, recipe, view, section, qr, hasPhoto }: ContentInput): Content {
+export function cardContent({
+	card,
+	recipe,
+	view,
+	section,
+	qr,
+	hasPhoto,
+	instagram
+}: ContentInput): Content {
 	return {
 		label: section.join(' / '),
 		title: recipe.title,
@@ -29,6 +39,7 @@ export function cardContent({ card, recipe, view, section, qr, hasPhoto }: Conte
 		),
 		qr,
 		urlText: shortUrl(),
-		hasPhoto
+		hasPhoto,
+		instagram
 	};
 }

@@ -2,13 +2,8 @@ import { readFileSync } from 'node:fs';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 
-/** The deployed origin comes from `site.json`, which the card renderer reads too. */
-const site: { url: string } = JSON.parse(
-	readFileSync(new URL('../site.json', import.meta.url), 'utf8')
-);
-
-/** Site settings from the repo root; missing or unreadable means every optional feature is off. */
-function siteConfig(): unknown {
+/** Site settings from the repo root, which the card renderer reads too. Missing or unreadable means defaults. */
+function siteConfig(): { site?: { url?: string }; ai?: { endpoint?: string } } {
 	try {
 		return JSON.parse(readFileSync('../cookbook.config.json', 'utf8'));
 	} catch {
@@ -16,14 +11,19 @@ function siteConfig(): unknown {
 	}
 }
 
+const config = siteConfig();
+
 export default defineConfig(({ mode }) => ({
 	plugins: [sveltekit()],
 	// Components are mounted in the tests, which needs Svelte's browser build.
 	resolve: mode === 'test' ? { conditions: ['browser'] } : {},
 	define: {
 		__BACKEND__: JSON.stringify(process.env.PUBLIC_BACKEND ?? 'static'),
-		__SITE_CONFIG__: JSON.stringify(siteConfig()),
-		__SITE_URL__: JSON.stringify(process.env.PUBLIC_SITE_URL ?? site.url)
+		__SITE_CONFIG__: JSON.stringify(config),
+		__SITE_URL__: JSON.stringify(
+			process.env.PUBLIC_SITE_URL || config.site?.url || 'https://expo39.github.io'
+		),
+		__AI_ENDPOINT__: JSON.stringify(process.env.PUBLIC_AI_ENDPOINT || config.ai?.endpoint || '')
 	},
 	// The share card layout in assets/ is shared with the Rust renderer.
 	server: { port: 5173, strictPort: true, fs: { allow: ['..'] } },

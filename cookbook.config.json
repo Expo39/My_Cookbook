@@ -1,4 +1,8 @@
 {
+  "site": {
+    "url": "https://expo39.github.io",
+    "basePath": "/My_Cookbook"
+  },
   "social": {
     "instagram": {
       "enabled": true,

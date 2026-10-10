@@ -4,6 +4,7 @@
 	import { page } from '$app/state';
 	import { afterNavigate, replaceState } from '$app/navigation';
 	import type { QrMatrix } from '$lib/card/layout';
+	import { createAiClient } from '$lib/ai';
 	import { loadCore, qrMatrix } from '$lib/core';
 	import { sectionTrail } from '$lib/data/tree';
 	import { homeHref, pageHref } from '$lib/links';
@@ -34,6 +35,7 @@
 	import RecipeNotes from './RecipeNotes.svelte';
 	import ServingsBar from './ServingsBar.svelte';
 	import ShareSheet from './ShareSheet.svelte';
+	import SousChef from './SousChef.svelte';
 
 	let { card, data, index }: { card: Card; data: RecipeData; index: SiteIndex } = $props();
 
@@ -54,6 +56,8 @@
 	let restored = $state(false);
 	let tab = $state<Tab>('ingredients');
 	let sheet: ShareSheet | undefined = $state();
+	const ai = createAiClient();
+	let chef: SousChef | undefined = $state();
 	let printingCard = $state(false);
 	let printQr = $state<QrMatrix | null>(null);
 
@@ -242,7 +246,15 @@
 
 <article class:enhanced={hydrated} class:printing-card={printingCard}>
 	<Breadcrumb {trail} />
-	<RecipeHeader {card} {model} {hydrated} {cookHref} onshare={share} onaddlist={addToList} />
+	<RecipeHeader
+		{card}
+		{model}
+		{hydrated}
+		{cookHref}
+		onshare={share}
+		onaddlist={addToList}
+		onask={ai ? () => chef?.show() : undefined}
+	/>
 	<ServingsBar {model} />
 
 	{#if hydrated}
@@ -308,6 +320,9 @@
 		<CookMode {model} {recipe} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
 	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} onprint={printCard} />{/if}
+	{#if hydrated && ai}
+		<SousChef bind:this={chef} client={ai} recipeId={card.id} recipe={data.recipe} />
+	{/if}
 	{#if printingCard}<PrintCard {card} {model} qr={printQr} />{/if}
 </article>
 

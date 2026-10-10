@@ -41,9 +41,15 @@ fn write_photo(root: &Path, shade: u8) {
 }
 
 fn cards(root: &Path, out: &Path) -> String {
+    cards_with(root, out, Path::new("no-such-config.json"))
+}
+
+fn cards_with(root: &Path, out: &Path, config: &Path) -> String {
     let output = Command::new(env!("CARGO_BIN_EXE_cookbook-cli"))
         .arg("--root")
         .arg(root)
+        .arg("--config")
+        .arg(config)
         .args(["cards", "--site-root", ROOT_URL, "--out"])
         .arg(out)
         .output()
@@ -164,4 +170,65 @@ fn a_recipe_without_a_photo_gets_the_typographic_layout() {
         .unwrap()
         .to_rgb8();
     assert_eq!(card.get_pixel(4, 4).0, [0x45, 0x55, 0x2a]);
+}
+
+fn render_with_instagram(name: &str, config: Option<&str>) -> PathBuf {
+    let root = copy_fixture(name, 200);
+    let out = root.parent().unwrap().join("cards");
+    let path = root.parent().unwrap().join("config.json");
+    match config {
+        Some(text) => fs::write(&path, text).unwrap(),
+        None => {
+            let _ = fs::remove_file(&path);
+        }
+    }
+    cards_with(&root, &out, &path);
+    out.join(ID)
+}
+
+#[test]
+fn the_instagram_handle_appears_on_sheets_but_not_on_the_link_preview() {
+    let on = render_with_instagram(
+        "cards-instagram-on",
+        Some(r#"{ "social": { "instagram": { "enabled": true, "handle": "tonys_foods" } } }"#),
+    );
+    let off = render_with_instagram("cards-instagram-none", None);
+    for name in ["portrait", "story"] {
+        assert_ne!(
+            fs::read(on.join(format!("{name}.png"))).unwrap(),
+            fs::read(off.join(format!("{name}.png"))).unwrap(),
+            "{name} should carry the handle"
+        );
+    }
+    assert_eq!(
+        fs::read(on.join("og.png")).unwrap(),
+        fs::read(off.join("og.png")).unwrap()
+    );
+}
+
+#[test]
+fn a_disabled_or_invalid_handle_leaves_no_trace() {
+    let none = render_with_instagram("cards-instagram-absent", None);
+    let disabled = render_with_instagram(
+        "cards-instagram-disabled",
+        Some(r#"{ "social": { "instagram": { "enabled": false, "handle": "tonys_foods" } } }"#),
+    );
+    let invalid = render_with_instagram(
+        "cards-instagram-invalid",
+        Some(r#"{ "social": { "instagram": { "enabled": true, "handle": "not a handle" } } }"#),
+    );
+    for name in ["og", "portrait", "story"] {
+        let file = format!("{name}.png");
+        let expected = fs::read(none.join(&file)).unwrap();
+        assert_eq!(
+            fs::read(disabled.join(&file)).unwrap(),
+            expected,
+            "{name} disabled"
+        );
+        assert_eq!(
+            fs::read(invalid.join(&file)).unwrap(),
+            expected,
+            "{name} invalid"
+        );
+    }
 }

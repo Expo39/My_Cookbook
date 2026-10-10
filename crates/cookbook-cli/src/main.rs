@@ -1,5 +1,6 @@
 mod build;
 mod cards;
+mod config;
 mod images;
 mod migrate;
 mod report;
@@ -19,6 +20,9 @@ struct Cli {
     /// The folder holding the recipe tree
     #[arg(long, global = true, default_value = "recipes")]
     root: PathBuf,
+    /// The site settings; a missing file means the defaults
+    #[arg(long, global = true, default_value = "cookbook.config.json")]
+    config: PathBuf,
     #[command(subcommand)]
     command: Command,
 }
@@ -66,7 +70,7 @@ enum Command {
         /// The folder to write `<id>/og.png`, `portrait.png` and `story.png` into
         #[arg(long, default_value = "web/static/cards")]
         out: PathBuf,
-        /// The address the cards link to; defaults to `PUBLIC_SITE_URL` and `BASE_PATH`, then `site.json`
+        /// The address the cards link to; defaults to `PUBLIC_SITE_URL` and `BASE_PATH`, then the `site` settings
         #[arg(long)]
         site_root: Option<String>,
     },
@@ -192,8 +196,9 @@ fn main() -> ExitCode {
             }
         },
         Command::Cards { out, site_root } => {
-            let site_root = site_root.unwrap_or_else(cards::site_root);
-            match cards::run(&cli.root, &out, &site_root) {
+            let config = config::Config::load(&cli.config);
+            let site_root = site_root.unwrap_or_else(|| config.site_root());
+            match cards::run(&cli.root, &out, &site_root, config.instagram().as_deref()) {
                 Ok(summary) => {
                     println!(
                         "cards: {} rendered, {} up to date, {} removed in {:.2?}",
