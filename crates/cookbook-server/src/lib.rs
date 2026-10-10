@@ -34,6 +34,7 @@ pub fn router(state: Arc<AppState>) -> Router {
             get(api::recipe)
                 .put(api::put_recipe)
                 .delete(api::delete_recipe)
+                .post(api::post_recipe)
                 .layer(DefaultBodyLimit::max(RECIPE_BODY_LIMIT)),
         )
         .route(

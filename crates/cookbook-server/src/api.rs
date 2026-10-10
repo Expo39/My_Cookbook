@@ -222,23 +222,29 @@ pub async fn put_recipe(
     ))
 }
 
-/// The photo (relative to the recipes folder) that only the recipe being removed uses.
-fn orphaned_photo(id: &str, collection: &Collection) -> Option<String> {
-    let photo = |recipe_id: &str, src: &str| {
-        let path = format!("{}/{src}", parent(recipe_id)?);
-        (is_valid_file_path(&path) && content_type(&path).is_some()).then_some(path)
-    };
-    let own = collection.recipes.iter().find(|r| r.id() == id)?;
-    let own = photo(id, &own.recipe.image.as_ref()?.src)?;
-    let shared = collection.recipes.iter().any(|r| {
+/// The photo of a recipe as a path relative to the recipes folder, when `src` is a safe image path.
+fn photo_path(recipe_id: &str, src: &str) -> Option<String> {
+    let path = format!("{}/{src}", parent(recipe_id)?);
+    (is_valid_file_path(&path) && content_type(&path).is_some()).then_some(path)
+}
+
+/// Whether another recipe than `id` uses the photo.
+fn photo_shared(id: &str, photo: &str, collection: &Collection) -> bool {
+    collection.recipes.iter().any(|r| {
         r.id() != id
             && r.recipe
                 .image
                 .as_ref()
-                .and_then(|image| photo(&r.id(), &image.src))
-                .is_some_and(|other| other == own)
-    });
-    (!shared).then_some(own)
+                .and_then(|image| photo_path(&r.id(), &image.src))
+                .is_some_and(|other| other == photo)
+    })
+}
+
+/// The photo (relative to the recipes folder) that only the recipe being removed uses.
+fn orphaned_photo(id: &str, collection: &Collection) -> Option<String> {
+    let own = collection.recipes.iter().find(|r| r.id() == id)?;
+    let own = photo_path(id, &own.recipe.image.as_ref()?.src)?;
+    (!photo_shared(id, &own, collection)).then_some(own)
 }
 
 pub async fn delete_recipe(
@@ -555,4 +561,231 @@ pub async fn logout(State(state): Shared) -> Response {
         Json(json!({ "authenticated": false })),
     )
         .into_response()
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MoveTo {
+    to: String,
+}
+
+/// Undoes a half-finished move: new files are removed and rewritten ones get their old bytes back.
+#[derive(Default)]
+struct Undo {
+    created: Vec<std::path::PathBuf>,
+    restore: Vec<(std::path::PathBuf, Vec<u8>)>,
+}
+
+impl Undo {
+    async fn rollback(self) {
+        for path in self.created {
+            let _ = tokio::fs::remove_file(path).await;
+        }
+        for (path, bytes) in self.restore {
+            let _ = tokio::fs::write(path, bytes).await;
+        }
+    }
+}
+
+fn bad_request(message: &str) -> Failure {
+    Failure::new(StatusCode::BAD_REQUEST, "bad_request", message)
+}
+
+/// `POST /api/recipes/{id}/move`: the only POST on the recipe wildcard, so the `/move` suffix is unambiguous.
+pub async fn post_recipe(
+    State(state): Shared,
+    _auth: Authed,
+    Path(path): Path<String>,
+    headers: HeaderMap,
+    Json(request): Json<MoveTo>,
+) -> ApiResult {
+    let id = path.strip_suffix("/move").ok_or_else(Failure::not_found)?;
+    let to = request.to;
+    if !is_valid_path(id) {
+        return Err(Failure::invalid_id());
+    }
+    if !is_valid_path(&to) || parent(&to).is_none() || to == id {
+        return Err(bad_request(
+            "The new id must be a different folder/slug path.",
+        ));
+    }
+    if !headers.contains_key(header::IF_MATCH) {
+        return Err(Failure::new(
+            StatusCode::PRECONDITION_REQUIRED,
+            "precondition_required",
+            "Send the recipe's ETag in If-Match.",
+        ));
+    }
+
+    let _guard = state.write_lock.lock().await;
+    let dir = state.config.recipes_dir();
+    let collection = state.snapshot().collection.clone();
+    let source = collection
+        .recipes
+        .iter()
+        .find(|r| r.id() == id)
+        .ok_or_else(Failure::not_found)?;
+    let old_file = dir.join(format!("{id}.json"));
+    check_preconditions(&headers, current_etag(&old_file).await.as_deref())?;
+
+    let new_file = dir.join(format!("{to}.json"));
+    let exists = || {
+        Failure::new(
+            StatusCode::CONFLICT,
+            "exists",
+            "A recipe already has that id.",
+        )
+    };
+    if collection.recipes.iter().any(|r| r.id() == to)
+        || collection.unparsed.contains(&to)
+        || tokio::fs::try_exists(&new_file).await.unwrap_or(true)
+    {
+        return Err(exists());
+    }
+    let folder = parent(&to).unwrap_or_default();
+    if !collection.sections.iter().any(|s| s.folder == folder) {
+        return Err(Failure::new(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "section_missing",
+            "The section for the new id does not exist yet. Create it first.",
+        ));
+    }
+
+    let mut moved = source.recipe.clone();
+    let mut photo_move: Option<(String, String, bool)> = None;
+    if let Some(image) = moved.image.as_mut()
+        && let Some(old) = photo_path(id, &image.src)
+        && collection.files.contains(&old)
+    {
+        let ext = old.rsplit_once('.').map_or("", |(_, ext)| ext);
+        let name = format!("{}.{ext}", slug(&to));
+        let new = format!("{folder}/{name}");
+        if new != old {
+            if collection.files.contains(&new)
+                || tokio::fs::try_exists(dir.join(&new)).await.unwrap_or(true)
+            {
+                return Err(exists());
+            }
+            let shared = photo_shared(id, &old, &collection);
+            photo_move = Some((old, new, shared));
+        }
+        image.src = name;
+    }
+    for link in &mut moved.related {
+        if link == id {
+            link.clone_from(&to);
+        }
+    }
+
+    let mut next = collection.clone();
+    next.recipes.retain(|r| r.id() != id);
+    next.files.remove(&format!("{id}.json"));
+    next.files.insert(format!("{to}.json"));
+    if let Some((old, new, shared)) = &photo_move {
+        next.files.insert(new.clone());
+        if let Some(width) = next.image_widths.get(old).copied() {
+            next.image_widths.insert(new.clone(), width);
+        }
+        if !shared {
+            next.files.remove(old);
+            next.image_widths.remove(old);
+        }
+    }
+    let mut touched = vec![RecipeFile {
+        path: format!("{to}.json"),
+        recipe: moved,
+    }];
+    for file in &mut next.recipes {
+        if file.recipe.related.iter().any(|r| r == id) {
+            for link in &mut file.recipe.related {
+                if link == id {
+                    link.clone_from(&to);
+                }
+            }
+            touched.push(file.clone());
+        }
+    }
+    next.recipes.push(touched[0].clone());
+    let context = next.context();
+    let results: Vec<CheckResult> = touched
+        .iter()
+        .flat_map(|file| check_recipe(file, &context))
+        .collect();
+    if has_errors(&results) {
+        return Err(Failure::checks(
+            StatusCode::UNPROCESSABLE_ENTITY,
+            "invalid",
+            "The move would leave recipes with problems, so nothing was changed.",
+            &results,
+        ));
+    }
+    let mut rendered = Vec::new();
+    for file in &touched {
+        let text = cookbook_tree::render_json(&file.recipe).map_err(|_| Failure::internal())?;
+        rendered.push((file.path.clone(), text));
+    }
+    let new_etag = etag_of(rendered[0].1.as_bytes());
+
+    let mut undo = Undo::default();
+    let written = write_move(&dir, id, &rendered, photo_move.as_ref(), &mut undo).await;
+    if let Err(failure) = written {
+        undo.rollback().await;
+        return Err(failure);
+    }
+
+    state.reload().await?;
+    let mut paths: Vec<String> = rendered
+        .iter()
+        .map(|(file, _)| format!("recipes/{file}"))
+        .collect();
+    paths.push(relative(id, ".json"));
+    if let Some((old, new, _)) = &photo_move {
+        paths.push(format!("recipes/{old}"));
+        paths.push(format!("recipes/{new}"));
+    }
+    state
+        .commit(
+            &paths,
+            &format!("content(recipes): move {}", source.recipe.title),
+        )
+        .await;
+    Ok(with_etag(
+        &new_etag,
+        Json(json!({ "id": to })).into_response(),
+    ))
+}
+
+/// Writes everything new first and removes the old files last, so a failure can be undone.
+async fn write_move(
+    dir: &FsPath,
+    id: &str,
+    rendered: &[(String, String)],
+    photo: Option<&(String, String, bool)>,
+    undo: &mut Undo,
+) -> ApiResult<()> {
+    if let Some((old, new, _)) = photo {
+        undo.created.push(dir.join(new));
+        tokio::fs::copy(dir.join(old), dir.join(new))
+            .await
+            .map_err(|_| Failure::internal())?;
+    }
+    for (index, (file, text)) in rendered.iter().enumerate() {
+        let target = dir.join(file);
+        if index == 0 {
+            undo.created.push(target.clone());
+        } else {
+            let original = tokio::fs::read(&target)
+                .await
+                .map_err(|_| Failure::internal())?;
+            undo.restore.push((target.clone(), original));
+        }
+        write_atomic(&target, text).await?;
+    }
+    tokio::fs::remove_file(dir.join(format!("{id}.json")))
+        .await
+        .map_err(|_| Failure::internal())?;
+    if let Some((old, _, false)) = photo {
+        let _ = tokio::fs::remove_file(dir.join(old)).await;
+    }
+    Ok(())
 }

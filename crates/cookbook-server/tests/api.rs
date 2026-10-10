@@ -112,6 +112,10 @@ fn cheap_hash(password: &str) -> String {
 }
 
 fn kitchen_with(gemini: Option<Arc<dyn Gemini>>, web: Option<&Path>) -> Kitchen {
+    kitchen_full(gemini, web, false)
+}
+
+fn kitchen_full(gemini: Option<Arc<dyn Gemini>>, web: Option<&Path>, git: bool) -> Kitchen {
     let dir = TempDir::new().unwrap();
     let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("../cookbook-cli/tests/fixtures/valid/recipes");
@@ -124,6 +128,7 @@ fn kitchen_with(gemini: Option<Arc<dyn Gemini>>, web: Option<&Path>) -> Kitchen 
         "WEB_DIR" => web.clone(),
         "ADMIN_PASSWORD_HASH" => Some(hash.clone()),
         "SESSION_SECRET" => Some(SECRET.to_owned()),
+        "GIT_COMMIT" => git.then(|| "true".to_owned()),
         _ => None,
     })
     .unwrap();
@@ -1007,4 +1012,216 @@ async fn if_none_match_star_creates_only_when_the_recipe_is_new() {
         )
         .await;
     assert_eq!(created.status, StatusCode::OK);
+}
+
+fn git(k: &Kitchen, args: &[&str]) -> String {
+    let output = std::process::Command::new("git")
+        .arg("-C")
+        .arg(k.dir.path())
+        .args(args)
+        .output()
+        .unwrap();
+    assert!(output.status.success(), "git {args:?}");
+    String::from_utf8(output.stdout).unwrap()
+}
+
+async fn add_section(k: &Kitchen, cookie: &str, path: &str) {
+    let reply = k
+        .call(
+            Method::POST,
+            "/api/sections",
+            Some(cookie),
+            Some(json!({ "path": path, "title": "Sweets" })),
+        )
+        .await;
+    assert_eq!(reply.status, StatusCode::CREATED);
+}
+
+async fn put(k: &Kitchen, cookie: &str, id: &str, body: Value) -> Reply {
+    let reply = k
+        .call(
+            Method::PUT,
+            &format!("/api/recipes/{id}"),
+            Some(cookie),
+            Some(body),
+        )
+        .await;
+    assert_eq!(
+        reply.status,
+        StatusCode::OK,
+        "{}",
+        String::from_utf8_lossy(&reply.body)
+    );
+    reply
+}
+
+async fn move_to(k: &Kitchen, cookie: &str, id: &str, to: &str, tag: Option<&str>) -> Reply {
+    let headers: Vec<(&str, &str)> = tag.map(|t| ("if-match", t)).into_iter().collect();
+    k.call_with(
+        Method::POST,
+        &format!("/api/recipes/{id}/move"),
+        cookie,
+        &headers,
+        Some(json!({ "to": to })),
+    )
+    .await
+}
+
+#[tokio::test]
+async fn moving_a_recipe_takes_its_photo_and_relinks_the_others_in_one_commit() {
+    let k = kitchen_full(None, None, true);
+    let cookie = k.login().await;
+    add_section(&k, &cookie, "sweets").await;
+    k.upload("/api/images/mains/pictured", &cookie, PNG).await;
+    put(
+        &k,
+        &cookie,
+        "mains/pictured",
+        recipe(json!({ "title": "Pictured stew", "image": { "src": "pictured.png", "alt": "A stew" } })),
+    )
+    .await;
+    put(
+        &k,
+        &cookie,
+        "mains/linker",
+        recipe(json!({ "title": "Linker", "related": ["mains/pictured", "mains/lentil-soup"] })),
+    )
+    .await;
+    git(&k, &["init", "-q"]);
+    git(&k, &["config", "user.name", "Test"]);
+    git(&k, &["config", "user.email", "test@example.com"]);
+    git(&k, &["add", "-A"]);
+    git(&k, &["commit", "-q", "-m", "start"]);
+
+    let tag = etag(&k.get("/api/recipes/mains/pictured").await);
+    let moved = move_to(
+        &k,
+        &cookie,
+        "mains/pictured",
+        "sweets/stew-cake",
+        Some(&tag),
+    )
+    .await;
+    assert_eq!(
+        moved.status,
+        StatusCode::OK,
+        "{}",
+        String::from_utf8_lossy(&moved.body)
+    );
+    assert_eq!(moved.json()["id"], "sweets/stew-cake");
+    assert_eq!(
+        etag(&moved),
+        etag(&k.get("/api/recipes/sweets/stew-cake").await)
+    );
+
+    assert!(!k.path("recipes/mains/pictured.json").exists());
+    assert!(!k.path("recipes/mains/pictured.png").exists());
+    assert!(k.path("recipes/sweets/stew-cake.json").exists());
+    assert!(k.path("recipes/sweets/stew-cake.png").exists());
+    let page = k.get("/api/recipes/sweets/stew-cake").await.json();
+    assert_eq!(page["recipe"]["image"]["src"], "stew-cake.png");
+    let linker = fs::read_to_string(k.path("recipes/mains/linker.json")).unwrap();
+    assert!(linker.contains("sweets/stew-cake") && !linker.contains("mains/pictured"));
+    assert_eq!(
+        k.get("/api/recipes/mains/pictured").await.status,
+        StatusCode::NOT_FOUND
+    );
+
+    assert_eq!(git(&k, &["rev-list", "--count", "HEAD"]).trim(), "2");
+    assert_eq!(
+        git(&k, &["log", "-1", "--format=%s"]).trim(),
+        "content(recipes): move Pictured stew"
+    );
+    assert_eq!(git(&k, &["status", "--porcelain"]).trim(), "");
+}
+
+#[tokio::test]
+async fn a_move_is_refused_for_each_precondition() {
+    let k = kitchen();
+    let cookie = k.login().await;
+    add_section(&k, &cookie, "sweets").await;
+    put(&k, &cookie, "sweets/taken", recipe(json!({}))).await;
+    let uri = "mains/lentil-soup";
+    let tag = etag(&k.get(&format!("/api/recipes/{uri}")).await);
+
+    let none = move_to(&k, &cookie, uri, "sweets/lentil-soup", None).await;
+    assert_eq!(none.status, StatusCode::PRECONDITION_REQUIRED);
+    assert_eq!(none.json()["error"], "precondition_required");
+
+    let stale = move_to(&k, &cookie, uri, "sweets/lentil-soup", Some("\"0000\"")).await;
+    assert_eq!(stale.status, StatusCode::PRECONDITION_FAILED);
+    assert_eq!(stale.json()["error"], "conflict");
+
+    let taken = move_to(&k, &cookie, uri, "sweets/taken", Some(&tag)).await;
+    assert_eq!(taken.status, StatusCode::CONFLICT);
+    assert_eq!(taken.json()["error"], "exists");
+
+    let nowhere = move_to(&k, &cookie, uri, "dinners/lentil-soup", Some(&tag)).await;
+    assert_eq!(nowhere.status, StatusCode::UNPROCESSABLE_ENTITY);
+    assert_eq!(nowhere.json()["error"], "section_missing");
+
+    for bad in ["../x", "Sweets/x", "x", uri] {
+        let reply = move_to(&k, &cookie, uri, bad, Some(&tag)).await;
+        assert_eq!(reply.status, StatusCode::BAD_REQUEST, "{bad}");
+        assert_eq!(reply.json()["error"], "bad_request", "{bad}");
+    }
+
+    let missing = move_to(&k, &cookie, "mains/ghost", "sweets/ghost", Some(&tag)).await;
+    assert_eq!(missing.status, StatusCode::NOT_FOUND);
+    assert_eq!(missing.json()["error"], "not_found");
+
+    let anonymous = k
+        .call(
+            Method::POST,
+            &format!("/api/recipes/{uri}/move"),
+            None,
+            Some(json!({ "to": "sweets/lentil-soup" })),
+        )
+        .await;
+    assert_eq!(anonymous.status, StatusCode::UNAUTHORIZED);
+    assert!(k.path("recipes/mains/lentil-soup.json").exists());
+    assert!(!k.path("recipes/sweets/lentil-soup.json").exists());
+}
+
+#[tokio::test]
+async fn a_failed_check_on_a_linker_leaves_the_tree_as_it_was() {
+    let k = kitchen();
+    let cookie = k.login().await;
+    add_section(&k, &cookie, "sweets").await;
+    put(
+        &k,
+        &cookie,
+        "mains/linker",
+        recipe(json!({ "title": "Linker", "related": ["mains/lentil-soup"] })),
+    )
+    .await;
+    let broken = fs::read_to_string(k.path("recipes/mains/linker.json"))
+        .unwrap()
+        .replace("{@chickpeas}", "{@nothing}");
+    fs::write(k.path("recipes/mains/linker.json"), &broken).unwrap();
+    put(
+        &k,
+        &cookie,
+        "mains/other",
+        recipe(json!({ "title": "Other" })),
+    )
+    .await;
+
+    let before = |name: &str| fs::read(k.path(&format!("recipes/{name}"))).unwrap();
+    let soup = before("mains/lentil-soup.json");
+    let tag = etag(&k.get("/api/recipes/mains/lentil-soup").await);
+    let reply = move_to(
+        &k,
+        &cookie,
+        "mains/lentil-soup",
+        "sweets/lentil-soup",
+        Some(&tag),
+    )
+    .await;
+    assert_eq!(reply.status, StatusCode::UNPROCESSABLE_ENTITY);
+    assert_eq!(reply.json()["error"], "invalid");
+    assert!(!reply.codes().is_empty());
+    assert_eq!(before("mains/lentil-soup.json"), soup);
+    assert_eq!(before("mains/linker.json"), broken.as_bytes());
+    assert!(!k.path("recipes/sweets/lentil-soup.json").exists());
 }
