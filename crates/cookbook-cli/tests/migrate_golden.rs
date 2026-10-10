@@ -77,9 +77,8 @@ fn migrated() -> &'static BTreeMap<String, Vec<u8>> {
     })
 }
 
-fn recipes() -> BTreeMap<String, Recipe> {
-    migrated()
-        .iter()
+fn parse_tree(tree: &BTreeMap<String, Vec<u8>>) -> BTreeMap<String, Recipe> {
+    tree.iter()
         .filter(|(path, _)| !path.ends_with("_section.json"))
         .map(|(path, bytes)| {
             let id = path.strip_suffix(".json").unwrap().to_owned();
@@ -89,6 +88,19 @@ fn recipes() -> BTreeMap<String, Recipe> {
         .collect()
 }
 
+/// The migration output.
+fn recipes() -> BTreeMap<String, Recipe> {
+    parse_tree(migrated())
+}
+
+/// The committed `recipes/` tree, which has been copy-edited since the migration.
+fn committed() -> BTreeMap<String, Recipe> {
+    parse_tree(&read_tree(&root().join("recipes")))
+}
+
+/// The one recipe whose method was written after the migration: the legacy page had none.
+const CHARCUTERIE: &str = "first-courses/platters/charcuterie-board-for-10";
+
 fn legacy_page() -> Html {
     Html::parse_document(&fs::read_to_string(root().join("index.html")).unwrap())
 }
@@ -97,12 +109,12 @@ fn legacy_page() -> Html {
 fn pairs<'a>(
     page: &'a Html,
     migrated: &'a BTreeMap<String, Recipe>,
-) -> Vec<(ElementRef<'a>, &'a Recipe, &'static str)> {
+) -> Vec<(ElementRef<'a>, &'a Recipe, &'static str, &'static str)> {
     page.select(&selector("div.recipe"))
         .map(|element| {
             let legacy = element.value().id().unwrap();
             let entry = LEGACY_RECIPES.iter().find(|r| r.legacy == legacy).unwrap();
-            (element, &migrated[entry.id], entry.legacy)
+            (element, &migrated[entry.id], entry.legacy, entry.id)
         })
         .collect()
 }
@@ -128,30 +140,63 @@ fn migrates_all_nineteen_recipes() {
     assert_eq!(legacy_page().select(&selector("div.recipe")).count(), 19);
 }
 
-#[test]
-fn counts_match_the_legacy_page() {
-    let (page, recipes) = (legacy_page(), recipes());
-    for (element, recipe, legacy) in pairs(&page, &recipes) {
-        let ingredients = element
+struct LegacyCounts {
+    ingredients: usize,
+    steps: usize,
+    tips: usize,
+}
+
+fn legacy_counts(element: ElementRef) -> LegacyCounts {
+    LegacyCounts {
+        ingredients: element
             .select(&selector(".ingredients li"))
             .filter(|li| !is_group_heading(*li))
-            .count();
-        let methods = element.select(&selector(".method li")).count();
-        let tips = element.select(&selector(".chef-tip p")).count();
-        assert_eq!(
-            recipe.ingredients().count(),
-            ingredients,
-            "{legacy}: ingredients"
-        );
-        assert_eq!(recipe.steps.len(), methods.max(1), "{legacy}: steps");
-        assert_eq!(recipe.tips.len(), tips, "{legacy}: tips");
+            .count(),
+        steps: element.select(&selector(".method li")).count().max(1),
+        tips: element.select(&selector(".chef-tip p")).count(),
     }
 }
 
 #[test]
-fn every_legacy_amount_survives() {
+fn counts_match_the_legacy_page() {
     let (page, recipes) = (legacy_page(), recipes());
-    for (element, recipe, legacy) in pairs(&page, &recipes) {
+    for (element, recipe, legacy, _) in pairs(&page, &recipes) {
+        let want = legacy_counts(element);
+        assert_eq!(
+            recipe.ingredients().count(),
+            want.ingredients,
+            "{legacy}: ingredients"
+        );
+        assert_eq!(recipe.steps.len(), want.steps, "{legacy}: steps");
+        assert_eq!(recipe.tips.len(), want.tips, "{legacy}: tips");
+    }
+}
+
+/// The copy edit may reword everything, but it keeps every ingredient and step. Tips can only
+/// grow (intro material moved out of the summary), and charcuterie gained a written method.
+#[test]
+fn committed_recipes_keep_the_legacy_counts() {
+    let (page, committed) = (legacy_page(), committed());
+    assert_eq!(committed.len(), 19);
+    for (element, recipe, legacy, id) in pairs(&page, &committed) {
+        let want = legacy_counts(element);
+        assert_eq!(
+            recipe.ingredients().count(),
+            want.ingredients,
+            "{legacy}: ingredients"
+        );
+        if id == CHARCUTERIE {
+            assert!(recipe.steps.len() >= want.steps, "{legacy}: steps");
+        } else {
+            assert_eq!(recipe.steps.len(), want.steps, "{legacy}: steps");
+        }
+        assert!(recipe.tips.len() >= want.tips, "{legacy}: tips");
+    }
+}
+
+fn assert_amounts_survive(recipes: &BTreeMap<String, Recipe>) {
+    let page = legacy_page();
+    for (element, recipe, legacy, _) in pairs(&page, recipes) {
         let mut found: Vec<f64> = Vec::new();
         for group in &recipe.ingredient_groups {
             found.extend(group.total.iter().flat_map(values));
@@ -171,9 +216,21 @@ fn every_legacy_amount_survives() {
 }
 
 #[test]
+fn every_legacy_amount_survives() {
+    assert_amounts_survive(&recipes());
+}
+
+#[test]
+fn every_legacy_amount_survives_the_copy_edit() {
+    assert_amounts_survive(&committed());
+}
+
+/// The migrator's own output keeps the legacy wording. The committed tree has been copy-edited,
+/// so this checks the migration only.
+#[test]
 fn every_legacy_step_and_tip_keeps_its_text() {
     let (page, recipes) = (legacy_page(), recipes());
-    for (element, recipe, legacy) in pairs(&page, &recipes) {
+    for (element, recipe, legacy, _) in pairs(&page, &recipes) {
         let steps: Vec<String> = element
             .select(&selector(".method li"))
             .map(text_of)
@@ -195,7 +252,7 @@ fn every_legacy_step_and_tip_keeps_its_text() {
 #[test]
 fn servings_follow_the_legacy_config() {
     let (page, recipes) = (legacy_page(), recipes());
-    for (element, recipe, legacy) in pairs(&page, &recipes) {
+    for (element, recipe, legacy, _) in pairs(&page, &recipes) {
         if let Some(input) = element.select(&selector("input[type=number]")).next() {
             let shown: u32 = input.value().attr("value").unwrap().parse().unwrap();
             assert_eq!(recipe.servings, shown, "{legacy}");
@@ -220,23 +277,4 @@ fn vanilla_variant_replaces_the_keyed_parts() {
         .collect();
     assert_eq!(labels, ["Extract", "Essence", "Pods"]);
     assert_eq!(recipe.variants[0].options[0].default, Some(true));
-}
-
-// TEMPORARY: this byte-for-byte comparison with the committed tree catches hand edits to
-// `recipes/` until the copy-editing pass. Relax or remove it in that commit.
-#[test]
-fn output_equals_the_committed_recipes_tree() {
-    let committed = read_tree(&root().join("recipes"));
-    let fresh = migrated();
-    assert_eq!(
-        committed.keys().collect::<Vec<_>>(),
-        fresh.keys().collect::<Vec<_>>(),
-        "the set of files differs"
-    );
-    for (path, bytes) in fresh {
-        assert!(
-            &committed[path] == bytes,
-            "{path} differs from the migration output"
-        );
-    }
 }
