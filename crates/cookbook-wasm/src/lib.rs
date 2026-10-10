@@ -144,6 +144,15 @@ pub fn servings_label(servings: f64, noun: JsValue) -> Result<String, JsError> {
     Ok(core::servings_label(servings, noun.as_ref()))
 }
 
+/// The modules of a QR code for `text` as `{ size, dark }`, or `undefined` when the text is too long.
+#[wasm_bindgen]
+pub fn qr_matrix(text: &str) -> Result<JsValue, JsError> {
+    match core::qr_matrix(text) {
+        Some(matrix) => to_js(&matrix),
+        None => Ok(JsValue::UNDEFINED),
+    }
+}
+
 /// Converts between units; `food` selects a density for mass to volume. `undefined` when impossible.
 #[wasm_bindgen]
 pub fn convert(

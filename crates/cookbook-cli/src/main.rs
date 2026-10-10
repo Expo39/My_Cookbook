@@ -1,4 +1,6 @@
 mod build;
+mod cards;
+mod images;
 mod migrate;
 mod report;
 
@@ -55,6 +57,18 @@ enum Command {
         /// The folder to write `index.json`, `search.json`, `manifest.json` and `recipes/` into
         #[arg(long, default_value = "web/static/data")]
         out: PathBuf,
+        /// The folder to write the resized recipe photos into
+        #[arg(long, default_value = "web/static/img")]
+        images_out: PathBuf,
+    },
+    /// Render the share cards (Open Graph, portrait and story) for every recipe, skipping those that are up to date
+    Cards {
+        /// The folder to write `<id>/og.png`, `portrait.png` and `story.png` into
+        #[arg(long, default_value = "web/static/cards")]
+        out: PathBuf,
+        /// The address the cards link to; defaults to `PUBLIC_SITE_URL` and `BASE_PATH`, then `site.json`
+        #[arg(long)]
+        site_root: Option<String>,
     },
     /// Print the JSON Schema for recipes and sections
     Schema {
@@ -177,7 +191,28 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         },
-        Command::Build { out } => match build::run(&cli.root, &out) {
+        Command::Cards { out, site_root } => {
+            let site_root = site_root.unwrap_or_else(cards::site_root);
+            match cards::run(&cli.root, &out, &site_root) {
+                Ok(summary) => {
+                    println!(
+                        "cards: {} rendered, {} up to date, {} removed in {:.2?}",
+                        summary.rendered, summary.skipped, summary.removed, summary.elapsed
+                    );
+                    ExitCode::SUCCESS
+                }
+                Err(build::BuildError::Check(report)) => {
+                    println!("{report}");
+                    eprintln!("the checklist has errors, so no cards were rendered");
+                    ExitCode::FAILURE
+                }
+                Err(build::BuildError::Other(message)) => {
+                    eprintln!("cards failed: {message}");
+                    ExitCode::FAILURE
+                }
+            }
+        }
+        Command::Build { out, images_out } => match build::run(&cli.root, &out, &images_out) {
             Ok(built) => {
                 println!("built {} recipes into {}", built.count, out.display());
                 if !built.warnings.is_empty() {

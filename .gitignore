@@ -56,3 +56,7 @@ CLAUDE.md
 # built from recipes/ by `make data`
 web/static/data/
 .claude/worktrees/
+
+# built from recipes/ by `make cards` and `make data`
+web/static/cards/
+web/static/img/
