@@ -153,7 +153,12 @@ export class EditorState {
 
 	built = $derived.by(() => {
 		const src = this.photo ? `${this.slug}.jpg` : undefined;
-		return recipeFromForm($state.snapshot(this.form) as FormData, src ? { src } : undefined);
+		const { recipe, issues } = recipeFromForm(
+			$state.snapshot(this.form) as FormData,
+			src ? { src } : undefined
+		);
+		// The WASM core reads an `undefined` field as a unit value, so only what JSON keeps goes to it.
+		return { recipe: JSON.parse(JSON.stringify(recipe)) as Recipe, issues };
 	});
 
 	results = $derived.by<CheckResult[]>(() => {

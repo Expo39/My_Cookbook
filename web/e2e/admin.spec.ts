@@ -115,7 +115,7 @@ async function fillNewRecipe(page: Page) {
 	await page.getByLabel('Amount', { exact: true }).fill('200');
 	await page.getByLabel('Unit', { exact: true }).selectOption('g');
 	await page.getByLabel('Ingredient', { exact: true }).fill('caster sugar');
-	await page.getByLabel('Step 1').fill('Bake at {temp:180} for {timer:30}.');
+	await page.locator('#f-steps-0-text').fill('Bake at {temp:180} for {timer:30}.');
 }
 
 test.describe('setting up and unlocking', () => {
@@ -162,7 +162,10 @@ test.describe('setting up and unlocking', () => {
 		await unlocked(page);
 		await page.goto(recipeIds[0]);
 		const edit = page.getByRole('link', { name: 'Edit', exact: true });
-		await expect(edit).toHaveAttribute('href', new RegExp(`edit\\?id=${recipeIds[0]}$`));
+		await expect(edit).toHaveAttribute(
+			'href',
+			new RegExp(`edit\\?id=${encodeURIComponent(recipeIds[0])}$`)
+		);
 
 		await page.getByRole('button', { name: 'Settings' }).click();
 		await page
@@ -176,7 +179,7 @@ test.describe('setting up and unlocking', () => {
 		await mockGitHub(page);
 		await page.goto('edit');
 		await expect(page.getByRole('heading', { name: 'Editing is locked' })).toBeVisible();
-		await expect(page.getByLabel('GitHub token')).toBeVisible();
+		await expect(page.getByRole('main').getByLabel('GitHub token')).toBeVisible();
 		await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
 	});
 });
@@ -194,7 +197,7 @@ test.describe('the editor', () => {
 		await expect(page.getByLabel('Section', { exact: true })).toHaveValue('desserts/tarts');
 		await expect(page.getByLabel('Web address')).toHaveValue('lemon-tart');
 
-		await page.getByLabel('Photo', { exact: true }).setInputFiles({
+		await page.locator('#photo-file').setInputFiles({
 			name: 'tart.png',
 			mimeType: 'image/png',
 			buffer: Buffer.from(PNG, 'base64')

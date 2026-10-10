@@ -114,3 +114,61 @@ test('writes screenshots of the share sheet with a card made', async ({ page }) 
 		}
 	}
 });
+
+test('writes screenshots of the admin drawer and the editor', async ({ page }) => {
+	mkdirSync(out, { recursive: true });
+	test.setTimeout(240_000);
+	const wellington = 'main-courses/beef-steak/beef-wellington';
+	const blob = {
+		v: 1,
+		kdf: { name: 'PBKDF2', hash: 'SHA-256', iterations: 1000 },
+		iv: 'AAAAAAAAAAAAAAAA',
+		salt: 'AAAAAAAAAAAAAAAAAAAAAA==',
+		data: 'AAAA'
+	};
+	const openDrawer = async () => {
+		await page.getByRole('button', { name: 'Settings' }).click();
+		await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+	};
+
+	for (const scheme of ['light', 'dark'] as const) {
+		await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
+		for (const width of [375, 1440]) {
+			const label = `${width}-${scheme}`;
+			await page.setViewportSize({ width, height: width < 768 ? 812 : 900 });
+
+			await page.route('**/admin.json', (route) => route.fulfill({ status: 404, body: '' }));
+			await page.goto('./');
+			await openDrawer();
+			await page.screenshot({ path: join(out, `admin-drawer-setup-${label}.png`) });
+
+			await page.unroute('**/admin.json');
+			await page.route('**/admin.json', (route) => route.fulfill({ json: blob }));
+			await page.goto('./');
+			await openDrawer();
+			await expect(page.getByRole('button', { name: 'Unlock editing' })).toBeVisible();
+			await page.screenshot({ path: join(out, `admin-drawer-locked-${label}.png`) });
+
+			await page.evaluate(() => sessionStorage.setItem('sapori:admin-token', 'test-token'));
+			await page.goto('./');
+			await openDrawer();
+			await expect(page.getByRole('link', { name: 'New recipe' })).toBeVisible();
+			await page.screenshot({ path: join(out, `admin-drawer-unlocked-${label}.png`) });
+
+			await page.goto(`edit?id=${wellington}`);
+			await expect(page.getByRole('button', { name: 'Save recipe' })).toBeEnabled();
+			await page.screenshot({ path: join(out, `editor-${label}.png`) });
+			expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+				width
+			);
+
+			if (width < 768) {
+				await page.getByRole('radio', { name: /^Checks/ }).check({ force: true });
+				await page.screenshot({ path: join(out, `editor-checks-${label}.png`) });
+				await page.getByRole('radio', { name: 'Preview' }).check({ force: true });
+				await page.screenshot({ path: join(out, `editor-preview-${label}.png`) });
+			}
+			await page.evaluate(() => sessionStorage.clear());
+		}
+	}
+});

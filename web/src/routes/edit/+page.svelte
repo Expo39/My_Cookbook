@@ -139,20 +139,31 @@
 		draft = null;
 	}
 
-	async function jump(path: string) {
-		pane = 'edit';
-		await tick();
+	/** The form control a result is about; a path with no control of its own falls back to its parent's. */
+	function fieldFor(path: string): HTMLElement | null {
 		let current = path;
 		while (current) {
 			const id = fieldId(current);
 			const target = document.getElementById(id) ?? document.querySelector(`[id^="${id}-"]`);
-			if (target instanceof HTMLElement) {
-				target.scrollIntoView({ block: 'center' });
-				target.focus();
-				return;
-			}
+			if (target instanceof HTMLElement) return target;
 			current = current.replace(/(\.[^.[\]]+|\[\d+\])$/, '');
 		}
+		return null;
+	}
+
+	function reveal(target: HTMLElement | null | undefined) {
+		target?.scrollIntoView({ block: 'center' });
+		target?.focus();
+	}
+
+	async function jump(paths: string | string[]) {
+		pane = 'edit';
+		await tick();
+		const fields = [paths].flat().flatMap((path) => fieldFor(path) ?? []);
+		fields.sort((a, b) =>
+			a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+		);
+		reveal(fields[0]);
 	}
 
 	async function watch(writer: RecipeWriter, result: SaveResult) {
@@ -177,10 +188,10 @@
 
 	async function save() {
 		if (!ed) return;
-		ed.showAll = true;
-		const first = ed.errors[0];
-		if (first || !ed.canSave) {
-			if (first) void jump(ed.pathOf(first));
+		const editor = ed;
+		editor.showAll = true;
+		if (editor.errors.length || !editor.canSave) {
+			void jump(editor.errors.map((result) => editor.pathOf(result)));
 			return;
 		}
 		saving = true;
