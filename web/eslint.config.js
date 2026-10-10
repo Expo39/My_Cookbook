@@ -5,7 +5,16 @@ import globals from 'globals';
 import ts from 'typescript-eslint';
 
 export default ts.config(
-	{ ignores: ['build/', '.svelte-kit/', 'src/lib/wasm/', 'playwright-report/', 'test-results/'] },
+	{
+		ignores: [
+			'build/',
+			'.svelte-kit/',
+			'src/lib/wasm/',
+			'src/lib/types/recipe.ts',
+			'playwright-report/',
+			'test-results/'
+		]
+	},
 	js.configs.recommended,
 	...ts.configs.recommended,
 	...svelte.configs['flat/recommended'],
