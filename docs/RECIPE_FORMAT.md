@@ -32,7 +32,7 @@ The Rust types in `crates/cookbook-core/src/schema.rs` are the source of truth. 
 | `title` | string | yes | |
 | `summary` | string | yes | 1–2 sentences, shown on cards and as the intro |
 | `servings` | integer ≥ 1 | yes | the servings the quantities are written for |
-| `servingsNoun` | string | no | e.g. `"boards"` or `"crepes"`; defaults to "servings" |
+| `servingsNoun` | string \| `{ one, other }` | no | the plural alone (`"boards"`), or both forms (`{ "one": "person", "other": "people" }`); defaults to "serving" and "servings". `servings_label(n)` in the core, and `servingsLabel` in the web wrapper, give "1 person" or "4 people" |
 | `titleLocal` | string | no | the Maltese or Italian name, shown under the title |
 | `origin` | string | no | provenance, e.g. "Nanna Rita" or "adapted from …" |
 | `scaling` | `{ min?, max?, note? }` | no | the sensible range in servings; outside it the stepper warns but does not block |
@@ -82,7 +82,13 @@ Units: `g kg ml l tsp tbsp cup oz lb floz pinch`. With no unit the amount is a c
 | `{@sugar*1/2}` | a fraction of the ingredient, for one split across several steps |
 | `{temp:200}` | "200 °C", converted with the unit setting (°F, gas mark) |
 | `{temp:200/180}` | "200 °C (180 °C fan)" |
+| `{temp:180-200}` | an oven range, "180–200 °C" (350–400 °F); a range takes no fan value |
+| `{temp:63!}` / `{temp:52-55!}` | a trailing `!` marks an internal or meat temperature: "63 °C", "52–55 °C". It converts to the nearest °F ("126–131 °F"), not to oven steps of 25, shows no gas mark, and takes no fan value |
 | `{timer:12}` / `{timer:12-15}` / `{timer:12\|pasta}` | "12–15 min", which starts a timer (optionally named) when tapped |
+| `{timer:0.5}` / `{timer:30s}` | "30 sec"; any duration under a minute reads in seconds |
+| `{timer:90}` / `{timer:4h}` / `{timer:3-4h}` | "1 h 30 min", "4 h", "3–4 h"; 60 minutes or more reads in hours |
+
+Timer values are minutes unless they end in `s`, `m` or `h`. In a range, a unit on the last value applies to the first too (`3-4h`, `30-90s`), and either value may carry its own (`45m-1.5h`). Ranges read in hours when both ends are whole multiples of 30 minutes (`1.5–2 h`); otherwise each end is written out (`45 min–1 h 30 min`).
 
 ### Variant
 ```json
