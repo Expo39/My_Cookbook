@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::{
@@ -37,7 +38,7 @@ pub enum Segment {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[serde(
     tag = "type",
     rename_all = "camelCase",
@@ -196,7 +197,7 @@ pub fn parse_tokens(text: &str) -> Vec<Segment> {
     segments
 }
 
-fn temp_text(celsius: f64, fan: Option<f64>, system: UnitSystem) -> String {
+pub fn temp_text(celsius: f64, fan: Option<f64>, system: UnitSystem) -> String {
     let show = |c: f64| match system {
         UnitSystem::Metric => format!("{} °C", c.round() as i64),
         UnitSystem::Us => format!("{} °F", fahrenheit(c, TempKind::Oven)),

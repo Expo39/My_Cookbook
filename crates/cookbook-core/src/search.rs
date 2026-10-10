@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::schema::Recipe;
@@ -87,13 +88,13 @@ pub struct SearchIndex {
     terms: Vec<IndexedTerm>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 pub struct SearchHit {
     pub id: String,
     pub score: f64,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 pub struct Coverage {
     pub id: String,
     pub matched: usize,
@@ -213,6 +214,11 @@ impl SearchIndex {
                 .map(|(term, postings)| IndexedTerm { term, postings })
                 .collect(),
         }
+    }
+
+    /// The recipe ids in index order.
+    pub fn ids(&self) -> impl Iterator<Item = &str> {
+        self.docs.iter().map(|d| d.id.as_str())
     }
 
     pub fn len(&self) -> usize {

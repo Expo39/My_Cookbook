@@ -1,3 +1,4 @@
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::{
@@ -15,7 +16,7 @@ pub struct DisplayCtx<'a> {
     pub food: Option<&'a str>,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 pub struct Shown {
     pub text: String,
     pub min: f64,

@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 
-use serde::Serialize;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     scale::{ScaleOptions, ScaleRequest, scale},
@@ -9,14 +10,14 @@ use crate::{
     units::toggle_unit,
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 pub enum Level {
     Error,
     Warning,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 pub struct CheckResult {
     /// A stable code such as `E-TOKEN-UNRESOLVED`.
     pub id: &'static str,
@@ -32,7 +33,7 @@ pub fn has_errors(results: &[CheckResult]) -> bool {
     results.iter().any(|r| r.level == Level::Error)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, JsonSchema)]
 pub struct RecipeFile {
     /// Relative to `recipes/`, e.g. `first-courses/pasta/one-pot-pasta.json`.
     pub path: String,
@@ -72,7 +73,8 @@ pub struct Collection {
 }
 
 /// What a single-recipe check needs to know about the rest of the collection.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Deserialize, JsonSchema)]
+#[serde(default, rename_all = "camelCase")]
 pub struct CheckContext {
     pub known_ids: BTreeSet<String>,
     pub section_folders: BTreeSet<String>,

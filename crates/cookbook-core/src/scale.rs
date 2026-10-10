@@ -1,6 +1,7 @@
 use std::collections::BTreeMap;
 
-use serde::Serialize;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     format::{DisplayCtx, Shown, display_amount},
@@ -13,7 +14,8 @@ pub type ScaledAmount = Shown;
 
 const EPSILON: f64 = 1e-9;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Deserialize, JsonSchema)]
+#[serde(rename_all = "camelCase")]
 pub enum ScaleRequest {
     Servings(f64),
     Multiplier(f64),
@@ -27,7 +29,8 @@ pub enum ScaleRequest {
     Pan(Pan),
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, JsonSchema)]
+#[serde(default, rename_all = "camelCase")]
 pub struct ScaleOptions {
     pub system: UnitSystem,
     /// Chosen option per variant key; a variant left out uses its default option.
@@ -43,7 +46,7 @@ impl Default for ScaleOptions {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 pub struct Warning {
     pub code: &'static str,
     pub message: String,
@@ -68,7 +71,7 @@ pub(crate) struct Exact {
     food: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScaledIngredient {
     pub key: Option<String>,
@@ -161,7 +164,7 @@ impl Exact {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScaledGroup {
     pub name: Option<String>,
@@ -169,7 +172,7 @@ pub struct ScaledGroup {
     pub items: Vec<ScaledIngredient>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScaledStep {
     pub heading: Option<String>,
@@ -180,7 +183,7 @@ pub struct ScaledStep {
     pub hint: Option<String>,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ScaledRecipe {
     pub factor: f64,
