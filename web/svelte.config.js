@@ -6,6 +6,7 @@ export default {
 	preprocess: vitePreprocess(),
 	kit: {
 		adapter: adapter({ pages: 'build', assets: 'build', fallback: '404.html', strict: true }),
+		output: { bundleStrategy: 'single' },
 		paths: { base: process.env.BASE_PATH ?? '' }
 	}
 };
