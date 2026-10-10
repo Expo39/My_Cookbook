@@ -88,8 +88,12 @@ WRANGLER := npx --yes wrangler@4.147.0
 worker-deploy:
 	$(RUN) sh -c 'cd crates/cookbook-worker && $(WRANGLER) deploy'
 
+# Prompts for the Gemini key, then generates the import secret, stores it and prints it once to keep.
 worker-secrets:
-	docker compose run --rm -it dev sh -c 'cd crates/cookbook-worker && $(WRANGLER) secret put GEMINI_API_KEY && $(WRANGLER) secret put ADMIN_IMPORT_SECRET'
+	docker compose run --rm -it dev sh -c 'cd crates/cookbook-worker && $(WRANGLER) secret put GEMINI_API_KEY && \
+		secret=$$(node -e "console.log(require(\"crypto\").randomBytes(32).toString(\"hex\"))") && \
+		printf "%s" "$$secret" | $(WRANGLER) secret put ADMIN_IMPORT_SECRET && \
+		printf "\nAdmin import secret (keep it; it is entered once in the site settings):\n%s\n" "$$secret"'
 
 server:
 	docker compose run --rm --service-ports -e COOKBOOK_ROOT=/work -e WEB_DIR=/work/web/build -e COOKIE_SECURE=false dev cargo run -p cookbook-server

@@ -39,7 +39,7 @@ Everything runs in the dev container, so nothing is installed on the host. `wran
    export CLOUDFLARE_ACCOUNT_ID=...   # optional
    ```
 
-3. Deploy, then set the secrets. Each secret is prompted for, so it never appears in the shell history:
+3. Deploy, then set the secrets. `make worker-secrets` prompts for the Gemini key, so it never appears in the shell history, then generates `ADMIN_IMPORT_SECRET` and prints it once to keep:
 
    ```sh
    make worker-deploy
@@ -58,7 +58,7 @@ Importing spends quota and is for the editor only, so `/import` needs `X-Admin-P
 
 The admin UI gets the secret from the same place as the GitHub token: the secret is stored encrypted in the same blob, so unlocking editing with the passphrase unlocks both. The UI signs a fresh timestamp for each import with Web Crypto (`HMAC`, `SHA-256`). Only the verification is implemented here.
 
-Generate the secret with `openssl rand -hex 32`.
+`make worker-secrets` generates the secret; any random 32-byte hex string works if it is set by hand.
 
 ## Layout
 

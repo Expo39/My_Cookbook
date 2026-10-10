@@ -8,5 +8,8 @@
       "enabled": true,
       "handle": "tonys_foods"
     }
+  },
+  "ai": {
+    "endpoint": "https://sapori-ai.antoniogaldes2.workers.dev"
   }
 }

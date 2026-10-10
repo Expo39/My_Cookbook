@@ -79,7 +79,7 @@ The static site cannot hold the Gemini key, so the sous-chef and the importer go
    make worker-deploy
    ```
 
-2. Add the secrets. `GEMINI_API_KEY` is a Google AI Studio key; `ADMIN_IMPORT_SECRET` keys the importer's admin proof (generate it with `openssl rand -hex 32`). Both are prompted for, so neither reaches the shell history.
+2. Add the secrets. `make worker-secrets` prompts for `GEMINI_API_KEY` (a Google AI Studio key), so it never reaches the shell history. It then generates `ADMIN_IMPORT_SECRET`, which keys the importer's admin proof, stores it in the Worker and prints it once to be kept for the site's editing settings.
 
    ```sh
    make worker-secrets
