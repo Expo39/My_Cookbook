@@ -51,7 +51,6 @@ impl From<&AiError> for ApiError {
 #[serde(rename_all = "camelCase")]
 struct ChatBody {
     recipe_id: String,
-    recipe: Recipe,
     #[serde(default)]
     history: Vec<Turn>,
     question: String,
@@ -60,7 +59,6 @@ struct ChatBody {
 #[derive(Debug)]
 pub struct ChatInput {
     pub recipe_id: String,
-    pub recipe: Recipe,
     pub history: Vec<Turn>,
     pub question: String,
 }
@@ -103,6 +101,35 @@ fn valid_id(id: &str) -> bool {
         })
 }
 
+/// The public JSON for a recipe on the deployed site; `site` is the site's address including any
+/// base path. The request body's own copy of the recipe is never trusted, so servers fetch this.
+pub fn site_recipe_url(site: &str, recipe_id: &str) -> String {
+    format!(
+        "{}/data/recipes/{recipe_id}.json",
+        site.trim_end_matches('/')
+    )
+}
+
+#[derive(Deserialize)]
+struct SiteRecipe {
+    recipe: Recipe,
+}
+
+/// Reads the recipe out of a `data/recipes/<id>.json` file as the static build writes it.
+pub fn parse_site_recipe(text: &str) -> Result<Recipe, ApiError> {
+    serde_json::from_str::<SiteRecipe>(text)
+        .map(|data| data.recipe)
+        .map_err(|_| unknown_recipe())
+}
+
+pub fn unknown_recipe() -> ApiError {
+    ApiError::new(
+        404,
+        "unknown_recipe",
+        "The sous-chef cannot find that recipe.",
+    )
+}
+
 /// `declared` is the `Content-Length` header, when present.
 pub fn parse_chat(declared: Option<usize>, body: &[u8]) -> Result<ChatInput, ApiError> {
     check_size(declared, body, CHAT_MAX_BYTES)?;
@@ -123,7 +150,6 @@ pub fn parse_chat(declared: Option<usize>, body: &[u8]) -> Result<ChatInput, Api
     }
     Ok(ChatInput {
         recipe_id: parsed.recipe_id,
-        recipe: parsed.recipe,
         history: parsed.history,
         question: question.to_owned(),
     })
@@ -145,11 +171,7 @@ mod tests {
     use super::*;
 
     fn chat_json(extra: &str) -> String {
-        format!(
-            r#"{{"recipeId":"mains/soup","recipe":{{"title":"Soup","summary":"s","servings":2,
-            "ingredientGroups":[{{"items":[{{"item":"rice"}}]}}],"steps":[{{"text":"Cook."}}]}},
-            "question":"Can I freeze it?"{extra}}}"#
-        )
+        format!(r#"{{"recipeId":"mains/soup","question":"Can I freeze it?"{extra}}}"#)
     }
 
     #[test]
@@ -219,9 +241,22 @@ mod tests {
     }
 
     #[test]
-    fn an_invalid_recipe_shape_is_refused() {
-        let body = chat_json("").replace(r#""title":"Soup","#, "");
-        assert_eq!(parse_chat(None, body.as_bytes()).unwrap_err().status, 400);
+    fn a_recipe_in_the_body_is_ignored() {
+        let body = chat_json(r#","recipe":{"title":"Anything at all"}"#);
+        assert!(parse_chat(None, body.as_bytes()).is_ok());
+    }
+
+    #[test]
+    fn site_recipes_are_fetched_by_id_and_read_from_the_build_shape() {
+        assert_eq!(
+            site_recipe_url("https://example.org/My_Cookbook/", "mains/soup"),
+            "https://example.org/My_Cookbook/data/recipes/mains/soup.json"
+        );
+        let file = r#"{"recipe":{"title":"Soup","summary":"s","servings":2,
+            "ingredientGroups":[{"items":[{"item":"rice"}]}],"steps":[{"text":"Cook."}]},
+            "section":["mains"]}"#;
+        assert_eq!(parse_site_recipe(file).unwrap().title, "Soup");
+        assert_eq!(parse_site_recipe("<html>").unwrap_err().status, 404);
     }
 
     #[test]

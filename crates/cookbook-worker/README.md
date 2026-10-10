@@ -6,7 +6,7 @@ A Cloudflare Worker, written in Rust, that proxies the sous-chef chat and the re
 
 | route | auth | body | success |
 |---|---|---|---|
-| `POST /chat` | none (per-IP limit) | `{ recipeId, recipe, history, question }`, at most 32 KB | `{ reply, truncated }` |
+| `POST /chat` | none (per-IP limit) | `{ recipeId, history, question }`, at most 32 KB; a `recipe` in the body is ignored | `{ reply, truncated }` |
 | `POST /import` | `X-Admin-Proof` header | `{ text }`, at most 20 KB | `{ recipe, checks }` |
 | `OPTIONS *` | none | none | 204 with the CORS headers |
 
@@ -16,6 +16,7 @@ Errors are always `{ error, message }`, where `message` is fit to show to a cook
 
 | name | kind | notes |
 |---|---|---|
+| `SITE_URL` | var | the deployed site's address including its base path, e.g. `https://expo39.github.io/My_Cookbook`. `/chat` fetches `<SITE_URL>/data/recipes/<recipeId>.json` itself, so the sous-chef only ever discusses published recipes |
 | `ALLOWED_ORIGINS` | var | comma-separated, e.g. `https://expo39.github.io,http://localhost:5173` |
 | `GEMINI_MODEL` | var | defaults to the model compiled into `cookbook-ai` |
 | `GEMINI_API_KEY` | secret | Google AI Studio key |

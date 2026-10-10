@@ -9,6 +9,7 @@ mod schema;
 mod types;
 
 pub use config::{DEFAULT_MODEL, GeminiConfig, endpoint};
+pub use cookbook_core::Recipe;
 pub use error::AiError;
 pub use prompts::{
     HISTORY_TURNS, Imported, MESSAGE_CHARS, Role, Turn, chat_request, import_request,
@@ -16,6 +17,7 @@ pub use prompts::{
 };
 pub use request::{
     ApiError, CHAT_MAX_BYTES, ChatInput, IMPORT_MAX_BYTES, parse_chat, parse_import,
+    parse_site_recipe, site_recipe_url, unknown_recipe,
 };
 pub use schema::import_schema;
 pub use types::{

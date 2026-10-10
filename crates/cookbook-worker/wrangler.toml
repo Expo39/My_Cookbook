@@ -6,6 +6,7 @@ compatibility_date = "2026-10-01"
 command = "worker-build --release"
 
 [vars]
+SITE_URL = "https://expo39.github.io/My_Cookbook"
 ALLOWED_ORIGINS = "https://expo39.github.io,http://localhost:5173"
 GEMINI_MODEL = "gemini-3.8-flash"
 RATE_LIMIT_CHAT = "30"
