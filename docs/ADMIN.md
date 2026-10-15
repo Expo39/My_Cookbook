@@ -1,11 +1,15 @@
 # Editing recipes from the site
 
-Recipes can be added, changed, moved and deleted from the site itself, without a checkout or a terminal. On GitHub Pages the editor commits straight to the repository, so every change goes through the same checklist and CI as any other and reaches the site when the deploy finishes. On a self-hosted server the editor writes through the server's API instead.
+Anyone can add recipes of their own from the site. Those recipes are kept in the visitor's browser and belong to them: they can change or delete them, and nobody else sees them. The cookbook's published recipes belong to its owner and can only be changed by whoever holds the GitHub token.
+
+With the token unlocked, recipes can be added, changed, moved and deleted in the cookbook itself, without a checkout or a terminal. On GitHub Pages the editor commits straight to the repository, so every change goes through the same checklist and CI as any other and reaches the site when the deploy finishes. On a self-hosted server the editor writes through the server's API instead.
 
 The other ways to add a recipe are the `add-recipe` skill for Claude Code and editing the JSON files by hand (see [RECIPE_FORMAT.md](RECIPE_FORMAT.md)). All of them end in the same recipe checklist, so a recipe cannot go live unless every check passes.
 
 ## Contents
 
+- [Recipes on this device](#recipes-on-this-device)
+- [Sharing a recipe with everyone](#sharing-a-recipe-with-everyone)
 - [Editing states](#editing-states)
 - [Setting up editing](#setting-up-editing)
 - [Unlocking on another device](#unlocking-on-another-device)
@@ -18,9 +22,30 @@ The other ways to add a recipe are the `add-recipe` skill for Claude Code and ed
 - [Importing a recipe with AI](#importing-a-recipe-with-ai)
 - [Self-hosted mode](#self-hosted-mode)
 
+## Recipes on this device
+
+**Add a recipe** (on the home page, on a section page, and in **Settings > Your recipes**) opens the editor at `/edit` without any token. A recipe saved there goes to the browser's IndexedDB, not to GitHub, and appears on the home page under "Your recipes" and in its section, marked "Yours". It opens at `/mine?id=<id>`, which shows it with every feature of a published recipe (scaling, units, timers, cook mode, the shopping list and the sous-chef) and a note that it is kept in this browser only.
+
+The editor is simpler in this mode, so that someone who has never seen a recipe file can fill it in:
+
+- A short introduction says that a title, the ingredients and the method are all a recipe needs.
+- **Paste a list** leads the ingredients: one ingredient per line, read with the same parser the site uses. Each row shows the amount, unit, ingredient and note, with **Optional ingredient** and **To taste, no amount** as tick boxes; "Up to", "Before the amount", the scaling mode and the key are under **More options**, and a group's total is under **Group total (optional)**.
+- The method is written in plain words. "Bake for 25 minutes at 200C" is saved as `Bake for {timer:25} at {temp:200}`, so the cook gets a timer and a converted temperature, and the editor lists what it found under each step. Hours and minutes, ranges ("20-25 minutes"), seconds, Fahrenheit and fan temperatures ("180°C (160°C fan)") are recognised. When the recipe is opened again the tokens are shown as the same words. **Insert** still adds ingredient references and named timers.
+- The local name, what a serving is called, the difficulty, tags, tips and related recipes are under **More details (optional)**.
+- The web address follows the title and is not shown, new sections cannot be created, and photos and the AI import are not offered; all of these belong to the cookbook.
+- The checklist pane is called **To do**.
+
+**Settings > Your recipes** counts the recipes on the device and has **Export** (a JSON file of them all), **Import** (reads such a file back; a file with any broken recipe is refused whole) and **Clear all personal recipes**, which asks first and names how many will be deleted. The browser is asked to keep the site's storage, but clearing the site's data deletes the recipes, so exporting a copy is worthwhile.
+
+## Sharing a recipe with everyone
+
+Each recipe in **Settings > Your recipes** has **Share with everyone**. Sharing needs the GitHub token: while editing is locked, the button points at the **Sharing to GitHub** panel below it, where the token is set up or unlocked as described in the rest of this guide.
+
+Once unlocked, **Share with everyone** asks for confirmation, then commits the recipe to `recipes/<id>.json` on the configured branch (`content(recipes): add <title>`), exactly as the token holder's editor would. From then on the recipe is the cookbook's: the copy on the device is marked as shared and locks, and the cookbook's copy appears after the next deploy. When the deployed index carries the recipe, the shared copy is removed from the device the next time the site loads. A commit that touches only `recipes/` takes CI's fast path (see [DEPLOYMENT.md](DEPLOYMENT.md#the-fast-path)), so it is live in a few minutes.
+
 ## Editing states
 
-Editing is controlled from **Settings** (the sliders icon), under **Editing**. What that panel shows depends on whether editing has been set up for the site and whether it is unlocked in the current tab.
+Editing is controlled from **Settings** (the sliders icon), under **Sharing to GitHub (optional)**. What that panel shows depends on whether editing has been set up for the site and whether it is unlocked in the current tab.
 
 ```mermaid
 stateDiagram-v2
@@ -33,7 +58,7 @@ stateDiagram-v2
     Unlocked --> [*]
 ```
 
-| State | What the Editing panel shows |
+| State | What the Sharing to GitHub panel shows |
 |---|---|
 | Not set up | The set-up form: GitHub token, password, repeated password and an optional AI import secret |
 | Locked | A password field and **Unlock editing** |
@@ -57,7 +82,7 @@ Editing needs a GitHub token that can commit to the repository. The token is enc
 
 ### 2. Set up editing on the site
 
-1. Open **Settings > Editing**. The set-up form appears while no editing key has been published.
+1. Open **Settings > Sharing to GitHub**. The set-up form appears while no editing key has been published.
 2. Paste the token into **GitHub token**.
 3. Choose a password of at least 12 characters and repeat it. A passphrase of several unrelated words is stronger than a short, complex password.
 4. If the AI importer is deployed, paste its secret into **AI import secret** (see [Importing a recipe with AI](#importing-a-recipe-with-ai)). It can be added later.
@@ -82,22 +107,22 @@ If the password may have been guessed, revoke the token on GitHub immediately, c
 
 ## Unlocking on another device
 
-Open **Settings > Editing**, enter the password and press **Unlock editing**. The browser downloads `admin.json` from the site, derives the key and decrypts the token locally. A wrong password shows a short message and nothing else happens. The editor page at `/edit` asks for the password itself when editing is locked.
+Open **Settings > Sharing to GitHub**, enter the password and press **Unlock editing**. The browser downloads `admin.json` from the site, derives the key and decrypts the token locally. A wrong password shows a short message and nothing else happens. The editor page at `/edit` offers the unlock form itself when a published recipe is opened while editing is locked.
 
 ## Changing the password or the token
 
-Both options are in **Settings > Editing** while editing is unlocked, and each commits a new `admin.json`. The change reaches other devices with the next deploy.
+Both options are in **Settings > Sharing to GitHub** while editing is unlocked, and each commits a new `admin.json`. The change reaches other devices with the next deploy.
 
 - **Change the password** asks for the current password and the new one (twice), decrypts the stored secrets with the current password and re-encrypts them under the new one. The token itself does not change.
 - **Replace the token or AI secret** is for a token that has expired or been revoked, or for a new import secret. It asks for the password; a field left blank keeps the value already stored.
 
 ## The editor
 
-**New recipe** in Settings opens a blank form, and when editing is unlocked every recipe page has an **Edit** button. The editor is one static page at `/edit`. It is kept out of search engines and out of the site's search index.
+With editing unlocked, **New recipe** in Settings opens a blank form that saves to GitHub, and every recipe page has an **Edit** button. Without the token, the same page edits recipes on the device instead (see [Recipes on this device](#recipes-on-this-device)); a published recipe opened there says it is part of the cookbook and offers to add a recipe of one's own. The editor is one static page at `/edit`. It is kept out of search engines and out of the site's search index.
 
 When an existing recipe is opened, the editor loads it from the repository (or the server) as it is stored now, not from the published site, so an edit always starts from the latest saved version.
 
-The form sits beside a checklist and a live preview. On a phone these become three tabs: **Edit**, **Checks** and **Preview**.
+The form sits beside a checklist and a live preview. On a phone these become three tabs: **Edit**, **To do** and **Preview**.
 
 ### Form sections
 

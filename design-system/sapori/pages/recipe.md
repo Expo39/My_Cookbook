@@ -21,4 +21,6 @@
 - **Hints and tips:**
   - Scaling hints ("check from the original time", "cook in batches") appear as small warning-coloured notes under the affected step.
   - The chef's tip is a surface panel with an accent uppercase label.
-- **Footer:** related recipes as compact cards; "Ask the sous-chef" (when AI is configured) opens a side drawer on desktop and a bottom sheet on mobile.
+- **Update banner:** when the open recipe was redeployed, a sticky floating notice (surface, 4 px primary left rule, `--shadow-float`) says "This recipe was updated" with a primary "Show the new version" button and a muted close cross. It is held back while cook mode is open, and applying it keeps the servings, ticks, timers and list.
+- **Your own recipe:** the same page at `/mine?id=`, with a device note under the breadcrumb, an Edit button, and no share or JSON-LD.
+- **Footer:** related recipes as compact cards; "Ask the sous-chef" (when AI is configured) opens a side drawer on desktop and a bottom sheet on mobile. The sheet rides above the phone keyboard. While waiting, three bouncing primary dots read "Thinking...", then "Still thinking... N s" after 4 s; the answer then streams into its bubble behind a blinking caret. A failed question stays in the log, dashed and faded, beside a warning row with **Try again**.
