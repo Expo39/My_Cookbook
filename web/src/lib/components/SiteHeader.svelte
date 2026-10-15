@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { afterNavigate } from '$app/navigation';
+	import { base } from '$app/paths';
 	import { page } from '$app/state';
 	import { favouritesHref, homeHref, pageHref, searchHref, shoppingHref } from '$lib/links';
 	import { siteTitle } from '$lib/title';
@@ -45,7 +46,7 @@
 <header>
 	<div class="inner">
 		<a class="brand" href={homeHref()}>
-			<Icon name="hat" size={26} />
+			<img class="logo" src="{base}/favicon.svg" alt="" width="28" height="28" />
 			<span>{siteTitle}</span>
 		</a>
 		<div class="tools">
@@ -83,12 +84,6 @@
 						>
 					</li>
 				{/each}
-				<li class="utility">
-					<a href={favouritesHref()} aria-current={here(favouritesHref())}>Favourites</a>
-				</li>
-				<li class="utility">
-					<a href={shoppingHref()} aria-current={here(shoppingHref())}>Shopping list</a>
-				</li>
 			</ul>
 		</nav>
 	</div>
@@ -112,6 +107,8 @@
 
 	.brand {
 		display: inline-flex;
+		flex-shrink: 1;
+		min-inline-size: 0;
 		align-items: center;
 		gap: var(--space-2);
 		min-block-size: var(--target);
@@ -126,7 +123,7 @@
 	.tools {
 		display: flex;
 		align-items: center;
-		gap: var(--space-2);
+		gap: var(--space-1);
 		margin-inline-start: auto;
 		order: 1;
 	}
@@ -148,10 +145,6 @@
 	.tool:hover,
 	.tool[aria-current='page'] {
 		background: var(--colour-tint);
-	}
-
-	.tool {
-		display: none;
 	}
 
 	.desktop-search {
@@ -230,6 +223,33 @@
 		color: var(--colour-on-primary);
 	}
 
+	.logo {
+		flex: none;
+		inline-size: 1.75rem;
+		block-size: 1.75rem;
+		border-radius: var(--radius-s);
+	}
+
+	/* Phones keep the logo, the name and all four tools on one row: the name shrinks a little. */
+	@media (max-width: 25.99rem) {
+		.inner {
+			column-gap: var(--space-2);
+		}
+
+		.tools {
+			gap: 0;
+		}
+
+		.brand {
+			font-size: clamp(0.95rem, 3.8vw, var(--text-l));
+		}
+
+		.logo {
+			inline-size: 1.5rem;
+			block-size: 1.5rem;
+		}
+	}
+
 	@media (min-width: 64rem) {
 		.inner {
 			flex-wrap: nowrap;
@@ -277,15 +297,11 @@
 			display: block;
 		}
 
+		.tools {
+			gap: var(--space-2);
+		}
+
 		.icon[href] {
-			display: none;
-		}
-
-		.tool {
-			display: grid;
-		}
-
-		.utility {
 			display: none;
 		}
 	}

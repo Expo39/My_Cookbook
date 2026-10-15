@@ -7,6 +7,7 @@
 		amount,
 		amountText,
 		toTaste = false,
+		optional = false,
 		changed = false,
 		notes = [],
 		checked,
@@ -22,6 +23,8 @@
 		amountText?: string;
 		/** Shows "to taste" in the amount slot when there is no amount. */
 		toTaste?: boolean;
+		/** Adds an "optional" tag after the name. */
+		optional?: boolean;
 		changed?: boolean;
 		/** Smaller lines under the ingredient, such as hints or where it came from. */
 		notes?: string[];
@@ -39,7 +42,9 @@
 		<span class="amount num" class:changed class:taste={!amount && !amountText && toTaste}
 			>{#if amount}{@render amount()}{:else if amountText}{amountText}{:else if toTaste}to taste{/if}</span
 		>
-		<label for={id}>{text}</label>
+		<label for={id}
+			>{text}{#if optional}<span class="optional">optional</span>{/if}</label
+		>
 		{#each shown as note (note)}
 			<span class="note">{note}</span>
 		{/each}
@@ -131,6 +136,20 @@
 
 	label {
 		cursor: pointer;
+	}
+
+	.optional {
+		display: inline-block;
+		margin-inline-start: var(--space-2);
+		padding: 0 var(--space-2);
+		border-radius: var(--radius-pill);
+		background: var(--colour-tint);
+		color: var(--colour-muted);
+		font-size: var(--text-xs);
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		text-decoration: none;
+		vertical-align: 0.1em;
 	}
 
 	.note {
