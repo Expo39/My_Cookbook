@@ -9,6 +9,7 @@ Live site: <https://expo39.github.io/My_Cookbook/>
 ## Contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Tech stack](#tech-stack)
 - [Architecture](#architecture)
@@ -25,7 +26,21 @@ Live site: <https://expo39.github.io/My_Cookbook/>
 
 Every recipe is one JSON file under `recipes/`, and the folder tree gives the site its sections. A Rust core (`cookbook-core`) holds the schema, the scaling engine, the unit tables, the ingredient-line parser, search and the recipe checklist. The same core runs at build time, through the `cookbook-cli` command line tool, and in the browser, compiled to WebAssembly, so the build and the page can never disagree about an amount.
 
-The web app is a SvelteKit site, pre-rendered with `adapter-static` and published on GitHub Pages. Recipes can be edited from the site itself: the editor commits to GitHub, and CI checks and deploys the change. An optional Cloudflare Worker adds an AI sous-chef and a recipe importer, and an optional Axum server can host the whole cookbook without GitHub Pages.
+The web app is a SvelteKit site, pre-rendered with `adapter-static` and published on GitHub Pages. Anyone can add recipes of their own, which stay in their browser; the cookbook's own recipes are edited from the site by the token holder, whose editor commits to GitHub, and CI checks and deploys the change. An optional Cloudflare Worker adds an AI sous-chef and a recipe importer, and an optional Axum server can host the whole cookbook without GitHub Pages.
+
+## Screenshots
+
+The "Bright Mediterranean" design: sea blue and terracotta on limestone white, with a dark theme to match.
+
+| Home | A recipe, in the dark theme |
+|---|---|
+| ![The home page, with the sections as cards under the search box](docs/screenshots/home-desktop.webp) | ![Beef Wellington in the dark theme, with the ingredients beside the method and its timers](docs/screenshots/recipe-desktop-dark.webp) |
+
+| Scaled on a phone | Adding your own recipe | The sous-chef |
+|---|---|---|
+| ![Beef Wellington scaled to 8 servings on a phone, with tappable amounts](docs/screenshots/recipe-phone.webp) | ![The editor on a phone, showing the timers and temperature found in a step written in plain words](docs/screenshots/editor-phone.webp) | ![The sous-chef answering whether the recipe can be made ahead](docs/screenshots/souschef-phone.webp) |
+
+A one-minute walkthrough, with captions, is on the site's [How to use](https://expo39.github.io/My_Cookbook/how-to-use) page.
 
 ## Features
 
@@ -36,7 +51,9 @@ The web app is a SvelteKit site, pre-rendered with `adapter-static` and publishe
 - Cook mode: one step at a time, keyboard and swipe navigation, the step's ingredients beside it, and a screen wake lock where the browser supports one.
 - Timers started from the method, kept as end times so they survive a reload, and able to run side by side.
 - A "serve at" planner that works back from a serving time when the steps carry timings.
-- Ticks on ingredients and steps, private notes, favourites and recently viewed recipes, all kept on the device.
+- Ticks on ingredients and steps, private notes, favourites and recently viewed recipes, all kept on the device. Ticks follow the ingredient or step, so they survive an update to the recipe.
+- A recipe updated while it is open offers its new version in place, keeping the servings, ticks, timers and list.
+- A how-to page covering every feature, with a recorded walkthrough.
 - Recipe variants (for example vanilla extract or pods), each replacing ingredients, steps and tips by key.
 
 ### Scaling and units
@@ -53,6 +70,13 @@ The web app is a SvelteKit site, pre-rendered with `adapter-static` and publishe
 - A printable A5 index card.
 - A shopping list that merges ingredients across recipes and can be shared as text.
 
+### Your own recipes
+
+- Anyone can add recipes, with no account and no token. They are kept in the browser (IndexedDB), appear on the home page and in their section marked "Yours", and have every feature of a published recipe.
+- The editor is friendly in this mode: paste the ingredient list in one go, write the method in plain words ("bake for 25 minutes at 200C" becomes a timer and a converted temperature), and find the rarer fields folded away.
+- Export, import and clear-all in Settings, and search and favourites include them.
+- **Share with everyone** hands a recipe to the cookbook with the GitHub token, after which it is the cookbook's.
+
 ### Editing
 
 - An in-site editor with a live preview and the recipe checklist running in WebAssembly as the recipe is typed.
@@ -62,7 +86,7 @@ The web app is a SvelteKit site, pre-rendered with `adapter-static` and publishe
 
 ### AI
 
-- A sous-chef chat on each recipe page, scoped to that published recipe.
+- A sous-chef chat on each recipe page, your own recipes included, with the answer streamed as it is written. A busy model is retried with backoff, then an optional fallback model; Cloudflare Turnstile can be switched on.
 - Import from text in the editor, which fills the form for review.
 - Both go through a Cloudflare Worker (or the self-hosted server), so the Gemini key never reaches the browser. Without an AI endpoint, both are hidden.
 
@@ -146,9 +170,10 @@ The home page lists the top-level sections and recently added recipes, with sear
 
 ### Adding a recipe
 
-There are three routes, and all of them end in the same recipe checklist (`cookbook-cli check`), so a recipe cannot go live unless every check passes.
+There are four routes, and all of them end in the same recipe checklist (`cookbook-cli check`), so a recipe cannot go live unless every check passes.
 
-- **The in-site editor.** Open **Settings**, then **Editing**, and unlock editing with the password. **New recipe** opens a blank form; every recipe page has an **Edit** button. Saving commits to GitHub and shows the build status. The first set-up and the rest of the editor are described in [docs/ADMIN.md](docs/ADMIN.md).
+- **On the device.** **Add a recipe** on the home page opens the editor without any token; the recipe is saved in the browser. **Share with everyone** in **Settings > Your recipes** later commits it to the cookbook with the GitHub token.
+- **The in-site editor.** Open **Settings**, then **Sharing to GitHub**, and unlock editing with the password. **New recipe** opens a blank form; every recipe page has an **Edit** button. Saving commits to GitHub and shows the build status. The first set-up and the rest of the editor are described in [docs/ADMIN.md](docs/ADMIN.md).
 - **The `add-recipe` skill.** In Claude Code, paste a recipe, a link or a photo. The skill writes the JSON file under `recipes/`, runs the checklist and proposes a commit.
 - **By hand.** Write the JSON file following [docs/RECIPE_FORMAT.md](docs/RECIPE_FORMAT.md), then run `make check`.
 
