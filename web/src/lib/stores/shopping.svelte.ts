@@ -4,6 +4,9 @@ import { readJson, writeJson } from './storage';
 
 export const SHOPPING_KEY = 'sapori:shopping';
 
+/** The list's own "recipe" for things the cook adds by hand, such as kitchen roll or extra lemons. */
+export const OWN_ITEMS = 'own';
+
 const isItem = (value: unknown): value is ShoppingItem =>
 	typeof value === 'object' && value !== null && typeof (value as ShoppingItem).item === 'string';
 
@@ -81,6 +84,17 @@ class ShoppingList {
 	/** Adding a recipe again replaces its earlier entry, so a change of scale is not counted twice. */
 	add(recipe: ShoppingRecipe): void {
 		this.recipes = [...this.recipes.filter((existing) => existing.id !== recipe.id), recipe];
+		this.#save();
+	}
+
+	/** Adds a line typed in by hand, beside the recipes' lines. */
+	addOwn(item: ShoppingItem): void {
+		const own = this.recipes.find((recipe) => recipe.id === OWN_ITEMS);
+		const items = [...(own?.items ?? []), item];
+		this.recipes = [
+			...this.recipes.filter((recipe) => recipe.id !== OWN_ITEMS),
+			{ id: OWN_ITEMS, title: 'Added by you', serves: '', items }
+		];
 		this.#save();
 	}
 

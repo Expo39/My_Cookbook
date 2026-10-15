@@ -300,7 +300,7 @@ export function groupByRecipe(
 ): LineGroup[] {
 	return recipes.map((recipe) => ({
 		id: recipe.id,
-		label: `${recipe.title} (${recipe.serves})`,
+		label: recipe.serves ? `${recipe.title} (${recipe.serves})` : recipe.title,
 		lines: mergeLines([recipe], convert, system)
 	}));
 }

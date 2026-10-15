@@ -209,9 +209,7 @@ test.describe('shopping list', () => {
 
 	test('merges recipes, ticks, clears and shares', async ({ page }) => {
 		await page.goto('shopping-list');
-		await expect(
-			page.getByText('Your list is empty. Add ingredients from any recipe.')
-		).toBeVisible();
+		await expect(page.getByText(/^Your list is empty/)).toBeVisible();
 
 		await page.goto(`${brulee}?x=2`);
 		await waitForCore(page);
@@ -252,9 +250,7 @@ test.describe('shopping list', () => {
 
 		await page.getByRole('button', { name: 'Clear all' }).click();
 		await page.getByRole('button', { name: 'Tap again to clear all' }).click();
-		await expect(
-			page.getByText('Your list is empty. Add ingredients from any recipe.')
-		).toBeVisible();
+		await expect(page.getByText(/^Your list is empty/)).toBeVisible();
 	});
 
 	test("a quantity can be changed to buy extra, and put back to the recipes' amount", async ({
@@ -282,6 +278,30 @@ test.describe('shopping list', () => {
 		await expect(
 			yolks.getByRole('button', { name: /egg yolks: 5, change the amount/ })
 		).toBeVisible();
+	});
+
+	test('the cook can add their own items, with or without an amount', async ({ page }) => {
+		await page.goto('shopping-list');
+		const field = page.getByLabel('Add an item');
+		await field.fill('2 lemons');
+		await field.press('Enter');
+		await field.fill('kitchen roll');
+		await page.getByRole('button', { name: 'Add', exact: true }).click();
+
+		const lemons = page.getByRole('listitem').filter({ hasText: 'lemons' });
+		await expect(
+			lemons.getByRole('button', { name: /lemons: 2, change the amount/ })
+		).toBeVisible();
+		await expect(lemons).toContainText('Added by you');
+		await expect(
+			page.getByRole('listitem').filter({ hasText: 'kitchen roll' }).getByRole('button', {
+				name: 'kitchen roll: add an amount'
+			})
+		).toBeVisible();
+
+		await page.reload();
+		await page.getByRole('radio', { name: 'Recipe' }).check();
+		await expect(page.getByRole('heading', { name: 'Added by you', exact: true })).toBeVisible();
 	});
 
 	test('adding a recipe again updates it instead of doubling it', async ({ page }) => {
