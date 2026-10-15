@@ -35,7 +35,7 @@
 	{#if section.recipes.length}
 		<ul class="grid">
 			{#each section.recipes as card (card.id)}
-				<li><RecipeCard {card} /></li>
+				<li><RecipeCard {card} showSection={false} /></li>
 			{/each}
 		</ul>
 	{/if}
@@ -49,7 +49,7 @@
 			{#if child.summary}<p class="summary">{child.summary}</p>{/if}
 			<ul class="grid">
 				{#each descendantRecipes(child) as card (card.id)}
-					<li><RecipeCard {card} /></li>
+					<li><RecipeCard {card} showSection={false} /></li>
 				{/each}
 			</ul>
 		</section>
@@ -98,7 +98,7 @@
 
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+		grid-template-columns: var(--card-grid);
 		gap: var(--space-4);
 	}
 </style>

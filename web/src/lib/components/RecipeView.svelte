@@ -402,7 +402,7 @@
 
 	.related ul {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+		grid-template-columns: var(--card-grid);
 		gap: var(--space-4);
 	}
 

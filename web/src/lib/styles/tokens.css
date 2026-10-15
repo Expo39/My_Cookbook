@@ -43,6 +43,7 @@
 	--radius-pill: 999px;
 
 	--measure: 68ch;
+	--card-grid: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
 	--page-max: 72rem;
 	--gutter: max(var(--space-4), env(safe-area-inset-left, 0px));
 	--target: 2.75rem;

@@ -6,11 +6,11 @@
 
 <nav aria-label="Breadcrumb">
 	<ol>
-		{#each trail as crumb, position (crumb.label)}
-			<li>
-				{#if position > 0}<Icon name="chevronRight" size={14} />{/if}
+		{#each trail as crumb (crumb.label)}
+			<li class:here={!crumb.href}>
 				{#if crumb.href}
 					<a href={crumb.href}>{crumb.label}</a>
+					<Icon name="chevronRight" size={14} />
 				{:else}
 					<span aria-current="page">{crumb.label}</span>
 				{/if}
@@ -22,44 +22,55 @@
 <style>
 	nav {
 		min-inline-size: 0;
-	}
-
-	ol {
-		display: flex;
-		gap: var(--space-2);
-		color: var(--colour-muted);
 		font-size: var(--text-s);
 	}
 
-	/* One line: the crumbs share the width and shorten with an ellipsis, Home and the chevrons never do. */
-	li {
+	/* The whole trail, wrapped onto more lines when it must, never cut short with an ellipsis. */
+	ol {
 		display: flex;
-		flex: 0 1 auto;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: var(--space-2);
-		min-inline-size: 0;
+		column-gap: var(--space-2);
+		color: var(--colour-muted);
 	}
 
-	li:first-child {
-		flex: none;
+	li {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
 	}
 
 	li :global(svg) {
 		flex: none;
 	}
 
-	a,
-	span {
-		display: block;
-		min-inline-size: var(--target);
-		overflow: hidden;
-		line-height: var(--target);
-		text-align: center;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	a {
+		display: inline-flex;
+		align-items: center;
+		min-block-size: var(--target);
+		overflow-wrap: anywhere;
+		font-weight: 700;
 	}
 
 	span {
 		color: var(--colour-ink);
+		overflow-wrap: anywhere;
+	}
+
+	/* On a phone the page title sits right below, so the trail stops at the parent. */
+	@media (max-width: 39.99rem) {
+		.here {
+			display: none;
+		}
+
+		li:nth-last-child(2) :global(svg) {
+			display: none;
+		}
+	}
+
+	@media print {
+		nav {
+			display: none;
+		}
 	}
 </style>
