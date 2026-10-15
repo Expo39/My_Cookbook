@@ -13,7 +13,7 @@ CARDS_OUT := web/static/cards
 CARDS_STAMP := $(CARDS_OUT)/.state.json
 CARD_SRC := cookbook.config.json $(shell find assets -type f)
 
-.PHONY: ascii preview worker-deploy worker-secrets verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
+.PHONY: ascii contrast preview worker-deploy worker-secrets verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
 
 image:
 	docker compose build dev
@@ -46,6 +46,7 @@ check:
 	$(RUN) cargo run --quiet -p cookbook-cli -- check --all
 
 test-fast: install data wasm
+	$(RUN) node scripts/check-contrast.mjs
 	$(RUN) cargo nextest run --workspace
 	$(RUN) pnpm --dir web test
 	@if [ -d recipes ] && [ -n "$$(ls -A recipes)" ]; then $(MAKE) --no-print-directory check; else echo "no recipes yet: skipping content check"; fi
@@ -108,3 +109,6 @@ hooks:
 # Non-ASCII outside accented letters, the degree sign and fraction glyphs fails.
 ascii:
 	$(RUN) node scripts/check-ascii.mjs
+
+contrast:
+	$(RUN) node scripts/check-contrast.mjs

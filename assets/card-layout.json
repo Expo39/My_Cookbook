@@ -1,12 +1,12 @@
 {
 	"version": 1,
 	"palette": {
-		"bg": "#ece4d3",
-		"surface": "#f5efe2",
-		"ink": "#2a2419",
-		"muted": "#5f5440",
-		"primary": "#45552a",
-		"onPrimary": "#f5efe2"
+		"bg": "#f8f7f3",
+		"surface": "#ffffff",
+		"ink": "#13202b",
+		"muted": "#4b5866",
+		"primary": "#0d4f8b",
+		"onPrimary": "#ffffff"
 	},
 	"fonts": {
 		"display": { "family": "Bitter", "weight": 800 },

@@ -103,7 +103,7 @@ fn the_photo_fills_the_top_of_the_card() {
         .to_rgb8();
     // The typographic layout paints this corner caper green; a photo does not.
     let corner = card.get_pixel(4, 4).0;
-    assert_ne!(corner, [0x45, 0x55, 0x2a]);
+    assert_ne!(corner, [0x0d, 0x4f, 0x8b]);
     assert!(corner[0] > 150, "the fixture's table is pale: {corner:?}");
 }
 
@@ -169,7 +169,7 @@ fn a_recipe_without_a_photo_gets_the_typographic_layout() {
     let card = image::open(out.join(ID).join("portrait.png"))
         .unwrap()
         .to_rgb8();
-    assert_eq!(card.get_pixel(4, 4).0, [0x45, 0x55, 0x2a]);
+    assert_eq!(card.get_pixel(4, 4).0, [0x0d, 0x4f, 0x8b]);
 }
 
 fn render_with_instagram(name: &str, config: Option<&str>) -> PathBuf {
