@@ -28,10 +28,12 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import { loadCore } from '$lib/core';
-	import { createWriter, RecipeNotFoundError } from '$lib/data';
+	import { createSource, createWriter, RecipeNotFoundError } from '$lib/data';
+	import { LocalWriter } from '$lib/data/local-writer';
+	import { personal } from '$lib/stores/personal.svelte';
 	import type { BuildStatus, RecipeWriter, SaveResult } from '$lib/data/writer';
 	import { WriteError } from '$lib/data/writer';
-	import { editHref, homeHref, pageHref } from '$lib/links';
+	import { editHref, homeHref, mineHref, pageHref } from '$lib/links';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import { siteTitle } from '$lib/title';
 
@@ -46,6 +48,9 @@
 
 	let phase = $state<Phase>('loading');
 	let mounted = $state(false);
+	/** Saving to this browser: anyone's own recipes. Without it, saves go to GitHub with the token. */
+	let local = $state(false);
+	const viewHref = (id: string) => (local ? mineHref(id) : pageHref(id));
 	let ed = $state.raw<EditorState>();
 	let writer: RecipeWriter | undefined;
 	let pane = $state<Pane>('edit');
@@ -70,28 +75,36 @@
 	]);
 
 	onMount(() => {
-		mounted = true;
 		void admin.restore();
+		void personal.load().then(() => (mounted = true));
 	});
 
 	onDestroy(() => (stopped = true));
 
+	/*
+	 * Anyone can add a recipe, and change or delete the ones they added on this device. The cookbook's
+	 * own recipes stay as they are unless editing is unlocked with the GitHub token.
+	 */
 	$effect(() => {
 		if (!mounted) return;
-		if (admin.unlocked) untrack(open);
+		const id = new SvelteURLSearchParams(location.search).get('id');
+		const mine = !!id && personal.editable(id);
+		const onDevice = mine || (!id && !admin.unlocked);
+		if (onDevice || admin.unlocked) untrack(() => open(onDevice));
 		else {
 			ed = undefined;
 			phase = 'locked';
 		}
 	});
 
-	async function open() {
+	async function open(onDevice: boolean) {
 		if (ed) return;
 		const params = new SvelteURLSearchParams(location.search);
 		const id = params.get('id');
 		let state: EditorState;
+		local = onDevice;
 		try {
-			writer = createWriter(admin.token);
+			writer = onDevice ? new LocalWriter(createSource()) : createWriter(admin.token);
 			state = id
 				? new EditorState({ index: data.index, id, recipe: await writer.read(id) })
 				: new EditorState({ index: data.index, section: params.get('section') ?? '' });
@@ -224,8 +237,8 @@
 			clearDraft(ed.draftId);
 			ed.markSaved();
 			outcome = { kind: moved ? 'moved' : 'saved', id: result.id, title: recipe.title };
-			chrome.notify('Saved. It goes live once the build finishes');
-			void watch(target, result);
+			chrome.notify(local ? 'Saved on this device' : 'Saved. It goes live once the build finishes');
+			if (!local) void watch(target, result);
 			if (moved) await reopen(target, result.id);
 		} catch (error) {
 			problem = failure(error);
@@ -256,7 +269,7 @@
 		clearDraft(ed.draftId);
 		ed.markSaved();
 		outcome = { kind: 'deleted', id: ed.originalId, title: ed.original.title };
-		void watch(target, result);
+		if (!local) void watch(target, result);
 	}
 </script>
 
@@ -271,8 +284,14 @@
 	<p class="page-note" role="status">Loading the editor...</p>
 {:else if phase === 'locked'}
 	<section class="locked">
-		<h1>Editing is locked</h1>
-		<p class="help">Unlock editing to add or change recipes.</p>
+		<h1>This recipe is part of the cookbook</h1>
+		<p class="help">
+			Only the cookbook's owner can change it, by unlocking editing with the GitHub token. You can
+			add recipes of your own at any time.
+		</p>
+		<a class="btn primary" href={editHref()} data-sveltekit-reload>
+			<Icon name="plus" size={18} />Add your own recipe
+		</a>
 		<AdminPanel />
 	</section>
 {:else if phase === 'missing'}
@@ -285,12 +304,20 @@
 	{@const editor = ed}
 	<div class="editor">
 		<header class="top">
-			<h1>{editor.editing ? 'Edit recipe' : 'New recipe'}</h1>
+			<div>
+				<h1>{editor.editing ? 'Edit recipe' : 'New recipe'}</h1>
+				{#if local}
+					<p class="where">
+						<Icon name="device" size={16} />Saved in this browser only. Share it from Settings when
+						you want everyone to see it.
+					</p>
+				{/if}
+			</div>
 			<div class="top-actions">
 				{#if editor.editing}
-					<a class="btn" href={pageHref(editor.originalId ?? '')}>View the recipe</a>
+					<a class="btn" href={viewHref(editor.originalId ?? '')}>View the recipe</a>
 				{/if}
-				{#if ai && !editor.editing}
+				{#if ai && !editor.editing && !local}
 					<button type="button" class="btn" onclick={() => aiImport?.show()}>
 						<Icon name="hat" size={18} />Import from text
 					</button>
@@ -321,7 +348,9 @@
 					{:else}
 						<strong>{outcome.title}</strong> was deleted.
 					{/if}
-					{#if status?.state === 'building'}
+					{#if local}
+						<Icon name="device" size={18} />It is on this device, ready to cook from.
+					{:else if status?.state === 'building'}
 						<Icon name="clock" size={18} />Building... the site is live in about a minute.
 					{:else if status?.state === 'live'}
 						<Icon name="checkCircle" size={18} />Live.
@@ -336,8 +365,8 @@
 					{/if}
 				</p>
 				<div class="notice-actions">
-					{#if outcome.kind !== 'deleted' && status?.state === 'live'}
-						<a class="btn" href={pageHref(outcome.id)}>View the recipe</a>
+					{#if outcome.kind !== 'deleted' && (local || status?.state === 'live')}
+						<a class="btn" href={viewHref(outcome.id)}>View the recipe</a>
 					{/if}
 					<a class="btn" href={editHref()} data-sveltekit-reload>New recipe</a>
 					<a class="btn" href={homeHref()}>Back to the cookbook</a>
@@ -486,7 +515,7 @@
 					{/if}
 				</FieldSet>
 
-				<PhotoField ed={editor} />
+				{#if !local}<PhotoField ed={editor} />{/if}
 				<IngredientsEditor ed={editor} />
 				<MethodEditor ed={editor} />
 
@@ -574,7 +603,7 @@
 		</div>
 	</div>
 
-	{#if ai && !editor.editing}
+	{#if ai && !editor.editing && !local}
 		<AiImport bind:this={aiImport} ed={editor} client={ai} onimported={() => (pane = 'edit')} />
 	{/if}
 	{#if editor.editing}
@@ -613,6 +642,14 @@
 
 	.page-note {
 		color: var(--colour-muted);
+	}
+
+	.where {
+		display: flex;
+		align-items: center;
+		gap: var(--space-1);
+		color: var(--colour-muted);
+		font-size: var(--text-s);
 	}
 
 	.top {

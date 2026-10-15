@@ -15,7 +15,6 @@
 		mergeLines,
 		lineKey as lineKeyOf,
 		quantityText,
-		type ShoppingItem,
 		type ShoppingLine
 	} from '$lib/kitchen/shopping';
 	import { unitLabel } from '$lib/recipe/format';
