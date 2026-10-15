@@ -13,7 +13,7 @@ CARDS_OUT := web/static/cards
 CARDS_STAMP := $(CARDS_OUT)/.state.json
 CARD_SRC := cookbook.config.json $(shell find assets -type f)
 
-.PHONY: ascii contrast preview worker-deploy worker-secrets verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
+.PHONY: walkthrough ascii contrast preview worker-deploy worker-secrets verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
 
 image:
 	docker compose build dev
@@ -79,6 +79,11 @@ SHOTS ?= $(CURDIR)/web/test-results/shots
 screenshots: build
 	mkdir -p $(SHOTS)
 	docker compose run --rm -v $(SHOTS):/shots -e SHOTS_DIR=/shots -e SCREENSHOTS=1 -e E2E_PREBUILT=1 dev pnpm --dir web e2e
+
+# Records the how-to video into web/static/video: a scripted run of the built site, then ffmpeg.
+walkthrough: build
+	docker compose run --rm -e E2E_PREBUILT=1 -e WALKTHROUGH=1 dev pnpm --dir web e2e
+	$(RUN) sh scripts/walkthrough-video.sh
 
 worker-build:
 	$(RUN) sh -c 'cd crates/cookbook-worker && worker-build --release'

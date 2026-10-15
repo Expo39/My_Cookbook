@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { instagram } from '$lib/config';
+	import { howToHref } from '$lib/links';
 	import Icon from './Icon.svelte';
 </script>
 
@@ -15,6 +16,10 @@
 				<span>More recipes on Instagram <strong>{instagram.handle}</strong></span>
 			</a>
 		{/if}
+		<a class="social" href={howToHref()}>
+			<Icon name="help" />
+			<span>How to use the cookbook</span>
+		</a>
 		<p class="copyright">
 			Copyright 2026 Antonio Galdes. Recipes and photos are shared under
 			<a

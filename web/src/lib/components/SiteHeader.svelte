@@ -2,7 +2,14 @@
 	import { afterNavigate } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/state';
-	import { favouritesHref, homeHref, pageHref, searchHref, shoppingHref } from '$lib/links';
+	import {
+		favouritesHref,
+		homeHref,
+		howToHref,
+		pageHref,
+		searchHref,
+		shoppingHref
+	} from '$lib/links';
 	import { siteTitle } from '$lib/title';
 	import Icon from './Icon.svelte';
 	import SearchForm from './SearchForm.svelte';
@@ -87,6 +94,9 @@
 				aria-current={here(shoppingHref())}
 			>
 				<Icon name="basket" />
+			</a>
+			<a class="tool" href={howToHref()} aria-label="How to use" aria-current={here(howToHref())}>
+				<Icon name="help" />
 			</a>
 			<button class="icon" type="button" aria-label="Settings" onclick={onsettings}>
 				<Icon name="sliders" />

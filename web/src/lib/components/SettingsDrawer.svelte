@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { howToHref } from '$lib/links';
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { theme, type Theme } from '$lib/stores/theme.svelte';
 	import type { UnitSystem } from '$lib/types/recipe';
@@ -63,7 +64,17 @@
 
 		<PersonalPanel onnavigate={() => dialog.close()} onunlock={() => adminPanel.reveal()} />
 
+		<p class="help">
+			<a href={howToHref('sharing')} onclick={() => dialog.close()}
+				>What the token, the password and the AI secret are</a
+			>
+		</p>
+
 		<AdminPanel bind:this={adminPanel} lazy onnavigate={() => dialog.close()} />
+
+		<a class="guide" href={howToHref()} onclick={() => dialog.close()}>
+			<Icon name="help" size={18} />How to use the cookbook
+		</a>
 	</div>
 </dialog>
 
@@ -128,6 +139,14 @@
 	.help {
 		color: var(--colour-muted);
 		font-size: var(--text-s);
+	}
+
+	.guide {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+		font-weight: 700;
 	}
 
 	@keyframes slide-in {
