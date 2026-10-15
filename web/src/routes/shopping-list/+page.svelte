@@ -133,6 +133,7 @@
 							text={[line.prefix, line.item].filter(Boolean).join(' ')}
 							amountText={quantityText(line)}
 							toTaste={line.toTaste}
+							flush
 							notes={[line.note ?? '', view === 'type' ? sources(line) : '']}
 							checked={shopping.isTicked(line.key)}
 							ontoggle={() => shopping.toggle(line.key)}
