@@ -25,7 +25,7 @@ test('home to section to recipe, and back by breadcrumb', async ({ page }) => {
 	expect(errors()).toEqual([]);
 });
 
-test('home shows a card for every top-level section and three recent recipes', async ({ page }) => {
+test('home shows a card for every top-level section and four recent recipes', async ({ page }) => {
 	await page.goto('./');
 	const main = page.getByRole('main');
 	for (const name of ['First Courses', 'Main Courses', 'Soups', 'Desserts', 'Sides']) {
@@ -33,7 +33,7 @@ test('home shows a card for every top-level section and three recent recipes', a
 	}
 	await expect(
 		page.getByRole('region', { name: 'Recently added' }).getByRole('article')
-	).toHaveCount(3);
+	).toHaveCount(4);
 });
 
 test('an unknown address shows the not-found page', async ({ page }) => {

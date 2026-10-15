@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { favouritesHref, homeHref, pageHref, searchHref, shoppingHref } from '$lib/links';
 	import { siteTitle } from '$lib/title';
@@ -16,7 +17,30 @@
 		const href = pageHref(path);
 		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 	};
+
+	let list: HTMLUListElement | undefined = $state();
+	let before = $state(false);
+	let after = $state(false);
+
+	/** Which ends of the sections row have more chips hidden past them. */
+	function measure() {
+		if (!list) return;
+		before = list.scrollLeft > 4;
+		after = list.scrollLeft + list.clientWidth < list.scrollWidth - 4;
+	}
+
+	/** Centres the current section's chip, scrolling the row only, never the page. */
+	afterNavigate(() => {
+		const chip = list?.querySelector<HTMLElement>('[aria-current="page"]');
+		if (list && chip) {
+			const offset = chip.getBoundingClientRect().left - list.getBoundingClientRect().left;
+			list.scrollLeft += offset - (list.clientWidth - chip.offsetWidth) / 2;
+		}
+		measure();
+	});
 </script>
+
+<svelte:window onresize={measure} />
 
 <header>
 	<div class="inner">
@@ -49,8 +73,8 @@
 				<Icon name="sliders" />
 			</button>
 		</div>
-		<nav aria-label="Sections">
-			<ul>
+		<nav aria-label="Sections" class:before class:after>
+			<ul bind:this={list} onscroll={measure}>
 				{#each sections as section (section.path)}
 					<li>
 						<a
@@ -139,14 +163,32 @@
 		inline-size: 100%;
 	}
 
-	/* One row that scrolls sideways on narrow screens, with a fade where it runs on. */
+	/* One row of chips that scrolls sideways on narrow screens, fading at whichever end runs on. */
 	ul {
 		display: flex;
-		column-gap: var(--space-4);
+		gap: var(--space-2);
+		padding-block: var(--space-2);
 		overflow-x: auto;
 		scroll-snap-type: x proximity;
 		scrollbar-width: none;
+	}
+
+	.before ul {
+		mask-image: linear-gradient(to right, transparent, black 2rem);
+	}
+
+	.after ul {
 		mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent);
+	}
+
+	.before.after ul {
+		mask-image: linear-gradient(
+			to right,
+			transparent,
+			black 2rem,
+			black calc(100% - 2rem),
+			transparent
+		);
 	}
 
 	ul::-webkit-scrollbar {
@@ -161,20 +203,31 @@
 	nav a {
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
 		min-block-size: var(--target);
 		min-inline-size: var(--target);
-		justify-content: center;
+		padding-inline: var(--space-4);
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-pill);
+		background: var(--colour-surface);
 		color: var(--colour-ink);
 		font-weight: 700;
 		font-size: var(--text-s);
 		text-decoration: none;
-		border-block-end: 2px solid transparent;
+		transition:
+			background-color var(--duration-micro),
+			border-color var(--duration-micro);
 	}
 
-	nav a:hover,
-	nav a[aria-current='page'] {
+	nav a:hover {
+		border-color: var(--colour-primary);
 		color: var(--colour-primary);
-		border-block-end-color: var(--colour-primary);
+	}
+
+	nav a[aria-current='page'] {
+		border-color: var(--colour-primary);
+		background: var(--colour-primary);
+		color: var(--colour-on-primary);
 	}
 
 	@media (min-width: 64rem) {
@@ -194,8 +247,30 @@
 			inline-size: auto;
 		}
 
-		ul {
+		ul,
+		.before ul,
+		.after ul,
+		.before.after ul {
+			gap: var(--space-4);
+			padding-block: 0;
 			mask-image: none;
+		}
+
+		nav a,
+		nav a:hover,
+		nav a[aria-current='page'] {
+			padding-inline: 0;
+			border: 0;
+			border-block-end: 2px solid transparent;
+			border-radius: 0;
+			background: transparent;
+			color: var(--colour-ink);
+		}
+
+		nav a:hover,
+		nav a[aria-current='page'] {
+			border-block-end-color: var(--colour-primary);
+			color: var(--colour-primary);
 		}
 
 		.desktop-search {

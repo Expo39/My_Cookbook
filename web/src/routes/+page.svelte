@@ -32,7 +32,7 @@
 	<section aria-labelledby="recent-title">
 		<h2 id="recent-title">Recently added</h2>
 		<div class="recent">
-			{#each latestRecipes(data.index, 3) as card (card.id)}
+			{#each latestRecipes(data.index, 4) as card (card.id)}
 				<RecipeCard {card} />
 			{/each}
 		</div>
@@ -65,22 +65,11 @@
 		gap: var(--space-4);
 	}
 
-	.grid {
-		display: grid;
-		align-items: start;
-		grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr));
-		gap: var(--space-4);
-	}
-
+	.grid,
 	.recent {
 		display: grid;
+		grid-template-columns: var(--card-grid);
 		gap: var(--space-4);
-	}
-
-	@media (min-width: 48rem) {
-		.recent {
-			grid-template-columns: repeat(3, 1fr);
-		}
 	}
 
 	@media (max-width: 47.99rem) {
