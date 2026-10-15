@@ -27,8 +27,8 @@
 		/** Adds an "optional" tag after the name. */
 		optional?: boolean;
 		/**
-		 * The shopping list's layout: the name first, from the left edge, and the quantity after it in a
-		 * pill, so a line with no quantity simply has no pill.
+		 * The shopping list's layout: the name first, from the left edge, and the quantity on the right,
+		 * so a line with no quantity simply has nothing there.
 		 */
 		flush?: boolean;
 		changed?: boolean;
@@ -50,7 +50,7 @@
 				>{text}{#if optional}<span class="optional">optional</span>{/if}</label
 			>
 			{#if amountText || toTaste}
-				<span class="pill num" class:taste={!amountText}>{amountText || 'to taste'}</span>
+				<span class="qty num" class:taste={!amountText}>{amountText || 'to taste'}</span>
 			{/if}
 		{:else}
 			<span class="amount num" class:changed class:taste={!amount && !amountText && toTaste}
@@ -161,21 +161,18 @@
 		flex-basis: 100%;
 	}
 
-	/* Sea blue with white text in light mode; the dark theme's primary makes it light blue on navy. */
-	.pill {
-		padding: 0 var(--space-2);
-		border-radius: var(--radius-pill);
-		background: var(--colour-primary);
-		color: var(--colour-on-primary);
-		font-size: var(--text-s);
+	/* A right-hand column of quantities, like a written list: quiet, and quick to scan. */
+	.qty {
+		color: var(--colour-primary);
 		white-space: nowrap;
 	}
 
-	.pill.taste {
-		background: var(--colour-tint);
+	.qty.taste {
 		color: var(--colour-muted);
 		font-family: var(--font-body);
+		font-size: var(--text-s);
 		font-style: italic;
+		font-weight: 400;
 	}
 
 	.taste {
@@ -218,9 +215,10 @@
 		opacity: 0.7;
 	}
 
-	.done .pill {
-		opacity: 0.5;
+	.done .qty {
+		color: var(--colour-muted);
 		text-decoration: line-through;
+		opacity: 0.7;
 	}
 
 	@media print {

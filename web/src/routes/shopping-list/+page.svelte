@@ -111,37 +111,39 @@
 			</div>
 		</div>
 
-		{#each groups as group (group.id)}
-			<section aria-labelledby="{id}-{group.id}">
-				<div class="head">
-					<h2 id="{id}-{group.id}" class="label">{group.label}</h2>
-					{#if view === 'recipe'}
-						<button
-							type="button"
-							class="remove"
-							aria-label="Remove {group.label} from the list"
-							onclick={() => shopping.remove(group.id)}
-						>
-							<Icon name="x" size={18} />
-						</button>
-					{/if}
-				</div>
-				<ul>
-					{#each group.lines as line, n (line.key + n)}
-						<IngredientLine
-							id="{id}-{group.id}-{n}"
-							text={[line.prefix, line.item].filter(Boolean).join(' ')}
-							amountText={quantityText(line)}
-							toTaste={line.toTaste}
-							flush
-							notes={[line.note ?? '', view === 'type' ? sources(line) : '']}
-							checked={shopping.isTicked(line.key)}
-							ontoggle={() => shopping.toggle(line.key)}
-						/>
-					{/each}
-				</ul>
-			</section>
-		{/each}
+		<div class="groups">
+			{#each groups as group (group.id)}
+				<section aria-labelledby="{id}-{group.id}">
+					<div class="head">
+						<h2 id="{id}-{group.id}" class="label">{group.label}</h2>
+						{#if view === 'recipe'}
+							<button
+								type="button"
+								class="remove"
+								aria-label="Remove {group.label} from the list"
+								onclick={() => shopping.remove(group.id)}
+							>
+								<Icon name="x" size={18} />
+							</button>
+						{/if}
+					</div>
+					<ul>
+						{#each group.lines as line, n (line.key + n)}
+							<IngredientLine
+								id="{id}-{group.id}-{n}"
+								text={[line.prefix, line.item].filter(Boolean).join(' ')}
+								amountText={quantityText(line)}
+								toTaste={line.toTaste}
+								flush
+								notes={[line.note ?? '', view === 'type' ? sources(line) : '']}
+								checked={shopping.isTicked(line.key)}
+								ontoggle={() => shopping.toggle(line.key)}
+							/>
+						{/each}
+					</ul>
+				</section>
+			{/each}
+		</div>
 	{/if}
 </div>
 
@@ -154,7 +156,30 @@
 
 	.page {
 		gap: var(--space-5);
-		max-inline-size: 48rem;
+	}
+
+	.groups {
+		display: grid;
+		gap: var(--space-6);
+	}
+
+	/*
+	 * On a wide screen each aisle (or recipe) is its own card in a grid, so a quantity sits close to its
+	 * name instead of across an empty page.
+	 */
+	@media (min-width: 48rem) {
+		.groups {
+			grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
+			align-items: start;
+			gap: var(--space-4);
+		}
+
+		section {
+			padding: var(--space-4) var(--space-5);
+			border: 1px solid var(--colour-line);
+			border-radius: var(--radius-m);
+			background: var(--colour-surface);
+		}
 	}
 
 	.empty {
@@ -164,6 +189,7 @@
 	.toolbar {
 		display: grid;
 		gap: var(--space-3);
+		max-inline-size: 36rem;
 	}
 
 	.progress {
