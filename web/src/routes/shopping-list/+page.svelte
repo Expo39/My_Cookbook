@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import IngredientLine from '$lib/components/IngredientLine.svelte';
 	import PageHead from '$lib/components/PageHead.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import { convert, loadCore } from '$lib/core';
@@ -127,22 +128,15 @@
 				</div>
 				<ul>
 					{#each group.lines as line, n (line.key + n)}
-						{@const ticked = shopping.isTicked(line.key)}
-						{@const quantity = quantityText(line)}
-						<li class:ticked>
-							<input
-								id="{id}-{group.id}-{n}"
-								type="checkbox"
-								checked={ticked}
-								onchange={() => shopping.toggle(line.key)}
-							/>
-							{#if quantity}<span class="amount num">{quantity}</span>{/if}
-							<label for="{id}-{group.id}-{n}" class:wide={!quantity}>
-								{line.prefix ? `${line.prefix} ` : ''}{line.item}
-								{#if line.note}<span class="note">{line.note}</span>{/if}
-								{#if view === 'type'}<span class="note">{sources(line)}</span>{/if}
-							</label>
-						</li>
+						<IngredientLine
+							id="{id}-{group.id}-{n}"
+							text={[line.prefix, line.item].filter(Boolean).join(' ')}
+							amountText={quantityText(line)}
+							toTaste={line.toTaste}
+							notes={[line.note ?? '', view === 'type' ? sources(line) : '']}
+							checked={shopping.isTicked(line.key)}
+							ontoggle={() => shopping.toggle(line.key)}
+						/>
 					{/each}
 				</ul>
 			</section>
@@ -230,96 +224,10 @@
 		background: transparent;
 	}
 
-	li {
-		display: grid;
-		grid-template-columns: var(--target) 5.5rem 1fr;
-		align-items: start;
-		border-block-end: 1px dashed var(--colour-line);
-	}
-
-	input {
-		appearance: none;
-		position: relative;
-		inline-size: var(--target);
-		block-size: var(--target);
-		margin: 0;
-	}
-
-	input::before {
-		content: '';
-		position: absolute;
-		inset: 50% auto auto 50%;
-		inline-size: 1.25rem;
-		block-size: 1.25rem;
-		border: 2px solid var(--colour-muted);
-		border-radius: var(--radius-s);
-		transform: translate(-50%, -50%);
-		transition:
-			background-color var(--duration-micro),
-			border-color var(--duration-micro);
-	}
-
-	input::after {
-		content: '';
-		position: absolute;
-		inset: 50% auto auto 50%;
-		inline-size: 0.35rem;
-		block-size: 0.65rem;
-		border: solid var(--colour-on-primary);
-		border-width: 0 2px 2px 0;
-		opacity: 0;
-		transform: translate(-50%, -62%) rotate(45deg);
-	}
-
-	input:checked::before {
-		border-color: var(--colour-primary);
-		background: var(--colour-primary);
-	}
-
-	input:checked::after {
-		opacity: 1;
-	}
-
-	.amount {
-		padding-inline-end: var(--space-2);
-		line-height: var(--target);
-		text-align: end;
-	}
-
-	label {
-		display: grid;
-		gap: var(--space-1);
-		padding-block: calc((var(--target) - 1.6em) / 2);
-		cursor: pointer;
-	}
-
-	.wide {
-		grid-column: 2 / -1;
-	}
-
-	.note {
-		color: var(--colour-muted);
-		font-size: var(--text-s);
-		font-style: italic;
-	}
-
-	.ticked .amount,
-	.ticked label {
-		color: var(--colour-muted);
-		text-decoration: line-through;
-		opacity: 0.7;
-		transition: opacity var(--duration-micro);
-	}
-
 	@media print {
 		.toolbar,
-		.remove,
-		input {
+		.remove {
 			display: none;
-		}
-
-		li {
-			grid-template-columns: 5rem 1fr;
 		}
 	}
 </style>

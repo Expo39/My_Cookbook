@@ -80,7 +80,8 @@
           "item": "Large handful of fresh basil"
         },
         {
-          "item": "Salt and pepper"
+          "item": "Salt and pepper",
+          "scale": "toTaste"
         },
         {
           "food": "cream",
