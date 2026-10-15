@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
-	import type { Ticks } from '$lib/stores/ticks.svelte';
+	import { stepTick, type Ticks } from '$lib/stores/ticks.svelte';
 	import type { ScaledStep } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
 	import StepText from './StepText.svelte';
@@ -19,7 +19,13 @@
 
 	const id = $props.id();
 	const steps = $derived(model.view.steps);
-	const done = $derived(ticks.count('s:'));
+	/** Each step's tick, from the step as written, since the shown text changes with the servings. */
+	const tickOf = (step: ScaledStep, number: number) =>
+		stepTick({
+			key: step.key,
+			text: model.data.recipe.steps[number - 1]?.text ?? step.text
+		});
+	const done = $derived(ticks.countOf(steps.map((step, i) => tickOf(step, i + 1))));
 
 	interface Stage {
 		heading?: string | null;
@@ -53,7 +59,8 @@
 			{#if stage.heading}<h3>{stage.heading}</h3>{/if}
 			<ol>
 				{#each stage.steps as { step, number } (number)}
-					{@const ticked = ticks.has(`s:${number}`)}
+					{@const tick = tickOf(step, number)}
+					{@const ticked = ticks.has(tick)}
 					<li class:ticked>
 						<input
 							type="checkbox"
@@ -62,7 +69,7 @@
 							aria-label="Mark step {number} as done"
 							checked={ticked}
 							disabled={!hydrated}
-							onchange={() => ticks.toggle(`s:${number}`)}
+							onchange={() => ticks.toggle(tick)}
 						/>
 						<div class="body">
 							<StepText {step} {recipe} {number} />
