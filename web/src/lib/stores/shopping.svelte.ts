@@ -1,4 +1,5 @@
 import { lineKey, type ShoppingItem, type ShoppingRecipe } from '$lib/kitchen/shopping';
+import type { Unit } from '$lib/types/recipe';
 import { readJson, writeJson } from './storage';
 
 export const SHOPPING_KEY = 'sapori:shopping';
@@ -18,17 +19,55 @@ function isRecipe(value: unknown): value is ShoppingRecipe {
 	);
 }
 
-/** The shopping list, kept as the recipes added to it plus the lines ticked off in the shop. */
+/** A quantity the cook typed in, in place of what the recipes add up to. */
+export interface ChosenAmount {
+	qty: number;
+	unit: Unit | null;
+}
+
+const isAmount = (value: unknown): value is ChosenAmount =>
+	typeof value === 'object' &&
+	value !== null &&
+	typeof (value as ChosenAmount).qty === 'number' &&
+	Number.isFinite((value as ChosenAmount).qty);
+
+/**
+ * The shopping list, kept as the recipes added to it, the lines ticked off in the shop, and any
+ * quantity the cook changed (to buy extra, say), keyed by line.
+ */
 class ShoppingList {
 	recipes = $state<ShoppingRecipe[]>([]);
 	ticked = $state<string[]>([]);
+	amounts = $state<Record<string, ChosenAmount>>({});
 
 	load(): void {
-		const stored = readJson(SHOPPING_KEY) as { recipes?: unknown; ticked?: unknown } | undefined;
+		const stored = readJson(SHOPPING_KEY) as
+			{ recipes?: unknown; ticked?: unknown; amounts?: unknown } | undefined;
 		this.recipes = Array.isArray(stored?.recipes) ? stored.recipes.filter(isRecipe) : [];
 		this.ticked = Array.isArray(stored?.ticked)
 			? stored.ticked.filter((key): key is string => typeof key === 'string')
 			: [];
+		const amounts = stored?.amounts;
+		this.amounts =
+			typeof amounts === 'object' && amounts !== null
+				? Object.fromEntries(Object.entries(amounts).filter(([, value]) => isAmount(value)))
+				: {};
+	}
+
+	amountOf(key: string): ChosenAmount | undefined {
+		return this.amounts[key];
+	}
+
+	setAmount(key: string, amount: ChosenAmount): void {
+		this.amounts = { ...this.amounts, [key]: amount };
+		this.#save();
+	}
+
+	resetAmount(key: string): void {
+		this.amounts = Object.fromEntries(
+			Object.entries(this.amounts).filter(([existing]) => existing !== key)
+		);
+		this.#save();
 	}
 
 	get count(): number {
@@ -76,13 +115,21 @@ class ShoppingList {
 	clearAll(): void {
 		this.recipes = [];
 		this.ticked = [];
+		this.amounts = {};
 		this.#save();
 	}
 
 	#save(): void {
 		const live = new Set(this.recipes.flatMap((recipe) => recipe.items.map(lineKey)));
-		this.ticked = this.ticked.filter((key) => live.has(key));
-		writeJson(SHOPPING_KEY, { recipes: $state.snapshot(this.recipes), ticked: this.ticked });
+		// A merged line can carry a "#n" suffix when units would not add up; it belongs to its base key.
+		const alive = (key: string) => live.has(key.replace(/#\d+$/, ''));
+		this.ticked = this.ticked.filter(alive);
+		this.amounts = Object.fromEntries(Object.entries(this.amounts).filter(([key]) => alive(key)));
+		writeJson(SHOPPING_KEY, {
+			recipes: $state.snapshot(this.recipes),
+			ticked: this.ticked,
+			amounts: $state.snapshot(this.amounts)
+		});
 	}
 }
 
