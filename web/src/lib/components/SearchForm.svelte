@@ -2,8 +2,10 @@
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import type { SearchEngine, Suggestion } from '$lib/core';
-	import { pageHref, searchHref } from '$lib/links';
+	import { mineHref, pageHref, searchHref } from '$lib/links';
 	import { searchEngine } from '$lib/search/engine';
+	import { suggestLocal } from '$lib/search/local';
+	import { personal } from '$lib/stores/personal.svelte';
 	import Icon from './Icon.svelte';
 
 	let { compact = false }: { compact?: boolean } = $props();
@@ -15,7 +17,9 @@
 	let input: HTMLInputElement;
 	let value = $state('');
 	let engine = $state.raw<SearchEngine>();
-	let suggestions = $state<Suggestion[]>([]);
+	/** The core's suggestions, plus `mine` for a recipe added on this device. */
+	type Option = Suggestion | { kind: 'mine'; id: string; title: string };
+	let suggestions = $state<Option[]>([]);
 	let open = $state(false);
 	let active = $state(-1);
 	let timer: ReturnType<typeof setTimeout> | undefined;
@@ -24,6 +28,7 @@
 
 	/** The index loads on first focus, so pages that never search never pay for it. */
 	function warm() {
+		void personal.load();
 		if (!engine)
 			searchEngine().then(
 				(loaded) => (engine = loaded),
@@ -34,14 +39,22 @@
 	function refresh() {
 		clearTimeout(timer);
 		timer = setTimeout(() => {
-			suggestions = engine && value.trim() ? engine.suggest(value, LIMIT) : [];
+			const own = personal.list.filter((entry) => !entry.shared);
+			const mine = suggestLocal(own, value, 2).map((hit) => ({ kind: 'mine' as const, ...hit }));
+			const found = engine && value.trim() ? engine.suggest(value, LIMIT) : [];
+			suggestions = [
+				...mine,
+				...found.filter((s) => !mine.some((m) => s.kind === 'recipe' && s.id === m.id))
+			].slice(0, LIMIT);
 			active = -1;
 			open = suggestions.length > 0;
 		}, 120);
 	}
 
-	function href(suggestion: Suggestion): string {
+	function href(suggestion: Option): string {
 		switch (suggestion.kind) {
+			case 'mine':
+				return mineHref(suggestion.id);
 			case 'recipe':
 				return pageHref(suggestion.id);
 			case 'ingredient':
@@ -51,7 +64,7 @@
 		}
 	}
 
-	function choose(suggestion: Suggestion) {
+	function choose(suggestion: Option) {
 		open = false;
 		value = '';
 		// eslint-disable-next-line svelte/no-navigation-without-resolve -- href() builds on resolved links
@@ -130,6 +143,8 @@
 			>
 				{#if suggestion.kind === 'recipe'}
 					<Icon name="hat" size={18} /><span>{suggestion.title}</span>
+				{:else if suggestion.kind === 'mine'}
+					<Icon name="device" size={18} /><span>{suggestion.title} <em>Yours</em></span>
 				{:else if suggestion.kind === 'ingredient'}
 					<Icon name="basket" size={18} /><span
 						>Recipes with <strong>{suggestion.term}</strong></span
@@ -275,6 +290,16 @@
 		border-radius: var(--radius-s);
 		color: var(--colour-ink);
 		cursor: pointer;
+	}
+
+	li em {
+		margin-inline-start: var(--space-1);
+		color: var(--colour-muted);
+		font-size: var(--text-xs);
+		font-style: normal;
+		font-weight: 700;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
 	}
 
 	li :global(svg) {
