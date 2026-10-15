@@ -21,7 +21,8 @@
 		model: RecipeModel;
 		hydrated: boolean;
 		cookHref: string;
-		onshare: () => void;
+		/** Absent for a recipe that has no public page to share. */
+		onshare?: () => void;
 		onaddlist: () => void;
 		onask?: () => void;
 		edithref?: string;
@@ -92,9 +93,11 @@
 		<button type="button" disabled={!hydrated || !model.ready} onclick={onaddlist}>
 			<Icon name="basket" />Add to shopping list
 		</button>
-		<button type="button" disabled={!hydrated} onclick={onshare}>
-			<Icon name="share" />Share
-		</button>
+		{#if onshare}
+			<button type="button" disabled={!hydrated} onclick={onshare}>
+				<Icon name="share" />Share
+			</button>
+		{/if}
 		{#if onask}
 			<button type="button" disabled={!hydrated} onclick={onask}>
 				<Icon name="hat" />Ask the sous-chef

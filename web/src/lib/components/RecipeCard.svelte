@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { pageHref } from '$lib/links';
+	import { mineHref, pageHref } from '$lib/links';
 	import { photoOf } from '$lib/photo';
 	import { formatMinutes, servingsText } from '$lib/recipe/format';
 	import type { RecipeCard } from '$lib/types/recipe';
@@ -9,12 +9,15 @@
 	let {
 		card,
 		coverage,
-		showSection = true
+		showSection = true,
+		local = false
 	}: {
 		card: RecipeCard;
 		coverage?: { matched: number; total: number };
 		/** Off where the page heading already names the section. */
 		showSection?: boolean;
+		/** Added on this device, so it opens from the browser's own store and carries a badge. */
+		local?: boolean;
 	} = $props();
 
 	const total = $derived(card.times.total);
@@ -28,8 +31,13 @@
 			<RecipePhoto id={card.id} {photo} sizes="(min-width: 48rem) 20rem, 90vw" />
 		{/if}
 		<div class="body">
-			{#if where}<p class="where">{where}</p>{/if}
-			<h3><a href={pageHref(card.id)}>{card.title}</a></h3>
+			{#if where || local}
+				<p class="where">
+					{#if local}<span class="mine"><Icon name="device" size={14} />Yours</span>{/if}{where ??
+						''}
+				</p>
+			{/if}
+			<h3><a href={local ? mineHref(card.id) : pageHref(card.id)}>{card.title}</a></h3>
 			{#if card.titleLocal}<p class="local">{card.titleLocal}</p>{/if}
 			{#if card.summary}<p class="summary">{card.summary}</p>{/if}
 			{#if coverage}
@@ -97,11 +105,26 @@
 	}
 
 	.where {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
 		color: var(--colour-accent);
 		font-size: var(--text-xs);
 		font-weight: 700;
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
+	}
+
+	.mine {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		padding: 0 var(--space-2);
+		border-radius: var(--radius-pill);
+		background: var(--colour-tint);
+		color: var(--colour-primary);
+		letter-spacing: 0.04em;
 	}
 
 	h3 {

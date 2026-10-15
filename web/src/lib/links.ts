@@ -9,6 +9,9 @@ export const shoppingHref = (): string => resolve('/shopping-list');
 
 export const favouritesHref = (): string => resolve('/favourites');
 
+/** A recipe added on this device; static hosting cannot pre-render it, so it lives under one page. */
+export const mineHref = (id: string): string => `${resolve('/mine')}?id=${encodeURIComponent(id)}`;
+
 export const searchHref = (query = ''): string =>
 	`${resolve('/search')}${query ? `?q=${encodeURIComponent(query)}` : ''}`;
 

@@ -25,6 +25,7 @@
 	import { siteTitle } from '$lib/title';
 	import type { RecipeCard as Card, RecipeData, SiteIndex } from '$lib/types/recipe';
 	import ActionBar from './ActionBar.svelte';
+	import Icon from './Icon.svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
 	import IngredientsPanel from './IngredientsPanel.svelte';
 	import MethodPanel from './MethodPanel.svelte';
@@ -38,7 +39,18 @@
 	import ShareSheet from './ShareSheet.svelte';
 	import SousChef from './SousChef.svelte';
 
-	let { card, data, index }: { card: Card; data: RecipeData; index: SiteIndex } = $props();
+	let {
+		card,
+		data,
+		index,
+		local = false
+	}: {
+		card: Card;
+		data: RecipeData;
+		index: SiteIndex;
+		/** Added on this device: not published, so there is no public page, card or link to share. */
+		local?: boolean;
+	} = $props();
 
 	type Tab = 'ingredients' | 'method';
 	const tabs: { id: Tab; label: string }[] = [
@@ -229,33 +241,45 @@
 	}
 </script>
 
-<PageHead
-	title={data.recipe.title}
-	{description}
-	path={card.id}
-	type="article"
-	image={{
-		url: cardUrl(card.id),
-		...CARD_SIZES.og,
-		alt: `Recipe card for ${data.recipe.title}, from ${siteTitle}`
-	}}
-/>
+{#if !local}
+	<PageHead
+		title={data.recipe.title}
+		{description}
+		path={card.id}
+		type="article"
+		image={{
+			url: cardUrl(card.id),
+			...CARD_SIZES.og,
+			alt: `Recipe card for ${data.recipe.title}, from ${siteTitle}`
+		}}
+	/>
+{/if}
 <svelte:head>
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -- the JSON is escaped by toScriptJson -->
-	{@html jsonLdTag}
+	{#if local}
+		<title>{data.recipe.title} | {siteTitle}</title>
+	{:else}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- the JSON is escaped by toScriptJson -->
+		{@html jsonLdTag}
+	{/if}
 </svelte:head>
 
 <article class:enhanced={hydrated} class:printing-card={printingCard}>
 	<Breadcrumb {trail} />
+	{#if local}
+		<p class="device">
+			<Icon name="device" size={18} />
+			<span>Your recipe. It is kept in this browser only, so only you can see it.</span>
+		</p>
+	{/if}
 	<RecipeHeader
 		{card}
 		{model}
 		{hydrated}
 		{cookHref}
-		onshare={share}
+		onshare={local ? undefined : share}
 		onaddlist={addToList}
 		onask={ai ? () => chef?.show() : undefined}
-		edithref={admin.unlocked ? editHref({ id: card.id }) : undefined}
+		edithref={local || admin.unlocked ? editHref({ id: card.id }) : undefined}
 	/>
 	<ServingsBar {model} />
 
@@ -317,11 +341,11 @@
 		</section>
 	{/if}
 
-	{#if hydrated}<ActionBar {model} {cookHref} onshare={share} />{/if}
+	{#if hydrated}<ActionBar {model} {cookHref} onshare={local ? undefined : share} />{/if}
 	{#if hydrated && cookStep !== null && CookMode}
 		<CookMode {model} {recipe} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
-	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} onprint={printCard} />{/if}
+	{#if hydrated && !local}<ShareSheet bind:this={sheet} {card} {model} onprint={printCard} />{/if}
 	{#if hydrated && ai}
 		<SousChef bind:this={chef} client={ai} recipeId={card.id} recipe={data.recipe} />
 	{/if}
@@ -332,6 +356,19 @@
 	article {
 		display: grid;
 		gap: var(--space-5);
+	}
+
+	.device {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		padding: var(--space-2) var(--space-3);
+		border: 1px dashed var(--colour-primary);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+		color: var(--colour-primary);
+		font-size: var(--text-s);
+		font-weight: 700;
 	}
 
 	.tabs {
