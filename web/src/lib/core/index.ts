@@ -28,7 +28,7 @@ type RawModule = {
 	parse_ingredient_line(line: string): unknown;
 	check_recipe(recipe: unknown, id: string, context?: unknown): unknown;
 	check_removal(id: string, recipes: unknown): unknown;
-	toggle_unit(qty: number, unit: Unit): unknown;
+	unit_options(qty: number, unit: Unit, system: UnitSystem): unknown;
 	format_temperature(
 		celsius: number,
 		max: number | undefined,
@@ -113,9 +113,13 @@ export function createSearchEngine(indexJson: string): SearchEngine {
 	return new (core().SearchEngine)(indexJson) as unknown as SearchEngine;
 }
 
-/** The next unit in the click-to-toggle cycle, or `undefined` for amounts that do not toggle. */
-export function toggleUnit(qty: number, unit: Unit): { qty: number; unit: Unit } | undefined {
-	return core().toggle_unit(qty, unit) as { qty: number; unit: Unit } | undefined;
+/** The units a cook can pick for an amount in `system`, each with the same physical amount. */
+export function unitOptions(
+	qty: number,
+	unit: Unit,
+	system: UnitSystem
+): { qty: number; unit: Unit }[] {
+	return core().unit_options(qty, unit, system) as { qty: number; unit: Unit }[];
 }
 
 export interface TemperatureOptions {

@@ -47,7 +47,11 @@
           "item": "melted butter"
         },
         {
-          "item": "Pinch of salt"
+          "amount": {
+            "qty": 1,
+            "unit": "pinch"
+          },
+          "item": "salt"
         }
       ]
     }

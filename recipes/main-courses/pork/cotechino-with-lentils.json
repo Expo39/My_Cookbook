@@ -83,7 +83,8 @@
           "item": "olive oil"
         },
         {
-          "item": "Salt and pepper"
+          "item": "Salt and pepper",
+          "scale": "toTaste"
         },
         {
           "item": "Fresh parsley"

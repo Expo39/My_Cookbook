@@ -12,7 +12,9 @@
   - a bottom action bar fixed at `padding-bottom: env(safe-area-inset-bottom)` holding Servings, Start cooking and Share
   - content is padded so nothing sits under the bar
 - **Ingredients:**
-  - a grid of checkbox, amount (`--font-num`, right-aligned, 5.5rem), then item and muted note
+  - a checkbox, then one left-aligned line: the amount (`--font-num`) in a slot at least `--amount-slot` (5rem) wide, then the item. A long item wraps back under the amount, and hints sit beneath in muted italics, also starting under the amount
+  - a line with no amount keeps the slot empty, so every item starts at the same place; a `toTaste` line shows "to taste" in the slot in muted italics
+  - tapping an amount toggles it to the next unit of the chosen system (metric: g, kg; ml, l, tsp, tbsp. US: oz, lb; tsp, tbsp, cup, fl oz), wrapping back to the written unit
   - dashed `--colour-line` row rules; group names in uppercase labels
   - ticking strikes the row through and fades it to muted, with an "x of y ready" counter and a Reset button
 - **Method:** step numbers in `--font-num`. Inline amounts from `{@...}` tokens show in bold primary, and timers are accent pills that start a timer when tapped. Steps can be ticked too.

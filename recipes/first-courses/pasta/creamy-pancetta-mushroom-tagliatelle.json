@@ -93,7 +93,8 @@
           "note": "chopped"
         },
         {
-          "item": "Salt and black pepper"
+          "item": "Salt and black pepper",
+          "scale": "toTaste"
         }
       ]
     }

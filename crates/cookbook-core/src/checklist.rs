@@ -7,7 +7,7 @@ use crate::{
     scale::{ScaleOptions, ScaleRequest, scale},
     schema::{Amount, Ingredient, Qty, Recipe, Section, Unit},
     tokens::{Segment, parse_tokens},
-    units::{convert, toggle_unit},
+    units::{UnitSystem, convert, unit_options},
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, JsonSchema)]
@@ -668,23 +668,18 @@ impl Checker<'_> {
             if !start.is_finite() || start <= 0.0 || unit == Unit::Pinch {
                 continue;
             }
-            let (mut qty, mut current) = (start, unit);
-            let mut returned = false;
-            for _ in 0..12 {
-                match toggle_unit(qty, current) {
-                    Some(next) => (qty, current) = next,
-                    None => break,
-                }
-                if current == unit {
-                    returned = true;
-                    break;
-                }
-            }
-            if !returned || (qty - start).abs() > start * 1e-6 {
+            let returned = [UnitSystem::Metric, UnitSystem::Us]
+                .into_iter()
+                .flat_map(|system| unit_options(start, unit, system))
+                .all(|(qty, to)| {
+                    convert(qty, to, unit, None)
+                        .is_some_and(|back| (back - start).abs() <= start * 1e-6)
+                });
+            if !returned {
                 self.error(
                     "E-UNIT-TOGGLE",
                     path,
-                    "the unit toggle does not return to the written amount",
+                    "a unit choice does not convert back to the written amount",
                 );
             }
         }
@@ -710,7 +705,36 @@ impl Checker<'_> {
             );
         }
         self.redundant_alts();
+        self.seasoning_to_taste();
         self.british_spelling();
+    }
+
+    /// Salt and pepper with no amount read as "to taste" in the amount slot, which needs the mode set
+    /// and the words kept out of the item.
+    fn seasoning_to_taste(&mut self) {
+        let r = self.recipe;
+        for (g, group) in r.ingredient_groups.iter().enumerate() {
+            for (i, ing) in group.items.iter().enumerate() {
+                let item = ing.item.as_deref().unwrap_or_default().to_lowercase();
+                let path = format!("ingredientGroups[{g}].items[{i}]");
+                if item.contains("to taste") {
+                    self.warn(
+                        "W-TO-TASTE",
+                        format!("{path}.item"),
+                        "write \"to taste\" as the toTaste scale mode, not in the item",
+                    );
+                } else if ing.amount.is_none()
+                    && ing.scale != Some(crate::schema::ScaleMode::ToTaste)
+                    && is_seasoning(&item)
+                {
+                    self.warn(
+                        "W-TO-TASTE",
+                        format!("{path}.scale"),
+                        "a seasoning with no amount should use the toTaste scale mode",
+                    );
+                }
+            }
+        }
     }
 
     /// An `alt` that restates the amount in an equivalent unit (1000 g and 1 kg) adds nothing.
@@ -1013,6 +1037,19 @@ pub fn check_removal(id: &str, collection: &Collection) -> Vec<CheckResult> {
         .collect()
 }
 
+/// Salt, pepper or both, as an item with nothing else in it.
+fn is_seasoning(item: &str) -> bool {
+    let words = item
+        .trim()
+        .trim_start_matches("kosher ")
+        .trim_start_matches("sea ")
+        .trim_start_matches("flaky ");
+    matches!(
+        words,
+        "salt" | "pepper" | "black pepper" | "salt and pepper" | "salt and black pepper"
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1252,6 +1289,20 @@ mod tests {
             r#"{ "qty": 4, "unit": "tbsp" }"#,
         );
         assert!(!codes(&run("mains/soup.json", &useful)).contains(&"W-ALT-REDUNDANT"));
+    }
+
+    #[test]
+    fn seasoning_without_an_amount_is_marked_to_taste() {
+        let salt = r#"{ "key": "salt", "amount": { "qty": 1, "unit": "tsp" }, "item": "salt", "scale": "seasoning" }"#;
+        let with = |line: &str| BASE.replace(salt, line).replace(" add {@salt} and", " add");
+        let plain = with(r#"{ "item": "Salt and black pepper" }"#);
+        assert!(codes(&run("mains/soup.json", &plain)).contains(&"W-TO-TASTE"));
+        let worded = with(r#"{ "item": "Salt to taste", "scale": "toTaste" }"#);
+        assert!(codes(&run("mains/soup.json", &worded)).contains(&"W-TO-TASTE"));
+        let right = with(r#"{ "item": "Salt and black pepper", "scale": "toTaste" }"#);
+        assert!(!codes(&run("mains/soup.json", &right)).contains(&"W-TO-TASTE"));
+        let herb = with(r#"{ "item": "Fresh parsley" }"#);
+        assert!(!codes(&run("mains/soup.json", &herb)).contains(&"W-TO-TASTE"));
     }
 
     #[test]

@@ -47,8 +47,8 @@ export function isoDuration(minutes: number): string {
 
 export const unitLabel = (unit: Unit): string => (unit === 'floz' ? 'fl oz' : unit);
 
-/** Units whose amounts can be cycled with a click. Pinches and counts have nowhere to go. */
-export const TOGGLEABLE: ReadonlySet<Unit> = new Set([
+/** Units a reader can switch an amount between. Pinches and counts have nowhere to go. */
+export const CONVERTIBLE: ReadonlySet<Unit> = new Set([
 	'g',
 	'kg',
 	'ml',

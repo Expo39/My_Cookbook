@@ -38,5 +38,5 @@ pub use site::{
 pub use tokens::{RenderedSegment, Segment, parse_tokens, render_segments, render_text, temp_text};
 pub use units::{
     Density, Dimension, TempKind, UnitSystem, convert, density, fahrenheit, gas_mark, normalise,
-    toggle_unit,
+    unit_options,
 };
