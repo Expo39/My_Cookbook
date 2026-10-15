@@ -8,6 +8,7 @@
 		amountText,
 		toTaste = false,
 		optional = false,
+		flush = false,
 		changed = false,
 		notes = [],
 		checked,
@@ -25,6 +26,11 @@
 		toTaste?: boolean;
 		/** Adds an "optional" tag after the name. */
 		optional?: boolean;
+		/**
+		 * The shopping list's layout: the name first, from the left edge, and the quantity after it in a
+		 * pill, so a line with no quantity simply has no pill.
+		 */
+		flush?: boolean;
 		changed?: boolean;
 		/** Smaller lines under the ingredient, such as hints or where it came from. */
 		notes?: string[];
@@ -38,13 +44,22 @@
 
 <li class:done={checked}>
 	<input {id} type="checkbox" {checked} {disabled} onchange={ontoggle} />
-	<div class="line">
-		<span class="amount num" class:changed class:taste={!amount && !amountText && toTaste}
-			>{#if amount}{@render amount()}{:else if amountText}{amountText}{:else if toTaste}to taste{/if}</span
-		>
-		<label for={id}
-			>{text}{#if optional}<span class="optional">optional</span>{/if}</label
-		>
+	<div class="line" class:flush>
+		{#if flush}
+			<label for={id}
+				>{text}{#if optional}<span class="optional">optional</span>{/if}</label
+			>
+			{#if amountText || toTaste}
+				<span class="pill num" class:taste={!amountText}>{amountText || 'to taste'}</span>
+			{/if}
+		{:else}
+			<span class="amount num" class:changed class:taste={!amount && !amountText && toTaste}
+				>{#if amount}{@render amount()}{:else if amountText}{amountText}{:else if toTaste}to taste{/if}</span
+			>
+			<label for={id}
+				>{text}{#if optional}<span class="optional">optional</span>{/if}</label
+			>
+		{/if}
 		{#each shown as note (note)}
 			<span class="note">{note}</span>
 		{/each}
@@ -122,8 +137,45 @@
 		color: var(--colour-ink);
 	}
 
+	/* An empty inline block has no baseline of its own; a zero-width space keeps the line in step. */
+	.amount:empty::before {
+		content: '\200b';
+	}
+
 	.changed {
 		color: var(--colour-primary);
+	}
+
+	.flush {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		column-gap: var(--space-3);
+	}
+
+	.flush label {
+		flex: 1;
+	}
+
+	.flush .note {
+		flex-basis: 100%;
+	}
+
+	/* Sea blue with white text in light mode; the dark theme's primary makes it light blue on navy. */
+	.pill {
+		padding: 0 var(--space-2);
+		border-radius: var(--radius-pill);
+		background: var(--colour-primary);
+		color: var(--colour-on-primary);
+		font-size: var(--text-s);
+		white-space: nowrap;
+	}
+
+	.pill.taste {
+		background: var(--colour-tint);
+		color: var(--colour-muted);
+		font-family: var(--font-body);
+		font-style: italic;
 	}
 
 	.taste {
@@ -164,6 +216,11 @@
 		color: var(--colour-muted);
 		text-decoration: line-through;
 		opacity: 0.7;
+	}
+
+	.done .pill {
+		opacity: 0.5;
+		text-decoration: line-through;
 	}
 
 	@media print {
