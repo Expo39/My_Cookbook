@@ -98,11 +98,11 @@
 
 {#if open && !disabled}
 	<form id="{id}-editor" class="editor" onsubmit={done}>
-		<div class="stepper">
-			<button type="button" aria-label="Less {label}" onclick={() => nudge(-1)}>
-				<Icon name="minus" size={18} />
-			</button>
-			<label class="sr-only" for="{id}-qty">Amount of {label}</label>
+		<button type="button" class="round" aria-label="Less {label}" onclick={() => nudge(-1)}>
+			<Icon name="minus" size={18} />
+		</button>
+		<label class="sr-only" for="{id}-qty">Amount of {label}</label>
+		<span class="field">
 			<input
 				bind:this={field}
 				id="{id}-qty"
@@ -113,22 +113,16 @@
 				onkeydown={(event) => event.key === 'Escape' && (open = false)}
 			/>
 			{#if unit}<span class="unit">{unitLabel(unit)}</span>{/if}
-			<button type="button" aria-label="More {label}" onclick={() => nudge(1)}>
-				<Icon name="plus" size={18} />
+		</span>
+		<button type="button" class="round" aria-label="More {label}" onclick={() => nudge(1)}>
+			<Icon name="plus" size={18} />
+		</button>
+		<button type="submit" class="done" aria-label="Done"><Icon name="check" size={20} /></button>
+		{#if edited}
+			<button type="button" class="back" onclick={reset}>
+				<Icon name="reset" size={14} />Back to {original || 'no amount'}
 			</button>
-		</div>
-		<div class="actions">
-			<button type="submit" class="primary">Done</button>
-			{#if edited}
-				<button type="button" onclick={reset}>
-					<Icon name="reset" size={16} />Back to {original || 'no amount'}
-				</button>
-			{/if}
-		</div>
-		<p class="from">
-			{#if original}The recipes need <strong>{original}</strong>.{:else}The recipes give no amount.{/if}
-			{#if value !== undefined && original}Change it to buy extra, or less if you have some.{/if}
-		</p>
+		{/if}
 	</form>
 {/if}
 
@@ -190,24 +184,18 @@
 		background: transparent;
 	}
 
+	/* One calm row: less, the amount, more, done. Going back to the recipes' amount sits beneath. */
 	.editor {
-		display: grid;
-		flex-basis: 100%;
-		gap: var(--space-2);
-		margin-block-start: var(--space-2);
-		padding: var(--space-3);
-		border: 1px solid var(--colour-line);
-		border-radius: var(--radius-m);
-		background: var(--colour-bg);
-	}
-
-	.stepper {
 		display: flex;
+		flex-wrap: wrap;
+		flex-basis: 100%;
 		align-items: center;
 		gap: var(--space-2);
+		margin-block-start: var(--space-2);
 	}
 
-	.stepper button {
+	.round,
+	.done {
 		display: grid;
 		place-items: center;
 		inline-size: var(--target);
@@ -219,18 +207,41 @@
 		color: var(--colour-primary);
 	}
 
-	input {
-		inline-size: 5rem;
+	.done {
+		margin-inline-start: auto;
+		border-color: var(--colour-primary);
+		background: var(--colour-primary);
+		color: var(--colour-on-primary);
+	}
+
+	.field {
+		display: inline-flex;
+		align-items: baseline;
+		gap: var(--space-1);
 		min-block-size: var(--target);
-		padding-inline: var(--space-2);
-		border: 1px solid var(--colour-muted);
-		border-radius: var(--radius-s);
-		background: var(--colour-surface);
+		padding-inline: var(--space-3);
+		border-block-end: 2px solid var(--colour-primary);
+	}
+
+	input {
+		inline-size: 3.5rem;
+		padding: 0;
+		border: 0;
+		background: transparent;
 		color: var(--colour-ink);
 		font-size: var(--text-l);
 		font-variant-numeric: tabular-nums;
 		font-weight: 700;
+		line-height: var(--target);
 		text-align: center;
+	}
+
+	input:focus-visible {
+		outline: none;
+	}
+
+	.field:focus-within {
+		border-block-end-color: var(--colour-accent);
 	}
 
 	.unit {
@@ -238,33 +249,18 @@
 		font-weight: 700;
 	}
 
-	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-2);
-	}
-
-	.actions button {
+	.back {
 		display: inline-flex;
+		flex-basis: 100%;
 		align-items: center;
 		gap: var(--space-1);
 		min-block-size: var(--target);
-		padding-inline: var(--space-3);
-		border: 1px solid var(--colour-line);
-		border-radius: var(--radius-s);
-		background: var(--colour-surface);
+		padding: 0;
+		border: 0;
+		background: transparent;
 		color: var(--colour-primary);
-		font-weight: 700;
-	}
-
-	.actions .primary {
-		border-color: var(--colour-primary);
-		background: var(--colour-primary);
-		color: var(--colour-on-primary);
-	}
-
-	.from {
-		color: var(--colour-muted);
 		font-size: var(--text-s);
+		font-weight: 700;
+		text-align: start;
 	}
 </style>

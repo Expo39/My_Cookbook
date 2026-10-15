@@ -5,7 +5,7 @@
 	import PageHead from '$lib/components/PageHead.svelte';
 	import QuantityEditor from '$lib/components/QuantityEditor.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
-	import { convert, loadCore } from '$lib/core';
+	import { convert, loadCore, parseIngredientLine } from '$lib/core';
 	import { shareText } from '$lib/kitchen/share-text';
 	import {
 		groupByAisle,
@@ -13,6 +13,7 @@
 		listText,
 		mergeLines,
 		quantityText,
+		type ShoppingItem,
 		type ShoppingLine
 	} from '$lib/kitchen/shopping';
 	import { homeHref } from '$lib/links';
@@ -79,6 +80,34 @@
 		shopping.clearAll();
 	}
 
+	let own = $state('');
+
+	/** "2 lemons" or "500 g flour" become an amount and an item; anything else is taken as it is. */
+	function addOwn(event: SubmitEvent) {
+		event.preventDefault();
+		const text = own.trim();
+		if (!text) return;
+		let item: ShoppingItem = { item: text };
+		if (coreReady) {
+			try {
+				const parsed = parseIngredientLine(text);
+				const qty = parsed.amount?.qty;
+				const [min, max] = typeof qty === 'number' ? [qty, qty] : qty ? [qty.min, qty.max] : [];
+				item = {
+					item: parsed.item || text,
+					note: parsed.note,
+					...(min !== undefined && max !== undefined
+						? { min, max, unit: parsed.amount?.unit ?? null }
+						: {})
+				};
+			} catch {
+				/* the line is kept as typed */
+			}
+		}
+		shopping.addOwn(item);
+		own = '';
+	}
+
 	const sources = (line: ShoppingLine) => line.recipes.map((recipe) => recipe.title).join(', ');
 </script>
 
@@ -91,10 +120,26 @@
 <div class="page">
 	<h1>Shopping list</h1>
 
+	{#if ready}
+		<form class="own" onsubmit={addOwn}>
+			<label for="{id}-own">Add an item</label>
+			<div class="own-row">
+				<input
+					id="{id}-own"
+					type="text"
+					autocomplete="off"
+					placeholder="2 lemons, kitchen roll..."
+					bind:value={own}
+				/>
+				<button type="submit" disabled={!own.trim()}><Icon name="plus" />Add</button>
+			</div>
+		</form>
+	{/if}
+
 	{#if !ready}
 		<p class="empty" role="status">Loading your list...</p>
 	{:else if merged.length === 0}
-		<p class="empty">Your list is empty. Add ingredients from any recipe.</p>
+		<p class="empty">Your list is empty. Add ingredients from any recipe, or type an item above.</p>
 		<p><a href={homeHref()}>Find a recipe</a></p>
 	{:else}
 		<div class="toolbar">
@@ -220,6 +265,50 @@
 
 	.empty {
 		color: var(--colour-muted);
+	}
+
+	.own {
+		display: grid;
+		gap: var(--space-1);
+		max-inline-size: 36rem;
+	}
+
+	.own label {
+		font-weight: 700;
+	}
+
+	.own-row {
+		display: flex;
+		gap: var(--space-2);
+	}
+
+	.own input {
+		flex: 1;
+		min-inline-size: 0;
+		min-block-size: var(--target);
+		padding-inline: var(--space-3);
+		border: 1px solid var(--colour-muted);
+		border-radius: var(--radius-s);
+		background: var(--colour-surface);
+		color: var(--colour-ink);
+		font: inherit;
+	}
+
+	.own button {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		min-block-size: var(--target);
+		padding-inline: var(--space-4);
+		border: 0;
+		border-radius: var(--radius-s);
+		background: var(--colour-primary);
+		color: var(--colour-on-primary);
+		font-weight: 700;
+	}
+
+	.own button:disabled {
+		opacity: 0.5;
 	}
 
 	.toolbar {
