@@ -33,7 +33,7 @@ const UNIT: Record<string, 'sec' | 'min' | 'hr'> = {
 };
 
 const NUM = String.raw`\d+(?:[.,]\d+)?`;
-const RANGE = String.raw`(?:\s*(?:-|–|to)\s*(${NUM}))?`;
+const RANGE = String.raw`(?:\s*(?:-|\u2013|to)\s*(${NUM}))?`;
 const HOURS_AND_MINUTES = new RegExp(
 	String.raw`\b(\d+)\s*(?:hours?|hrs?)\s*(?:and\s*)?(\d+)\s*(?:minutes?|mins?)\b`,
 	'gi'
@@ -43,7 +43,7 @@ const TIMER = new RegExp(
 	'gi'
 );
 const TEMP = new RegExp(
-	String.raw`\b(\d{2,3})(?:\s*(?:-|–|to)\s*(\d{2,3}))?\s*(?:°\s*|degrees\s*)?([CF])\b` +
+	String.raw`\b(\d{2,3})(?:\s*(?:-|\u2013|to)\s*(\d{2,3}))?\s*(?:°\s*|degrees\s*)?([CF])\b` +
 		String.raw`(?:\s*\(\s*(\d{2,3})\s*°?\s*C?\s*fan\s*\))?`,
 	'gi'
 );
@@ -60,13 +60,13 @@ function eachPlain(text: string, swap: (plain: string) => string): string {
 }
 
 export function wordsToTokens(text: string): { text: string; found: Found[] } {
-	const found: Found[] = [];
+	const found: (Found & { token: string })[] = [];
 	const out = eachPlain(text, (plain) =>
 		plain
 			.replace(HOURS_AND_MINUTES, (_, hours, mins) => {
-				const total = Number(hours) * 60 + Number(mins);
-				found.push({ kind: 'timer', label: `${hours} h ${mins} min timer` });
-				return timerToken({ min: total, unit: 'min' });
+				const token = timerToken({ min: Number(hours) * 60 + Number(mins), unit: 'min' });
+				found.push({ kind: 'timer', label: `${hours} h ${mins} min timer`, token });
+				return token;
 			})
 			.replace(TIMER, (match, from, to, word) => {
 				const unit = UNIT[word.toLowerCase()];
@@ -74,22 +74,38 @@ export function wordsToTokens(text: string): { text: string; found: Found[] } {
 				const min = number(from);
 				const max = to ? number(to) : undefined;
 				const short = unit === 'sec' ? 'sec' : unit === 'hr' ? 'h' : 'min';
-				found.push({ kind: 'timer', label: `${from}${to ? `-${to}` : ''} ${short} timer` });
-				return timerToken({ min, max, unit });
+				const token = timerToken({ min, max, unit });
+				found.push({ kind: 'timer', label: `${from}${to ? `-${to}` : ''} ${short} timer`, token });
+				return token;
 			})
 			.replace(TEMP, (match, from, to, scale, fan) => {
 				const celsius = toCelsius(Number(from), scale);
 				const max = to ? toCelsius(Number(to), scale) : undefined;
 				if (celsius < 30 || celsius > 300) return match;
 				const fanDegrees = fan ? Number(fan) : undefined;
+				const token = temperatureToken({ celsius, max, fan: fanDegrees });
 				found.push({
+					token,
 					kind: 'temp',
 					label: `${celsius}${max ? `-${max}` : ''}°C${fanDegrees ? ` (${fanDegrees}°C fan)` : ''}`
 				});
-				return temperatureToken({ celsius, max, fan: fanDegrees });
+				return token;
 			})
 	);
-	return { text: out, found };
+	return { text: out, found: inReadingOrder(out, found) };
+}
+
+/** Times are found before temperatures; the chips follow the order they come in the step. */
+function inReadingOrder(text: string, found: (Found & { token: string })[]): Found[] {
+	const from: Record<string, number> = {};
+	return found
+		.map(({ token, ...item }) => {
+			const at = text.indexOf(token, from[token] ?? 0);
+			from[token] = at + 1;
+			return { at, item };
+		})
+		.sort((a, b) => a.at - b.at)
+		.map(({ item }) => item);
 }
 
 const TIMER_TOKEN = /^\{timer:([\d.]+)(?:-([\d.]+))?(s|h)?\}$/;

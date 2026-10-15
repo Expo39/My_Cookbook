@@ -70,13 +70,16 @@
 
 	const panes: { value: Pane; label: string }[] = $derived([
 		{ value: 'edit', label: 'Edit' },
-		{ value: 'checks', label: ed?.errors.length ? `Checks (${ed.errors.length})` : 'Checks' },
+		{ value: 'checks', label: ed?.errors.length ? `To do (${ed.errors.length})` : 'To do' },
 		{ value: 'preview', label: 'Preview' }
 	]);
 
 	onMount(() => {
 		void admin.restore();
 		void personal.load().then(() => (mounted = true));
+		// The save bar sits where the back-to-top button would, so the button moves above it.
+		chrome.hasActionBar = true;
+		return () => (chrome.hasActionBar = false);
 	});
 
 	onDestroy(() => (stopped = true));
@@ -106,8 +109,17 @@
 		try {
 			writer = onDevice ? new LocalWriter(createSource()) : createWriter(admin.token);
 			state = id
-				? new EditorState({ index: data.index, id, recipe: await writer.read(id) })
-				: new EditorState({ index: data.index, section: params.get('section') ?? '' });
+				? new EditorState({
+						index: data.index,
+						id,
+						recipe: await writer.read(id),
+						plainSteps: onDevice
+					})
+				: new EditorState({
+						index: data.index,
+						section: params.get('section') ?? '',
+						plainSteps: onDevice
+					});
 		} catch (error) {
 			if (error instanceof RecipeNotFoundError) phase = 'missing';
 			else problem = 'The recipe could not be loaded. Reload the page to try again.';
@@ -169,6 +181,8 @@
 	}
 
 	function reveal(target: HTMLElement | null | undefined) {
+		const folded = target?.closest('details');
+		if (folded) folded.open = true;
 		target?.scrollIntoView({ block: 'center' });
 		target?.focus();
 	}
@@ -302,11 +316,112 @@
 	</section>
 {:else if ed}
 	{@const editor = ed}
+
+	{#snippet localName()}
+		<TextField
+			id={fieldId('titleLocal')}
+			label="Local name"
+			bind:value={editor.form.titleLocal}
+			optional
+			hint="The Maltese or Italian name, shown under the title."
+		/>
+	{/snippet}
+
+	{#snippet nouns()}
+		<TextField
+			id="noun-one"
+			label="One serving is called"
+			bind:value={editor.form.nounOne}
+			optional
+			hint="Such as 'person'."
+		/>
+		<TextField
+			id="noun-other"
+			label="Several are called"
+			bind:value={editor.form.nounOther}
+			optional
+			hint="Such as 'people' or 'boards'."
+		/>
+	{/snippet}
+
+	{#snippet difficultyAndTags()}
+		<Field id={fieldId('difficulty')} label="Difficulty" optional>
+			<select id={fieldId('difficulty')} class="control" bind:value={editor.form.difficulty}>
+				<option value="">Not stated</option>
+				<option value="easy">Easy</option>
+				<option value="medium">Medium</option>
+				<option value="hard">Hard</option>
+			</select>
+		</Field>
+		<TagsField ed={editor} />
+	{/snippet}
+
+	{#snippet address()}
+		<TextField
+			id={fieldId('slug')}
+			label="Web address"
+			bind:value={
+				() => editor.slug,
+				(value) => {
+					editor.form.slug = value;
+					editor.form.slugTouched = true;
+				}
+			}
+			hint={editor.editing
+				? `Changing this moves the recipe. It is at /${editor.originalId} now.`
+				: `Follows the title until you change it: /${editor.id}`}
+			error={editor.errorFor('slug')}
+			onblur={() => editor.touch('slug')}
+		/>
+		{#if editor.moving}
+			<p class="notice" role="status">
+				<span>
+					<strong>This moves the recipe.</strong> The photo and the links from other recipes move with
+					it.
+				</span>
+				<span>From <code>/{editor.originalId}</code></span>
+				<span>To <code>/{editor.id}</code></span>
+			</p>
+		{/if}
+	{/snippet}
+
+	{#snippet tipsAndRelated()}
+		<FieldSet legend="Tips" id={fieldId('tips')}>
+			<p class="help">Shown as the "Chef's tip" beside the method.</p>
+			<RowList
+				items={editor.form.tips}
+				noun="tip"
+				onmove={(from, to) => moveItem(editor.form.tips, from, to)}
+				onremove={(index) => removeItem(editor.form.tips, index)}
+			>
+				{#snippet row(tip, index)}
+					<TextField
+						id={fieldId(`tips[${index}]`)}
+						label="Tip {index + 1}"
+						rows={3}
+						bind:value={tip.text}
+					/>
+				{/snippet}
+			</RowList>
+			<button
+				type="button"
+				class="btn add"
+				onclick={() => editor.form.tips.push({ uid: uid(), text: '' })}
+			>
+				<Icon name="plus" size={18} />Add a tip
+			</button>
+		</FieldSet>
+		<RelatedPicker ed={editor} />
+	{/snippet}
 	<div class="editor">
 		<header class="top">
 			<div>
 				<h1>{editor.editing ? 'Edit recipe' : 'New recipe'}</h1>
 				{#if local}
+					<p class="intro">
+						A title, the ingredients and the method are all a recipe needs. Write it the way you
+						would tell a friend; the rest is optional.
+					</p>
 					<p class="where">
 						<Icon name="device" size={16} />Saved in this browser only. Share it from Settings when
 						you want everyone to see it.
@@ -402,13 +517,7 @@
 						error={editor.errorFor('title')}
 						onblur={() => editor.touch('title')}
 					/>
-					<TextField
-						id={fieldId('titleLocal')}
-						label="Local name"
-						bind:value={editor.form.titleLocal}
-						optional
-						hint="The Maltese or Italian name, shown under the title."
-					/>
+					{#if !local}{@render localName()}{/if}
 					<TextField
 						id={fieldId('summary')}
 						label="Summary"
@@ -430,20 +539,7 @@
 							error={editor.errorFor('servings')}
 							onblur={() => editor.touch('servings')}
 						/>
-						<TextField
-							id="noun-one"
-							label="One serving is called"
-							bind:value={editor.form.nounOne}
-							optional
-							hint="Such as 'person'."
-						/>
-						<TextField
-							id="noun-other"
-							label="Several are called"
-							bind:value={editor.form.nounOther}
-							optional
-							hint="Such as 'people' or 'boards'."
-						/>
+						{#if !local}{@render nouns()}{/if}
 					</div>
 					<div class="row">
 						<TextField
@@ -474,78 +570,31 @@
 							error={editor.errorFor('times.rest')}
 						/>
 					</div>
-					<Field id={fieldId('difficulty')} label="Difficulty" optional>
-						<select id={fieldId('difficulty')} class="control" bind:value={editor.form.difficulty}>
-							<option value="">Not stated</option>
-							<option value="easy">Easy</option>
-							<option value="medium">Medium</option>
-							<option value="hard">Hard</option>
-						</select>
-					</Field>
-					<TagsField ed={editor} />
+					{#if !local}{@render difficultyAndTags()}{/if}
 				</FieldSet>
 
 				<FieldSet legend="Where it lives">
-					<SectionPicker ed={editor} />
-					<TextField
-						id={fieldId('slug')}
-						label="Web address"
-						bind:value={
-							() => editor.slug,
-							(value) => {
-								editor.form.slug = value;
-								editor.form.slugTouched = true;
-							}
-						}
-						hint={editor.editing
-							? `Changing this moves the recipe. It is at /${editor.originalId} now.`
-							: `Follows the title until you change it: /${editor.id}`}
-						error={editor.errorFor('slug')}
-						onblur={() => editor.touch('slug')}
-					/>
-					{#if editor.moving}
-						<p class="notice" role="status">
-							<span>
-								<strong>This moves the recipe.</strong> The photo and the links from other recipes move
-								with it.
-							</span>
-							<span>From <code>/{editor.originalId}</code></span>
-							<span>To <code>/{editor.id}</code></span>
-						</p>
-					{/if}
+					<SectionPicker ed={editor} allowNew={!local} />
+					{#if !local}{@render address()}{/if}
 				</FieldSet>
 
 				{#if !local}<PhotoField ed={editor} />{/if}
-				<IngredientsEditor ed={editor} />
+				<IngredientsEditor ed={editor} simple={local} />
 				<MethodEditor ed={editor} />
 
-				<FieldSet legend="Tips" id={fieldId('tips')}>
-					<p class="help">Shown as the "Chef's tip" beside the method.</p>
-					<RowList
-						items={editor.form.tips}
-						noun="tip"
-						onmove={(from, to) => moveItem(editor.form.tips, from, to)}
-						onremove={(index) => removeItem(editor.form.tips, index)}
-					>
-						{#snippet row(tip, index)}
-							<TextField
-								id={fieldId(`tips[${index}]`)}
-								label="Tip {index + 1}"
-								rows={3}
-								bind:value={tip.text}
-							/>
-						{/snippet}
-					</RowList>
-					<button
-						type="button"
-						class="btn add"
-						onclick={() => editor.form.tips.push({ uid: uid(), text: '' })}
-					>
-						<Icon name="plus" size={18} />Add a tip
-					</button>
-				</FieldSet>
-
-				<RelatedPicker ed={editor} />
+				{#if local}
+					<details class="more">
+						<summary>More details (optional)</summary>
+						<div class="more-fields">
+							{@render localName()}
+							<div class="row">{@render nouns()}</div>
+							{@render difficultyAndTags()}
+							{@render tipsAndRelated()}
+						</div>
+					</details>
+				{:else}
+					{@render tipsAndRelated()}
+				{/if}
 
 				{#if editor.form.variants.length}
 					<FieldSet legend="Variants">
@@ -644,6 +693,31 @@
 		color: var(--colour-muted);
 	}
 
+	.intro {
+		max-inline-size: 60ch;
+	}
+
+	.more {
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-m);
+		background: var(--colour-surface);
+	}
+
+	.more summary {
+		padding: var(--space-4);
+		color: var(--colour-primary);
+		font-family: var(--font-display);
+		font-size: var(--text-l);
+		font-weight: 800;
+		cursor: pointer;
+	}
+
+	.more-fields {
+		display: grid;
+		gap: var(--space-4);
+		padding: 0 var(--space-4) var(--space-4);
+	}
+
 	.where {
 		display: flex;
 		align-items: center;
@@ -719,6 +793,11 @@
 
 	.bar-summary {
 		font-weight: 700;
+	}
+
+	.bar .btn {
+		flex: none;
+		white-space: nowrap;
 	}
 
 	@media (max-width: 63.99rem) {
