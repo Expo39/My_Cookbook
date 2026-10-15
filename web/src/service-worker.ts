@@ -4,12 +4,13 @@
 /// <reference lib="webworker" />
 
 import { base, build, files, version } from '$service-worker';
+import { DATA_CACHE } from '$lib/kitchen/cache-names';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
 const SHELL = `shell-${version}`;
 const PAGES = 'pages-v1';
-const DATA = 'data-v1';
+const DATA = DATA_CACHE;
 
 // The recipe JSON is large and changes with the content, so it is cached as it is used, not up front.
 // admin.json must always be fetched fresh, or a new password would not unlock until the cache turned over.

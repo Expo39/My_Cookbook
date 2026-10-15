@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { preferences } from '$lib/stores/preferences.svelte';
-	import type { Ticks } from '$lib/stores/ticks.svelte';
+	import { ingredientTick, type Ticks } from '$lib/stores/ticks.svelte';
 	import { unitLabel } from '$lib/recipe/format';
 	import type { ScaledIngredient } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
@@ -12,7 +12,10 @@
 
 	const id = $props.id();
 	const total = $derived(model.view.groups.reduce((sum, group) => sum + group.items.length, 0));
-	const ready = $derived(ticks.count('i:'));
+	const keys = $derived(
+		model.view.groups.flatMap((group) => group.items.map((item) => ingredientTick(group, item)))
+	);
+	const ready = $derived(ticks.countOf(keys));
 	const anyPickable = $derived(
 		model.view.groups.some((group) => group.items.some((item) => model.canPick(item)))
 	);
@@ -81,6 +84,7 @@
 			<ul>
 				{#each group.items as item, i (i)}
 					{@const position = `${g}.${i}`}
+					{@const tick = ingredientTick(group, item)}
 					{@const words = wording(item)}
 					{@const menu = words.amount && model.canPick(item)}
 					<IngredientLine
@@ -91,9 +95,9 @@
 						changed={item.scaled}
 						amountText={words.amount && !menu ? item.amount?.text : undefined}
 						notes={item.hint ? [item.hint] : []}
-						checked={ticks.has(`i:${position}`)}
+						checked={ticks.has(tick)}
 						disabled={!hydrated}
-						ontoggle={() => ticks.toggle(`i:${position}`)}
+						ontoggle={() => ticks.toggle(tick)}
 						amount={menu ? unitToggle : undefined}
 					/>
 					{#snippet unitToggle()}
@@ -101,7 +105,7 @@
 							type="button"
 							class="toggle num"
 							class:changed={item.scaled}
-							disabled={!model.ready || ticks.has(`i:${position}`)}
+							disabled={!model.ready || ticks.has(tick)}
 							aria-label={label(position, item)}
 							onclick={() => cycle(position, item)}>{model.amountText(position, item)}</button
 						>
