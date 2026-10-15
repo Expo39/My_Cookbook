@@ -26,6 +26,14 @@
 		void admin.checkConfigured();
 	}
 
+	let section: HTMLElement;
+
+	/** Brings the panel into view and puts the cursor in its first field. */
+	export function reveal() {
+		section.scrollIntoView({ block: 'start', behavior: 'smooth' });
+		section.querySelector<HTMLInputElement>('input')?.focus({ preventScroll: true });
+	}
+
 	onMount(() => {
 		void admin.restore();
 		if (!lazy) check();
@@ -101,8 +109,8 @@
 	}
 </script>
 
-<section class="admin" aria-labelledby="{uid}-title">
-	<h3 id="{uid}-title" class="label">Editing</h3>
+<section bind:this={section} class="admin" aria-labelledby="{uid}-title">
+	<h3 id="{uid}-title" class="label">Sharing to GitHub (optional)</h3>
 
 	{#if admin.configured === null && !admin.unlocked}
 		<p class="help">Looking for the editing key...</p>

@@ -6,8 +6,11 @@
 	import RecipeCard from '$lib/components/RecipeCard.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import type { SearchEngine } from '$lib/core';
+	import { localCards } from '$lib/data/local-card';
 	import { allRecipes } from '$lib/data/tree';
 	import { searchEngine } from '$lib/search/engine';
+	import { haveLocal, searchLocal } from '$lib/search/local';
+	import { personal } from '$lib/stores/personal.svelte';
 	import type { RecipeCard as Card } from '$lib/types/recipe';
 
 	let { data } = $props();
@@ -16,6 +19,9 @@
 
 	const id = $props.id();
 	const cards = $derived(new Map(allRecipes(data.index).map((card) => [card.id, card])));
+	/** Recipes added on this device, which the published index does not know about. */
+	const own = $derived(personal.list.filter((entry) => !entry.shared && !cards.has(entry.id)));
+	const ownCards = $derived(new Map(localCards(data.index, own).map((card) => [card.id, card])));
 
 	let query = $state('');
 	let mode = $state<Mode>('recipes');
@@ -26,6 +32,7 @@
 	interface Result {
 		card: Card;
 		coverage?: { matched: number; total: number };
+		local?: boolean;
 	}
 
 	const results = $derived.by<Result[]>(() => {
@@ -41,7 +48,18 @@
 				const card = cards.get(hit.id);
 				if (card) found.push({ card, coverage: { matched: hit.matched, total: hit.total } });
 			}
+			for (const hit of haveLocal(own, have)) {
+				const card = ownCards.get(hit.id);
+				if (card) found.push({ card, coverage: hit, local: true });
+			}
+			// Fewest missing ingredients first, across the cookbook's recipes and yours alike.
+			const missing = ({ coverage }: Result) => (coverage ? coverage.total - coverage.matched : 0);
+			found.sort((a, b) => missing(a) - missing(b));
 		} else {
+			for (const id of searchLocal(own, text)) {
+				const card = ownCards.get(id);
+				if (card) found.push({ card, local: true });
+			}
 			for (const hit of engine.search(text)) {
 				const card = cards.get(hit.id);
 				if (card) found.push({ card });
@@ -66,6 +84,7 @@
 		query = params.get('q') ?? '';
 		mode = params.get('m') === 'have' ? 'have' : 'recipes';
 		synced = true;
+		void personal.load();
 
 		searchEngine()
 			.then((loaded) => (engine = loaded))
@@ -157,8 +176,8 @@
 					{results.length === 1 ? 'recipe' : 'recipes'} found
 				</p>
 				<ul>
-					{#each results as { card, coverage } (card.id)}
-						<li><RecipeCard {card} {coverage} /></li>
+					{#each results as { card, coverage, local } (card.id)}
+						<li><RecipeCard {card} {coverage} {local} /></li>
 					{/each}
 				</ul>
 			{/if}

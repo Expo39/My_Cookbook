@@ -11,7 +11,9 @@
 	import TimerStrip from '$lib/components/TimerStrip.svelte';
 	import Toast from '$lib/components/Toast.svelte';
 	import { rememberPage } from '$lib/kitchen/offline';
+	import { allRecipes } from '$lib/data/tree';
 	import { chrome } from '$lib/stores/chrome.svelte';
+	import { personal } from '$lib/stores/personal.svelte';
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { timers } from '$lib/stores/timers.svelte';
@@ -26,6 +28,9 @@
 		theme.load();
 		preferences.load();
 		timers.load();
+		// A shared recipe stays on the device until the deployed cookbook carries its own copy.
+		const published = new Set(allRecipes(data.index).map((card) => card.id));
+		void personal.load().then(() => personal.forgetPublished(published));
 	});
 </script>
 

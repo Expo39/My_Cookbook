@@ -4,6 +4,7 @@
 	import type { UnitSystem } from '$lib/types/recipe';
 	import AdminPanel from './admin/AdminPanel.svelte';
 	import Icon from './Icon.svelte';
+	import PersonalPanel from './PersonalPanel.svelte';
 	import Segmented from './Segmented.svelte';
 
 	let dialog: HTMLDialogElement;
@@ -59,6 +60,8 @@
 			/>
 			<p class="help">Recipes open in these units. A shared link can still choose its own.</p>
 		</div>
+
+		<PersonalPanel onnavigate={() => dialog.close()} onunlock={() => adminPanel.reveal()} />
 
 		<AdminPanel bind:this={adminPanel} lazy onnavigate={() => dialog.close()} />
 	</div>
