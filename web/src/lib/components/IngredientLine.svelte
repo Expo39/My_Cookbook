@@ -212,17 +212,41 @@
 		font-style: italic;
 	}
 
-	.done .amount,
-	.done label {
-		color: var(--colour-muted);
-		text-decoration: line-through;
-		opacity: 0.7;
+	/* A ticked line is done as a whole: everything on it fades, and the name is struck through. */
+	.line {
+		transition: opacity var(--duration-panel) var(--ease-out);
 	}
 
-	.done .qty {
-		color: var(--colour-muted);
+	.done .line {
+		opacity: 0.5;
+	}
+
+	.done label {
 		text-decoration: line-through;
-		opacity: 0.7;
+		text-decoration-color: var(--colour-muted);
+	}
+
+	.done .amount,
+	.done .qty,
+	.done .line :global(button) {
+		color: var(--colour-muted);
+		background: transparent;
+	}
+
+	.done .line :global(button::before) {
+		background: transparent;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		input:checked::before {
+			animation: pop var(--duration-panel) var(--ease-out);
+		}
+	}
+
+	@keyframes pop {
+		50% {
+			transform: translate(-50%, -50%) scale(1.15);
+		}
 	}
 
 	@media print {

@@ -11,6 +11,7 @@
 		edited,
 		value,
 		unit,
+		disabled = false,
 		onset,
 		onreset
 	}: {
@@ -24,6 +25,8 @@
 		/** The number the editor starts from. */
 		value: number | undefined;
 		unit: Unit | null;
+		/** A ticked line is bought: its quantity is settled. */
+		disabled?: boolean;
 		onset: (qty: number) => void;
 		onreset: () => void;
 	} = $props();
@@ -85,6 +88,7 @@
 	class="qty"
 	class:edited
 	class:empty={!shown}
+	{disabled}
 	aria-expanded={open}
 	aria-controls="{id}-editor"
 	aria-label={shown ? `${label}: ${shown}, change the amount` : `${label}: add an amount`}
@@ -92,7 +96,7 @@
 	>{#if shown}{shown}{:else}<Icon name="plus" size={14} />amount{/if}</button
 >
 
-{#if open}
+{#if open && !disabled}
 	<form id="{id}-editor" class="editor" onsubmit={done}>
 		<div class="stepper">
 			<button type="button" aria-label="Less {label}" onclick={() => nudge(-1)}>
@@ -130,6 +134,8 @@
 
 <style>
 	.qty {
+		position: relative;
+		z-index: 0;
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-1);
@@ -144,13 +150,28 @@
 		font-variant-numeric: tabular-nums;
 		font-weight: 700;
 		white-space: nowrap;
-		text-decoration: underline dotted var(--colour-muted);
-		text-underline-offset: 0.25em;
 	}
 
-	.qty:hover,
-	.qty[aria-expanded='true'] {
+	/* The amount sits on a soft chip, so it reads as something to tap without underlining it. */
+	.qty::before {
+		content: '';
+		position: absolute;
+		inset: 50% 0 auto;
+		z-index: -1;
+		block-size: 1.75rem;
+		border-radius: var(--radius-s);
 		background: var(--colour-tint);
+		transform: translateY(-50%);
+		transition: background-color var(--duration-micro);
+	}
+
+	.qty:disabled {
+		cursor: default;
+	}
+
+	.qty:not(:disabled):hover::before,
+	.qty[aria-expanded='true']::before {
+		background: var(--colour-line);
 	}
 
 	/* A changed amount takes the accent, so it is plain the list no longer matches the recipes. */
@@ -160,10 +181,13 @@
 
 	.empty {
 		color: var(--colour-muted);
-		font-family: var(--font-body);
 		font-size: var(--text-s);
 		font-weight: 400;
-		text-decoration: none;
+	}
+
+	.empty::before {
+		border: 1px dashed var(--colour-line);
+		background: transparent;
 	}
 
 	.editor {
