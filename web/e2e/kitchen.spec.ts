@@ -257,6 +257,33 @@ test.describe('shopping list', () => {
 		).toBeVisible();
 	});
 
+	test("a quantity can be changed to buy extra, and put back to the recipes' amount", async ({
+		page
+	}) => {
+		await page.goto(brulee);
+		await waitForCore(page);
+		await page.getByRole('button', { name: 'Add to shopping list' }).click();
+		await page.goto('shopping-list');
+
+		const sugar = page.getByRole('listitem').filter({ hasText: 'caster sugar' });
+		await sugar.getByRole('button', { name: /caster sugar: 50 g, change the amount/ }).click();
+		await sugar.getByRole('button', { name: 'More caster sugar' }).click();
+		await sugar.getByRole('button', { name: 'Done' }).click();
+		await expect(sugar.getByRole('button', { name: /60 g, change the amount/ })).toBeVisible();
+		await expect(sugar).toContainText('Recipe: 50 g');
+
+		await page.reload();
+		await expect(sugar).toContainText('Recipe: 50 g');
+		await sugar.getByRole('button', { name: /60 g, change the amount/ }).click();
+		await sugar.getByRole('button', { name: 'Back to 50 g' }).click();
+		await expect(sugar).not.toContainText('Recipe:');
+
+		const yolks = page.getByRole('listitem').filter({ hasText: 'egg yolks' });
+		await expect(
+			yolks.getByRole('button', { name: /egg yolks: 5, change the amount/ })
+		).toBeVisible();
+	});
+
 	test('adding a recipe again updates it instead of doubling it', async ({ page }) => {
 		await page.goto(brulee);
 		await waitForCore(page);

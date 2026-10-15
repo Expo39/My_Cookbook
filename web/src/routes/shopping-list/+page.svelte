@@ -3,6 +3,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import IngredientLine from '$lib/components/IngredientLine.svelte';
 	import PageHead from '$lib/components/PageHead.svelte';
+	import QuantityEditor from '$lib/components/QuantityEditor.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import { convert, loadCore } from '$lib/core';
 	import { shareText } from '$lib/kitchen/share-text';
@@ -32,10 +33,20 @@
 
 	const converter = $derived(coreReady ? convert : undefined);
 	const merged = $derived(mergeLines(shopping.recipes, converter, preferences.units));
+	/** Each line with the cook's own quantity in place of the recipes', and the recipes' kept beside it. */
+	const chosen = (line: ShoppingLine) => {
+		const original = quantityText(line);
+		const own = shopping.amountOf(line.key);
+		const needed = line.max;
+		return own
+			? { ...line, min: own.qty, max: own.qty, unit: own.unit, original, needed, edited: true }
+			: { ...line, original, needed, edited: false };
+	};
 	const groups = $derived(
-		view === 'type'
+		(view === 'type'
 			? groupByAisle(merged)
 			: groupByRecipe(shopping.recipes, converter, preferences.units)
+		).map((group) => ({ ...group, lines: group.lines.map(chosen) }))
 	);
 	const tickedCount = $derived(merged.filter((line) => shopping.isTicked(line.key)).length);
 
@@ -132,13 +143,32 @@
 							<IngredientLine
 								id="{id}-{group.id}-{n}"
 								text={[line.prefix, line.item].filter(Boolean).join(' ')}
-								amountText={quantityText(line)}
 								toTaste={line.toTaste}
 								flush
-								notes={[line.note ?? '', view === 'type' ? sources(line) : '']}
+								notes={[
+									line.note ?? '',
+									line.edited ? `Recipe: ${line.original || 'no amount'}` : '',
+									view === 'type' ? sources(line) : ''
+								]}
 								checked={shopping.isTicked(line.key)}
 								ontoggle={() => shopping.toggle(line.key)}
+								amount={line.toTaste && !line.edited ? undefined : quantity}
 							/>
+							{#snippet quantity()}
+								<QuantityEditor
+									label={line.item}
+									shown={quantityText(line)}
+									original={line.original}
+									edited={line.edited}
+									value={line.max}
+									unit={line.unit ?? null}
+									onset={(qty) =>
+										qty === line.needed
+											? shopping.resetAmount(line.key)
+											: shopping.setAmount(line.key, { qty, unit: line.unit ?? null })}
+									onreset={() => shopping.resetAmount(line.key)}
+								/>
+							{/snippet}
 						{/each}
 					</ul>
 				</section>
@@ -167,14 +197,20 @@
 	 * On a wide screen each aisle (or recipe) is its own card in a grid, so a quantity sits close to its
 	 * name instead of across an empty page.
 	 */
+	/*
+	 * Masonry: columns of cards, each as tall as its list, packed top to bottom. Column layout cannot
+	 * use gap between items in a column, so each card keeps a bottom margin instead.
+	 */
 	@media (min-width: 48rem) {
 		.groups {
-			grid-template-columns: repeat(auto-fill, minmax(min(22rem, 100%), 1fr));
-			align-items: start;
-			gap: var(--space-4);
+			display: block;
+			columns: 20rem;
+			column-gap: var(--space-4);
 		}
 
 		section {
+			break-inside: avoid;
+			margin-block-end: var(--space-4);
 			padding: var(--space-4) var(--space-5);
 			border: 1px solid var(--colour-line);
 			border-radius: var(--radius-m);

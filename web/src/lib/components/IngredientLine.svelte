@@ -19,7 +19,7 @@
 		id: string;
 		/** The line without its amount, e.g. "casarecce or short pasta". */
 		text: string;
-		/** An interactive amount, such as a unit menu; it wins over `amountText`. */
+		/** An interactive amount, such as a unit toggle or a quantity editor; it wins over `amountText`. */
 		amount?: Snippet;
 		amountText?: string;
 		/** Shows "to taste" in the amount slot when there is no amount. */
@@ -49,8 +49,10 @@
 			<label for={id}
 				>{text}{#if optional}<span class="optional">optional</span>{/if}</label
 			>
-			{#if amountText || toTaste}
-				<span class="qty num" class:taste={!amountText}>{amountText || 'to taste'}</span>
+			{#if amount}
+				{@render amount()}
+			{:else if amountText || toTaste}
+				<span class="qty" class:taste={!amountText}>{amountText || 'to taste'}</span>
 			{/if}
 		{:else}
 			<span class="amount num" class:changed class:taste={!amount && !amountText && toTaste}
@@ -164,6 +166,8 @@
 	/* A right-hand column of quantities, like a written list: quiet, and quick to scan. */
 	.qty {
 		color: var(--colour-primary);
+		font-variant-numeric: tabular-nums;
+		font-weight: 700;
 		white-space: nowrap;
 	}
 
