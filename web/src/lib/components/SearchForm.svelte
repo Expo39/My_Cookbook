@@ -233,7 +233,9 @@
 		box-shadow: 0 0 0 3px var(--colour-tint);
 	}
 
+	/* Slimmer than the bar it sits in, so the header keeps some air above and below it. */
 	.compact input {
+		min-block-size: 2.25rem;
 		font-size: var(--text-s);
 	}
 

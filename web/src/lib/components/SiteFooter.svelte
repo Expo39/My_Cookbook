@@ -16,7 +16,7 @@
 			</a>
 		{/if}
 		<p class="copyright">
-			Copyright 2026 Antonio. Recipes and photos are shared under
+			Copyright 2026 Antonio Galdes. Recipes and photos are shared under
 			<a
 				href="https://creativecommons.org/licenses/by-nc/4.0/"
 				rel="license noopener"

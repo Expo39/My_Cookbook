@@ -5,7 +5,9 @@ test('home to section to recipe, and back by breadcrumb', async ({ page }) => {
 	const errors = watchErrors(page);
 	await page.goto('./');
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText("Sapori ta' l-kċina");
-	await expect(page.getByText("Antonio's recipes from a Maltese kitchen")).toBeVisible();
+	await expect(
+		page.getByText('Recipes from a Maltese kitchen by Antonio Galdes, with room for your own')
+	).toBeVisible();
 
 	await page.getByRole('main').getByRole('link', { name: 'First Courses' }).click();
 	await expect(page).toHaveURL(/\/first-courses$/);
