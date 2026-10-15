@@ -6,7 +6,7 @@ const root = () => document.documentElement;
 beforeEach(() => {
 	localStorage.clear();
 	delete root().dataset.theme;
-	theme.choice = 'system';
+	theme.choice = 'light';
 });
 
 describe('the theme store', () => {
@@ -16,21 +16,22 @@ describe('the theme store', () => {
 		expect(localStorage.getItem(THEME_KEY)).toBe('dark');
 		theme.set('light');
 		expect(root().dataset.theme).toBe('light');
-	});
-
-	it('returns to the system theme by removing the attribute and the stored choice', () => {
-		theme.set('dark');
-		theme.set('system');
-		expect(root().dataset.theme).toBeUndefined();
 		expect(localStorage.getItem(THEME_KEY)).toBeNull();
 	});
 
-	it('loads the stored choice, and falls back to system for anything else', () => {
+	it('follows the device by removing the attribute and storing the choice', () => {
+		theme.set('dark');
+		theme.set('system');
+		expect(root().dataset.theme).toBeUndefined();
+		expect(localStorage.getItem(THEME_KEY)).toBe('system');
+	});
+
+	it('loads the stored choice, and falls back to light for anything else', () => {
 		localStorage.setItem(THEME_KEY, 'dark');
 		theme.load();
 		expect(theme.choice).toBe('dark');
 		localStorage.setItem(THEME_KEY, 'sepia');
 		theme.load();
-		expect(theme.choice).toBe('system');
+		expect(theme.choice).toBe('light');
 	});
 });

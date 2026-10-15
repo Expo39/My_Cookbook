@@ -39,9 +39,9 @@
 			name="theme"
 			value={theme.choice}
 			options={[
-				{ value: 'system', label: 'System' },
 				{ value: 'light', label: 'Light' },
-				{ value: 'dark', label: 'Dark' }
+				{ value: 'dark', label: 'Dark' },
+				{ value: 'system', label: 'Match device' }
 			]}
 			onchange={(value) => theme.set(value as Theme)}
 		/>

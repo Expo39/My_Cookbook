@@ -3,18 +3,20 @@ import { ingredients, method, waitForCore } from './helpers';
 
 const wellington = 'main-courses/beef-steak/beef-wellington';
 
-test('the theme choice applies at once and persists across reloads without a flash', async ({
+test('light is the default, and the theme choice applies at once and persists across reloads without a flash', async ({
 	page
 }) => {
+	await page.emulateMedia({ colorScheme: 'dark' });
 	await page.goto('./');
 	const html = page.locator('html');
+	await expect(html).toHaveAttribute('data-theme', 'light');
 	await page.getByRole('button', { name: 'Settings' }).click();
 	const drawer = page.getByRole('dialog', { name: 'Settings' });
 	await expect(drawer.getByRole('heading', { name: 'Editing' })).toBeVisible();
 
 	await drawer.getByRole('radio', { name: 'Dark' }).check();
 	await expect(html).toHaveAttribute('data-theme', 'dark');
-	await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(34, 29, 21)');
+	await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(14, 22, 32)');
 
 	await page.goto('./', { waitUntil: 'commit' });
 	await page.waitForFunction(() => document.documentElement.dataset.theme === 'dark');
@@ -23,9 +25,10 @@ test('the theme choice applies at once and persists across reloads without a fla
 
 	await page.getByRole('button', { name: 'Settings' }).click();
 	await drawer.getByRole('radio', { name: 'Light' }).check();
-	await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(236, 228, 211)');
-	await drawer.getByRole('radio', { name: 'System' }).check();
+	await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(248, 247, 243)');
+	await drawer.getByRole('radio', { name: 'Match device' }).check();
 	await expect(html).not.toHaveAttribute('data-theme', /.*/);
+	await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(14, 22, 32)');
 });
 
 test('the default units from the settings apply to recipes that do not say otherwise', async ({
