@@ -12,7 +12,7 @@ interface Entry {
 
 /** Lower case with accents dropped, so "brulee" finds "Brûlée" as it does in the core's search. */
 export const fold = (text: string): string =>
-	text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+	text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 
 const words = (text: string) =>
 	fold(text)
