@@ -30,12 +30,30 @@
 		after = list.scrollLeft + list.clientWidth < list.scrollWidth - 4;
 	}
 
-	/** Centres the current section's chip, scrolling the row only, never the page. */
+	let glide: HTMLLIElement | undefined = $state();
+	let glides = $state(false);
+	let settled = false;
+
+	/**
+	 * Slides the highlight to the current section's chip and glides the row to centre it, scrolling the
+	 * row only, never the page. The first placement after a load jumps there with no animation.
+	 */
 	afterNavigate(() => {
-		const chip = list?.querySelector<HTMLElement>('[aria-current="page"]');
-		if (list && chip) {
-			const offset = chip.getBoundingClientRect().left - list.getBoundingClientRect().left;
-			list.scrollLeft += offset - (list.clientWidth - chip.offsetWidth) / 2;
+		const chip = list?.querySelector<HTMLElement>('a[aria-current="page"]');
+		if (list && glide) {
+			glides = true;
+			glide.classList.toggle('shown', !!chip);
+			glide.classList.toggle('instant', !settled);
+			if (chip) {
+				glide.style.setProperty('--glide-x', `${chip.offsetLeft}px`);
+				glide.style.setProperty('--glide-w', `${chip.offsetWidth}px`);
+				const smooth = settled && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+				list.scrollTo({
+					left: chip.offsetLeft - (list.clientWidth - chip.offsetWidth) / 2,
+					behavior: smooth ? 'smooth' : 'auto'
+				});
+			}
+			settled = true;
 		}
 		measure();
 	});
@@ -47,7 +65,7 @@
 	<div class="inner">
 		<a class="brand" href={homeHref()}>
 			<img class="logo" src="{base}/favicon.svg" alt="" width="28" height="28" />
-			<span>{siteTitle}</span>
+			<span class="name">{siteTitle}</span>
 		</a>
 		<div class="tools">
 			<div class="desktop-search"><SearchForm compact /></div>
@@ -74,8 +92,9 @@
 				<Icon name="sliders" />
 			</button>
 		</div>
-		<nav aria-label="Sections" class:before class:after>
+		<nav aria-label="Sections" class:before class:after class:glides>
 			<ul bind:this={list} onscroll={measure}>
+				<li class="glide" bind:this={glide} aria-hidden="true"></li>
 				{#each sections as section (section.path)}
 					<li>
 						<a
@@ -107,9 +126,9 @@
 
 	.brand {
 		display: inline-flex;
-		flex-shrink: 1;
-		min-inline-size: 0;
 		align-items: center;
+		justify-content: center;
+		min-inline-size: var(--target);
 		gap: var(--space-2);
 		min-block-size: var(--target);
 		color: var(--colour-primary);
@@ -158,12 +177,14 @@
 
 	/* One row of chips that scrolls sideways on narrow screens, fading at whichever end runs on. */
 	ul {
+		position: relative;
 		display: flex;
 		gap: var(--space-2);
 		padding-block: var(--space-2);
 		overflow-x: auto;
-		scroll-snap-type: x proximity;
+		overscroll-behavior-x: contain;
 		scrollbar-width: none;
+		-webkit-overflow-scrolling: touch;
 	}
 
 	.before ul {
@@ -190,7 +211,31 @@
 
 	li {
 		flex: none;
-		scroll-snap-align: start;
+	}
+
+	/* One filled pill that slides from chip to chip, so changing section feels like one motion. */
+	.glide {
+		position: absolute;
+		inset-block: var(--space-2);
+		inset-inline-start: 0;
+		inline-size: var(--glide-w, 0);
+		border-radius: var(--radius-pill);
+		background: var(--colour-primary);
+		opacity: 0;
+		transform: translateX(var(--glide-x, 0));
+		transition:
+			transform var(--duration-panel) var(--ease-out),
+			inline-size var(--duration-panel) var(--ease-out),
+			opacity var(--duration-micro);
+		pointer-events: none;
+	}
+
+	.glide:global(.shown) {
+		opacity: 1;
+	}
+
+	.glide:global(.instant) {
+		transition: none;
 	}
 
 	nav a {
@@ -209,7 +254,9 @@
 		text-decoration: none;
 		transition:
 			background-color var(--duration-micro),
-			border-color var(--duration-micro);
+			border-color var(--duration-micro),
+			color var(--duration-panel),
+			transform var(--duration-micro);
 	}
 
 	nav a:hover {
@@ -223,6 +270,16 @@
 		color: var(--colour-on-primary);
 	}
 
+	/* Once the sliding pill is in place, the chip itself goes clear and sits on top of it. */
+	.glides a[aria-current='page'] {
+		position: relative;
+		background: transparent;
+	}
+
+	nav a:active {
+		transform: scale(0.96);
+	}
+
 	.logo {
 		flex: none;
 		inline-size: 1.75rem;
@@ -230,23 +287,26 @@
 		border-radius: var(--radius-s);
 	}
 
-	/* Phones keep the logo, the name and all four tools on one row: the name shrinks a little. */
-	@media (max-width: 25.99rem) {
-		.inner {
-			column-gap: var(--space-2);
-		}
-
-		.tools {
-			gap: 0;
-		}
-
-		.brand {
-			font-size: clamp(0.95rem, 3.8vw, var(--text-l));
+	/* Phones show the logo alone; the name stays for screen readers. */
+	@media (max-width: 39.99rem) {
+		.name {
+			position: absolute;
+			inline-size: 1px;
+			block-size: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
 		}
 
 		.logo {
-			inline-size: 1.5rem;
-			block-size: 1.5rem;
+			inline-size: 2rem;
+			block-size: 2rem;
+		}
+
+		/* The logo and the four tools share the bar evenly. */
+		.tools {
+			flex: 1;
+			justify-content: space-around;
 		}
 	}
 
@@ -254,6 +314,7 @@
 		.inner {
 			flex-wrap: nowrap;
 			gap: var(--space-5);
+			padding-block: var(--space-3);
 		}
 
 		.tools {
@@ -276,9 +337,14 @@
 			mask-image: none;
 		}
 
+		.glide {
+			display: none;
+		}
+
 		nav a,
 		nav a:hover,
-		nav a[aria-current='page'] {
+		nav a[aria-current='page'],
+		.glides a[aria-current='page'] {
 			padding-inline: 0;
 			border: 0;
 			border-block-end: 2px solid transparent;

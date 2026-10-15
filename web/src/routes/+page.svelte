@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 	import PageHead from '$lib/components/PageHead.svelte';
 	import RecipeCard from '$lib/components/RecipeCard.svelte';
 	import SearchForm from '$lib/components/SearchForm.svelte';
@@ -8,14 +9,14 @@
 
 	let { data } = $props();
 
-	const subtitle = "Antonio's recipes from a Maltese kitchen";
+	const subtitle = 'Recipes from a Maltese kitchen by Antonio Galdes, with room for your own';
 </script>
 
 <PageHead title={siteTitle} description={subtitle} path="" />
 
 <div class="home">
 	<div class="opening">
-		<h1>{siteTitle}</h1>
+		<h1><img src="{base}/favicon.svg" alt="" width="56" height="56" />{siteTitle}</h1>
 		<p class="subtitle">{subtitle}</p>
 	</div>
 	<div class="search"><SearchForm /></div>
@@ -49,6 +50,19 @@
 		display: grid;
 		gap: var(--space-2);
 		padding-block-start: var(--space-4);
+	}
+
+	h1 {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+
+	h1 img {
+		flex: none;
+		inline-size: 0.9em;
+		block-size: 0.9em;
+		border-radius: var(--radius-m);
 	}
 
 	.subtitle {

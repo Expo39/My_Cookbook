@@ -18,7 +18,7 @@
 	]);
 	const count = $derived(countRecipes(section));
 	const description = $derived(
-		section.summary ?? `${section.title}: ${count} ${recipesText(count)} from Antonio's kitchen.`
+		section.summary ?? `${section.title}: ${count} ${recipesText(count)} from a Maltese kitchen.`
 	);
 </script>
 

@@ -64,7 +64,7 @@ describe('the recipe JSON-LD', () => {
 			url: input.url,
 			author: {
 				'@type': 'Person',
-				name: 'Antonio',
+				name: 'Antonio Galdes',
 				...(instagram ? { sameAs: [instagram.url] } : {})
 			},
 			recipeCategory: 'Main Courses',

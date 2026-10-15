@@ -1,7 +1,7 @@
 {
 	"name": "Sapori ta' l-kċina",
 	"short_name": "Sapori",
-	"description": "Antonio's recipes from a Maltese kitchen",
+	"description": "Recipes from a Maltese kitchen by Antonio Galdes, with room for your own",
 	"lang": "en-GB",
 	"start_url": "./",
 	"scope": "./",
