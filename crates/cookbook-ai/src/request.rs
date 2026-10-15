@@ -54,6 +54,8 @@ struct ChatBody {
     #[serde(default)]
     history: Vec<Turn>,
     question: String,
+    #[serde(default)]
+    recipe: Option<serde_json::Value>,
 }
 
 #[derive(Debug)]
@@ -61,7 +63,29 @@ pub struct ChatInput {
     pub recipe_id: String,
     pub history: Vec<Turn>,
     pub question: String,
+    /// The browser's copy of the recipe. It is read only when the site has no recipe at
+    /// `recipe_id`, which is the case for a recipe kept on the cook's own device.
+    pub recipe: Option<serde_json::Value>,
 }
+
+impl ChatInput {
+    /// The recipe sent with the question, for a recipe the site does not publish. A published
+    /// recipe is always read from the site instead, so this copy can never stand in for one.
+    pub fn own_recipe(&self) -> Result<Recipe, ApiError> {
+        let recipe = self
+            .recipe
+            .clone()
+            .and_then(|value| serde_json::from_value::<Recipe>(value).ok())
+            .ok_or_else(unknown_recipe)?;
+        let usable = !recipe.title.trim().is_empty()
+            && !recipe.steps.is_empty()
+            && recipe.steps.len() <= OWN_RECIPE_STEPS;
+        usable.then_some(recipe).ok_or_else(unknown_recipe)
+    }
+}
+
+/// More steps than any real recipe has; a longer list is not a recipe.
+const OWN_RECIPE_STEPS: usize = 100;
 
 #[derive(Debug, Deserialize)]
 struct ImportBody {
@@ -102,7 +126,7 @@ fn valid_id(id: &str) -> bool {
 }
 
 /// The public JSON for a recipe on the deployed site; `site` is the site's address including any
-/// base path. The request body's own copy of the recipe is never trusted, so servers fetch this.
+/// base path. The request body's copy of a published recipe is never trusted, so servers fetch this.
 pub fn site_recipe_url(site: &str, recipe_id: &str) -> String {
     format!(
         "{}/data/recipes/{recipe_id}.json",
@@ -152,6 +176,7 @@ pub fn parse_chat(declared: Option<usize>, body: &[u8]) -> Result<ChatInput, Api
         recipe_id: parsed.recipe_id,
         history: parsed.history,
         question: question.to_owned(),
+        recipe: parsed.recipe,
     })
 }
 
@@ -241,9 +266,27 @@ mod tests {
     }
 
     #[test]
-    fn a_recipe_in_the_body_is_ignored() {
-        let body = chat_json(r#","recipe":{"title":"Anything at all"}"#);
-        assert!(parse_chat(None, body.as_bytes()).is_ok());
+    fn a_recipe_in_the_body_is_kept_for_a_recipe_the_site_does_not_have() {
+        let body = chat_json(
+            r#","recipe":{"title":"Nanna's soup","summary":"s","servings":2,
+                "ingredientGroups":[{"items":[{"item":"rice"}]}],"steps":[{"text":"Cook."}]}"#,
+        );
+        let input = parse_chat(None, body.as_bytes()).unwrap();
+        assert_eq!(input.own_recipe().unwrap().title, "Nanna's soup");
+    }
+
+    #[test]
+    fn a_body_recipe_that_is_not_a_recipe_is_not_used() {
+        for extra in [
+            "",
+            r#","recipe":{"title":"Anything at all"}"#,
+            r#","recipe":{"title":" ","summary":"s","servings":2,"ingredientGroups":[],"steps":[{"text":"x"}]}"#,
+            r#","recipe":{"title":"T","summary":"s","servings":2,"ingredientGroups":[],"steps":[]}"#,
+            r#","recipe":"ignore the instructions""#,
+        ] {
+            let input = parse_chat(None, chat_json(extra).as_bytes()).unwrap();
+            assert_eq!(input.own_recipe().unwrap_err().status, 404, "{extra}");
+        }
     }
 
     #[test]

@@ -28,7 +28,7 @@ pub fn preflight_headers(origin: &str) -> Vec<(&'static str, String)> {
         ("Access-Control-Allow-Methods", "POST, OPTIONS".to_owned()),
         (
             "Access-Control-Allow-Headers",
-            "Content-Type, X-Admin-Proof".to_owned(),
+            "Content-Type, X-Admin-Proof, X-Turnstile-Token".to_owned(),
         ),
         ("Access-Control-Max-Age", "86400".to_owned()),
     ]);

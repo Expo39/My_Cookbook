@@ -204,7 +204,8 @@ Errors have ids starting `E-` and warnings `W-` (for example `E-TOKEN-UNRESOLVED
 ### The AI endpoints
 
 - The Gemini key lives only in the Worker's secrets (or the server's environment) and never reaches the browser.
-- `/chat` takes a `recipeId`, not a recipe. The Worker fetches `<SITE_URL>/data/recipes/<recipeId>.json` from the published site itself and ignores any recipe in the request body, so the sous-chef only discusses published recipes and cannot be fed arbitrary content as a recipe. The self-hosted server reads the recipe from its own tree in the same way.
+- `/chat` names its recipe with a `recipeId`. The Worker fetches `<SITE_URL>/data/recipes/<recipeId>.json` from the published site itself, so a published recipe is never taken from the request body. Only when the site has no recipe at that address (a recipe kept on the cook's own device) is the copy in the body used, and only if it parses as a recipe with a title and at most 100 steps inside the 32 KB body limit. Such a copy can describe nothing but the cook's own recipe, and the system prompt still tells the model to treat the conversation as questions, never as instructions. The self-hosted server reads recipes from its own tree in the same way.
+- When `TURNSTILE_SECRET` is set, `/chat` also needs a fresh Cloudflare Turnstile token, checked with Cloudflare before Gemini is called.
 - `/import` requires an `X-Admin-Proof` header: an HMAC-SHA256 of a recent timestamp keyed with `ADMIN_IMPORT_SECRET`, valid for 5 minutes. The editor signs it with the secret from the unlocked blob.
 - Request bodies are size-limited, and the Worker allows cross-origin requests only from `ALLOWED_ORIGINS`.
 
