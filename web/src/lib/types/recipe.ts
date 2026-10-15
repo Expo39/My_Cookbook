@@ -66,6 +66,26 @@ export type ScaleRequest =
 	| {
 			pan: Pan;
 	  };
+/**
+ * One line under the search box while the cook types.
+ *
+ * This interface was referenced by `Web`'s JSON-Schema
+ * via the `definition` "Suggestion".
+ */
+export type Suggestion =
+	| {
+			id: string;
+			kind: 'recipe';
+			title: string;
+	  }
+	| {
+			kind: 'ingredient';
+			term: string;
+	  }
+	| {
+			kind: 'correction';
+			query: string;
+	  };
 export type UnitSystem = 'metric' | 'us';
 
 export interface Amount {

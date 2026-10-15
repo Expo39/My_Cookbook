@@ -94,6 +94,18 @@ pub struct SearchHit {
     pub score: f64,
 }
 
+/// One line under the search box while the cook types.
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "camelCase")]
+pub enum Suggestion {
+    /// A recipe whose title (or ingredients) match what has been typed so far.
+    Recipe { id: String, title: String },
+    /// An ingredient word that completes the last word typed, e.g. "garl" to "garlic".
+    Ingredient { term: String },
+    /// The query with each unknown word swapped for the closest word in the index.
+    Correction { query: String },
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 pub struct Coverage {
     pub id: String,
@@ -283,6 +295,85 @@ impl SearchIndex {
                 .then_with(|| self.title_of(&a.id).cmp(self.title_of(&b.id)))
         });
         hits
+    }
+
+    /// Suggestions for a query still being typed: the best recipes, then ingredient words that
+    /// complete the last word, or a corrected query when nothing matches. At most `limit` in all.
+    pub fn suggest(&self, query: &str, limit: usize) -> Vec<Suggestion> {
+        let words = tokenise(query);
+        let Some(last) = words.last() else {
+            return Vec::new();
+        };
+        let mut out: Vec<Suggestion> = self
+            .search(query)
+            .into_iter()
+            .take(limit.saturating_sub(2).max(1))
+            .map(|hit| Suggestion::Recipe {
+                title: self.title_of(&hit.id).to_owned(),
+                id: hit.id,
+            })
+            .collect();
+
+        let ingredient = |field: &u8| *field == Field::Item as u8 || *field == Field::Food as u8;
+        let start = self
+            .terms
+            .partition_point(|t| t.term.as_str() < last.as_str());
+        let mut completions: Vec<&IndexedTerm> = self.terms[start..]
+            .iter()
+            .take_while(|t| t.term.starts_with(last.as_str()))
+            .filter(|t| t.term.len() > 2 && t.postings.iter().any(|(_, f)| ingredient(f)))
+            .collect();
+        // "tomato" and "tomatoes" are one suggestion: a plural goes when its singular is listed.
+        let listed: Vec<&str> = completions.iter().map(|t| t.term.as_str()).collect();
+        completions.retain(|t| {
+            !["s", "es"].iter().any(|end| {
+                t.term
+                    .strip_suffix(end)
+                    .is_some_and(|stem| listed.contains(&stem))
+            })
+        });
+        completions.sort_by(|a, b| {
+            b.postings
+                .len()
+                .cmp(&a.postings.len())
+                .then(a.term.cmp(&b.term))
+        });
+        for term in completions {
+            if out.len() >= limit {
+                break;
+            }
+            out.push(Suggestion::Ingredient {
+                term: term.term.clone(),
+            });
+        }
+
+        // A word the index does not know was only matched loosely, if at all: offer the spelling.
+        let corrected: Vec<String> = words.iter().map(|w| self.closest(w)).collect();
+        if corrected != words {
+            out.truncate(limit.saturating_sub(1));
+            out.push(Suggestion::Correction {
+                query: corrected.join(" "),
+            });
+        }
+        out.truncate(limit);
+        out
+    }
+
+    /// The word itself when the index knows it, else the most used term one edit away.
+    fn closest(&self, word: &str) -> String {
+        let known = |w: &str| {
+            let at = self.terms.partition_point(|t| t.term.as_str() < w);
+            self.terms.get(at).is_some_and(|t| t.term.starts_with(w))
+        };
+        if word.chars().count() < 4 || known(word) {
+            return word.to_owned();
+        }
+        let chars: Vec<char> = word.chars().collect();
+        self.terms
+            .iter()
+            .filter(|t| within_one_edit(&chars, &t.term.chars().collect::<Vec<_>>()))
+            .max_by_key(|t| t.postings.len())
+            .map_or_else(|| word.to_owned(), |t| t.term.clone())
     }
 
     fn title_of(&self, id: &str) -> &str {
@@ -487,5 +578,42 @@ mod tests {
                 && d("pasta", "pastu")
         );
         assert!(!d("pasta", "pizza") && !d("pasta", "past a x"));
+    }
+
+    #[test]
+    fn suggestions_lead_with_recipes_then_complete_an_ingredient() {
+        let found = index().suggest("tom", 6);
+        assert!(matches!(&found[0], Suggestion::Recipe { .. }));
+        let terms: Vec<&Suggestion> = found
+            .iter()
+            .filter(|s| matches!(s, Suggestion::Ingredient { .. }))
+            .collect();
+        assert_eq!(
+            terms,
+            [&Suggestion::Ingredient {
+                term: "tomatoes".into()
+            }]
+        );
+        assert!(found.len() <= 6);
+        assert!(index().suggest("  ", 6).is_empty());
+    }
+
+    #[test]
+    fn a_misspelt_query_gets_a_correction_after_its_matches() {
+        let found = index().suggest("spagheti carbonarra", 6);
+        assert!(matches!(&found[0], Suggestion::Recipe { id, .. } if id == "pasta/carbonara"));
+        assert_eq!(
+            found.last(),
+            Some(&Suggestion::Correction {
+                query: "spaghetti carbonara".into()
+            })
+        );
+        assert!(index().suggest("zzzz", 6).is_empty());
+        assert!(
+            !index()
+                .suggest("tomato", 6)
+                .iter()
+                .any(|s| matches!(s, Suggestion::Correction { .. }))
+        );
     }
 }

@@ -92,6 +92,11 @@ impl SearchEngine {
         to_js(&self.index.search(query))
     }
 
+    /// Up to `limit` suggestions for a query still being typed.
+    pub fn suggest(&self, query: &str, limit: usize) -> Result<JsValue, JsError> {
+        to_js(&self.index.suggest(query, limit))
+    }
+
     #[wasm_bindgen(js_name = ingredientsIHave)]
     pub fn ingredients_i_have(&self, have: Vec<String>) -> Result<JsValue, JsError> {
         let have: Vec<&str> = have.iter().map(String::as_str).collect();

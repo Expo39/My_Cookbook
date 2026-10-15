@@ -10,6 +10,7 @@ import type {
 	ScaledRecipe,
 	ServingsNoun,
 	SearchHit,
+	Suggestion,
 	Unit,
 	UnitSystem
 } from '$lib/types/recipe';
@@ -18,6 +19,7 @@ export type * from '$lib/types/recipe';
 
 type RawEngine = {
 	search(query: string): unknown;
+	suggest(query: string, limit: number): unknown;
 	ingredientsIHave(have: string[]): unknown;
 	free(): void;
 };
@@ -45,6 +47,8 @@ type RawModule = {
 
 export interface SearchEngine {
 	search(query: string): SearchHit[];
+	/** Up to `limit` suggestions for a query still being typed. */
+	suggest(query: string, limit: number): Suggestion[];
 	ingredientsIHave(have: string[]): Coverage[];
 	/** Releases the engine's memory; the engine cannot be used afterwards. */
 	free(): void;
