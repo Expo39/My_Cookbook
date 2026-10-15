@@ -41,7 +41,7 @@
 	<div class="head">
 		<h2 id="{id}-title">Method</h2>
 		<div class="progress">
-			<span class="num" aria-live="polite">{done} of {steps.length}</span> done
+			<span aria-live="polite"><span class="num">{done} of {steps.length}</span> done</span>
 			<button type="button" disabled={!hydrated || done === 0} onclick={() => ticks.clear('s:')}>
 				<Icon name="reset" size={16} />Reset
 			</button>

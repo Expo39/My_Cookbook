@@ -19,14 +19,16 @@
 
 	/** The line with its amount taken out, because the amount has its own slot. */
 	function wording(item: ScaledIngredient): { text: string; amount: boolean } {
+		// "(optional)" becomes a tag beside the line rather than words in brackets.
+		const line = item.optional ? item.text.replace(/\s*\(optional\)$/, '') : item.text;
 		const amount = item.amount?.text;
-		const at = amount ? item.text.indexOf(amount) : -1;
+		const at = amount ? line.indexOf(amount) : -1;
 		if (!amount || at < 0) {
 			// With no amount, "to taste" moves into the amount slot.
-			const text = item.toTaste ? item.text.replace(/,?\s*to taste\b/i, '') : item.text;
+			const text = item.toTaste ? line.replace(/,?\s*to taste\b/i, '') : line;
 			return { text: text.trim(), amount: false };
 		}
-		const rest = item.text.slice(0, at) + item.text.slice(at + amount.length);
+		const rest = line.slice(0, at) + line.slice(at + amount.length);
 		return { text: rest.replace(/\s+/g, ' ').trim(), amount: true };
 	}
 
@@ -47,7 +49,7 @@
 	<div class="head">
 		<h2 id="{id}-title">Ingredients</h2>
 		<div class="progress">
-			<span class="num" aria-live="polite">{ready} of {total}</span> ready
+			<span aria-live="polite"><span class="num">{ready} of {total}</span> ready</span>
 			<button type="button" disabled={!hydrated || ready === 0} onclick={() => ticks.clear('i:')}>
 				<Icon name="reset" size={16} />Reset
 			</button>
@@ -85,6 +87,7 @@
 						id="{id}-{position}"
 						text={words.text}
 						toTaste={item.toTaste}
+						optional={item.optional}
 						changed={item.scaled}
 						amountText={words.amount && !menu ? item.amount?.text : undefined}
 						notes={item.hint ? [item.hint] : []}
