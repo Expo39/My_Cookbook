@@ -1,25 +1,28 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import { outside } from '$lib/actions/outside';
 	import Icon from '$lib/components/Icon.svelte';
 	import IngredientLine from '$lib/components/IngredientLine.svelte';
 	import PageHead from '$lib/components/PageHead.svelte';
 	import QuantityEditor from '$lib/components/QuantityEditor.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
-	import { convert, loadCore, parseIngredientLine } from '$lib/core';
+	import { convert, loadCore, type Unit } from '$lib/core';
 	import { shareText } from '$lib/kitchen/share-text';
 	import {
 		groupByAisle,
 		groupByRecipe,
 		listText,
 		mergeLines,
+		lineKey as lineKeyOf,
 		quantityText,
 		type ShoppingItem,
 		type ShoppingLine
 	} from '$lib/kitchen/shopping';
+	import { unitLabel } from '$lib/recipe/format';
 	import { homeHref } from '$lib/links';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import { preferences } from '$lib/stores/preferences.svelte';
-	import { shopping } from '$lib/stores/shopping.svelte';
+	import { OWN_ITEMS, shopping } from '$lib/stores/shopping.svelte';
 
 	type View = 'type' | 'recipe';
 
@@ -33,11 +36,18 @@
 	let confirmTimer: ReturnType<typeof setTimeout> | undefined;
 
 	const converter = $derived(coreReady ? convert : undefined);
-	const merged = $derived(mergeLines(shopping.recipes, converter, preferences.units));
+	const merged = $derived(
+		mergeLines(shopping.recipes, converter, preferences.units).filter(
+			(line) => !shopping.isHidden(line.key)
+		)
+	);
+	/** Only typed in by hand, so it has no aisle the recipes would give it. */
+	const ownOnly = (line: ShoppingLine) =>
+		line.recipes.length > 0 && line.recipes.every((recipe) => recipe.id === OWN_ITEMS);
 	/** Each line with the cook's own quantity in place of the recipes', and the recipes' kept beside it. */
 	const chosen = (line: ShoppingLine) => {
 		const original = quantityText(line);
-		const own = shopping.amountOf(line.key);
+		const own = ownOnly(line) ? undefined : shopping.amountOf(line.key);
 		const needed = line.max;
 		return own
 			? { ...line, min: own.qty, max: own.qty, unit: own.unit, original, needed, edited: true }
@@ -45,9 +55,17 @@
 	};
 	const groups = $derived(
 		(view === 'type'
-			? groupByAisle(merged)
-			: groupByRecipe(shopping.recipes, converter, preferences.units)
-		).map((group) => ({ ...group, lines: group.lines.map(chosen) }))
+			? [
+					{ id: OWN_ITEMS, label: 'Added by you', lines: merged.filter(ownOnly) },
+					...groupByAisle(merged.filter((line) => !ownOnly(line)))
+				]
+			: groupByRecipe(shopping.recipes, converter, preferences.units).map((group) => ({
+					...group,
+					lines: group.lines.filter((line) => !shopping.isHidden(line.key))
+				}))
+		)
+			.filter((group) => group.lines.length > 0)
+			.map((group) => ({ ...group, lines: group.lines.map(chosen) }))
 	);
 	const tickedCount = $derived(merged.filter((line) => shopping.isTicked(line.key)).length);
 
@@ -81,31 +99,58 @@
 	}
 
 	let own = $state('');
+	let ownQty = $state('');
+	let ownUnit = $state<Unit | ''>('');
+	let ownNote = $state('');
+	let noting = $state(false);
+	let adding = $state(false);
+	let itemField: HTMLInputElement | undefined = $state();
 
-	/** "2 lemons" or "500 g flour" become an amount and an item; anything else is taken as it is. */
+	async function startAdding() {
+		adding = true;
+		await tick();
+		itemField?.focus();
+	}
+
+	/** The units of the chosen system; spoons belong to both. */
+	const units = $derived<Unit[]>(
+		preferences.units === 'us'
+			? ['oz', 'lb', 'cup', 'floz', 'tbsp', 'tsp']
+			: ['g', 'kg', 'ml', 'l', 'tbsp', 'tsp']
+	);
+
 	function addOwn(event: SubmitEvent) {
 		event.preventDefault();
-		const text = own.trim();
-		if (!text) return;
-		let item: ShoppingItem = { item: text };
-		if (coreReady) {
-			try {
-				const parsed = parseIngredientLine(text);
-				const qty = parsed.amount?.qty;
-				const [min, max] = typeof qty === 'number' ? [qty, qty] : qty ? [qty.min, qty.max] : [];
-				item = {
-					item: parsed.item || text,
-					note: parsed.note,
-					...(min !== undefined && max !== undefined
-						? { min, max, unit: parsed.amount?.unit ?? null }
-						: {})
-				};
-			} catch {
-				/* the line is kept as typed */
-			}
-		}
-		shopping.addOwn(item);
+		const name = own.trim();
+		if (!name) return;
+		const qty = Number(ownQty.replace(',', '.'));
+		const note = ownNote.trim();
+		shopping.addOwn({
+			item: name,
+			...(note ? { note } : {}),
+			...(ownQty.trim() && Number.isFinite(qty) && qty > 0
+				? { min: qty, max: qty, unit: ownUnit || null }
+				: {})
+		});
 		own = '';
+		ownQty = '';
+		ownNote = '';
+		noting = false;
+		itemField?.focus();
+	}
+
+	/** Off the list at once, with a moment to take it back. */
+	function removeLine(line: ShoppingLine) {
+		const typed = ownOnly(line)
+			? shopping.recipes
+					.find((recipe) => recipe.id === OWN_ITEMS)
+					?.items.find((item) => lineKeyOf(item) === line.key)
+			: undefined;
+		shopping.hide(line.key);
+		chrome.notify(`Removed ${line.item}`, 5000, {
+			label: 'Undo',
+			run: () => shopping.unhide(line.key, typed)
+		});
 	}
 
 	const sources = (line: ShoppingLine) => line.recipes.map((recipe) => recipe.title).join(', ');
@@ -121,19 +166,60 @@
 	<h1>Shopping list</h1>
 
 	{#if ready}
-		<form class="own" onsubmit={addOwn}>
-			<label for="{id}-own">Add an item</label>
-			<div class="own-row">
+		{#if adding}
+			<form class="own" onsubmit={addOwn} use:outside={() => (adding = false)}>
+				<h2 class="label">Add an item</h2>
+				<label class="sr-only" for="{id}-add-item">Item</label>
 				<input
-					id="{id}-own"
+					bind:this={itemField}
+					id="{id}-add-item"
+					class="item-field"
 					type="text"
 					autocomplete="off"
-					placeholder="2 lemons, kitchen roll..."
+					placeholder="Lemons, kitchen roll..."
 					bind:value={own}
 				/>
-				<button type="submit" disabled={!own.trim()}><Icon name="plus" />Add</button>
-			</div>
-		</form>
+				<div class="own-row">
+					<label class="sr-only" for="{id}-add-qty">Quantity</label>
+					<input
+						id="{id}-add-qty"
+						class="qty-field"
+						type="text"
+						inputmode="decimal"
+						autocomplete="off"
+						placeholder="Qty"
+						bind:value={ownQty}
+					/>
+					<label class="sr-only" for="{id}-add-unit">Unit</label>
+					<select id="{id}-add-unit" bind:value={ownUnit}>
+						<option value="">no unit</option>
+						{#each units as unit (unit)}
+							<option value={unit}>{unitLabel(unit)}</option>
+						{/each}
+					</select>
+					<button type="submit" disabled={!own.trim()}><Icon name="plus" />Add</button>
+				</div>
+				{#if noting}
+					<label class="sr-only" for="{id}-add-note">Note</label>
+					<input
+						id="{id}-add-note"
+						class="note-field"
+						type="text"
+						autocomplete="off"
+						placeholder="A note, such as 'the big pack'"
+						bind:value={ownNote}
+					/>
+				{:else}
+					<button type="button" class="add-note" onclick={() => (noting = true)}>
+						<Icon name="plus" size={14} />Add a note
+					</button>
+				{/if}
+			</form>
+		{:else}
+			<button type="button" class="start" onclick={startAdding}>
+				<Icon name="plus" />Add an item
+			</button>
+		{/if}
 	{/if}
 
 	{#if !ready}
@@ -161,7 +247,12 @@
 				<button type="button" disabled={tickedCount === 0} onclick={() => shopping.clearTicked()}>
 					<Icon name="check" />Clear ticked
 				</button>
-				<button type="button" class:danger={confirming} onclick={clearAll}>
+				<button
+					type="button"
+					class:danger={confirming}
+					onclick={clearAll}
+					use:outside={() => (confirming = false)}
+				>
 					<Icon name="trash" />{confirming ? 'Tap again to clear all' : 'Clear all'}
 				</button>
 			</div>
@@ -193,10 +284,11 @@
 								notes={[
 									line.note ?? '',
 									line.edited ? `Recipe: ${line.original || 'no amount'}` : '',
-									view === 'type' ? sources(line) : ''
+									view === 'type' && group.id !== OWN_ITEMS ? sources(line) : ''
 								]}
 								checked={shopping.isTicked(line.key)}
 								ontoggle={() => shopping.toggle(line.key)}
+								onremove={() => removeLine(line)}
 								amount={line.toTaste && !line.edited ? undefined : quantity}
 							/>
 							{#snippet quantity()}
@@ -207,10 +299,13 @@
 									edited={line.edited}
 									value={line.max}
 									unit={line.unit ?? null}
+									disabled={shopping.isTicked(line.key)}
 									onset={(qty) =>
-										qty === line.needed
-											? shopping.resetAmount(line.key)
-											: shopping.setAmount(line.key, { qty, unit: line.unit ?? null })}
+										ownOnly(line)
+											? shopping.setOwnAmount(line.key, qty)
+											: qty === line.needed
+												? shopping.resetAmount(line.key)
+												: shopping.setAmount(line.key, { qty, unit: line.unit ?? null })}
 									onreset={() => shopping.resetAmount(line.key)}
 								/>
 							{/snippet}
@@ -269,12 +364,8 @@
 
 	.own {
 		display: grid;
-		gap: var(--space-1);
+		gap: var(--space-2);
 		max-inline-size: 36rem;
-	}
-
-	.own label {
-		font-weight: 700;
 	}
 
 	.own-row {
@@ -282,7 +373,18 @@
 		gap: var(--space-2);
 	}
 
-	.own input {
+	.own .qty-field {
+		flex: 0 0 5rem;
+		text-align: center;
+	}
+
+	.own select {
+		flex: 1;
+		padding-inline: var(--space-2);
+	}
+
+	.own input,
+	.own select {
 		flex: 1;
 		min-inline-size: 0;
 		min-block-size: var(--target);
@@ -294,7 +396,39 @@
 		font: inherit;
 	}
 
-	.own button {
+	.start {
+		display: inline-flex;
+		align-items: center;
+		justify-self: start;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+		padding-inline: var(--space-4);
+		border: 1px dashed var(--colour-primary);
+		border-radius: var(--radius-s);
+		background: var(--colour-surface);
+		color: var(--colour-primary);
+		font-weight: 700;
+	}
+
+	.start:hover {
+		background: var(--colour-tint);
+	}
+
+	.add-note {
+		display: inline-flex;
+		align-items: center;
+		justify-self: start;
+		gap: var(--space-1);
+		min-block-size: var(--target);
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--colour-primary);
+		font-size: var(--text-s);
+		font-weight: 700;
+	}
+
+	.own-row button {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-1);
@@ -307,7 +441,7 @@
 		font-weight: 700;
 	}
 
-	.own button:disabled {
+	.own-row button:disabled {
 		opacity: 0.5;
 	}
 

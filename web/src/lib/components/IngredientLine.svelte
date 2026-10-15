@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Icon from './Icon.svelte';
 
 	let {
 		id,
@@ -13,7 +14,8 @@
 		notes = [],
 		checked,
 		disabled = false,
-		ontoggle
+		ontoggle,
+		onremove
 	}: {
 		/** The checkbox id, which the label points at. */
 		id: string;
@@ -37,34 +39,43 @@
 		checked: boolean;
 		disabled?: boolean;
 		ontoggle: () => void;
+		/** Shows a button that takes the line off the list. */
+		onremove?: () => void;
 	} = $props();
 
 	const shown = $derived(notes.filter(Boolean));
 </script>
 
-<li class:done={checked}>
-	<input {id} type="checkbox" {checked} {disabled} onchange={ontoggle} />
-	<div class="line" class:flush>
-		{#if flush}
-			<label for={id}
-				>{text}{#if optional}<span class="optional">optional</span>{/if}</label
-			>
-			{#if amount}
-				{@render amount()}
-			{:else if amountText || toTaste}
-				<span class="qty" class:taste={!amountText}>{amountText || 'to taste'}</span>
+<li class:done={checked} class:removable={!!onremove}>
+	<div class="row">
+		<input {id} type="checkbox" {checked} {disabled} onchange={ontoggle} />
+		<div class="line" class:flush>
+			{#if flush}
+				<label for={id}
+					>{text}{#if optional}<span class="optional">optional</span>{/if}</label
+				>
+				{#if amount}
+					{@render amount()}
+				{:else if amountText || toTaste}
+					<span class="qty" class:taste={!amountText}>{amountText || 'to taste'}</span>
+				{/if}
+			{:else}
+				<span class="amount num" class:changed class:taste={!amount && !amountText && toTaste}
+					>{#if amount}{@render amount()}{:else if amountText}{amountText}{:else if toTaste}to taste{/if}</span
+				>
+				<label for={id}
+					>{text}{#if optional}<span class="optional">optional</span>{/if}</label
+				>
 			{/if}
-		{:else}
-			<span class="amount num" class:changed class:taste={!amount && !amountText && toTaste}
-				>{#if amount}{@render amount()}{:else if amountText}{amountText}{:else if toTaste}to taste{/if}</span
-			>
-			<label for={id}
-				>{text}{#if optional}<span class="optional">optional</span>{/if}</label
-			>
+			{#each shown as note (note)}
+				<span class="note">{note}</span>
+			{/each}
+		</div>
+		{#if onremove}
+			<button type="button" class="remove" aria-label="Remove {text}" onclick={onremove}>
+				<Icon name="x" size={16} />
+			</button>
 		{/if}
-		{#each shown as note (note)}
-			<span class="note">{note}</span>
-		{/each}
 	</div>
 </li>
 
@@ -74,11 +85,54 @@
 	 * line up whether or not a line has an amount, and a long name wraps back under the amount.
 	 */
 	li {
+		border-block-end: 1px dashed var(--colour-line);
+		transition: color var(--duration-micro);
+	}
+
+	.row {
 		display: grid;
 		grid-template-columns: var(--target) 1fr;
 		align-items: start;
-		border-block-end: 1px dashed var(--colour-line);
-		transition: color var(--duration-micro);
+	}
+
+	.removable .row {
+		grid-template-columns: var(--target) 1fr var(--target);
+	}
+
+	/* A full-size target with a small circle behind the cross, so it stays light on the line. */
+	.remove {
+		position: relative;
+		display: grid;
+		place-items: center;
+		inline-size: var(--target);
+		block-size: var(--target);
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--colour-muted);
+	}
+
+	.remove::before {
+		content: '';
+		position: absolute;
+		inset: 50% auto auto 50%;
+		inline-size: 1.75rem;
+		block-size: 1.75rem;
+		border-radius: var(--radius-pill);
+		transform: translate(-50%, -50%);
+		transition: background-color var(--duration-micro);
+	}
+
+	.remove :global(svg) {
+		position: relative;
+	}
+
+	.remove:hover {
+		color: var(--colour-danger);
+	}
+
+	.remove:hover::before {
+		background: var(--colour-tint);
 	}
 
 	input {
@@ -250,9 +304,17 @@
 	}
 
 	@media print {
+		.remove {
+			display: none;
+		}
+
 		li {
-			grid-template-columns: 1fr;
 			break-inside: avoid;
+		}
+
+		.row,
+		.removable .row {
+			grid-template-columns: 1fr;
 		}
 
 		input {
