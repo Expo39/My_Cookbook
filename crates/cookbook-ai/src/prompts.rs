@@ -5,7 +5,7 @@ use crate::{
     config::GeminiConfig,
     error::AiError,
     schema::import_schema,
-    types::{Content, GenerationConfig, Request},
+    types::{Content, GenerationConfig, Request, ThinkingConfig},
 };
 
 /// The most recent turns of the conversation that are sent to the model.
@@ -87,6 +87,9 @@ pub fn chat_request(
         generation_config: Some(GenerationConfig {
             temperature: Some(config.temperature),
             max_output_tokens: Some(config.max_output_tokens),
+            thinking_config: config.thinking_level.as_ref().map(|level| ThinkingConfig {
+                thinking_level: Some(level.clone()),
+            }),
             ..GenerationConfig::default()
         }),
     }
@@ -103,6 +106,7 @@ pub fn import_request(config: &GeminiConfig, free_text: &str) -> Request {
             max_output_tokens: Some(config.max_output_tokens),
             response_mime_type: Some("application/json".to_owned()),
             response_schema: Some(import_schema()),
+            thinking_config: None,
         }),
     }
 }

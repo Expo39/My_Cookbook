@@ -8,19 +8,22 @@ The static site uses the Worker when `ai.endpoint` in `cookbook.config.json` (or
 
 | route | auth | body | success |
 |---|---|---|---|
-| `POST /chat` | none (per-IP limit) | `{ recipeId, history, question }`, at most 32 KB; a `recipe` in the body is ignored | `{ reply, truncated }` |
+| `POST /chat` | per-IP limit, and a Turnstile token when `TURNSTILE_SECRET` is set | `{ recipeId, history, question, recipe? }`, at most 32 KB; `recipe` is read only when the site has no recipe at `recipeId` | a `text/event-stream`: `delta` events `{ text }`, then `done` `{ truncated }`, or an `error` event `{ error, message }` |
 | `POST /import` | `X-Admin-Proof` header | `{ text }`, at most 20 KB | `{ recipe, checks }` |
 | `OPTIONS *` | none | none | 204 with the CORS headers |
 
-Errors are always `{ error, message }`, where `message` is fit to show to a cook. Rate limits reply 429 with a `Retry-After` header. Limits default to 30 chat requests and 5 imports per IP per hour (`RATE_LIMIT_CHAT`, `RATE_LIMIT_IMPORT`), counted as a fixed window in Workers KV. The Rate Limiting binding is not exposed by workers-rs yet.
+Errors before the answer starts are always `{ error, message }` with an error status, where `message` is fit to show to a cook; an answer that breaks off part way ends with an `error` event of the same shape. Rate limits reply 429 with a `Retry-After` header. Limits default to 30 chat requests and 5 imports per IP per hour (`RATE_LIMIT_CHAT`, `RATE_LIMIT_IMPORT`), counted as a fixed window in Workers KV. The Rate Limiting binding is not exposed by workers-rs yet.
 
 ## Configuration
 
 | name | kind | notes |
 |---|---|---|
-| `SITE_URL` | var | the deployed site's address including its base path, e.g. `https://expo39.github.io/My_Cookbook`. `/chat` fetches `<SITE_URL>/data/recipes/<recipeId>.json` itself, so the sous-chef only ever discusses published recipes |
+| `SITE_URL` | var | the deployed site's address including its base path, e.g. `https://expo39.github.io/My_Cookbook`. `/chat` fetches `<SITE_URL>/data/recipes/<recipeId>.json` itself, so a published recipe is never taken from the request |
 | `ALLOWED_ORIGINS` | var | comma-separated, e.g. `https://expo39.github.io,http://localhost:5173` |
 | `GEMINI_MODEL` | var | defaults to the model compiled into `cookbook-ai` |
+| `GEMINI_THINKING_LEVEL` | var | `low` by default; `minimal`, `medium`, `high`, or `default` to send none |
+| `GEMINI_FALLBACK_MODEL` | var | optional; tried after the main model has been busy three times |
+| `TURNSTILE_SECRET` | secret | optional; when set, `/chat` needs an `X-Turnstile-Token` header |
 | `GEMINI_API_KEY` | secret | Google AI Studio key |
 | `ADMIN_IMPORT_SECRET` | secret | keys the admin proof, see below |
 | `RATE_LIMIT` | KV binding | created by the first deploy |

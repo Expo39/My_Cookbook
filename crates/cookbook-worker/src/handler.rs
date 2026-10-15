@@ -1,15 +1,23 @@
+use std::time::Duration;
+
 use cookbook_ai::{
-    AiError, ApiError, GeminiConfig, Recipe, Request as GeminiRequest, Response as GeminiResponse,
-    chat_request, endpoint, import_request, parse_chat, parse_import, parse_import_response,
-    parse_site_recipe, site_recipe_url, unknown_recipe,
+    ATTEMPTS_PER_MODEL, AiError, ApiError, GeminiConfig, Recipe, Relay, Request as GeminiRequest,
+    Response as GeminiResponse, backoff_ms, chat_request, endpoint, import_request, parse_chat,
+    parse_import, parse_import_response, parse_site_recipe, site_recipe_url, stream_endpoint,
+    unknown_recipe,
 };
+use futures_util::{StreamExt, stream};
 use serde_json::json;
-use worker::{Date, Env, Fetch, Headers, Method, Request, RequestInit, Response, Result};
+use worker::{
+    ByteStream, Date, Delay, Env, Fetch, Headers, Method, Request, RequestInit, Response, Result,
+    console_error, js_sys,
+};
 
 use crate::{
     auth::{self, AuthError},
     cors,
     limits::{self, Limits, Route},
+    turnstile,
 };
 
 const KV_BINDING: &str = "RATE_LIMIT";
@@ -116,6 +124,10 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
         })?;
     }
 
+    if kind == Route::Chat {
+        human(req, env).await?;
+    }
+
     rate_limit(req, env, kind).await?;
 
     let declared = req
@@ -133,20 +145,26 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
     let body = match kind {
         Route::Chat => {
             let input = parse_chat(declared, &body)?;
-            let recipe = site_recipe(env, &input.recipe_id).await?;
+            // A recipe kept on the cook's device is not on the site, so its copy in the request is
+            // used; a published recipe always comes from the site.
+            let recipe = match site_recipe(env, &input.recipe_id).await {
+                Err(error) if error.status == 404 => input.own_recipe()?,
+                found => found?,
+            };
             let request = chat_request(&config, &recipe, &input.history, &input.question);
-            let reply = gemini(env, &config, &request)
-                .await?
-                .reply()
-                .map_err(|e| from_ai(&e))?;
-            json!({ "reply": reply.text, "truncated": reply.truncated })
+            let upstream = gemini(env, &config, &request, true).await?;
+            return relay(upstream).map_err(|_| unavailable());
         }
         Route::Import => {
             let text = parse_import(declared, &body)?;
             let request = import_request(&config, &text);
-            let reply = gemini(env, &config, &request)
-                .await?
-                .reply()
+            let mut upstream = gemini(env, &config, &request, false).await?;
+            let answer = upstream
+                .text()
+                .await
+                .map_err(|_| from_ai(&AiError::Unavailable))?;
+            let reply = GeminiResponse::from_json(&answer)
+                .and_then(|response| response.reply())
                 .map_err(|e| from_ai(&e))?;
             if reply.truncated {
                 return Err(from_ai(&AiError::Truncated));
@@ -214,40 +232,161 @@ async fn site_recipe(env: &Env, recipe_id: &str) -> std::result::Result<Recipe, 
     }
 }
 
+/// Checks the Turnstile token when `TURNSTILE_SECRET` is set; without the secret anyone may ask.
+async fn human(req: &Request, env: &Env) -> std::result::Result<(), ApiError> {
+    let Some(secret) = env.secret("TURNSTILE_SECRET").ok().map(|s| s.to_string()) else {
+        return Ok(());
+    };
+    let refused = || {
+        ApiError::new(
+            403,
+            "turnstile",
+            "The sous-chef could not check that you are a person. Reload the page and ask again.",
+        )
+    };
+    let header = req.headers().get(turnstile::HEADER).ok().flatten();
+    let token = turnstile::usable(header.as_deref()).ok_or_else(refused)?;
+    let ip = req.headers().get("CF-Connecting-IP").ok().flatten();
+    let headers = Headers::new();
+    headers
+        .set("Content-Type", "application/x-www-form-urlencoded")
+        .map_err(|_| unavailable())?;
+    let mut init = RequestInit::new();
+    init.with_method(Method::Post)
+        .with_headers(headers)
+        .with_body(Some(
+            turnstile::form_body(&secret, token, ip.as_deref()).into(),
+        ));
+    let outgoing =
+        Request::new_with_init(turnstile::VERIFY_URL, &init).map_err(|_| unavailable())?;
+    let answer = match Fetch::Request(outgoing).send().await {
+        Ok(mut response) => response.text().await.unwrap_or_default(),
+        Err(error) => {
+            console_error!("turnstile: siteverify could not be reached: {error}");
+            return Err(from_ai(&AiError::Unavailable));
+        }
+    };
+    if turnstile::passed(&answer) {
+        Ok(())
+    } else {
+        Err(refused())
+    }
+}
+
+/// Relays Gemini's streamed answer to the browser as `delta` events and a closing `done`, or an
+/// `error` event when the answer breaks off.
+fn relay(mut upstream: Response) -> Result<Response> {
+    let chunks = upstream.stream()?;
+    let events = stream::unfold(
+        Some((chunks, Relay::new())),
+        |state: Option<(ByteStream, Relay)>| async move {
+            let (mut chunks, mut relay) = state?;
+            let (out, more) = match chunks.next().await {
+                Some(Ok(bytes)) => (relay.push(&bytes), true),
+                Some(Err(error)) => {
+                    console_error!("gemini: the stream broke off: {error}");
+                    (relay.fail(&AiError::Unavailable), false)
+                }
+                None => (relay.end(), false),
+            };
+            let next = more.then_some((chunks, relay));
+            Some((Ok::<Vec<u8>, worker::Error>(out.into_bytes()), next))
+        },
+    );
+    let mut response = Response::from_stream(events)?;
+    let headers = response.headers_mut();
+    headers.set("Content-Type", "text/event-stream; charset=utf-8")?;
+    headers.set("Cache-Control", "no-store")?;
+    Ok(response)
+}
+
+enum Refusal {
+    /// The model does not take the thinking level that was asked for.
+    Thinking,
+    Ai(AiError),
+}
+
+/// Calls Gemini and returns its successful response unread. A busy model is asked again after a
+/// short, jittered wait, then the fallback model is tried, so several cooks asking at once are
+/// served in turn instead of being told the sous-chef is unavailable.
 async fn gemini(
     env: &Env,
     config: &GeminiConfig,
     request: &GeminiRequest,
-) -> std::result::Result<GeminiResponse, ApiError> {
+    streamed: bool,
+) -> std::result::Result<Response, ApiError> {
     let key = env
         .secret("GEMINI_API_KEY")
         .map_err(|_| unavailable())?
         .to_string();
+    let mut request = request.clone();
+    let mut last = AiError::Unavailable;
+    for model in config.models() {
+        let url = if streamed {
+            stream_endpoint(model)
+        } else {
+            endpoint(model)
+        };
+        let mut attempt = 0;
+        while attempt < ATTEMPTS_PER_MODEL {
+            match send(&key, &url, &request).await {
+                Ok(response) => return Ok(response),
+                Err(Refusal::Thinking) => match request.without_thinking() {
+                    Some(plain) => {
+                        console_error!(
+                            "gemini: {model} refused the thinking level; asking without it"
+                        );
+                        request = plain;
+                    }
+                    None => return Err(from_ai(&AiError::Unavailable)),
+                },
+                Err(Refusal::Ai(error)) => {
+                    console_error!("gemini: {model} attempt {} failed: {error:?}", attempt + 1);
+                    if !error.is_retryable() {
+                        return Err(from_ai(&error));
+                    }
+                    last = error;
+                    attempt += 1;
+                    if attempt < ATTEMPTS_PER_MODEL {
+                        let wait = backoff_ms(attempt - 1, js_sys::Math::random());
+                        Delay::from(Duration::from_millis(wait)).await;
+                    }
+                }
+            }
+        }
+    }
+    Err(from_ai(&last))
+}
+
+async fn send(
+    key: &str,
+    url: &str,
+    request: &GeminiRequest,
+) -> std::result::Result<Response, Refusal> {
+    let failed = |_| Refusal::Ai(AiError::Unavailable);
     let headers = Headers::new();
     headers
         .set("Content-Type", "application/json")
-        .map_err(|_| unavailable())?;
-    headers
-        .set("x-goog-api-key", &key)
-        .map_err(|_| unavailable())?;
-    let payload = serde_json::to_string(request).map_err(|_| unavailable())?;
+        .map_err(failed)?;
+    headers.set("x-goog-api-key", key).map_err(failed)?;
+    let payload = serde_json::to_string(request).map_err(|_| Refusal::Ai(AiError::Unavailable))?;
     let mut init = RequestInit::new();
     init.with_method(Method::Post)
         .with_headers(headers)
         .with_body(Some(payload.into()));
-    let outgoing =
-        Request::new_with_init(&endpoint(&config.model), &init).map_err(|_| unavailable())?;
-    let mut response = Fetch::Request(outgoing)
-        .send()
-        .await
-        .map_err(|_| from_ai(&AiError::Unavailable))?;
+    let outgoing = Request::new_with_init(url, &init).map_err(failed)?;
+    let mut response = Fetch::Request(outgoing).send().await.map_err(failed)?;
     let status = response.status_code();
-    let text = response
-        .text()
-        .await
-        .map_err(|_| from_ai(&AiError::Unavailable))?;
-    if !(200..300).contains(&status) {
-        return Err(from_ai(&AiError::from_response(status, &text)));
+    if (200..300).contains(&status) {
+        return Ok(response);
     }
-    GeminiResponse::from_json(&text).map_err(|e| from_ai(&e))
+    let text = response.text().await.unwrap_or_default();
+    console_error!(
+        "gemini: {status}: {}",
+        text.chars().take(500).collect::<String>()
+    );
+    if AiError::refuses_thinking(status, &text) {
+        return Err(Refusal::Thinking);
+    }
+    Err(Refusal::Ai(AiError::from_response(status, &text)))
 }

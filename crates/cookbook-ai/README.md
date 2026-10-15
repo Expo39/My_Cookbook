@@ -8,9 +8,11 @@ The crate does no IO and carries no HTTP client, so it builds for native targets
 
 | Item | Purpose |
 |---|---|
-| `GeminiConfig`, `DEFAULT_MODEL`, `endpoint` | the model, temperature and output limit, read from `GEMINI_MODEL`, `GEMINI_TEMPERATURE` and `GEMINI_MAX_OUTPUT_TOKENS`, and the `generateContent` URL |
-| `parse_chat`, `ChatInput`, `CHAT_MAX_BYTES` | validates a `/chat` body (`recipeId`, history, question) |
-| `site_recipe_url`, `parse_site_recipe`, `unknown_recipe` | the published-site URL of the chat's recipe and its parser, so the Worker reads the recipe from the site, never from the request |
+| `GeminiConfig`, `DEFAULT_MODEL`, `endpoint`, `stream_endpoint` | the model, temperature, output limit, thinking level and fallback model, read from `GEMINI_MODEL`, `GEMINI_TEMPERATURE`, `GEMINI_MAX_OUTPUT_TOKENS`, `GEMINI_THINKING_LEVEL` and `GEMINI_FALLBACK_MODEL`, and the `generateContent` and `streamGenerateContent` URLs |
+| `parse_chat`, `ChatInput`, `CHAT_MAX_BYTES` | validates a `/chat` body (`recipeId`, history, question, and the optional `recipe` that `ChatInput::own_recipe` checks) |
+| `site_recipe_url`, `parse_site_recipe`, `unknown_recipe` | the published-site URL of the chat's recipe and its parser, so a published recipe is read from the site, never from the request |
+| `Relay`, `SseDecoder`, `delta_event`, `done_event`, `error_event` | reads Gemini's streamed answer and writes the events the browser reads |
+| `backoff_ms`, `ATTEMPTS_PER_MODEL`, `AiError::is_retryable` | when and how long to wait before asking a busy model again |
 | `chat_request`, `HISTORY_TURNS`, `MESSAGE_CHARS`, `Turn`, `Role` | builds the sous-chef request, scoped to one recipe |
 | `parse_import`, `IMPORT_MAX_BYTES` | validates an `/import` body |
 | `import_request`, `import_schema`, `parse_import_response`, `Imported` | builds the importer request with a response schema, and turns the reply into a `Recipe` with its checklist results |

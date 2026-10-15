@@ -1,7 +1,9 @@
 import {
 	chatBody,
+	chatPost,
 	post,
 	type AiClient,
+	type ChatOptions,
 	type ChatReply,
 	type ChatRequest,
 	type ImportResult
@@ -17,10 +19,14 @@ export class ServerClient implements AiClient {
 		this.#fetch = fetcher;
 	}
 
-	chat(request: ChatRequest): Promise<ChatReply> {
-		return post(this.#fetch, `${this.#prefix}/chat`, chatBody(request), {
-			credentials: 'same-origin'
-		});
+	chat(request: ChatRequest, options?: ChatOptions): Promise<ChatReply> {
+		return chatPost(
+			this.#fetch,
+			`${this.#prefix}/chat`,
+			chatBody(request),
+			{ credentials: 'same-origin' },
+			options
+		);
 	}
 
 	importRecipe(text: string): Promise<ImportResult> {

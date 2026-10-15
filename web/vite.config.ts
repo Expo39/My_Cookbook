@@ -4,7 +4,10 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 
 /** Site settings from the repo root, which the card renderer reads too. Missing or unreadable means defaults. */
-function siteConfig(): { site?: { url?: string }; ai?: { endpoint?: string } } {
+function siteConfig(): {
+	site?: { url?: string };
+	ai?: { endpoint?: string; turnstileSiteKey?: string };
+} {
 	try {
 		return JSON.parse(readFileSync('../cookbook.config.json', 'utf8'));
 	} catch {
@@ -35,7 +38,10 @@ export default defineConfig(({ mode }) => ({
 		__SITE_URL__: JSON.stringify(
 			process.env.PUBLIC_SITE_URL || config.site?.url || 'https://expo39.github.io'
 		),
-		__AI_ENDPOINT__: JSON.stringify(process.env.PUBLIC_AI_ENDPOINT || config.ai?.endpoint || '')
+		__AI_ENDPOINT__: JSON.stringify(process.env.PUBLIC_AI_ENDPOINT || config.ai?.endpoint || ''),
+		__TURNSTILE_SITE_KEY__: JSON.stringify(
+			process.env.PUBLIC_TURNSTILE_SITE_KEY || config.ai?.turnstileSiteKey || ''
+		)
 	},
 	// The share card layout in assets/ is shared with the Rust renderer.
 	server: { port: 5173, strictPort: true, fs: { allow: ['..'] } },

@@ -86,10 +86,30 @@ The static site cannot hold the Gemini key, so the sous-chef and the importer go
    ```
 
 3. Check the variables in `wrangler.toml`:
-   - `SITE_URL` is the published site including its base path (`https://expo39.github.io/My_Cookbook`). The Worker fetches each recipe for `/chat` from `<SITE_URL>/data/recipes/<id>.json`, so it only ever discusses published recipes.
+   - `SITE_URL` is the published site including its base path (`https://expo39.github.io/My_Cookbook`). The Worker fetches each recipe for `/chat` from `<SITE_URL>/data/recipes/<id>.json`, so a published recipe is always discussed as published. Only when that address does not exist (a recipe kept on the cook's own device) is the copy sent with the question used, after it has been checked to be a recipe.
    - `ALLOWED_ORIGINS` lists the origins allowed to call it.
    - `GEMINI_MODEL`, `RATE_LIMIT_CHAT` and `RATE_LIMIT_IMPORT` tune the model and the hourly limits.
+   - `GEMINI_THINKING_LEVEL` (default `low`) sets how long the model thinks before it answers; `minimal` is faster on the models that accept it, and `default` leaves the choice to the model. A model that refuses the level is asked again without one.
+   - `GEMINI_FALLBACK_MODEL`, when set, is tried after the main model has been busy three times in a row, for example a lighter Flash model.
 4. Set `ai.endpoint` in `cookbook.config.json` (or `PUBLIC_AI_ENDPOINT` at build time) to the Worker's URL, and enter the same `ADMIN_IMPORT_SECRET` in the site's editing settings (see [ADMIN.md](ADMIN.md#importing-a-recipe-with-ai)).
+
+Answers are streamed to the browser as they are written. When Gemini is busy (a 429 for a per-minute limit, or a 500 or 503), the Worker waits a moment, with a little randomness so that cooks refused together do not return together, and asks again up to three times before it tries the fallback model. Each refusal is logged; `npx wrangler tail` in `crates/cookbook-worker` (inside `make shell`) shows them live.
+
+### Turnstile (optional)
+
+Cloudflare Turnstile keeps scripts from spending the Gemini quota. It is off until the Worker has a `TURNSTILE_SECRET`, so it can be added at any time.
+
+1. In the Cloudflare dashboard, open **Turnstile > Add widget**. Name it, add the site's hostname (`expo39.github.io`, plus `localhost` for development), and choose the **Invisible** widget mode. Cloudflare shows a site key and a secret key.
+2. Store the secret key in the Worker:
+
+   ```sh
+   make shell
+   cd crates/cookbook-worker && npx wrangler secret put TURNSTILE_SECRET
+   ```
+
+3. Put the site key in `cookbook.config.json` as `ai.turnstileSiteKey` (or set `PUBLIC_TURNSTILE_SITE_KEY` at build time), then deploy the site. The site key is public by design.
+
+The browser then fetches a fresh token before each question and sends it in the `X-Turnstile-Token` header, and the Worker checks it with Cloudflare before it calls Gemini. To switch Turnstile off again, delete the secret with `npx wrangler secret delete TURNSTILE_SECRET`; the site key can stay.
 
 `make worker-build` builds the Worker without deploying it. No Cloudflare account id is committed; Wrangler takes it from `CLOUDFLARE_ACCOUNT_ID` or from the token. The routes, limits and the admin proof are documented in [crates/cookbook-worker/README.md](../crates/cookbook-worker/README.md).
 

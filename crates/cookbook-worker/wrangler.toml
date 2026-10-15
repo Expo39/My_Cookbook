@@ -11,10 +11,12 @@ ALLOWED_ORIGINS = "https://expo39.github.io,http://localhost:5173"
 GEMINI_MODEL = "gemini-3.8-flash"
 RATE_LIMIT_CHAT = "30"
 RATE_LIMIT_IMPORT = "5"
+GEMINI_THINKING_LEVEL = "low"
+# GEMINI_FALLBACK_MODEL = "a lighter Flash model, tried when the main one stays busy"
 
 # No id is given: `wrangler deploy` creates and links the namespace on the first deploy.
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 
 # Secrets are never written here. Set them with `wrangler secret put`:
-#   GEMINI_API_KEY, ADMIN_IMPORT_SECRET
+#   GEMINI_API_KEY, ADMIN_IMPORT_SECRET, and optionally TURNSTILE_SECRET
