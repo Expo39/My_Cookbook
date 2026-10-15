@@ -139,7 +139,7 @@
 						{/if}
 					</div>
 					<ul>
-						{#each group.lines as line, n (line.key + n)}
+						{#each group.lines as line, n (line.key)}
 							<IngredientLine
 								id="{id}-{group.id}-{n}"
 								text={[line.prefix, line.item].filter(Boolean).join(' ')}

@@ -101,7 +101,7 @@
 							type="button"
 							class="toggle num"
 							class:changed={item.scaled}
-							disabled={!model.ready}
+							disabled={!model.ready || ticks.has(`i:${position}`)}
 							aria-label={label(position, item)}
 							onclick={() => cycle(position, item)}>{model.amountText(position, item)}</button
 						>
@@ -192,26 +192,26 @@
 		text-transform: none;
 	}
 
+	/* A soft chip says "tap me" without an underline; it appears once the toggle works. */
 	.toggle {
-		margin: 0 0 0 calc(-1 * var(--space-1));
-		padding: 0 var(--space-1);
+		margin: 0 0 0 calc(-1 * var(--space-2));
+		padding: 0 var(--space-2);
 		border: 0;
 		border-radius: var(--radius-s);
-		background: transparent;
+		background: var(--colour-tint);
 		color: inherit;
 		font: inherit;
 		text-align: start;
-		text-decoration: underline dotted var(--colour-muted);
-		text-underline-offset: 0.25em;
+		transition: background-color var(--duration-micro);
 	}
 
 	.toggle:not(:disabled):hover {
-		background: var(--colour-tint);
+		background: var(--colour-line);
 	}
 
 	.toggle:disabled {
+		background: transparent;
 		cursor: default;
-		text-decoration: none;
 	}
 
 	.changed {
