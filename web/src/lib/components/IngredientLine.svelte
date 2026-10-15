@@ -99,9 +99,8 @@
 		grid-template-columns: var(--target) 1fr var(--target);
 	}
 
-	/* A full-size target with a small circle behind the cross, so it stays light on the line. */
+	/* A full-size target that only turns red on hover, so it stays light on the line. */
 	.remove {
-		position: relative;
 		display: grid;
 		place-items: center;
 		inline-size: var(--target);
@@ -112,27 +111,8 @@
 		color: var(--colour-muted);
 	}
 
-	.remove::before {
-		content: '';
-		position: absolute;
-		inset: 50% auto auto 50%;
-		inline-size: 1.75rem;
-		block-size: 1.75rem;
-		border-radius: var(--radius-pill);
-		transform: translate(-50%, -50%);
-		transition: background-color var(--duration-micro);
-	}
-
-	.remove :global(svg) {
-		position: relative;
-	}
-
 	.remove:hover {
 		color: var(--colour-danger);
-	}
-
-	.remove:hover::before {
-		background: var(--colour-tint);
 	}
 
 	input {
