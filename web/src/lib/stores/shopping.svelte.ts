@@ -42,6 +42,8 @@ class ShoppingList {
 	recipes = $state<ShoppingRecipe[]>([]);
 	ticked = $state<string[]>([]);
 	amounts = $state<Record<string, ChosenAmount>>({});
+	/** Lines the cook took off the list, such as something already in the cupboard. */
+	hidden = $state<string[]>([]);
 
 	load(): void {
 		const stored = readJson(SHOPPING_KEY) as
@@ -98,6 +100,47 @@ class ShoppingList {
 		this.#save();
 	}
 
+	/** A hand-typed item has no recipe amount to compare with, so its quantity is simply changed. */
+	setOwnAmount(key: string, qty: number): void {
+		this.recipes = this.recipes.map((recipe) =>
+			recipe.id === OWN_ITEMS
+				? {
+						...recipe,
+						items: recipe.items.map((item) =>
+							lineKey(item) === key ? { ...item, min: qty, max: qty } : item
+						)
+					}
+				: recipe
+		);
+		this.#save();
+	}
+
+	isHidden(key: string): boolean {
+		return this.hidden.includes(key);
+	}
+
+	/** Takes a line off the list; a line typed in by hand is deleted outright. */
+	hide(key: string): void {
+		const own = this.recipes.find((recipe) => recipe.id === OWN_ITEMS);
+		if (own?.items.some((item) => lineKey(item) === key)) {
+			const items = own.items.filter((item) => lineKey(item) !== key);
+			this.recipes = this.recipes
+				.map((recipe) => (recipe.id === OWN_ITEMS ? { ...recipe, items } : recipe))
+				.filter((recipe) => recipe.items.length > 0);
+		}
+		if (!this.hidden.includes(key)) this.hidden = [...this.hidden, key];
+		this.#save();
+	}
+
+	/** Puts a line back: undoes `hide`, re-adding a hand-typed item from `item`. */
+	unhide(key: string, item?: ShoppingItem): void {
+		if (item && !this.recipes.some((recipe) => recipe.items.some((i) => lineKey(i) === key))) {
+			this.addOwn(item);
+		}
+		this.hidden = this.hidden.filter((hidden) => hidden !== key);
+		this.#save();
+	}
+
 	remove(recipeId: string): void {
 		this.recipes = this.recipes.filter((recipe) => recipe.id !== recipeId);
 		this.#save();
@@ -130,6 +173,7 @@ class ShoppingList {
 		this.recipes = [];
 		this.ticked = [];
 		this.amounts = {};
+		this.hidden = [];
 		this.#save();
 	}
 
@@ -139,10 +183,12 @@ class ShoppingList {
 		const alive = (key: string) => live.has(key.replace(/#\d+$/, ''));
 		this.ticked = this.ticked.filter(alive);
 		this.amounts = Object.fromEntries(Object.entries(this.amounts).filter(([key]) => alive(key)));
+		this.hidden = this.hidden.filter(alive);
 		writeJson(SHOPPING_KEY, {
 			recipes: $state.snapshot(this.recipes),
 			ticked: this.ticked,
-			amounts: $state.snapshot(this.amounts)
+			amounts: $state.snapshot(this.amounts),
+			hidden: this.hidden
 		});
 	}
 }

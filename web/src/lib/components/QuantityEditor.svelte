@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { outside } from '$lib/actions/outside';
 	import { unitLabel } from '$lib/recipe/format';
 	import type { Unit } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
@@ -83,50 +84,57 @@
 	}
 </script>
 
-<button
-	type="button"
-	class="qty"
-	class:edited
-	class:empty={!shown}
-	{disabled}
-	aria-expanded={open}
-	aria-controls="{id}-editor"
-	aria-label={shown ? `${label}: ${shown}, change the amount` : `${label}: add an amount`}
-	onclick={() => (open ? done() : show())}
-	>{#if shown}{shown}{:else}<Icon name="plus" size={14} />amount{/if}</button
->
+<span class="wrap" use:outside={() => open && done()}>
+	<button
+		type="button"
+		class="qty"
+		class:edited
+		class:empty={!shown}
+		{disabled}
+		aria-expanded={open}
+		aria-controls="{id}-editor"
+		aria-label={shown ? `${label}: ${shown}, change the amount` : `${label}: add an amount`}
+		onclick={() => (open ? done() : show())}
+		>{#if shown}{shown}{:else}<Icon name="plus" size={14} />amount{/if}</button
+	>
 
-{#if open && !disabled}
-	<form id="{id}-editor" class="editor" onsubmit={done}>
-		<button type="button" class="round" aria-label="Less {label}" onclick={() => nudge(-1)}>
-			<Icon name="minus" size={18} />
-		</button>
-		<label class="sr-only" for="{id}-qty">Amount of {label}</label>
-		<span class="field">
-			<input
-				bind:this={field}
-				id="{id}-qty"
-				type="text"
-				inputmode="decimal"
-				autocomplete="off"
-				bind:value={draft}
-				onkeydown={(event) => event.key === 'Escape' && (open = false)}
-			/>
-			{#if unit}<span class="unit">{unitLabel(unit)}</span>{/if}
-		</span>
-		<button type="button" class="round" aria-label="More {label}" onclick={() => nudge(1)}>
-			<Icon name="plus" size={18} />
-		</button>
-		<button type="submit" class="done" aria-label="Done"><Icon name="check" size={20} /></button>
-		{#if edited}
-			<button type="button" class="back" onclick={reset}>
-				<Icon name="reset" size={14} />Back to {original || 'no amount'}
+	{#if open && !disabled}
+		<form id="{id}-editor" class="editor" onsubmit={done}>
+			<button type="button" class="round" aria-label="Less {label}" onclick={() => nudge(-1)}>
+				<Icon name="minus" size={18} />
 			</button>
-		{/if}
-	</form>
-{/if}
+			<label class="sr-only" for="{id}-qty">Amount of {label}</label>
+			<span class="field">
+				<input
+					bind:this={field}
+					id="{id}-qty"
+					type="text"
+					inputmode="decimal"
+					autocomplete="off"
+					bind:value={draft}
+					onkeydown={(event) => event.key === 'Escape' && (open = false)}
+				/>
+				{#if unit}<span class="unit">{unitLabel(unit)}</span>{/if}
+			</span>
+			<button type="button" class="round" aria-label="More {label}" onclick={() => nudge(1)}>
+				<Icon name="plus" size={18} />
+			</button>
+			<button type="submit" class="done" aria-label="Done"><Icon name="check" size={20} /></button>
+			{#if edited}
+				<button type="button" class="back" onclick={reset}>
+					<Icon name="reset" size={14} />Back to {original || 'no amount'}
+				</button>
+			{/if}
+		</form>
+	{/if}
+</span>
 
 <style>
+	/* Lays its parts out in the line itself; it exists so a press outside can be told apart. */
+	.wrap {
+		display: contents;
+	}
+
 	.qty {
 		position: relative;
 		z-index: 0;

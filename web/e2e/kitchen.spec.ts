@@ -280,28 +280,40 @@ test.describe('shopping list', () => {
 		).toBeVisible();
 	});
 
-	test('the cook can add their own items, with or without an amount', async ({ page }) => {
+	test('the cook can add their own items, in their own group, and remove any line', async ({
+		page
+	}) => {
+		await page.goto(brulee);
+		await waitForCore(page);
+		await page.getByRole('button', { name: 'Add to shopping list' }).click();
 		await page.goto('shopping-list');
-		const field = page.getByLabel('Add an item');
-		await field.fill('2 lemons');
-		await field.press('Enter');
-		await field.fill('kitchen roll');
+
+		await page.getByRole('button', { name: 'Add an item' }).click();
+		await page.getByLabel('Item', { exact: true }).fill('lemons');
+		await page.getByLabel('Quantity').fill('2');
 		await page.getByRole('button', { name: 'Add', exact: true }).click();
+		await page.getByLabel('Item', { exact: true }).fill('kitchen roll');
+		await page.getByRole('button', { name: 'Add a note' }).click();
+		await page.getByLabel('Note').fill('the big pack');
+		await page.getByLabel('Item', { exact: true }).press('Enter');
 
-		const lemons = page.getByRole('listitem').filter({ hasText: 'lemons' });
-		await expect(
-			lemons.getByRole('button', { name: /lemons: 2, change the amount/ })
-		).toBeVisible();
-		await expect(lemons).toContainText('Added by you');
-		await expect(
-			page.getByRole('listitem').filter({ hasText: 'kitchen roll' }).getByRole('button', {
-				name: 'kitchen roll: add an amount'
-			})
-		).toBeVisible();
+		const own = page.getByRole('region', { name: 'Added by you' });
+		await expect(own.getByRole('button', { name: /lemons: 2, change the amount/ })).toBeVisible();
+		await expect(own.getByRole('listitem').filter({ hasText: 'kitchen roll' })).toContainText(
+			'the big pack'
+		);
 
+		await page.getByRole('heading', { name: 'Shopping list' }).click();
+		await expect(page.getByLabel('Item', { exact: true })).toHaveCount(0);
+
+		await page.getByRole('button', { name: 'Remove egg yolks' }).click();
+		await expect(page.getByRole('listitem').filter({ hasText: 'egg yolks' })).toHaveCount(0);
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect(page.getByRole('listitem').filter({ hasText: 'egg yolks' })).toHaveCount(1);
+
+		await page.getByRole('button', { name: 'Remove lemons' }).click();
 		await page.reload();
-		await page.getByRole('radio', { name: 'Recipe' }).check();
-		await expect(page.getByRole('heading', { name: 'Added by you', exact: true })).toBeVisible();
+		await expect(page.getByRole('listitem').filter({ hasText: 'lemons' })).toHaveCount(0);
 	});
 
 	test('adding a recipe again updates it instead of doubling it', async ({ page }) => {
