@@ -10,7 +10,9 @@ const pages = [
 	{ name: 'home', path: './' },
 	{ name: 'section', path: 'first-courses' },
 	{ name: 'recipe-wellington', path: 'main-courses/beef-steak/beef-wellington', core: true },
-	{ name: 'search', path: 'search?q=pasta', core: true }
+	{ name: 'search', path: 'search?q=pasta', core: true },
+	{ name: 'guide', path: 'how-to-use' },
+	{ name: 'new-recipe', path: 'edit', core: true }
 ];
 
 test.setTimeout(240_000);
@@ -21,6 +23,8 @@ test('writes screenshots of the main pages in both themes', async ({ page }) => 
 
 	for (const scheme of ['light', 'dark'] as const) {
 		await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
+		// Light is the default whatever the device says, so the dark pass chooses it in Settings' storage.
+		await page.addInitScript((theme) => localStorage.setItem('sapori:theme', theme), scheme);
 		for (const width of widths) {
 			await page.setViewportSize({ width, height: width < 768 ? 812 : 900 });
 			for (const { name, path, core } of pages) {

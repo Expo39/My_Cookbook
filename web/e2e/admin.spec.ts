@@ -214,12 +214,16 @@ test.describe('setting up and unlocking', () => {
 		await expect(edit).toBeHidden();
 	});
 
-	test('keeps the editor behind the password and out of search engines', async ({ page }) => {
+	test("keeps the cookbook's recipes behind the password and out of search engines", async ({
+		page
+	}) => {
 		await mockGitHub(page);
-		await page.goto('edit');
-		await expect(page.getByRole('heading', { name: 'Editing is locked' })).toBeVisible();
+		await page.goto(`edit?id=${recipeIds[0]}`);
+		await expect(
+			page.getByRole('heading', { name: 'This recipe is part of the cookbook' })
+		).toBeVisible();
 		await expect(page.getByRole('main').getByLabel('GitHub token')).toBeVisible();
-		await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/);
+		await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(1);
 	});
 });
 
