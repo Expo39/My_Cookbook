@@ -170,7 +170,7 @@ test('writes screenshots of the admin drawer and the editor', async ({ page }) =
 			);
 
 			if (width < 768) {
-				await page.getByRole('radio', { name: /^Checks/ }).check({ force: true });
+				await page.getByRole('radio', { name: /^To do/ }).check({ force: true });
 				await page.screenshot({ path: join(out, `editor-checks-${label}.png`) });
 				await page.getByRole('radio', { name: 'Preview' }).check({ force: true });
 				await page.screenshot({ path: join(out, `editor-preview-${label}.png`) });

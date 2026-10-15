@@ -6,7 +6,7 @@
 	import Field from './Field.svelte';
 	import TextField from './TextField.svelte';
 
-	let { ed }: { ed: EditorState } = $props();
+	let { ed, allowNew = true }: { ed: EditorState; allowNew?: boolean } = $props();
 
 	const id = fieldId('section');
 	let title = $state('');
@@ -46,26 +46,28 @@
 		</select>
 	</Field>
 
-	<div class="add">
-		<TextField
-			id="new-section"
-			label="New section"
-			bind:value={title}
-			optional
-			hint="Creates a folder with its own page. Add it inside the chosen section, or at the top."
-			error={problem}
-		/>
-		<div class="buttons">
-			{#if current}
-				<button type="button" class="btn" onclick={() => add(ed.form.section)}>
-					<Icon name="plus" size={18} />Add inside {current.label.replace(' (new)', '')}
+	{#if allowNew}
+		<div class="add">
+			<TextField
+				id="new-section"
+				label="New section"
+				bind:value={title}
+				optional
+				hint="Creates a folder with its own page. Add it inside the chosen section, or at the top."
+				error={problem}
+			/>
+			<div class="buttons">
+				{#if current}
+					<button type="button" class="btn" onclick={() => add(ed.form.section)}>
+						<Icon name="plus" size={18} />Add inside {current.label.replace(' (new)', '')}
+					</button>
+				{/if}
+				<button type="button" class="btn" onclick={() => add('')}>
+					<Icon name="plus" size={18} />Add at the top level
 				</button>
-			{/if}
-			<button type="button" class="btn" onclick={() => add('')}>
-				<Icon name="plus" size={18} />Add at the top level
-			</button>
+			</div>
 		</div>
-	</div>
+	{/if}
 
 	{#if ed.form.newSections.length}
 		<ul class="created">

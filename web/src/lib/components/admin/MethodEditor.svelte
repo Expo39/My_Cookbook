@@ -38,6 +38,11 @@
 	<p class="help">
 		Write each step on its own. A heading starts a titled stage, such as "Day 1: the night before".
 	</p>
+	{#if ed.plainSteps}
+		<p class="hint">
+			<Icon name="timer" size={18} />Write normally: times and temperatures become tappable timers.
+		</p>
+	{/if}
 	{#if ed.errorFor('steps')}
 		<p class="error" role="alert" id="f-steps">
 			<Icon name="alert" size={16} />{ed.errorFor('steps')}
@@ -69,6 +74,18 @@
 						remember(step.uid, event);
 					}}
 				/>
+				{#if ed.steps[i]?.found.length}
+					<ul class="found" aria-label="Found in step {i + 1}">
+						{#each ed.steps[i].found as item, f (f)}
+							<li>
+								<Icon
+									name={item.kind === 'timer' ? 'timer' : 'thermometer'}
+									size={16}
+								/>{item.label}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 				<InsertMenu {ed} oninsert={(token) => insert(i, token)} />
 				<div class="times">
 					<TextField
@@ -117,6 +134,43 @@
 
 	.step:focus {
 		outline: none;
+	}
+
+	.hint {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+		color: var(--colour-ink);
+	}
+
+	.hint :global(svg) {
+		flex: none;
+		color: var(--colour-primary);
+	}
+
+	.found {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	.found li {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		padding: var(--space-1) var(--space-3);
+		border-radius: 999px;
+		background: var(--colour-tint);
+		color: var(--colour-primary);
+		font-family: var(--font-num);
+		font-size: var(--text-s);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.times {

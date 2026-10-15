@@ -380,7 +380,7 @@ test.describe('the editor', () => {
 		);
 
 		await expect(page.getByRole('region', { name: 'Checklist' })).toBeHidden();
-		await page.getByRole('radio', { name: /^Checks/ }).check({ force: true });
+		await page.getByRole('radio', { name: /^To do/ }).check({ force: true });
 		await expect(page.getByRole('region', { name: 'Checklist' })).toBeVisible();
 		await page.getByRole('radio', { name: 'Preview' }).check({ force: true });
 		await expect(page.getByRole('region', { name: 'Preview' })).toBeVisible();
