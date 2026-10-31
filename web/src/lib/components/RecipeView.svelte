@@ -49,7 +49,7 @@
 		card: Card;
 		data: RecipeData;
 		index: SiteIndex;
-		/** Added on this device: not published, so there is no public page, card or link to share. */
+		/** Added on this device: not published, so there is no public page or link; the card can still be sent. */
 		local?: boolean;
 	} = $props();
 
@@ -246,7 +246,7 @@
 	async function printCard() {
 		try {
 			await loadCore();
-			printQr = qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null;
+			printQr = local ? null : (qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null);
 		} catch {
 			printQr = null;
 		}
@@ -316,7 +316,7 @@
 		{model}
 		{hydrated}
 		{cookHref}
-		onshare={local ? undefined : share}
+		onshare={share}
 		onaddlist={addToList}
 		onask={ai ? () => chef?.show() : undefined}
 		edithref={local || admin.unlocked ? editHref({ id: card.id }) : undefined}
@@ -381,11 +381,11 @@
 		</section>
 	{/if}
 
-	{#if hydrated}<ActionBar {model} {cookHref} onshare={local ? undefined : share} />{/if}
+	{#if hydrated}<ActionBar {model} {cookHref} onshare={share} />{/if}
 	{#if hydrated && cookStep !== null && CookMode}
 		<CookMode {model} {recipe} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
-	{#if hydrated && !local}<ShareSheet bind:this={sheet} {card} {model} onprint={printCard} />{/if}
+	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} {local} onprint={printCard} />{/if}
 	{#if hydrated && ai}
 		<SousChef bind:this={chef} client={ai} recipeId={card.id} recipe={data.recipe} />
 	{/if}

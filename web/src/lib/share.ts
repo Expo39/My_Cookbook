@@ -22,9 +22,13 @@ export async function shareLink(title: string, url: string): Promise<ShareOutcom
 
 export type FileShareOutcome = 'shared' | 'cancelled' | 'unsupported' | 'failed';
 
-/** Shares a file through the system sheet; `unsupported` when the browser cannot share this file. */
-export async function shareFile(file: File, title: string): Promise<FileShareOutcome> {
-	const data = { files: [file], title };
+/** Shares a file, with optional text such as the recipe's link, through the system sheet; `unsupported` when the browser cannot share this file. */
+export async function shareFile(
+	file: File,
+	title: string,
+	text?: string
+): Promise<FileShareOutcome> {
+	const data = { files: [file], title, ...(text ? { text } : {}) };
 	if (typeof navigator.canShare !== 'function' || !navigator.canShare(data)) return 'unsupported';
 	try {
 		await navigator.share(data);
