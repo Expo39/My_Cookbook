@@ -1,4 +1,4 @@
-import { readJson, writeJson } from './storage';
+import { readJson, writeJson, writeStorage } from './storage';
 
 const KEY = 'sapori:device-notice';
 const WEEK = 7 * 24 * 60 * 60 * 1000;
@@ -14,6 +14,8 @@ class DeviceNotice {
 	quiet = $state<number | null>(null);
 
 	load(): void {
+		// The backup reminder this replaced kept its own key; nothing reads it any more.
+		writeStorage('sapori:backup', null);
 		const stored = readJson(KEY) as { read?: number; quiet?: number } | undefined;
 		this.read = stored?.read ?? null;
 		this.quiet = stored?.quiet ?? null;

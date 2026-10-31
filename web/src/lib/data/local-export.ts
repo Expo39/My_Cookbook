@@ -73,5 +73,8 @@ export async function exportFile(
 		'Ingredients',
 		'Method'
 	]);
-	return { blob: new Blob([`${BOM}${[header, ...rows].join('\n')}\n`], { type: 'text/csv' }), name };
+	return {
+		blob: new Blob([`${BOM}${[header, ...rows].join('\n')}\n`], { type: 'text/csv' }),
+		name
+	};
 }
