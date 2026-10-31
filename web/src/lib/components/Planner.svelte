@@ -2,6 +2,7 @@
 	import { clockLabel, hasEnoughTiming, parseClock, planBackwards } from '$lib/kitchen/planner';
 	import { formatMinutes } from '$lib/recipe/format';
 	import type { ScaledStep } from '$lib/types/recipe';
+	import InfoTip from './InfoTip.svelte';
 
 	let { steps }: { steps: ScaledStep[] } = $props();
 
@@ -15,7 +16,13 @@
 
 {#if enough}
 	<details>
-		<summary>Plan backwards from...</summary>
+		<summary>
+			Plan backwards from...
+			<InfoTip
+				topic="planning backwards"
+				text="Pick the time you want to eat, and each step gets the clock time to start it, worked back from the hands-on and waiting times in the recipe."
+			/>
+		</summary>
 		<div class="panel">
 			<label for="{id}-time">Serve at</label>
 			<input id="{id}-time" type="time" bind:value={serveAt} />
@@ -52,7 +59,9 @@
 
 	summary {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
+		gap: var(--space-2);
 		min-block-size: var(--target);
 		padding-inline: var(--space-4);
 		color: var(--colour-primary);

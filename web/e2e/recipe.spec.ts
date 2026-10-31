@@ -94,10 +94,29 @@ test('an amount toggles through the units of the chosen system only, and the hin
 test('the hint can be dismissed without using it', async ({ page }) => {
 	await page.goto(brulee);
 	await waitForCore(page);
-	await page.getByRole('button', { name: 'Dismiss the hint' }).click();
+	await ingredients(page).getByRole('button', { name: 'Dismiss the hint' }).click();
 	await page.reload();
 	await waitForCore(page);
 	await expect(page.getByText('Tap an amount to change its unit')).toHaveCount(0);
+});
+
+test('a hint and a breathing first circle show the steps can be ticked, until one is', async ({
+	page
+}) => {
+	await page.goto(brulee);
+	await waitForCore(page);
+	const hint = method(page).getByText("Tap a step's number to mark it done");
+	await expect(hint).toBeVisible();
+	await expect(method(page).locator('li.beckon')).toHaveCount(1);
+
+	await method(page).getByRole('checkbox', { name: 'Mark step 1 as done' }).check();
+	await expect(hint).toHaveCount(0);
+	await expect(method(page).locator('li.beckon')).toHaveCount(0);
+	await method(page).getByRole('checkbox', { name: 'Mark step 1 as done' }).uncheck();
+	await page.reload();
+	await waitForCore(page);
+	await expect(method(page).getByRole('checkbox', { name: 'Mark step 2 as done' })).toBeEnabled();
+	await expect(hint).toHaveCount(0);
 });
 
 test('ticks stay between visits and can be reset', async ({ page }) => {

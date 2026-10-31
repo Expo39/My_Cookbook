@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readJson, readList, readStorage, writeJson, writeStorage } from './storage';
 import { favourites } from './favourites.svelte';
 import { Notes, notesKey } from './notes.svelte';
+import { preferences } from './preferences.svelte';
 import { RECENT_KEY, RECENT_LIMIT, recent } from './recent.svelte';
 import { SHOPPING_KEY, shopping } from './shopping.svelte';
 
@@ -107,6 +108,16 @@ describe('favourites', () => {
 		favourites.toggle('a/x');
 		favourites.toggle('a/y');
 		expect(favourites.ids).not.toContain('a/x');
+	});
+});
+
+describe('the step hint', () => {
+	it('is dismissed for good once, whether closed or used', () => {
+		expect(preferences.stepHintDismissed).toBe(false);
+		preferences.dismissStepHint();
+		preferences.dismissStepHint();
+		expect(preferences.stepHintDismissed).toBe(true);
+		expect(readStorage('sapori:hint:steps')).toBe('1');
 	});
 });
 
