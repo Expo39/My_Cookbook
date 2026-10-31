@@ -36,9 +36,9 @@ The "Bright Mediterranean" design: sea blue and terracotta on limestone white, w
 |---|---|
 | ![The home page, with the sections as cards under the search box](docs/screenshots/home-desktop.webp) | ![Beef Wellington in the dark theme, with the ingredients beside the method and its timers](docs/screenshots/recipe-desktop-dark.webp) |
 
-| Scaled on a phone | Adding your own recipe | The sous-chef |
-|---|---|---|
-| ![Beef Wellington scaled to 8 servings on a phone, with tappable amounts](docs/screenshots/recipe-phone.webp) | ![The editor on a phone, showing the timers and temperature found in a step written in plain words](docs/screenshots/editor-phone.webp) | ![The sous-chef answering whether the recipe can be made ahead](docs/screenshots/souschef-phone.webp) |
+| Scaled on a phone | Cook mode | Adding your own recipe | The sous-chef |
+|---|---|---|---|
+| ![Beef Wellington scaled to 8 servings on a phone, with tappable amounts](docs/screenshots/recipe-phone.webp) | ![Cook mode on step 3 of Beef Wellington, with the step's own ingredients listed under it and the shallots ticked off](docs/screenshots/cook-mode-phone.webp) | ![The editor on a phone, showing the timers and temperature found in a step written in plain words](docs/screenshots/editor-phone.webp) | ![The sous-chef answering whether the recipe can be made ahead](docs/screenshots/souschef-phone.webp) |
 
 A one-minute walkthrough, with captions, is on the site's [How to use](https://expo39.github.io/My_Cookbook/how-to-use) page.
 
@@ -49,10 +49,10 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 - Section pages and recipe pages pre-rendered for every folder and recipe, with `Recipe` JSON-LD and Open Graph tags.
 - Search that ignores accents, and an ingredients mode that ranks recipes by how many of their ingredients the cook already has. The search page shows how to search with examples to tap, and offers the ingredients mode when a comma is typed.
 - Small "i" circles explain the less obvious controls: a bubble on hover with a mouse, a note underneath on a phone.
-- Cook mode: one step at a time, keyboard and swipe navigation, the step's ingredients beside it, and a screen wake lock where the browser supports one.
+- Cook mode: one step at a time in large type, with the ingredients that step uses listed under it to tick off (found from the step's words, so recipes need no extra markup), the full list beside it on a wide screen or one tap away on a phone, the next step previewed, a "Ready to serve" screen with the chef's tips at the end, keyboard and swipe navigation, and a screen wake lock where the browser supports one.
 - Timers started from the method, kept as end times so they survive a reload, and able to run side by side.
 - A "serve at" planner that works back from a serving time when the steps carry timings.
-- Ticks on ingredients and steps, private notes, favourites and recently viewed recipes, all kept on the device. Ticks follow the ingredient or step, so they survive an update to the recipe.
+- Ticks on ingredients and steps, private notes, favourites and recently viewed recipes, all kept on the device. Ticks follow the ingredient or step, so they survive an update to the recipe, and cook mode shares them with the recipe page. Until a first step is ticked, a hint and a gently breathing first circle show that a step's number can be tapped.
 - A recipe updated while it is open offers its new version in place, keeping the servings, ticks, timers and list.
 - A how-to page covering every feature, with a recorded walkthrough.
 - Recipe variants (for example vanilla extract or pods), each replacing ingredients, steps and tips by key.

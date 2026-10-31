@@ -8,7 +8,7 @@
 - **Tablet and desktop (>= 48rem):** two columns, the ingredients on the left (at most 22rem) and the method on the right with numbered steps. The whole page scrolls as one; the ingredients never scroll in a box of their own.
 - **Mobile:**
   - Ingredients | Method segmented tabs
-  - a bottom action bar fixed at `padding-bottom: env(safe-area-inset-bottom)` holding Servings, Start cooking and Share
+  - a bottom action bar fixed at `padding-bottom: env(safe-area-inset-bottom)` holding Servings, Start cooking and Share; while it is on the page the body is padded by the bar's height, so the footer's last line ends above it
   - content is padded so nothing sits under the bar
 - **Ingredients:**
   - a checkbox, then one left-aligned line: the amount (`--font-num`) in a slot at least `--amount-slot` (4.5rem) wide, then the item, in a column of its own: a long item wraps under itself, never under the amount, and hints sit beneath it in muted italics
@@ -16,7 +16,8 @@
   - tapping an amount toggles it to the next unit of the chosen system (metric: g, kg; ml, l, tsp, tbsp. US: oz, lb; tsp, tbsp, cup, fl oz), wrapping back to the written unit
   - dashed `--colour-line` row rules; group names in uppercase labels
   - ticking strikes the row through and fades it to muted, with an "x of y ready" counter and a Reset button
-- **Method:** step numbers in `--font-num`. Inline amounts from `{@...}` tokens show in bold primary, and timers are accent pills that start a timer when tapped. Steps can be ticked too.
+- **Method:** step numbers in `--font-num` inside a 2rem primary ring that is the step's checkbox; ticked, it fills primary with a white tick, both centred by construction (`inset: 0; margin: auto`), not by offsets. Inline amounts from `{@...}` tokens show in bold primary, and timers are accent pills that start a timer when tapped. Until the cook has ticked a step or closed it, a dashed hint under the heading says "Tap a step's number to mark it done" (the shared `Hint.svelte`, as for the units hint) and the first ring breathes three times in tint.
+- **Planner:** "Plan backwards from..." is a folded surface panel with an "i" in its summary that explains it without opening it.
 - **Hints and tips:**
   - Scaling hints ("check from the original time", "cook in batches") appear as small warning-coloured notes under the affected step.
   - The chef's tip is a surface panel with an accent uppercase label.

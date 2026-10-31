@@ -139,6 +139,7 @@ Times, temperatures and cookware are never scaled automatically. When the scale 
 - `discrete` rounds to the nearest whole piece (minimum 1). Only when the recipe is `precise` and the ingredient has `each` does a fractional part of 0.25 to 0.75 show as a half with its weight, e.g. "1½ (75 g) eggs".
 - A cup is 240 ml, a tablespoon 15 ml, a teaspoon 5 ml and a US fluid ounce 30 ml. An ingredient with an `alt` is shown in its authored units and never converted.
 - Token modifiers combine as `{@key:amount*1/2}`. `{timer:12-15|name}` takes both a range and a name.
+- Cook mode lists the ingredients each step uses without any tokens: it matches the step's words against the ingredient lines ("add the shallots and the red wine" finds both). Name ingredients plainly in the method and the match follows. A `{@key}` token is only needed to show an amount inline, and its line always counts as used by that step.
 
 ## Validation
 `cookbook-cli check` runs the recipe checklist; `make check` runs it over the whole tree. Errors have ids starting `E-` and stop the build; warnings start `W-` and are reported but allowed. The same rules run in the in-site editor (through WASM), in CI and on the self-hosted server. See [ARCHITECTURE.md](ARCHITECTURE.md#where-the-checklist-runs).
