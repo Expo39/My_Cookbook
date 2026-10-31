@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
+	import BackupReminder from '$lib/components/BackupReminder.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import PageHead from '$lib/components/PageHead.svelte';
 	import RecipeCard from '$lib/components/RecipeCard.svelte';
@@ -53,6 +54,7 @@
 				<h2 id="mine-title">Your recipes</h2>
 				<a class="add" href={editHref()}><Icon name="plus" size={18} />Add a recipe</a>
 			</div>
+			<BackupReminder />
 			{#if mine.length}
 				<div class="recent">
 					{#each mine as card (card.id)}
