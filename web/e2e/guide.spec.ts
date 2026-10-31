@@ -38,3 +38,31 @@ test('AI crawlers are asked to stay away while search engines are welcome', asyn
 	expect(robots).toMatch(/User-agent: GPTBot\nDisallow: \//);
 	expect(robots).toMatch(/User-agent: \*\nAllow: \//);
 });
+
+test('the walkthrough turns to landscape in full screen, and back after', async ({ page }) => {
+	await page.addInitScript(() => {
+		const calls: string[] = [];
+		(window as unknown as { orientationCalls: string[] }).orientationCalls = calls;
+		Object.defineProperty(screen, 'orientation', {
+			value: {
+				type: 'portrait-primary',
+				lock: (to: string) => (calls.push(`lock:${to}`), Promise.resolve()),
+				unlock: () => calls.push('unlock')
+			}
+		});
+	});
+	await page.goto('how-to-use');
+	const video = page.locator('figure.video video');
+	await video.evaluate((element) => element.requestFullscreen());
+	await expect
+		.poll(() =>
+			page.evaluate(() => (window as unknown as { orientationCalls: string[] }).orientationCalls)
+		)
+		.toEqual(['lock:landscape']);
+	await page.evaluate(() => document.exitFullscreen());
+	await expect
+		.poll(() =>
+			page.evaluate(() => (window as unknown as { orientationCalls: string[] }).orientationCalls)
+		)
+		.toEqual(['lock:landscape', 'unlock']);
+});

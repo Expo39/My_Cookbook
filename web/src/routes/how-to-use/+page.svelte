@@ -4,6 +4,30 @@
 	import PageHead from '$lib/components/PageHead.svelte';
 	import { editHref, favouritesHref, searchHref, shoppingHref } from '$lib/links';
 
+	let video = $state<HTMLVideoElement>();
+
+	/** `lock` is not in every browser's types; where it is missing or refused, nothing happens. */
+	type Lockable = ScreenOrientation & { lock?: (orientation: 'landscape') => Promise<void> };
+
+	/**
+	 * The walkthrough is recorded landscape, so a phone held upright turns it sideways in full screen.
+	 * Android allows this while the video is full screen; iOS's own player turns with the phone.
+	 */
+	let locked = false;
+
+	function turn() {
+		const orientation = screen.orientation as Lockable | undefined;
+		if (document.fullscreenElement === video) {
+			orientation
+				?.lock?.('landscape')
+				.then(() => (locked = true))
+				.catch(() => {});
+		} else if (locked) {
+			orientation?.unlock();
+			locked = false;
+		}
+	}
+
 	const contents = [
 		{ id: 'finding', title: 'Finding a recipe' },
 		{ id: 'cooking', title: 'Cooking from a recipe' },
@@ -67,6 +91,14 @@
 			a: 'Its service did not answer, perhaps for a moment. Everything else in the cookbook works as normal; tap Check again in a little while.'
 		},
 		{
+			q: 'How does cook mode know which ingredients a step uses?',
+			a: 'It reads the step. When a step says "add the shallots and the red wine", those two lines appear under it. When you write a recipe of your own, name the ingredients in the method the way you would say them and cook mode finds them; there is nothing extra to fill in.'
+		},
+		{
+			q: 'Can I cook my own recipes in cook mode?',
+			a: 'Yes. Start cooking works the same on a recipe kept on your device, with its ingredients under each step.'
+		},
+		{
 			q: 'Do I need to be online?',
 			a: 'Only the first time. The cookbook keeps the recipes you open, so they work in the kitchen without a signal. Searching every recipe, sharing and the sous-chef need a connection, and the sous-chef says so when you are offline.'
 		},
@@ -80,6 +112,8 @@
 		}
 	];
 </script>
+
+<svelte:document onfullscreenchange={turn} />
 
 <PageHead
 	title="How to use the cookbook"
@@ -98,7 +132,13 @@
 	</header>
 
 	<figure class="video">
-		<video controls preload="none" playsinline poster="{base}/video/how-to-use.jpg">
+		<video
+			bind:this={video}
+			controls
+			preload="none"
+			playsinline
+			poster="{base}/video/how-to-use.jpg"
+		>
 			<track kind="captions" src="{base}/video/how-to-use.vtt" srclang="en-GB" label="English" />
 			<source src="{base}/video/how-to-use.webm" type="video/webm" />
 		</video>
@@ -160,12 +200,25 @@
 			one that finishes soonest is shown, with the rest a tap away. A finished timer sounds, and
 			vibrates where the phone can.
 		</p>
+		<h3>Ticking off</h3>
+		<p>
+			Tick each ingredient as you get it out, and tap a step's number to mark the step done. The
+			ticks are kept if you leave and come back, and <strong>Reset</strong> clears them.
+			<strong>Plan backwards from...</strong> works out when to start each step for the time you want
+			to eat.
+		</p>
 		<h3>Cook mode</h3>
 		<p>
-			<strong>Start cooking</strong> shows one step at a time in large type, with that step's
-			ingredients and timers. The screen stays awake while it is open. Tick ingredients off as you
-			go; ticks are kept if you leave and come back. <strong>Plan backwards from...</strong> works out
-			when to start for the time you want to eat.
+			<strong>Start cooking</strong> shows one step at a time in large type. Under each step,
+			<strong>For this step</strong> lists the ingredients it uses, with their amounts at the
+			servings you chose, to tick off as they go in; these are the same ticks as on the recipe. The
+			whole list is beside the step on a wide screen, and behind <strong>Ingredients</strong> at the
+			bottom on a phone. <strong>Up next</strong> shows what is coming, and the last step ends on
+			<strong>Ready to serve</strong>, with the chef's tips.
+		</p>
+		<p>
+			Swipe, use the arrow keys or the buttons to move between steps. The screen stays awake while
+			it is open.
 		</p>
 	</section>
 
