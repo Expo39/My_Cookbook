@@ -5,6 +5,7 @@
 	import { beforeNavigate, goto } from '$app/navigation';
 	import { clearDraft, loadDraft, saveDraft, type Draft } from '$lib/admin/draft';
 	import { EditorState, fieldId } from '$lib/admin/editor-state.svelte';
+	import { summarise } from '$lib/admin/checklist';
 	import { admin } from '$lib/admin/session.svelte';
 	import { uid, type FormData } from '$lib/admin/recipe-form';
 	import { moveItem, removeItem } from '$lib/admin/lists';
@@ -632,13 +633,7 @@
 
 				<div class="bar">
 					<p class="bar-summary" role="status">
-						{#if !editor.coreReady}
-							Loading the checks...
-						{:else if editor.errors.length}
-							{editor.errors.length} to fix before saving
-						{:else}
-							Ready to save
-						{/if}
+						{editor.coreReady ? summarise(editor.errors.length) : 'Getting ready...'}
 					</p>
 					<button class="btn primary" disabled={saving || !editor.coreReady}>
 						<Icon name="check" size={18} />{saving
