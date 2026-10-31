@@ -22,6 +22,9 @@
 		failed?: boolean;
 		/** The answer is still arriving. */
 		streaming?: boolean;
+		/** The model that wrote the answer, and whether it stood in for the main one. */
+		model?: string;
+		fallback?: boolean;
 	}
 
 	let dialog: HTMLDialogElement;
@@ -92,6 +95,7 @@
 		try {
 			for (let attempt = 0; ; attempt++) {
 				const answer = messages.length;
+				let by: Pick<Message, 'model' | 'fallback'> = {};
 				controller = new AbortController();
 				const timer = setTimeout(() => controller?.abort(), LIMIT_MILLISECONDS);
 				try {
@@ -100,6 +104,7 @@
 						{
 							signal: controller.signal,
 							onFallback: () => (lighter = true),
+							onModel: (model, fallback) => (by = { model, fallback }),
 							onText: (sofar) => {
 								if (messages.length === answer) {
 									messages.push({ role: 'model', text: '', streaming: true });
@@ -110,7 +115,12 @@
 						}
 					);
 					if (messages.length === answer) messages.push({ role: 'model', text: '' });
-					messages[answer] = { role: 'model', text: reply.reply, truncated: reply.truncated };
+					messages[answer] = {
+						role: 'model',
+						text: reply.reply,
+						truncated: reply.truncated,
+						...by
+					};
 					reach = 'ready';
 					return;
 				} catch (failure) {
@@ -267,6 +277,13 @@
 					</p>
 					{#if message.truncated}
 						<p class="cut">The answer was cut short. Ask again for the rest.</p>
+					{/if}
+					{#if message.model}
+						<p class="cut">
+							{message.fallback
+								? `Answered by the lighter model, ${message.model}, because the main one could not answer.`
+								: `Answered by ${message.model}.`}
+						</p>
 					{/if}
 				</li>
 			{:else}

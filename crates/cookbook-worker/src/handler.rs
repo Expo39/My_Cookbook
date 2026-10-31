@@ -294,8 +294,9 @@ enum Phase {
 }
 
 /// Answers a question as server-sent events, starting at once so the cook hears what is going on:
-/// a `status` event `{ state: "fallback" }` when the main model is too busy and a lighter one is
-/// asked instead, then `delta` events and a closing `done`, or an `error` event.
+/// a `status` event `{ state: "fallback" }` when the main model cannot answer and a lighter one is
+/// asked instead, a `model` event `{ model, fallback }` naming the one that answers, then `delta`
+/// events and a closing `done`, or an `error` event.
 fn answer(
     env: Env,
     config: &GeminiConfig,
@@ -310,9 +311,13 @@ fn answer(
                 Phase::Asking(at, mut request) => {
                     match ask_model(&key, &models[at], &mut request, true).await {
                         Ok(mut upstream) => match upstream.stream() {
-                            Ok(chunks) => {
-                                (String::new(), Some(Phase::Answering(chunks, Relay::new())))
-                            }
+                            Ok(chunks) => (
+                                sse_event(
+                                    "model",
+                                    &json!({ "model": models[at], "fallback": at > 0 }),
+                                ),
+                                Some(Phase::Answering(chunks, Relay::new())),
+                            ),
                             Err(_) => (error_event(&AiError::Unavailable), None),
                         },
                         Err(error) => {
@@ -414,10 +419,10 @@ fn gemini_key(env: &Env) -> std::result::Result<String, ApiError> {
         .map_err(|_| unavailable())
 }
 
-/// Whether the next model is worth trying after `error`: a busy, stuck or unknown model says
-/// nothing about the others.
+/// Whether the next model is worth trying after `error`: a busy, stuck or unknown model, or one
+/// whose daily quota is spent, says nothing about the others, which have quotas of their own.
 fn try_next(error: &AiError) -> bool {
-    error.is_retryable() || *error == AiError::UnknownModel
+    error.is_retryable() || matches!(error, AiError::UnknownModel | AiError::Quota)
 }
 
 /// Asks one model, again after a short jittered wait while it is busy, and returns its successful
