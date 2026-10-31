@@ -8,8 +8,9 @@
 	import TextField from './TextField.svelte';
 
 	/**
-	 * One ingredient on one line: amount, unit, ingredient and note. The rarer fields wait behind
-	 * "More", and a folded row lists the ones that are set, so nothing is hidden by surprise.
+	 * One ingredient on one line: amount, unit, ingredient and note. The two questions most lines
+	 * never need wait behind "More", and a folded row lists any answer that differs from the usual.
+	 * The key, for naming the ingredient in the method, is only for the cookbook's own recipes.
 	 */
 	let { ed, row, path }: { ed: EditorState; row: IngredientRow; path: string } = $props();
 
@@ -19,15 +20,24 @@
 	const keyPath = $derived(`${path}.key`);
 
 	const mode = $derived(SCALE_MODES.find((m) => m.value === row.scale));
+	const withKeys = $derived(!ed.plainSteps);
+
+	/** The amount box takes a range too, such as "2-3" or "2 to 3". */
+	const amount = {
+		get: () => (row.qtyMax ? `${row.qtyMin}-${row.qtyMax}` : row.qtyMin),
+		set: (value: string) => {
+			const range = value.match(/^\s*(\S+?)\s*(?:-|–|to)\s*(\S+)\s*$/i);
+			[row.qtyMin, row.qtyMax] = range ? [range[1], range[2]] : [value, ''];
+		}
+	};
 	const suggestion = $derived(row.item.trim() ? suggestKey(row.item, ed.keys) : '');
 	const errors = $derived([ed.errorFor(qtyPath), ed.errorFor(itemPath)].filter(Boolean));
 	const set = $derived(
 		[
-			row.optional && 'optional',
+			row.optional && 'can be left out',
 			row.scale !== 'linear' && mode?.label.toLowerCase(),
-			row.qtyMax && `up to ${row.qtyMax}`,
 			row.prefix && `"${row.prefix}"`,
-			row.key && `key: ${row.key}`
+			withKeys && row.key && `key: ${row.key}`
 		].filter(Boolean) as string[]
 	);
 
@@ -45,8 +55,8 @@
 			class="control num qty"
 			inputmode="decimal"
 			autocomplete="off"
-			placeholder="250"
-			bind:value={row.qtyMin}
+			placeholder="Qty"
+			bind:value={amount.get, amount.set}
 			aria-invalid={ed.errorFor(qtyPath) ? 'true' : undefined}
 			onblur={() => ed.touch(qtyPath)}
 		/>
@@ -91,15 +101,23 @@
 
 	{#if more}
 		<div class="more">
-			<label class="check">
-				<input type="checkbox" bind:checked={row.optional} />
-				<span>Optional ingredient</span>
-			</label>
+			<fieldset class="question">
+				<legend>Can it be left out?</legend>
+				<div class="answers">
+					<label class="check">
+						<input type="radio" name={id('optional')} value={false} bind:group={row.optional} />
+						<span>No, it is needed</span>
+					</label>
+					<label class="check">
+						<input type="radio" name={id('optional')} value={true} bind:group={row.optional} />
+						<span>Yes, it is optional</span>
+					</label>
+				</div>
+			</fieldset>
 			<Field
 				id={id('scale')}
-				label="When the servings change"
+				label="When you change the servings, this amount..."
 				hint={mode?.help}
-				info="Most amounts double when the servings double. Eggs round to whole ones, and salt or 'to taste' lines grow more gently or not at all."
 			>
 				<select
 					class="control"
@@ -112,35 +130,21 @@
 					{/each}
 				</select>
 			</Field>
-			<TextField
-				id={id('amount.max')}
-				label="Up to"
-				bind:value={row.qtyMax}
-				inputmode="decimal"
-				numeric
-				optional
-				hint="For a range, as in 2 to 3 cloves"
-			/>
-			<TextField
-				id={id('prefix')}
-				label="Before the amount"
-				bind:value={row.prefix}
-				optional
-				hint="As in 'Zest of' 1 lemon"
-			/>
-			<TextField
-				id={id('key')}
-				label="Key"
-				bind:value={row.key}
-				optional
-				info="A short name for this ingredient. The method can then mention it, and its amount follows the servings there too."
-				error={ed.errorFor(keyPath)}
-				onblur={() => ed.touch(keyPath)}
-			/>
-			{#if !row.key && suggestion}
-				<button type="button" class="btn suggest" onclick={() => (row.key = suggestion)}>
-					Use "{suggestion}" as the key
-				</button>
+			{#if withKeys}
+				<TextField
+					id={id('key')}
+					label="Key"
+					bind:value={row.key}
+					optional
+					info="A short name for this ingredient. The method can then mention it, and its amount follows the servings there too."
+					error={ed.errorFor(keyPath)}
+					onblur={() => ed.touch(keyPath)}
+				/>
+				{#if !row.key && suggestion}
+					<button type="button" class="btn suggest" onclick={() => (row.key = suggestion)}>
+						Use "{suggestion}" as the key
+					</button>
+				{/if}
 			{/if}
 		</div>
 	{/if}
@@ -217,6 +221,25 @@
 		padding: var(--space-3);
 		border-radius: var(--radius-s);
 		background: var(--colour-surface);
+	}
+
+	.question {
+		display: grid;
+		gap: var(--space-1);
+		margin: 0;
+		padding: 0;
+		border: 0;
+	}
+
+	.question legend {
+		padding: 0;
+		font-weight: 700;
+	}
+
+	.answers {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0 var(--space-4);
 	}
 
 	.check {
