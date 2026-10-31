@@ -60,8 +60,12 @@
 		</div>
 	</div>
 
-	{#if model.ready && anyPickable && !preferences.unitHintDismissed}
-		<Hint text="Tap an amount to change its unit" ondismiss={() => preferences.dismissUnitHint()} />
+	{#if anyPickable && !preferences.unitHintDismissed}
+		<Hint
+			name="units"
+			text="Tap an amount to change its unit"
+			ondismiss={() => preferences.dismissUnitHint()}
+		/>
 	{/if}
 
 	{#each model.view.groups as group, g (g)}
@@ -96,6 +100,7 @@
 							type="button"
 							class="toggle num"
 							class:changed={item.scaled}
+							class:done={ticks.has(tick)}
 							disabled={!model.ready || ticks.has(tick)}
 							aria-label={label(position, item)}
 							onclick={() => cycle(position, item)}>{model.amountText(position, item)}</button
@@ -189,8 +194,11 @@
 	}
 
 	.toggle:disabled {
-		background: transparent;
 		cursor: default;
+	}
+
+	.toggle.done {
+		background: transparent;
 	}
 
 	.changed {

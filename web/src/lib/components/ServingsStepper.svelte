@@ -53,7 +53,8 @@
 		background: var(--colour-tint);
 	}
 
-	button:disabled {
+	/* Greyed only at the limit; a fieldset waiting for the recipe core leaves the look alone. */
+	button[disabled] {
 		color: var(--colour-muted);
 		opacity: 0.55;
 	}

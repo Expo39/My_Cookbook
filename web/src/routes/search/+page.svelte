@@ -176,7 +176,8 @@
 		{#if failed}
 			<p class="status">Search could not load. Reload the page to try again.</p>
 		{:else if !searching}
-			<div class="guide">
+			{#if !synced}<p class="status waiting">Loading search...</p>{/if}
+			<div class="guide" data-query-hidden={synced ? undefined : ''}>
 				<h2 class="label">How to search</h2>
 				<ul>
 					{#each EXAMPLES[mode] as example (example.query)}
@@ -273,6 +274,20 @@
 
 	.status {
 		font-size: var(--text-m);
+	}
+
+	/* Before the code runs, a query in the address (seen by the script in app.html) means results
+	   are coming, so the help is not shown first. */
+	.waiting {
+		display: none;
+	}
+
+	:global(html[data-query]) .waiting {
+		display: block;
+	}
+
+	:global(html[data-query]) .guide[data-query-hidden] {
+		display: none;
 	}
 
 	ul {

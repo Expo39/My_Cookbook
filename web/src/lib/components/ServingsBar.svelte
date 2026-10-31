@@ -60,11 +60,14 @@
 	});
 
 	// On a phone the bottom bar is the main control, so this panel starts folded to one summary row.
+	// The page is drawn open for wide screens; on a phone CSS shows it folded until this takes over.
 	let open = $state(true);
+	let settled = $state(false);
 	$effect(() => {
 		const phone = matchMedia('(max-width: 47.99rem)');
 		const sync = () => (open = !phone.matches);
 		sync();
+		settled = true;
 		phone.addEventListener('change', sync);
 		return () => phone.removeEventListener('change', sync);
 	});
@@ -105,7 +108,7 @@
 
 <section aria-labelledby="{id}-title">
 	<h2 id="{id}-title" class="sr-only">Adjust the recipe</h2>
-	<details class="panel" bind:open>
+	<details class="panel" class:settled bind:open>
 		<summary class="fold">
 			<span class="state"
 				><span class="num">{servingsText(model.view.servings, recipe.servingsNoun)}</span>
@@ -258,6 +261,12 @@
 				<Icon name="reset" size={16} />Reset
 			</button>
 		</p>
+	{:else if !model.ready}
+		<!-- Holds the row's place when the address scales the recipe (the script in app.html). -->
+		<p class="scaled held" aria-hidden="true">
+			<span>Scaled</span>
+			<button type="button" tabindex="-1"><Icon name="reset" size={16} />Reset</button>
+		</p>
 	{/if}
 
 	{#if notes.length}
@@ -270,6 +279,14 @@
 </section>
 
 <style>
+	.held {
+		visibility: hidden;
+	}
+
+	:global(html:not([data-scaled='amount'])) .held {
+		display: none;
+	}
+
 	section {
 		display: grid;
 		gap: var(--space-3);
@@ -324,11 +341,6 @@
 		margin: 0;
 		padding: 0;
 		border: 0;
-		transition: opacity var(--duration-micro);
-	}
-
-	.controls:disabled {
-		opacity: 0.6;
 	}
 
 	.row {
@@ -463,6 +475,20 @@
 	.notes :global(svg) {
 		flex: none;
 		margin-block-start: 0.15rem;
+	}
+
+	@media (max-width: 47.99rem) {
+		.panel:not(.settled) > :not(.fold) {
+			display: none;
+		}
+
+		.panel:not(.settled) > .fold {
+			margin-block-end: 0;
+		}
+
+		.panel:not(.settled) .scale-label :global(svg) {
+			transform: none;
+		}
 	}
 
 	@media (min-width: 48rem) {

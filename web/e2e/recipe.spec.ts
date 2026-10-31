@@ -200,3 +200,53 @@ test('counts use the singular when there is one', async ({ page }) => {
 	await expect(page.getByText('1 recipe', { exact: true }).first()).toBeVisible();
 	await expect(page.getByText('1 recipes')).toHaveCount(0);
 });
+
+test.describe('the first paint of a reload', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('shows every control at full strength, with the hints for a new cook', async ({ page }) => {
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.goto(brulee);
+		await expect(page.getByRole('link', { name: 'Start cooking' }).first()).toBeVisible();
+		for (const name of ['Favourite', 'More servings']) {
+			const control = page.getByRole('button', { name }).first();
+			await expect(control).toBeDisabled();
+			expect(await control.evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
+		}
+		expect(
+			await page
+				.locator('.panel .controls')
+				.evaluate((element) => getComputedStyle(element).opacity)
+		).toBe('1');
+		await expect(page.getByText('Tap an amount to change its unit')).toBeVisible();
+		await expect(page.getByText("Tap a step's number to mark it done")).toBeVisible();
+	});
+});
+
+test.describe('a reload of a scaled recipe', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('holds back the written amounts, and nothing that shows moves', async ({ page }) => {
+		const url = `${brulee}?serves=8&u=us`;
+		await page.goto(url);
+		await waitForCore(page);
+		const barTop = async () =>
+			Math.round(
+				(await page.getByRole('region', { name: 'Adjust the recipe' }).boundingBox())?.y ?? 0
+			);
+		const settled = await barTop();
+
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.reload();
+		// What waits for the core stays hidden and appears in its final place; nothing above moves.
+		for (const hidden of ['.columns', '.serves', '.panel .state']) {
+			await expect(page.locator(hidden).first()).toHaveCSS('visibility', 'hidden');
+		}
+		expect(Math.abs((await barTop()) - settled)).toBeLessThanOrEqual(2);
+		await expect(page.locator('p.scaled.held')).toBeAttached();
+
+		await page.goto(brulee);
+		await expect(page.locator('.columns')).toHaveCSS('visibility', 'visible');
+		await expect(page.locator('p.scaled.held')).toBeHidden();
+	});
+});

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
+	import CardGhosts from '$lib/components/CardGhosts.svelte';
 	import ExportReminder from '$lib/components/ExportReminder.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import PageHead from '$lib/components/PageHead.svelte';
@@ -17,7 +18,6 @@
 
 	const subtitle = 'Recipes from a Maltese kitchen by Antonio Galdes, with room for your own';
 
-	let hydrated = $state(false);
 	const mine = $derived(
 		localCards(
 			data.index,
@@ -25,9 +25,7 @@
 		)
 	);
 
-	onMount(() => {
-		void personal.load().then(() => (hydrated = true));
-	});
+	onMount(() => void personal.load());
 </script>
 
 <PageHead title={siteTitle} description={subtitle} path="" />
@@ -48,27 +46,28 @@
 		</div>
 	</section>
 
-	{#if hydrated}
-		<section aria-labelledby="mine-title">
-			<div class="heading">
-				<h2 id="mine-title">Your recipes</h2>
-				<a class="add" href={editHref()}><Icon name="plus" size={18} />Add a recipe</a>
-			</div>
+	<section aria-labelledby="mine-title">
+		<div class="heading">
+			<h2 id="mine-title">Your recipes</h2>
+			<a class="add" href={editHref()}><Icon name="plus" size={18} />Add a recipe</a>
+		</div>
+		{#if personal.loaded}
 			<ExportReminder />
-			{#if mine.length}
-				<div class="recent">
-					{#each mine as card (card.id)}
-						<RecipeCard {card} local />
-					{/each}
-				</div>
-			{:else}
-				<p class="invite">
-					Add your own recipes and cook from them here. They are kept in this browser, so only you
-					see them.
-				</p>
-			{/if}
-		</section>
-	{/if}
+		{/if}
+		{#if mine.length}
+			<div class="recent">
+				{#each mine as card (card.id)}
+					<RecipeCard {card} local />
+				{/each}
+			</div>
+		{:else}
+			{#if !personal.loaded}<CardGhosts list="mine" />{/if}
+			<p class="invite" data-ghost-empty={personal.loaded ? undefined : 'mine'}>
+				Add your own recipes and cook from them here. They are kept in this browser, so only you see
+				them.
+			</p>
+		{/if}
+	</section>
 
 	<section aria-labelledby="recent-title">
 		<h2 id="recent-title">Recently added</h2>
