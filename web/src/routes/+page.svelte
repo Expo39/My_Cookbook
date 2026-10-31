@@ -79,8 +79,10 @@
 </div>
 
 <style>
+	/* One column no wider than the screen, however long a line inside it. */
 	.home {
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		gap: var(--space-6);
 	}
 

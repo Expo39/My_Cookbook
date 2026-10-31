@@ -160,9 +160,11 @@
 </form>
 
 <style>
+	/* The search box's natural width must not widen the page on a narrow phone. */
 	form {
 		position: relative;
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		gap: var(--space-2);
 	}
 
