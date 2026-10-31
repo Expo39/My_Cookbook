@@ -1,0 +1,9 @@
+# The workflows pin each action to a commit; this opens a pull request when a newer release appears.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
