@@ -177,12 +177,15 @@
 
 	/** The form control a result is about; a path with no control of its own falls back to its parent's. */
 	function fieldFor(path: string): HTMLElement | null {
-		let current = path;
+		// The address follows the title, and a recipe on this device does not show it at all.
+		let current = path === 'slug' && !document.getElementById(fieldId('slug')) ? 'title' : path;
 		while (current) {
 			const id = fieldId(current);
 			const target = document.getElementById(id) ?? document.querySelector(`[id^="${id}-"]`);
 			if (target instanceof HTMLElement) return target;
-			current = current.replace(/(\.[^.[\]]+|\[\d+\])$/, '');
+			const parent = current.replace(/(\.[^.[\]]+|\[\d+\])$/, '');
+			if (parent === current) return null;
+			current = parent;
 		}
 		return null;
 	}
