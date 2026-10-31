@@ -3,6 +3,7 @@
 	import { replaceState } from '$app/navigation';
 	import { page } from '$app/state';
 	import PageHead from '$lib/components/PageHead.svelte';
+	import InfoTip from '$lib/components/InfoTip.svelte';
 	import RecipeCard from '$lib/components/RecipeCard.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import type { SearchEngine } from '$lib/core';
@@ -16,6 +17,21 @@
 	let { data } = $props();
 
 	type Mode = 'recipes' | 'have';
+
+	/** Tappable examples, so the ways to search are shown rather than described. */
+	const EXAMPLES: Record<Mode, { query: string; meaning: string }[]> = {
+		recipes: [
+			{ query: 'katsu', meaning: 'a dish by its name' },
+			{ query: 'mushroom', meaning: 'every recipe with an ingredient' },
+			{ query: 'pasta tomato', meaning: 'recipes with both words' },
+			{ query: 'italian', meaning: 'a kind of dish, such as Italian Classics' },
+			{ query: 'brulee', meaning: 'accents and small typos do not matter' }
+		],
+		have: [
+			{ query: 'eggs, flour, milk', meaning: 'what is in your kitchen, with commas between' },
+			{ query: 'chicken, rice, onion', meaning: 'recipes you can nearly make come first' }
+		]
+	};
 
 	const id = $props.id();
 	const cards = $derived(new Map(allRecipes(data.index).map((card) => [card.id, card])));
@@ -125,9 +141,17 @@
 			onchange={(value) => (mode = value as Mode)}
 		/>
 		<div class="field">
-			<label for="{id}-query">
-				{mode === 'have' ? 'Ingredients you have' : 'Search recipes'}
-			</label>
+			<div class="label-row">
+				<label for="{id}-query">
+					{mode === 'have' ? 'Ingredients you have' : 'Search recipes'}
+				</label>
+				<InfoTip
+					topic="searching"
+					text={mode === 'have'
+						? 'List what you have, with commas between, such as "eggs, flour, milk". Recipes that need the fewest other things come first, with how many of their ingredients you have.'
+						: 'Type a name, an ingredient or a kind of dish. Several words find recipes with all of them. For a list of what you have, choose "I have these ingredients".'}
+				/>
+			</div>
 			<input
 				id="{id}-query"
 				type="search"
@@ -141,7 +165,7 @@
 			<p id="{id}-help" class="help">
 				{mode === 'have'
 					? 'Separate ingredients with commas. Recipes you can nearly make come first.'
-					: 'Accents do not matter: brulee finds Crème Brûlée.'}
+					: 'A name, an ingredient or a kind of dish.'}
 			</p>
 		</div>
 	</form>
@@ -152,12 +176,30 @@
 		{#if failed}
 			<p class="status">Search could not load. Reload the page to try again.</p>
 		{:else if !searching}
-			<p class="status">
-				Type a recipe name{mode === 'have' ? ' or the ingredients in your kitchen' : ''} to begin.
-			</p>
+			<div class="guide">
+				<h2 class="label">How to search</h2>
+				<ul>
+					{#each EXAMPLES[mode] as example (example.query)}
+						<li>
+							<button type="button" class="example" onclick={() => (query = example.query)}>
+								{example.query}
+							</button>
+							<span>{example.meaning}</span>
+						</li>
+					{/each}
+				</ul>
+			</div>
 		{:else if !engine}
 			<p class="status">Loading search...</p>
 		{:else}
+			{#if mode === 'recipes' && query.includes(',')}
+				<p class="status switch">
+					Looks like a list of ingredients. Search by what you have to find recipes that use them.
+					<button type="button" class="example" onclick={() => (mode = 'have')}>
+						Search by ingredients
+					</button>
+				</p>
+			{/if}
 			{#if correction}
 				<p class="status">
 					Did you mean
@@ -237,6 +279,64 @@
 		display: grid;
 		grid-template-columns: var(--card-grid);
 		gap: var(--space-4);
+	}
+
+	.label-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1);
+	}
+
+	.guide {
+		display: grid;
+		gap: var(--space-3);
+		max-inline-size: 40rem;
+		padding: var(--space-4);
+		border-radius: var(--radius-m);
+		background: var(--colour-tint);
+	}
+
+	.guide .label {
+		color: var(--colour-primary);
+	}
+
+	/* Two aligned columns, the example and what it shows, on every screen size. */
+	.guide ul {
+		display: grid;
+		grid-template-columns: max-content minmax(0, 1fr);
+		align-items: center;
+		gap: var(--space-2) var(--space-3);
+	}
+
+	.guide li {
+		display: contents;
+	}
+
+	.guide span {
+		color: var(--colour-muted);
+		font-size: var(--text-s);
+	}
+
+	/* Each example is a chip that fills the box, so trying it is one tap. */
+	.example {
+		min-block-size: var(--target);
+		padding-inline: var(--space-3);
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-pill);
+		background: var(--colour-surface);
+		color: var(--colour-primary);
+		font-weight: 700;
+	}
+
+	.switch {
+		display: grid;
+		justify-items: start;
+		gap: var(--space-2);
+	}
+
+	.example:hover {
+		border-color: var(--colour-primary);
 	}
 
 	.fix {
