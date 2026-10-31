@@ -215,3 +215,70 @@ describe('ServerClient', () => {
 		expect(importing.mock.calls[0][0]).toBe('/api/ai/import');
 	});
 });
+
+describe('the sous-chef status and fallbacks', () => {
+	it('reports a lighter model stepping in, and names the model that answers', async () => {
+		const fetcher = mocked(
+			streamed(
+				event('status', { state: 'fallback' }) +
+					event('model', { model: 'gemini-flash-lite-latest', fallback: true }) +
+					event('delta', { text: 'Yes.' }) +
+					event('done', { truncated: false })
+			)
+		);
+		const onFallback = vi.fn();
+		const onModel = vi.fn();
+		const reply = await new WorkerClient('https://ai.test', fetcher, human).chat(request, {
+			onFallback,
+			onModel
+		});
+		expect(reply).toEqual({ reply: 'Yes.', truncated: false });
+		expect(onFallback).toHaveBeenCalledOnce();
+		expect(onModel).toHaveBeenCalledWith('gemini-flash-lite-latest', true);
+	});
+
+	it('passes on the high-demand message when every model is busy', async () => {
+		const fetcher = mocked(
+			streamed(
+				event('error', {
+					error: 'unavailable',
+					message: 'The sous-chef is unavailable due to high demand. Try again in a few minutes.'
+				})
+			)
+		);
+		await expect(new WorkerClient('https://ai.test', fetcher, human).chat(request)).rejects.toThrow(
+			/unavailable due to high demand/
+		);
+	});
+
+	it('reads the status without asking a question: busy, and a retired model', async () => {
+		const fetcher = mocked(json({ gemini: 'busy', retired: 'gemini-3.8-flash' }));
+		const status = await new WorkerClient('https://ai.test', fetcher, human).status();
+		expect(status).toEqual({ busy: true, retired: 'gemini-3.8-flash' });
+		expect(fetcher.mock.calls[0][0]).toBe('https://ai.test/status');
+	});
+
+	it('treats a quiet, healthy service as ready', async () => {
+		const fetcher = mocked(json({ gemini: 'ok', retired: null }));
+		expect(await new WorkerClient('https://ai.test', fetcher, human).status()).toEqual({
+			busy: false,
+			retired: undefined
+		});
+	});
+
+	it('throws when the service answers with an error, so the page can say it is unreachable', async () => {
+		const fetcher = mocked(new Response('down', { status: 503 }));
+		await expect(new WorkerClient('https://ai.test', fetcher, human).status()).rejects.toThrow();
+	});
+
+	it('the self-hosted server is the site itself, so it is always reachable', async () => {
+		expect(await new ServerClient('').status()).toEqual({ busy: false });
+	});
+
+	it('sends the Turnstile token with the question', async () => {
+		const fetcher = mocked(streamed(event('done', { truncated: false })));
+		await new WorkerClient('https://ai.test', fetcher, async () => 'person-token').chat(request);
+		const init = fetcher.mock.calls[0][1] as RequestInit;
+		expect((init.headers as Record<string, string>)['x-turnstile-token']).toBe('person-token');
+	});
+});

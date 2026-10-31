@@ -57,6 +57,29 @@ function github(
 }
 
 describe('GitHubWriter', () => {
+	it.each([
+		['../.github/workflows/ci', 'a recipe address that climbs out of the recipes'],
+		['desserts/Lemon Tart', 'a name with capitals and spaces'],
+		['desserts/tart.yml', 'a name with a dot']
+	])('refuses %s (%s) before anything reaches GitHub', async (id) => {
+		const api = github();
+		const writer = new GitHubWriter('token', ref, api.fetcher);
+		await expect(writer.save(id, recipe, { isNew: true })).rejects.toThrow(/is not a recipe file/);
+		expect(api.calls.filter((call) => call.method !== 'GET')).toEqual([]);
+	});
+
+	it('refuses to delete an old photo whose name points outside the recipe folder', async () => {
+		const api = github();
+		const writer = new GitHubWriter('token', ref, api.fetcher);
+		await expect(
+			writer.save('desserts/lemon-tart', recipe, {
+				isNew: false,
+				previousImage: '../../web/static/admin.json'
+			})
+		).rejects.toThrow(/is not a recipe file/);
+		expect(api.calls.filter((call) => call.method !== 'GET')).toEqual([]);
+	});
+
 	it('commits a new recipe on its own in one commit', async () => {
 		const api = github();
 		const writer = new GitHubWriter('token', ref, api.fetcher);

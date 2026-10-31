@@ -798,3 +798,78 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
         );
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cards::text::Metrics;
+
+    fn sheet_texts(ingredients: Vec<Line>) -> Vec<String> {
+        let layout = Layout::load();
+        let content = Content {
+            label: "Main courses / Rice bowls".to_owned(),
+            title: "Chicken Katsu Curry".to_owned(),
+            title_local: None,
+            total: Some("50 min".to_owned()),
+            serves: "2 servings".to_owned(),
+            ingredients,
+            qr: None,
+            url_text: "example.test".to_owned(),
+            has_photo: false,
+            instagram: None,
+        };
+        compose(
+            &layout,
+            &layout.formats["portrait"],
+            &content,
+            &Metrics::load(),
+        )
+        .into_iter()
+        .filter_map(|op| match op {
+            Op::Text { text, .. } => Some(text),
+            _ => None,
+        })
+        .collect()
+    }
+
+    fn line(amount: &str, rest: &str) -> Line {
+        Line {
+            amount: amount.to_owned(),
+            rest: rest.to_owned(),
+        }
+    }
+
+    #[test]
+    fn a_long_ingredient_wraps_instead_of_being_cut_short() {
+        let long =
+            "Japanese short-grain or jasmine rice, uncooked, about 80 g per person, rinsed well";
+        let texts = sheet_texts(vec![line("160 g", long)]);
+        let parts: Vec<&String> = texts.iter().filter(|t| long.contains(t.as_str())).collect();
+        assert!(parts.len() > 1, "{texts:?}");
+        assert_eq!(
+            parts
+                .iter()
+                .map(|t| t.as_str())
+                .collect::<Vec<_>>()
+                .join(" "),
+            long
+        );
+        assert!(!texts.iter().any(|t| t.ends_with("...")));
+    }
+
+    #[test]
+    fn a_long_list_is_shown_whole_in_two_columns() {
+        let list = (1..=24)
+            .map(|i| line(&format!("{i} g"), &format!("item {i}")))
+            .collect();
+        let texts = sheet_texts(list);
+        for i in 1..=24 {
+            assert!(texts.contains(&format!("item {i}")), "item {i} is missing");
+        }
+        assert!(
+            !texts
+                .iter()
+                .any(|t| t.ends_with("more") || t.ends_with("..."))
+        );
+    }
+}

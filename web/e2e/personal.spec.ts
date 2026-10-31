@@ -4,14 +4,15 @@ import { waitForCore } from './helpers';
 /** Adds a recipe through the editor, without a token, the way a visitor would. */
 async function addRecipe(page: Page, title: string) {
 	await page.goto('edit');
+	const gotIt = page.getByRole('button', { name: 'Got it' });
+	if (await gotIt.isVisible()) await gotIt.click();
 	await page.getByLabel('Title', { exact: true }).fill(title);
 	await page.getByLabel('Summary', { exact: true }).fill('A family favourite from the village.');
 	await page.getByRole('textbox', { name: 'Servings', exact: true }).fill('4');
 	await page.getByLabel('Section', { exact: true }).selectOption('soups');
-	await page.getByRole('button', { name: 'Paste a list' }).click();
 	await page.getByLabel('One ingredient per line').fill('1 kg pumpkin\n2 onions\nsalt, to taste');
-	await page.getByRole('button', { name: 'Review' }).click();
-	await page.getByRole('button', { name: /^Add 3 ingredients/ }).click();
+	const reads = page.getByRole('heading', { name: 'How it will read' }).locator('..');
+	await expect(reads.getByRole('listitem')).toHaveCount(3);
 	await page
 		.getByLabel('Step 1', { exact: true })
 		.fill('Simmer the pumpkin and onions for 25 minutes, then blend.');
@@ -69,4 +70,142 @@ test('clearing your recipes asks first, names how many, and removes them all', a
 	await page.keyboard.press('Escape');
 	await page.reload();
 	await expect(page.getByRole('link', { name: 'Soppa tal-armla' })).toHaveCount(0);
+});
+
+test('the first time a cook adds a recipe, they are told where it is kept, once', async ({
+	page
+}) => {
+	await page.goto('edit');
+	const note = page.getByRole('note').filter({ hasText: 'saved only in this browser' });
+	await expect(note).toBeVisible();
+	await note.getByRole('button', { name: 'Got it' }).click();
+	await expect(note).toHaveCount(0);
+	await page.reload();
+	await expect(
+		page.getByText('Saved only in this browser on this device.', { exact: true })
+	).toBeVisible();
+	await expect(page.getByRole('button', { name: 'Got it' })).toHaveCount(0);
+});
+
+test('the ingredient list reads back as it is written, and line by line keeps every line', async ({
+	page
+}) => {
+	await page.goto('edit');
+	await page.getByRole('button', { name: 'Got it' }).click();
+	await expect(page.getByText('Ways to write a line')).toBeVisible();
+	await page
+		.getByLabel('One ingredient per line')
+		.fill('1. 400g  plain flour\n• 2 eggs\nFor the filling:\n500 g ricotta\n250');
+	const reads = page.getByRole('heading', { name: 'How it will read' }).locator('..');
+	await expect(reads.getByRole('listitem')).toHaveCount(4);
+	await expect(reads.getByText('For the filling')).toBeVisible();
+	await expect(reads.getByRole('listitem').first()).toContainText('400 g');
+	await expect(reads.getByText(/Check this line/)).toHaveCount(1);
+
+	await page.getByRole('radio', { name: 'Line by line' }).check({ force: true });
+	await expect(page.getByLabel('Name of this part').nth(1)).toHaveValue('For the filling');
+	await expect(page.getByLabel('Ingredient', { exact: true })).toHaveCount(4);
+	await page.getByLabel('Ingredient', { exact: true }).first().fill('strong flour');
+	await page.getByRole('radio', { name: 'Write the list' }).check({ force: true });
+	await expect(page.getByLabel('One ingredient per line')).toHaveValue(
+		/^400 g strong flour\n2 eggs\n\nFor the filling:\n500 g ricotta\n250$/
+	);
+});
+
+test('each point under Before you save takes the cook to its field, and the page stays usable', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 1280, height: 900 });
+	await page.goto('edit');
+	await page.getByRole('button', { name: 'Got it' }).click();
+	await page.getByLabel('Title', { exact: true }).fill('Orange Asparagus');
+	await page.getByLabel('Section', { exact: true }).selectOption('sides');
+	const checks = page.getByRole('region', { name: 'Before you save' });
+	await expect(checks.getByText(/things? left to fill in/)).toBeVisible();
+	const targets: Record<string, string> = {
+		'There is already a recipe with this name. Change the name a little.': 'f-title',
+		'Add a sentence or two about the dish.': 'f-summary',
+		'Add the ingredients.': 'f-ingredientGroups',
+		'Step 1 is empty. Write it, or remove it.': 'f-steps-0-text'
+	};
+	for (const [point, field] of Object.entries(targets)) {
+		await checks.getByRole('button', { name: point }).click();
+		await expect(page.locator(`#${field}`)).toBeFocused();
+	}
+	await page.getByLabel('Title', { exact: true }).fill('Orange Asparagus, my way');
+	await expect(checks.getByRole('button', { name: /already a recipe/ })).toHaveCount(0);
+});
+
+test('a new section can be added for a recipe kept on the device', async ({ page }) => {
+	await page.goto('edit');
+	await page.getByRole('button', { name: 'Got it' }).click();
+	await page.getByRole('button', { name: 'New section', exact: true }).click();
+	await expect(page.getByText(/stays with your recipe on this device/)).toBeVisible();
+	await page.getByLabel('Name', { exact: true }).fill('Family Feasts');
+	await page.getByRole('button', { name: 'Add', exact: true }).click();
+	await expect(page.getByLabel('Section', { exact: true })).toHaveValue('family-feasts');
+});
+
+test('your recipes export as text, a spreadsheet or JSON', async ({ page }) => {
+	await addRecipe(page, 'Ross il-forn');
+	await page.goto('./');
+	await page.getByRole('button', { name: 'Settings' }).click();
+	const drawer = page.getByRole('dialog', { name: 'Settings' });
+	await expect(drawer.getByText(/Saved only in this browser on this device/)).toBeVisible();
+	for (const [label, extension, opening] of [
+		['Text', 'txt', 'Ross il-forn\n4 servings'],
+		['Spreadsheet (CSV)', 'csv', '﻿Title,Section,Servings'],
+		['JSON', 'json', '{\n  "kind": "sapori-recipes"']
+	] as const) {
+		await drawer.getByRole('button', { name: 'Export your recipes' }).click();
+		const dialog = page.getByRole('dialog', { name: 'Export your recipes' });
+		const [download] = await Promise.all([
+			page.waitForEvent('download'),
+			dialog.getByRole('button', { name: new RegExp(`^${label.replace(/[()]/g, '\\$&')}`) }).click()
+		]);
+		expect(download.suggestedFilename()).toMatch(
+			new RegExp(`^my-recipes-\\d{4}-\\d{2}-\\d{2}\\.${extension}$`)
+		);
+		const path = await download.path();
+		const { readFileSync } = await import('node:fs');
+		expect(readFileSync(path, 'utf8').startsWith(opening)).toBe(true);
+		await expect(dialog).toBeHidden();
+	}
+});
+
+test('about once a week the home page reminds a cook to export, until they do', async ({
+	page
+}) => {
+	await addRecipe(page, 'Bigilla');
+	await page.goto('./');
+	const reminder = page.getByRole('complementary', { name: 'Export your recipes' });
+	await expect(reminder).toHaveCount(0);
+
+	await page.evaluate(() =>
+		localStorage.setItem(
+			'sapori:device-notice',
+			JSON.stringify({ read: 1, quiet: Date.now() - 8 * 24 * 60 * 60 * 1000 })
+		)
+	);
+	await page.reload();
+	await expect(reminder).toContainText('Your recipes are only in this browser.');
+	await reminder.getByRole('button', { name: 'Remind me next week' }).click();
+	await expect(reminder).toHaveCount(0);
+	await page.reload();
+	await expect(reminder).toHaveCount(0);
+});
+
+test('a recipe kept on the device can be shared as a card, but has no link yet', async ({
+	page
+}) => {
+	await addRecipe(page, 'Imqarrun il-forn');
+	await page.goto('mine?id=soups%2Fimqarrun-il-forn');
+	await waitForCore(page);
+	await page.getByRole('button', { name: 'Share', exact: true }).click();
+	const sheet = page.getByRole('dialog', { name: 'Share' });
+	await expect(
+		sheet.getByRole('img', { name: /The recipe card for Imqarrun il-forn/ })
+	).toBeVisible();
+	await expect(sheet.getByRole('button', { name: 'Send the link' })).toBeDisabled();
+	await expect(sheet.getByText('so it has no link yet')).toBeVisible();
 });

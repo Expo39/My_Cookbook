@@ -143,7 +143,7 @@ test('the share sheet is a bottom sheet on a phone', async ({ page }) => {
 	await page.goto(wellington);
 	await waitForCore(page);
 	await page.getByRole('button', { name: 'Share this recipe' }).click();
-	const sheet = page.getByRole('dialog', { name: 'Share this recipe' });
+	const sheet = page.getByRole('dialog', { name: 'Share' });
 	await expect(sheet).toBeVisible();
 	const box = await sheet.boundingBox();
 	const viewport = page.viewportSize();
@@ -152,4 +152,17 @@ test('the share sheet is a bottom sheet on a phone', async ({ page }) => {
 	for (const button of await sheet.getByRole('button').all()) {
 		expect((await button.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
 	}
+});
+
+test('nothing scrolls sideways on a narrow phone, even with the add-item form open', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 320, height: 640 });
+	for (const path of ['./', 'search', 'how-to-use', wellington, 'edit']) {
+		await page.goto(path);
+		expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBe(320);
+	}
+	await page.goto('shopping-list');
+	await page.getByRole('button', { name: 'Add an item' }).click();
+	expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });

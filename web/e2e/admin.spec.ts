@@ -151,21 +151,45 @@ async function fillNewRecipe(page: Page) {
 	await page.getByLabel('Summary').fill('A sharp, bright tart with a crisp base.');
 	await page.getByLabel('Prep (minutes)').fill('20');
 	await page.getByLabel('Cook (minutes)').fill('30');
-	await page.getByLabel('Amount', { exact: true }).fill('200');
-	await page.getByLabel('Unit', { exact: true }).selectOption('g');
-	await page.getByLabel('Ingredient', { exact: true }).fill('caster sugar');
+	await page.locator('#f-ingredientGroups').fill('200 g caster sugar');
 	await page.locator('#f-steps-0-text').fill('Bake at {temp:180} for {timer:30}.');
+}
+
+/** The web address follows the title and is folded away; "Change" opens it. */
+async function openAddress(page: Page) {
+	const address = page.getByLabel('Web address');
+	if (!(await address.isVisible())) await page.getByText('Change', { exact: true }).click();
+	return address;
+}
+
+/** Chooses a section, then its subsection when the path has one. */
+async function chooseSection(page: Page, path: string) {
+	await page.getByLabel('Section', { exact: true }).selectOption(path.split('/')[0]);
+	if (path.includes('/')) await page.locator('#f-section-sub').selectOption(path);
+}
+
+/** Owner editing sits in a folded part of Settings. */
+async function ownerPanel(page: Page) {
+	await page.getByRole('button', { name: 'Settings' }).click();
+	const drawer = page.getByRole('dialog', { name: 'Settings' });
+	const summary = drawer.getByText("For the cookbook's owner");
+	if (
+		!(await drawer
+			.getByRole('button', { name: /Set up editing|Unlock editing|Lock editing/ })
+			.isVisible())
+	)
+		await summary.click();
+	return drawer;
 }
 
 test.describe('setting up and unlocking', () => {
 	test('sets up editing once, then unlocks with the password', async ({ page }) => {
 		const github = await mockGitHub(page);
 		await page.goto('./');
-		await page.getByRole('button', { name: 'Settings' }).click();
-		const drawer = page.getByRole('dialog', { name: 'Settings' });
+		const drawer = await ownerPanel(page);
 		await expect(drawer.getByRole('button', { name: 'Set up editing' })).toBeVisible();
 
-		await drawer.getByLabel('GitHub token').fill('github_pat_example');
+		await drawer.getByLabel('GitHub token', { exact: true }).fill('github_pat_example');
 		await drawer.getByLabel('Password', { exact: true }).fill('too short');
 		await drawer.getByLabel('Repeat the password').fill('too short');
 		await drawer.getByRole('button', { name: 'Set up editing' }).click();
@@ -175,7 +199,7 @@ test.describe('setting up and unlocking', () => {
 		await drawer.getByLabel('Password', { exact: true }).fill('a long enough password');
 		await drawer.getByLabel('Repeat the password').fill('a long enough password');
 		await drawer.getByRole('button', { name: 'Set up editing' }).click();
-		await expect(drawer.getByText('Editing is unlocked.')).toBeVisible();
+		await expect(drawer.getByText('Editing is unlocked in this tab.')).toBeVisible();
 
 		expect(github.commits()).toHaveLength(1);
 		expect(github.commits()[0].body?.message).toBe('chore(admin): set up editing');
@@ -188,11 +212,11 @@ test.describe('setting up and unlocking', () => {
 		expect(JSON.stringify(blob)).not.toContain('github_pat_example');
 
 		await drawer.getByRole('button', { name: 'Lock editing' }).click();
-		await drawer.getByLabel('Password').fill('not the right password');
+		await drawer.getByLabel('Password', { exact: true }).fill('not the right password');
 		await drawer.getByRole('button', { name: 'Unlock editing' }).click();
 		await expect(drawer.getByRole('alert')).toContainText('That password did not work');
 
-		await drawer.getByLabel('Password').fill('a long enough password');
+		await drawer.getByLabel('Password', { exact: true }).fill('a long enough password');
 		await drawer.getByRole('button', { name: 'Unlock editing' }).click();
 		await expect(drawer.getByRole('link', { name: 'New recipe' })).toBeVisible();
 	});
@@ -222,7 +246,7 @@ test.describe('setting up and unlocking', () => {
 		await expect(
 			page.getByRole('heading', { name: 'This recipe is part of the cookbook' })
 		).toBeVisible();
-		await expect(page.getByRole('main').getByLabel('GitHub token')).toBeVisible();
+		await expect(page.getByRole('main').getByLabel('GitHub token', { exact: true })).toBeVisible();
 		await expect(page.locator('meta[name="robots"][content*="noindex"]')).toHaveCount(1);
 	});
 });
@@ -235,10 +259,13 @@ test.describe('the editor', () => {
 		await expect(saveButton(page)).toBeEnabled();
 
 		await fillNewRecipe(page);
-		await page.getByLabel('New section').fill('Tarts');
-		await page.getByRole('button', { name: /^Add inside/ }).click();
-		await expect(page.getByLabel('Section', { exact: true })).toHaveValue('desserts/tarts');
+		await page.getByRole('button', { name: 'New subsection', exact: true }).click();
+		await page.getByLabel('Name', { exact: true }).fill('Tarts');
+		await page.getByRole('button', { name: 'Add', exact: true }).click();
+		await expect(page.getByLabel('Section', { exact: true })).toHaveValue('desserts');
+		await expect(page.locator('#f-section-sub')).toHaveValue('desserts/tarts');
 		await expect(page.getByLabel('Web address')).toHaveValue('lemon-tart');
+		await expect(page.getByLabel('Web address')).toBeHidden();
 
 		await page.locator('#photo-file').setInputFiles({
 			name: 'tart.png',
@@ -348,7 +375,7 @@ test.describe('the editor', () => {
 		expect(github.commits()).toHaveLength(0);
 
 		await page.getByLabel('Title', { exact: true }).fill('Lemon Tart');
-		await expect(page.getByText(/to fix before saving/).first()).toBeVisible();
+		await expect(page.getByText(/things? left to fill in/).first()).toBeVisible();
 	});
 
 	test('offers a saved draft back after a reload', async ({ page }) => {
@@ -383,9 +410,9 @@ test.describe('the editor', () => {
 			375
 		);
 
-		await expect(page.getByRole('region', { name: 'Checklist' })).toBeHidden();
+		await expect(page.getByRole('region', { name: 'Before you save' })).toBeHidden();
 		await page.getByRole('radio', { name: /^To do/ }).check({ force: true });
-		await expect(page.getByRole('region', { name: 'Checklist' })).toBeVisible();
+		await expect(page.getByRole('region', { name: 'Before you save' })).toBeVisible();
 		await page.getByRole('radio', { name: 'Preview' }).check({ force: true });
 		await expect(page.getByRole('region', { name: 'Preview' })).toBeVisible();
 		await expect(page.getByLabel('Title', { exact: true })).toBeHidden();
@@ -445,9 +472,10 @@ test.describe('moving', () => {
 		await page.goto(`edit?id=${linked}`);
 		await expect(saveButton(page)).toBeEnabled();
 
-		await page.getByLabel('New section').fill('Specials');
-		await page.getByRole('button', { name: 'Add at the top level' }).click();
-		await page.getByLabel('Web address').fill('house-special');
+		await page.getByRole('button', { name: 'New section', exact: true }).click();
+		await page.getByLabel('Name', { exact: true }).fill('Specials');
+		await page.getByRole('button', { name: 'Add', exact: true }).click();
+		await (await openAddress(page)).fill('house-special');
 		const notice = page.getByRole('status').filter({ hasText: 'This moves the recipe.' });
 		await expect(notice).toContainText(`/${linked}`);
 		await expect(notice).toContainText('/specials/house-special');
@@ -491,10 +519,8 @@ test.describe('moving', () => {
 		await unlocked(page);
 		await page.goto(`edit?id=${unlinked}`);
 		await expect(saveButton(page)).toBeEnabled();
-		await page.getByLabel('Web address').fill(linked.split('/').pop() as string);
-		await page
-			.getByLabel('Section', { exact: true })
-			.selectOption(linked.slice(0, linked.lastIndexOf('/')));
+		await (await openAddress(page)).fill(linked.split('/').pop() as string);
+		await chooseSection(page, linked.slice(0, linked.lastIndexOf('/')));
 		await page.getByRole('button', { name: 'Move and save' }).click();
 		await expect(page.getByText('already exists').first()).toBeVisible();
 		expect(github.commits()).toHaveLength(0);

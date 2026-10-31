@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cardContent } from './content';
-import { compose, layout, splitAmount, type Content, type Op } from './layout';
+import { compose, layout, planList, splitAmount, type Content, type Op } from './layout';
 import { qrPath } from './qr';
 import type { Measure } from './text';
 import type { Recipe, RecipeCard, ScaledRecipe } from '$lib/types/recipe';
@@ -176,5 +176,67 @@ describe('qrPath', () => {
 	it('merges horizontal runs of dark modules', () => {
 		const small = { size: 3, dark: [true, true, false, false, false, false, true, false, true] };
 		expect(qrPath(small, 2)).toBe('M0 0h4v2h-4zM0 4h2v2h-2zM4 4h2v2h-2z');
+	});
+});
+
+describe('the ingredient list on a sheet', () => {
+	const format = layout.formats.portrait;
+	const linesOf = (ingredients: Content['ingredients']) =>
+		texts(compose(format, content({ ingredients }), measure));
+
+	it('wraps a long ingredient under itself instead of cutting it short', () => {
+		const long = 'a mix of hard, semi-soft, soft and blue cheeses from the market';
+		const ops = linesOf([{ amount: '1.15 kg', rest: long }]);
+		const parts = ops.filter((op) => long.includes(op.text) && op.text.length > 3);
+		expect(parts.length).toBeGreaterThan(1);
+		expect(parts.map((op) => op.text).join(' ')).toBe(long);
+		expect(new Set(parts.map((op) => op.x)).size).toBe(1);
+		expect(ops.some((op) => op.text.includes('…'))).toBe(false);
+	});
+
+	it('moves an amount too wide for its column into the words, whole', () => {
+		const ops = linesOf([{ amount: '200-300 g of very finely grated', rest: 'cheese' }]);
+		expect(ops.some((op) => op.text.startsWith('200-300 g of very'))).toBe(true);
+		expect(ops.some((op) => op.text.includes('…'))).toBe(false);
+	});
+
+	it('runs a long list in two columns before leaving anything out', () => {
+		const list = Array.from({ length: 30 }, (_, i) => ({
+			amount: `${i + 1} g`,
+			rest: `item ${i + 1}`
+		}));
+		const ops = linesOf(list);
+		const items = ops.filter((op) => /^item \d+$/.test(op.text));
+		expect(items).toHaveLength(30);
+		expect(new Set(items.map((op) => op.x)).size).toBe(2);
+		expect(ops.some((op) => /more$/.test(op.text))).toBe(false);
+	});
+
+	it('keeps an ingredient in one column and balances the two', () => {
+		const list = Array.from({ length: 28 }, (_, i) => ({
+			amount: '1 g',
+			rest:
+				i === 3 ? 'a very long ingredient that has to wrap onto a second line here' : `item ${i}`
+		}));
+		const plan = planList(list, 600, 900, 1, measure);
+		const columns = [0, 1].map((column) =>
+			plan.placed
+				.filter((item) => item.column === column)
+				.reduce((n, item) => n + item.parts.length, 0)
+		);
+		expect(Math.abs(columns[0] - columns[1])).toBeLessThanOrEqual(2);
+		expect(
+			plan.placed.every((item) => item.row + item.parts.length <= Math.floor(600 / plan.step))
+		).toBe(true);
+		expect(plan.more).toBe(0);
+	});
+
+	it('says how many are left only when even two small columns cannot hold the list', () => {
+		const list = Array.from({ length: 200 }, (_, i) => ({ amount: '1 g', rest: `item ${i}` }));
+		const plan = planList(list, 300, 900, 1, measure);
+		expect(plan.more).toBeGreaterThan(0);
+		expect(plan.placed.length + plan.more).toBe(200);
+		const rows = Math.floor(300 / plan.step);
+		expect(plan.moreAt.row).toBeLessThan(rows);
 	});
 });
