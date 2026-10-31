@@ -1,9 +1,11 @@
 # Recipe page: overrides
 
 - **Header:** title (display 2.2-3rem), `titleLocal` in italic muted, meta row (prep / cook / rest / difficulty, numerals in `--font-num`), tags, favourite and share buttons.
+- **Photo (`PhotoSlot.svelte`):** on a phone across the top above the title at 3:2; from 64rem the header is two columns, the text left and the photo right (20-28rem) at 4:3, so the servings bar stays in the first screenful. Without a photo the same place holds **Add a photo**, a compact dashed strip in tint with the image icon (never a big empty frame). Over a photo that can be changed sit small surface buttons with `--shadow-float`: **Change** and, for a photo kept on the device, an icon-only bin. Under it a muted line says "Only on this device" for a kept photo, or follows the build after a commit. The confirm dialog shows the photo, a required description and where it will be saved.
 - **Servings bar:**
   - a tint panel with a minus/plus stepper (output in `--font-num` 1.15rem) and a multiplier menu (half, 2x, 3x)
   - "Scale another way" (a folded "I have..." and tin size), with an "i" in its bar that explains it without opening it, and a Metric/US switch
+  - on a phone the panel is folded to one summary row from the first paint; its controls never fade while the recipe core loads
   - when scaled, the amounts that changed are shown in `--colour-primary`
 - **Tablet and desktop (>= 48rem):** two columns, the ingredients on the left (at most 22rem) and the method on the right with numbered steps. The whole page scrolls as one; the ingredients never scroll in a box of their own.
 - **Mobile:**

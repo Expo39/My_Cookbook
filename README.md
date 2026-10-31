@@ -82,6 +82,7 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 
 - An in-site editor with a live preview and the recipe checklist running in WebAssembly as the recipe is typed.
 - One commit per save, carrying the recipe, its photo and any new sections, followed by the CI and deploy status.
+- **Add a photo** on every recipe page, straight from a phone's camera or gallery: committed to GitHub with the recipe when editing is unlocked, kept in this browser otherwise, and sent along when a recipe of one's own is shared.
 - Moving a recipe to another section or address, conflict protection against overwriting a newer version, and a delete check for recipes that still link to it.
 - The `add-recipe` skill for Claude Code, which turns pasted text, a link or a photo into a checked recipe file.
 
