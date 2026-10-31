@@ -27,7 +27,7 @@
 		},
 		{
 			q: 'Why do my recipes stay on this device?',
-			a: 'There are no accounts, so a recipe you add is kept in this browser. It is yours to change or delete, and nobody else sees it. Clearing your browsing data deletes it, so save a backup file from Settings, or from the reminder on the home page. The file also moves your recipes to another device.'
+			a: 'There are no accounts, so a recipe you add is kept in this browser. It is yours to change or delete, and nobody else sees it. Clearing your browsing data deletes it, so export your recipes from Settings now and then to keep a copy, as text, a spreadsheet or JSON.'
 		},
 		{
 			q: 'How do I share a recipe with everyone?',
@@ -196,14 +196,14 @@
 			they do not follow you to another device. Clearing the browser's data for the site deletes
 			them, so keep a copy.
 		</p>
-		<h3>Backing up and clearing</h3>
+		<h3>Exporting and clearing</h3>
 		<p>
-			In <strong>Settings &gt; Your recipes</strong>, <strong>Save a backup</strong> saves them all
-			to a file on your device, and <strong>Restore a backup</strong> reads such a file back, on
-			this device or another. While recipes are not backed up, the home page reminds you; close the
-			reminder and it comes back two weeks later.
-			<strong>Clear all personal recipes</strong> deletes them from this device after asking how many
-			will go.
+			Clearing your browsing data deletes your recipes, so export them now and then.
+			<strong>Settings &gt; Your recipes &gt; Export your recipes</strong> saves them to your
+			downloads as text (to read or print), a spreadsheet (CSV, for Excel or Google Sheets) or JSON
+			(everything, as stored). About once a week the home page reminds you; close it and it waits
+			another week. <strong>Clear all personal recipes</strong> deletes them from this device after asking
+			how many will go.
 		</p>
 	</section>
 

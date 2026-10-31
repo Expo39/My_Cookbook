@@ -35,7 +35,7 @@ The editor is simpler in this mode, so that someone who has never seen a recipe 
 - The web address follows the title and is not shown, new sections cannot be created, and photos and the AI import are not offered; all of these belong to the cookbook.
 - The checklist pane is called **To do**.
 
-**Settings > Your recipes** counts the recipes on the device and has **Export** (a JSON file of them all), **Import** (reads such a file back; a file with any broken recipe is refused whole) and **Clear all personal recipes**, which asks first and names how many will be deleted. The browser is asked to keep the site's storage, but clearing the site's data deletes the recipes, so exporting a copy is worthwhile.
+**Settings > Your recipes** counts the recipes on the device, says plainly that they live only in this browser, and has **Export your recipes** (text, a CSV spreadsheet or JSON) and **Clear all personal recipes**, which asks first and names how many will be deleted. There is no import: the browser is asked to keep the site's storage, but clearing the site's data deletes the recipes, so the cook is told when they first add one (a note in the editor with **Got it**) and reminded about once a week on the home page, with **Export** and a close button that rests it for a week.
 
 ## Sharing a recipe with everyone
 

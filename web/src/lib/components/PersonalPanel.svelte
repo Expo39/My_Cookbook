@@ -3,20 +3,19 @@
 	import { onMount } from 'svelte';
 	import { admin } from '$lib/admin/session.svelte';
 	import { createWriter } from '$lib/data';
-	import { parseExport } from '$lib/data/local-export';
 	import { WriteError } from '$lib/data/writer';
 	import { editHref, mineHref } from '$lib/links';
 	import { chrome } from '$lib/stores/chrome.svelte';
-	import { backup } from '$lib/stores/backup.svelte';
 	import { personal } from '$lib/stores/personal.svelte';
 	import Modal from './admin/Modal.svelte';
+	import ExportDialog from './ExportDialog.svelte';
 	import Icon from './Icon.svelte';
 
 	let { onnavigate, onunlock }: { onnavigate?: () => void; onunlock?: () => void } = $props();
 
 	const uid = $props.id();
 	let clearDialog: Modal | undefined = $state();
-	let picker: HTMLInputElement | undefined = $state();
+	let exporter: ExportDialog | undefined = $state();
 	let asking = $state<string | null>(null);
 	let sharing = $state<string | null>(null);
 	let problem = $state('');
@@ -26,31 +25,7 @@
 	const handedOver = $derived(personal.list.filter((entry) => entry.shared));
 	const count = (n: number) => `${n} ${n === 1 ? 'recipe' : 'recipes'}`;
 
-	onMount(() => {
-		void personal.load();
-		backup.load();
-	});
-
-	const lastBackup = $derived(
-		backup.saved
-			? `Last backup: ${new Date(backup.saved).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
-			: 'Not backed up yet.'
-	);
-
-	async function upload(event: Event) {
-		const input = event.currentTarget as HTMLInputElement;
-		const file = input.files?.[0];
-		input.value = '';
-		if (!file) return;
-		problem = done = '';
-		try {
-			const entries = parseExport(await file.text());
-			for (const entry of entries) await personal.save(entry.id, entry.recipe);
-			done = `${count(entries.length)} imported.`;
-		} catch (error) {
-			problem = error instanceof Error ? error.message : 'That file could not be read.';
-		}
-	}
+	onMount(() => void personal.load());
 
 	async function clearAll() {
 		await personal.clear();
@@ -91,10 +66,12 @@
 
 <section class="personal" aria-labelledby="{uid}-title">
 	<h3 id="{uid}-title" class="label">Your recipes</h3>
-	<p class="help">
-		Recipes you add are saved only in this browser. Clearing your browsing history or data deletes
-		them, so save a backup now and then: it is a file you keep, and Restore a backup brings them
-		back.
+	<p class="notice">
+		<Icon name="alert" size={18} />
+		<span>
+			Saved only in this browser on this device. Clearing your browsing data deletes them, so export
+			them to keep a copy.
+		</span>
 	</p>
 
 	{#if personal.loaded}
@@ -149,25 +126,11 @@
 		<a class="btn primary" href={editHref()} onclick={onnavigate}>
 			<Icon name="plus" size={18} />Add a recipe
 		</a>
-		<div class="files">
-			{#if personal.list.length}
-				<button type="button" class="btn" onclick={() => backup.save(personal.list)}>
-					<Icon name="download" size={18} />Save a backup
-				</button>
-			{/if}
-			<button type="button" class="btn" onclick={() => picker?.click()}>
-				<Icon name="upload" size={18} />Restore a backup
+		{#if personal.list.length}
+			<button type="button" class="btn" onclick={() => exporter?.show()}>
+				<Icon name="download" size={18} />Export your recipes
 			</button>
-			<input
-				bind:this={picker}
-				type="file"
-				accept="application/json,.json"
-				hidden
-				onchange={upload}
-			/>
-		</div>
-
-		{#if personal.list.length}<p class="help">{lastBackup}</p>{/if}
+		{/if}
 
 		{#if own.length}
 			<button type="button" class="btn danger" onclick={() => clearDialog?.show()}>
@@ -182,9 +145,11 @@
 	{#if done}<p class="help" role="status">{done}</p>{/if}
 </section>
 
+<ExportDialog bind:this={exporter} />
+
 <Modal bind:this={clearDialog} title="Clear all personal recipes?">
 	<p>
-		This deletes {count(own.length)} from this device for good. Save a backup first if you want to keep
+		This deletes {count(own.length)} from this device for good. Export them first if you want to keep
 		a copy.
 	</p>
 	<div class="buttons">
@@ -208,6 +173,23 @@
 	.help {
 		color: var(--colour-muted);
 		font-size: var(--text-s);
+	}
+
+	.notice {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--space-2);
+		padding: var(--space-2) var(--space-3);
+		border-inline-start: 3px solid var(--colour-accent);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+		font-size: var(--text-s);
+	}
+
+	.notice :global(svg) {
+		flex: none;
+		margin-block-start: 0.1em;
+		color: var(--colour-accent);
 	}
 
 	.count {
@@ -277,12 +259,6 @@
 	.buttons {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--space-2);
-	}
-
-	.files {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
 		gap: var(--space-2);
 	}
 </style>
