@@ -6,7 +6,7 @@
 	import PageHead from '$lib/components/PageHead.svelte';
 	import QuantityEditor from '$lib/components/QuantityEditor.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
-	import { convert, loadCore, type Unit } from '$lib/core';
+	import { convert, loadCore, parseIngredientLine } from '$lib/core';
 	import { shareText } from '$lib/kitchen/share-text';
 	import {
 		groupByAisle,
@@ -15,6 +15,7 @@
 		mergeLines,
 		lineKey as lineKeyOf,
 		quantityText,
+		type ShoppingItem,
 		type ShoppingLine
 	} from '$lib/kitchen/shopping';
 	import { unitLabel } from '$lib/recipe/format';
@@ -97,13 +98,10 @@
 		shopping.clearAll();
 	}
 
+	/** Typed the way it would be written down: "2 kg potatoes, the big bag", one per line. */
 	let own = $state('');
-	let ownQty = $state('');
-	let ownUnit = $state<Unit | ''>('');
-	let ownNote = $state('');
-	let noting = $state(false);
 	let adding = $state(false);
-	let itemField: HTMLInputElement | undefined = $state();
+	let itemField: HTMLTextAreaElement | undefined = $state();
 
 	async function startAdding() {
 		adding = true;
@@ -111,31 +109,53 @@
 		itemField?.focus();
 	}
 
-	/** The units of the chosen system; spoons belong to both. */
-	const units = $derived<Unit[]>(
-		preferences.units === 'us'
-			? ['oz', 'lb', 'cup', 'floz', 'tbsp', 'tsp']
-			: ['g', 'kg', 'ml', 'l', 'tbsp', 'tsp']
+	/** A line as an item, with its amount and note picked out; anything else is kept as written. */
+	function toItem(line: string): ShoppingItem {
+		let parsed;
+		try {
+			parsed = coreReady ? parseIngredientLine(line) : undefined;
+		} catch {
+			/* kept whole below */
+		}
+		if (!parsed?.item) return { item: line };
+		const qty = parsed.amount?.qty;
+		const [min, max] = typeof qty === 'number' ? [qty, qty] : qty ? [qty.min, qty.max] : [];
+		return {
+			item: parsed.item,
+			...(parsed.prefix ? { prefix: parsed.prefix } : {}),
+			...(parsed.note ? { note: parsed.note } : {}),
+			...(min !== undefined ? { min, max, unit: parsed.amount?.unit ?? null } : {})
+		};
+	}
+
+	const typedItems = $derived(
+		own
+			.split('\n')
+			.map((line) => line.trim())
+			.filter(Boolean)
+			.map(toItem)
 	);
 
-	function addOwn(event: SubmitEvent) {
-		event.preventDefault();
-		const name = own.trim();
-		if (!name) return;
-		const qty = Number(ownQty.replace(',', '.'));
-		const note = ownNote.trim();
-		shopping.addOwn({
-			item: name,
-			...(note ? { note } : {}),
-			...(ownQty.trim() && Number.isFinite(qty) && qty > 0
-				? { min: qty, max: qty, unit: ownUnit || null }
-				: {})
-		});
+	function amountOf(item: ShoppingItem): string {
+		if (item.min === undefined) return '';
+		const qty =
+			item.max !== undefined && item.max !== item.min ? `${item.min}-${item.max}` : item.min;
+		return [qty, item.unit ? unitLabel(item.unit) : ''].filter(Boolean).join(' ');
+	}
+
+	function addOwn(event?: SubmitEvent) {
+		event?.preventDefault();
+		for (const item of typedItems) shopping.addOwn(item);
 		own = '';
-		ownQty = '';
-		ownNote = '';
-		noting = false;
 		itemField?.focus();
+	}
+
+	/** Enter adds; Shift and Enter starts another line. */
+	function enter(event: KeyboardEvent) {
+		if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+			event.preventDefault();
+			addOwn();
+		}
 	}
 
 	/** Off the list at once, with a moment to take it back. */
@@ -167,52 +187,37 @@
 	{#if ready}
 		{#if adding}
 			<form class="own" onsubmit={addOwn} use:outside={() => (adding = false)}>
-				<h2 class="label">Add an item</h2>
-				<label class="sr-only" for="{id}-add-item">Item</label>
-				<input
-					bind:this={itemField}
-					id="{id}-add-item"
-					class="item-field"
-					type="text"
-					autocomplete="off"
-					placeholder="Lemons, kitchen roll..."
-					bind:value={own}
-				/>
+				<label class="label" for="{id}-add">Add to the list</label>
 				<div class="own-row">
-					<label class="sr-only" for="{id}-add-qty">Quantity</label>
-					<input
-						id="{id}-add-qty"
-						class="qty-field"
-						type="text"
-						inputmode="decimal"
+					<textarea
+						bind:this={itemField}
+						id="{id}-add"
+						rows="1"
 						autocomplete="off"
-						placeholder="Qty"
-						bind:value={ownQty}
-					/>
-					<label class="sr-only" for="{id}-add-unit">Unit</label>
-					<select id="{id}-add-unit" bind:value={ownUnit}>
-						<option value="">no unit</option>
-						{#each units as unit (unit)}
-							<option value={unit}>{unitLabel(unit)}</option>
-						{/each}
-					</select>
-					<button type="submit" disabled={!own.trim()}><Icon name="plus" />Add</button>
+						placeholder="2 kg potatoes, the big bag"
+						aria-describedby="{id}-add-help"
+						bind:value={own}
+						onkeydown={enter}
+					></textarea>
+					<button type="submit" disabled={!typedItems.length}><Icon name="plus" />Add</button>
 				</div>
-				{#if noting}
-					<label class="sr-only" for="{id}-add-note">Note</label>
-					<input
-						id="{id}-add-note"
-						class="note-field"
-						type="text"
-						autocomplete="off"
-						placeholder="A note, such as 'the big pack'"
-						bind:value={ownNote}
-					/>
-				{:else}
-					<button type="button" class="add-note" onclick={() => (noting = true)}>
-						<Icon name="plus" size={14} />Add a note
-					</button>
+				{#if typedItems.length}
+					<ul class="will-add" aria-label="Will be added">
+						{#each typedItems as item, n (n)}
+							<li>
+								<span class="num">{amountOf(item)}</span>
+								<span
+									>{[item.prefix, item.item].filter(Boolean).join(' ')}{#if item.note}<span
+											class="note">, {item.note}</span
+										>{/if}</span
+								>
+							</li>
+						{/each}
+					</ul>
 				{/if}
+				<p class="help" id="{id}-add-help">
+					Write it as you would on paper. Paste several lines to add them all at once.
+				</p>
 			</form>
 		{:else}
 			<button type="button" class="start" onclick={startAdding}>
@@ -375,29 +380,49 @@
 
 	.own-row {
 		display: flex;
+		align-items: flex-start;
 		gap: var(--space-2);
 	}
 
-	.own .qty-field {
-		flex: 0 0 5rem;
-		text-align: center;
-	}
-
-	.own input,
-	.own select {
+	.own textarea {
 		flex: 1;
 		min-inline-size: 0;
 		min-block-size: var(--target);
-		padding-inline: var(--space-3);
+		padding: var(--space-2) var(--space-3);
 		border: 1px solid var(--colour-muted);
 		border-radius: var(--radius-s);
 		background: var(--colour-surface);
 		color: var(--colour-ink);
-		font: inherit;
+		field-sizing: content;
+		resize: none;
 	}
 
-	.own select {
-		padding-inline: var(--space-2);
+	.will-add {
+		display: grid;
+		gap: var(--space-1);
+		padding: var(--space-2) var(--space-3);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+	}
+
+	.will-add li {
+		display: grid;
+		grid-template-columns: var(--amount-slot) minmax(0, 1fr);
+		gap: var(--space-3);
+	}
+
+	.will-add .num {
+		color: var(--colour-primary);
+		text-align: end;
+	}
+
+	.note,
+	.help {
+		color: var(--colour-muted);
+	}
+
+	.help {
+		font-size: var(--text-s);
 	}
 
 	.start {
@@ -416,20 +441,6 @@
 
 	.start:hover {
 		background: var(--colour-tint);
-	}
-
-	.add-note {
-		display: inline-flex;
-		align-items: center;
-		justify-self: start;
-		gap: var(--space-1);
-		min-block-size: var(--target);
-		padding: 0;
-		border: 0;
-		background: transparent;
-		color: var(--colour-primary);
-		font-size: var(--text-s);
-		font-weight: 700;
 	}
 
 	.own-row button {
