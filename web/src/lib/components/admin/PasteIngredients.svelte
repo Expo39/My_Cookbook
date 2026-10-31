@@ -1,18 +1,31 @@
+<script lang="ts" module>
+	import type { IngredientRow } from '$lib/admin/recipe-form';
+
+	/** A line ending in a colon, such as "For the sauce:", starts a new part, as in most cookbooks. */
+	export interface PastedPart {
+		name: string;
+		rows: IngredientRow[];
+	}
+</script>
+
 <script lang="ts">
 	import '$lib/styles/admin.css';
 	import { parseIngredientLine } from '$lib/core';
-	import { rowFromIngredient, type IngredientRow } from '$lib/admin/recipe-form';
+	import { rowFromIngredient } from '$lib/admin/recipe-form';
 	import type { Ingredient } from '$lib/types/recipe';
 	import Icon from '../Icon.svelte';
 	import Modal from './Modal.svelte';
 
-	let { ready, onadd }: { ready: boolean; onadd: (rows: IngredientRow[]) => void } = $props();
+	let { ready, onadd }: { ready: boolean; onadd: (parts: PastedPart[]) => void } = $props();
 
 	const id = $props.id();
 	let modal: Modal;
 	let text = $state('');
-	let reviewed = $state<{ line: string; parsed?: Ingredient; problem?: string }[] | null>(null);
+	let reviewed = $state<
+		{ line: string; heading?: string; parsed?: Ingredient; problem?: string }[] | null
+	>(null);
 
+	const pasted = $derived(reviewed?.filter((entry) => entry.parsed || entry.heading) ?? []);
 	const good = $derived(reviewed?.filter((entry) => entry.parsed) ?? []);
 	const failed = $derived(reviewed?.filter((entry) => entry.problem) ?? []);
 
@@ -28,6 +41,7 @@
 			.map((line) => line.trim())
 			.filter(Boolean)
 			.map((line) => {
+				if (line.endsWith(':')) return { line, heading: line.slice(0, -1).trim() };
 				try {
 					return { line, parsed: parseIngredientLine(line) };
 				} catch (error) {
@@ -40,7 +54,12 @@
 	}
 
 	function add() {
-		onadd(good.map((entry) => rowFromIngredient(entry.parsed!)));
+		const parts: PastedPart[] = [{ name: '', rows: [] }];
+		for (const entry of pasted) {
+			if (entry.heading !== undefined) parts.push({ name: entry.heading, rows: [] });
+			else parts[parts.length - 1].rows.push(rowFromIngredient(entry.parsed!));
+		}
+		onadd(parts.filter((part) => part.rows.length));
 		if (failed.length) {
 			text = failed.map((entry) => entry.line).join('\n');
 			reviewed = null;
@@ -74,8 +93,8 @@
 			oninput={() => (reviewed = null)}
 		></textarea>
 		<p class="help" id="{id}-help">
-			For example "200 g plain flour" or "2 tbsp olive oil, plus extra". You can fix anything on the
-			next screen.
+			For example "200 g plain flour" or "2 tbsp olive oil, plus extra". A line ending in a colon,
+			such as "For the sauce:", starts a new part. You can fix anything on the next screen.
 		</p>
 
 		{#if reviewed}
@@ -83,15 +102,19 @@
 				{#if good.length}
 					<h3>Ready to add ({good.length})</h3>
 					<ul>
-						{#each good as entry (entry.line)}
-							<li><Icon name="checkCircle" size={18} />{describe(entry.parsed!)}</li>
+						{#each pasted as entry, n (n)}
+							{#if entry.heading !== undefined}
+								<li class="part">{entry.heading}</li>
+							{:else}
+								<li><Icon name="checkCircle" size={18} />{describe(entry.parsed!)}</li>
+							{/if}
 						{/each}
 					</ul>
 				{/if}
 				{#if failed.length}
 					<h3>Could not read ({failed.length})</h3>
 					<ul>
-						{#each failed as entry (entry.line)}
+						{#each failed as entry, n (n)}
 							<li class="bad">
 								<Icon name="xCircle" size={18} />
 								<span>"{entry.line}"<br /><span class="why">{entry.problem}</span></span>
@@ -148,6 +171,12 @@
 		flex: none;
 		margin-block-start: 0.2em;
 		color: var(--colour-success);
+	}
+
+	.part {
+		margin-block-start: var(--space-2);
+		color: var(--colour-primary);
+		font-weight: 700;
 	}
 
 	li.bad :global(svg) {

@@ -9,6 +9,7 @@
 		onmove,
 		onremove,
 		canRemove = true,
+		compact = false,
 		row
 	}: {
 		items: T[];
@@ -16,6 +17,8 @@
 		onmove: (from: number, to: number) => void;
 		onremove: (index: number) => void;
 		canRemove?: boolean;
+		/** Keeps the buttons beside each item at every width, for long lists of short rows. */
+		compact?: boolean;
 		row: Snippet<[T, number]>;
 	} = $props();
 
@@ -55,7 +58,7 @@
 	}
 </script>
 
-<ul>
+<ul class:compact>
 	{#each items as item, index (item.uid)}
 		<!-- A drop target for the pointer; the buttons below do the same job from the keyboard. -->
 		<li
@@ -167,6 +170,15 @@
 		color: var(--colour-danger);
 	}
 
+	.compact li {
+		padding: var(--space-2);
+	}
+
+	.compact li,
+	.compact .actions {
+		gap: 0 var(--space-1);
+	}
+
 	@media (min-width: 64rem) {
 		li {
 			grid-template-columns: auto 1fr auto;
@@ -177,5 +189,14 @@
 			flex-direction: column;
 			gap: 0;
 		}
+	}
+
+	.compact li {
+		grid-template-columns: auto 1fr auto;
+		grid-template-areas: 'handle body actions';
+	}
+
+	.compact .actions {
+		flex-direction: column;
 	}
 </style>

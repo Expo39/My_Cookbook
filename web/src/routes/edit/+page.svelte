@@ -591,7 +591,7 @@
 				</FieldSet>
 
 				{#if !local}<PhotoField ed={editor} />{/if}
-				<IngredientsEditor ed={editor} simple={local} />
+				<IngredientsEditor ed={editor} />
 				<MethodEditor ed={editor} />
 
 				{#if local}
