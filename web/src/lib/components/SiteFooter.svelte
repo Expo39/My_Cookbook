@@ -7,8 +7,8 @@
 <footer>
 	<div class="inner">
 		<blockquote>
-			<p>Cooking is like love - it should be entered into with abandon or not at all.</p>
-			<cite>Harriet Van Horne</cite>
+			<p>A recipe teaches you to cook. An empty cupboard teaches you to create.</p>
+			<cite>Antonio Galdes</cite>
 		</blockquote>
 		{#if instagram}
 			<a class="social" href={instagram.url} rel="me noopener" target="_blank">
@@ -19,6 +19,10 @@
 		<a class="social" href={howToHref()}>
 			<Icon name="help" />
 			<span>How to use the cookbook</span>
+		</a>
+		<a class="social" href={howToHref('questions')}>
+			<Icon name="info" />
+			<span>Questions and answers</span>
 		</a>
 		<p class="copyright">
 			Copyright 2026 Antonio Galdes. Recipes and photos are shared under

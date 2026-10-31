@@ -78,6 +78,9 @@
 			<a class="link" href={howToHref()} onclick={close}>
 				<Icon name="help" size={18} />How to use the cookbook
 			</a>
+			<a class="link" href={howToHref('questions')} onclick={close}>
+				<Icon name="info" size={18} />Questions and answers
+			</a>
 		</section>
 
 		<details class="card owner" bind:open={ownerOpen}>
