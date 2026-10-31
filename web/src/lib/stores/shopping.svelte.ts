@@ -101,13 +101,13 @@ class ShoppingList {
 	}
 
 	/** A hand-typed item has no recipe amount to compare with, so its quantity is simply changed. */
-	setOwnAmount(key: string, qty: number): void {
+	setOwnAmount(key: string, qty: number, unit: Unit | null): void {
 		this.recipes = this.recipes.map((recipe) =>
 			recipe.id === OWN_ITEMS
 				? {
 						...recipe,
 						items: recipe.items.map((item) =>
-							lineKey(item) === key ? { ...item, min: qty, max: qty } : item
+							lineKey(item) === key ? { ...item, min: qty, max: qty, unit } : item
 						)
 					}
 				: recipe

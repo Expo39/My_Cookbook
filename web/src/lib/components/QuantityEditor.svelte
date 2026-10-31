@@ -28,19 +28,22 @@
 		unit: Unit | null;
 		/** A ticked line is bought: its quantity is settled. */
 		disabled?: boolean;
-		onset: (qty: number) => void;
+		onset: (qty: number, unit: Unit | null) => void;
 		onreset: () => void;
 	} = $props();
+
+	const UNITS: Unit[] = ['g', 'kg', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'oz', 'lb', 'floz', 'pinch'];
 
 	const id = $props.id();
 	let open = $state(false);
 	let draft = $state('');
+	let chosen = $state<Unit | ''>('');
 	let field: HTMLInputElement | undefined = $state();
 
 	/** A step a shopper would actually buy in: tens of grams, half spoons, whole items. */
 	const step = $derived.by(() => {
 		const current = Number(draft) || value || 0;
-		switch (unit) {
+		switch (chosen) {
 			case 'g':
 			case 'ml':
 				return current >= 200 ? 50 : 10;
@@ -61,20 +64,21 @@
 
 	async function show() {
 		draft = value === undefined ? '' : String(Math.round(value * 100) / 100);
+		chosen = unit ?? '';
 		open = true;
 		await tick();
 		field?.select();
 	}
 
 	function nudge(direction: 1 | -1) {
-		const next = Math.max(0, (Number(draft) || 0) + direction * step);
+		const next = Math.max(0, (Number(draft.replace(',', '.')) || 0) + direction * step);
 		draft = String(Math.round(next * 100) / 100);
 	}
 
 	function done(event?: SubmitEvent) {
 		event?.preventDefault();
-		const qty = Number(draft);
-		if (draft.trim() !== '' && Number.isFinite(qty) && qty > 0) onset(qty);
+		const qty = Number(draft.replace(',', '.'));
+		if (draft.trim() !== '' && Number.isFinite(qty) && qty > 0) onset(qty, chosen || null);
 		open = false;
 	}
 
@@ -100,26 +104,35 @@
 
 	{#if open && !disabled}
 		<form id="{id}-editor" class="editor" onsubmit={done}>
-			<button type="button" class="round" aria-label="Less {label}" onclick={() => nudge(-1)}>
-				<Icon name="minus" size={18} />
-			</button>
-			<label class="sr-only" for="{id}-qty">Amount of {label}</label>
-			<span class="field">
+			<div class="amount">
+				<button type="button" class="round" aria-label="Less {label}" onclick={() => nudge(-1)}>
+					<Icon name="minus" size={18} />
+				</button>
+				<label class="sr-only" for="{id}-qty">Amount of {label}</label>
 				<input
 					bind:this={field}
 					id="{id}-qty"
 					type="text"
 					inputmode="decimal"
 					autocomplete="off"
+					placeholder="0"
 					bind:value={draft}
 					onkeydown={(event) => event.key === 'Escape' && (open = false)}
 				/>
-				{#if unit}<span class="unit">{unitLabel(unit)}</span>{/if}
-			</span>
-			<button type="button" class="round" aria-label="More {label}" onclick={() => nudge(1)}>
-				<Icon name="plus" size={18} />
-			</button>
-			<button type="submit" class="done" aria-label="Done"><Icon name="check" size={20} /></button>
+				<button type="button" class="round" aria-label="More {label}" onclick={() => nudge(1)}>
+					<Icon name="plus" size={18} />
+				</button>
+			</div>
+			<div class="finish">
+				<label class="sr-only" for="{id}-unit">Unit</label>
+				<select id="{id}-unit" bind:value={chosen}>
+					<option value="">no unit</option>
+					{#each UNITS as option (option)}
+						<option value={option}>{unitLabel(option)}</option>
+					{/each}
+				</select>
+				<button type="submit" class="done"><Icon name="check" size={18} />Done</button>
+			</div>
 			{#if edited}
 				<button type="button" class="back" onclick={reset}>
 					<Icon name="reset" size={14} />Back to {original || 'no amount'}
@@ -192,18 +205,27 @@
 		background: transparent;
 	}
 
-	/* One calm row: less, the amount, more, done. Going back to the recipes' amount sits beneath. */
+	/* A small card under the line, in rows that fit a narrow column: the amount, its unit and done. */
 	.editor {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
 		flex-basis: 100%;
-		align-items: center;
-		gap: var(--space-2);
+		gap: var(--space-3);
 		margin-block-start: var(--space-2);
+		padding: var(--space-3);
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-m);
+		background: var(--colour-surface);
+		box-shadow: var(--shadow-float);
 	}
 
-	.round,
-	.done {
+	.amount {
+		display: grid;
+		grid-template-columns: var(--target) minmax(0, 1fr) var(--target);
+		align-items: center;
+		gap: var(--space-2);
+	}
+
+	.round {
 		display: grid;
 		place-items: center;
 		inline-size: var(--target);
@@ -215,51 +237,37 @@
 		color: var(--colour-primary);
 	}
 
-	.done {
-		margin-inline-start: auto;
-		border-color: var(--colour-primary);
-		background: var(--colour-primary);
-		color: var(--colour-on-primary);
+	.round:hover {
+		background: var(--colour-tint);
 	}
 
-	.field {
-		display: inline-flex;
-		align-items: baseline;
-		gap: var(--space-1);
+	input,
+	select {
+		min-inline-size: 0;
 		min-block-size: var(--target);
-		padding-inline: var(--space-3);
-		border-block-end: 2px solid var(--colour-primary);
+		padding-inline: var(--space-2);
+		border: 1px solid var(--colour-muted);
+		border-radius: var(--radius-s);
+		background: var(--colour-surface);
+		color: var(--colour-ink);
+		font-weight: 700;
 	}
 
 	input {
-		inline-size: 3.5rem;
-		padding: 0;
-		border: 0;
-		background: transparent;
-		color: var(--colour-ink);
 		font-size: var(--text-l);
 		font-variant-numeric: tabular-nums;
-		font-weight: 700;
-		line-height: var(--target);
 		text-align: center;
 	}
 
-	input:focus-visible {
-		outline: none;
-	}
-
-	.field:focus-within {
-		border-block-end-color: var(--colour-accent);
-	}
-
-	.unit {
-		color: var(--colour-muted);
-		font-weight: 700;
+	.finish {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		gap: var(--space-2);
 	}
 
 	.back {
 		display: inline-flex;
-		flex-basis: 100%;
+		justify-self: start;
 		align-items: center;
 		gap: var(--space-1);
 		min-block-size: var(--target);
@@ -270,5 +278,18 @@
 		font-size: var(--text-s);
 		font-weight: 700;
 		text-align: start;
+	}
+
+	.done {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		min-block-size: var(--target);
+		padding-inline: var(--space-4);
+		border: 0;
+		border-radius: var(--radius-s);
+		background: var(--colour-primary);
+		color: var(--colour-on-primary);
+		font-weight: 700;
 	}
 </style>
