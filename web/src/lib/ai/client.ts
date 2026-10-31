@@ -29,8 +29,10 @@ export interface ImportResult {
 export interface ChatOptions {
 	/** Called with the answer so far each time more of it arrives. */
 	onText?: (text: string) => void;
-	/** Called when the main model is too busy and a lighter one is asked instead. */
+	/** Called when the main model cannot answer and a lighter one is asked instead. */
 	onFallback?: () => void;
+	/** Called with the model that answers, and whether it is the fallback. */
+	onModel?: (model: string, fallback: boolean) => void;
 	signal?: AbortSignal;
 }
 
@@ -123,7 +125,7 @@ export async function chatPost(
 	url: string,
 	body: unknown,
 	init: RequestInit,
-	{ onText, onFallback, signal }: ChatOptions = {}
+	{ onText, onFallback, onModel, signal }: ChatOptions = {}
 ): Promise<ChatReply> {
 	const response = await send(fetcher, url, body, { ...init, signal });
 	if (!response.headers.get('content-type')?.includes('text/event-stream') || !response.body) {
@@ -142,11 +144,15 @@ export async function chatPost(
 				const parsed = JSON.parse(data) as {
 					text?: string;
 					truncated?: boolean;
+					model?: string;
+					fallback?: boolean;
 					error?: string;
 					message?: string;
 				};
 				if (event === 'status') {
 					onFallback?.();
+				} else if (event === 'model' && parsed.model) {
+					onModel?.(parsed.model, parsed.fallback ?? false);
 				} else if (event === 'delta' && parsed.text) {
 					text += parsed.text;
 					onText?.(text);
