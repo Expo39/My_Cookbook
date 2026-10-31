@@ -57,7 +57,9 @@ All fonts are self-hosted as woff2 under `web/static/fonts/`, subset to Latin + 
 ## Interaction and accessibility (from ui-ux-pro-max priorities 1-9)
 - Touch targets are at least 44x44 px, with at least 8 px between them. `cursor: pointer` on everything clickable.
 - Focus is visible everywhere as a 2 px `--colour-primary` outline with a 2 px offset. Never remove it.
-- Labels are visible on every input and never placeholder-only. Errors sit next to their field and say how to fix the problem.
+- Labels are visible on every input and never placeholder-only. Errors sit next to their field and say how to fix the problem. The one exception is a dense repeated row (an ingredient line by line, the shopping list's amount card), where the columns make each box plain; those keep visually hidden labels.
+- Anything that needs explaining gets an "i" (`InfoTip.svelte`) beside its label: with a mouse, hover or focus shows a dark bubble (`--colour-ink` ground, at most 20rem); on touch, a tap opens a tint note with a primary edge on its own line. It has a normal pointer cursor and no hover ring, and inside a `<summary>` it never opens or closes the box.
+- While a dialog is open only the dialog scrolls; the page behind stays where it was.
 - Deep links everywhere: recipe view state goes in the URL (`?serves=6&u=us&v=vanilla:pods`). Back always behaves predictably.
 - Reserve space for images (`aspect-ratio`), keeping CLS under 0.1. Lazy-load images below the fold and serve AVIF or WebP.
 
@@ -74,6 +76,6 @@ Tokens instead of repeated values. Svelte-scoped component styles, and one globa
 - [ ] No emoji icons; every icon comes from `Icon.svelte`
 - [ ] Focus is visible; full keyboard path through the page; touch targets are at least 44 px
 - [ ] `prefers-reduced-motion` is respected
-- [ ] Screenshots at 375 / 768 / 1024 / 1440 px in light and dark, with no horizontal scroll and nothing hidden behind fixed bars or safe areas
+- [ ] Screenshots at 320 / 375 / 768 / 1024 / 1440 px in light and dark, with no horizontal scroll and nothing hidden behind fixed bars or safe areas
 - [ ] All numerals that are data are in `--font-num`
 - [ ] svelte-check passes with no warnings

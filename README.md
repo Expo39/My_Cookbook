@@ -47,7 +47,8 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 ### Reading and cooking
 
 - Section pages and recipe pages pre-rendered for every folder and recipe, with `Recipe` JSON-LD and Open Graph tags.
-- Search that ignores accents, and an ingredients mode that ranks recipes by how many of their ingredients the cook already has.
+- Search that ignores accents, and an ingredients mode that ranks recipes by how many of their ingredients the cook already has. The search page shows how to search with examples to tap, and offers the ingredients mode when a comma is typed.
+- Small "i" circles explain the less obvious controls: a bubble on hover with a mouse, a note underneath on a phone.
 - Cook mode: one step at a time, keyboard and swipe navigation, the step's ingredients beside it, and a screen wake lock where the browser supports one.
 - Timers started from the method, kept as end times so they survive a reload, and able to run side by side.
 - A "serve at" planner that works back from a serving time when the steps carry timings.
@@ -65,10 +66,10 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 
 ### Sharing
 
-- Share a link through the system share sheet, or copy it.
-- Share cards (Open Graph, portrait and story) rendered at build time, and a card drawn in the browser for the current scale, units and variant.
-- A printable A5 index card.
-- A shopping list that merges ingredients across recipes and can be shared as text.
+- **Share** opens straight onto a recipe card drawn in the browser for the current scale, units and variant, with every ingredient (long ones wrap; long lists run in two columns) and a QR code for the recipe.
+- On a phone, **Send the card** hands the image and the link to the system share sheet (WhatsApp, Messenger, Instagram and so on), optionally with the whole recipe as text; most computers get **Copy the card** instead. **Save image**, **Send the link**, **Copy as text** and **Print** (an A5 index card) sit beside it. A recipe kept on the device has no link yet.
+- Share cards (Open Graph, portrait and story) rendered at build time with the same layout.
+- A shopping list that merges ingredients across recipes and can be shared as text. Your own items are typed as you would write them ("2 kg potatoes"), and any amount can change its number and unit.
 
 ### Your own recipes
 
@@ -86,9 +87,15 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 
 ### AI
 
-- A sous-chef chat on each recipe page, your own recipes included, with the answer streamed as it is written. A busy model is retried with backoff, then an optional fallback model; Cloudflare Turnstile can be switched on.
+- A sous-chef chat on each recipe page, your own recipes included, with the answer streamed as it is written and labelled with the model that wrote it. As it opens it says whether the cook is offline, the service is unreachable or the AI is in high demand. A busy, retired or out-of-quota model hands over to a lighter fallback (Google's newest Flash-Lite), and the cook is told; a silent model is given up after 25 seconds. Cloudflare Turnstile checks that a person is asking, and per-visitor and site-wide limits keep bots from draining the quota.
 - Import from text in the editor, which fills the form for review.
 - Both go through a Cloudflare Worker (or the self-hosted server), so the Gemini key never reaches the browser. Without an AI endpoint, both are hidden.
+
+### Security
+
+- A Content Security Policy on every page: only the site's own scripts run, and the page talks only to the AI worker, GitHub and Turnstile.
+- The editing token is encrypted in the browser with the owner's password, kept per tab, and can only write recipe files.
+- The worker serves only the cookbook's own pages, and the importer needs a signed proof.
 
 ### Offline
 
@@ -162,11 +169,11 @@ The home page lists the top-level sections and recently added recipes, with sear
 
 ### Shopping list
 
-**Add to shopping list** on a recipe adds its ingredients at the current scale. The list (`/shopping-list`) merges the same food across recipes, lets items be ticked off, and **Share list** shares it as text. Adding a recipe again updates its entry instead of doubling it.
+**Add to shopping list** on a recipe adds its ingredients at the current scale. The list (`/shopping-list`) merges the same food across recipes, lets items be ticked off, and **Share list** shares it as text. Adding a recipe again updates its entry instead of doubling it. **Add an item** takes anything else in one box, written as on paper; tapping any amount opens a small card to change its number and unit.
 
 ### Sharing
 
-**Share** opens a sheet with three options: share the link (with the current servings, units and variant in it), share a recipe card image drawn for the current view, or print an A5 index card.
+**Share** opens on a preview of the recipe card for the current view. **Send the card** (or **Copy the card** on a computer) sends it with the link, **Send the link** shares the address with the servings, units and variant in it, **Copy as text** copies the whole recipe, and **Print** prints an A5 index card.
 
 ### Adding a recipe
 
