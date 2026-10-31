@@ -29,7 +29,15 @@
 	const FORMAT = 'portrait';
 
 	let dialog: HTMLDialogElement;
-	let made = $state<{ blob: Blob; url: string; name: string } | null>(null);
+	let made = $state<{
+		blob: Blob;
+		url: string;
+		name: string;
+		/** What the card was drawn for, kept on the preview so a test can see it matches the page. */
+		servings: number;
+		units: string;
+		variants: string;
+	} | null>(null);
 	let busy = $state(false);
 	let status = $state('');
 	let withText = $state(false);
@@ -79,7 +87,16 @@
 			});
 			const blob = await toBlob(await renderCard({ format: FORMAT, content, photo }));
 			reset();
-			made = { blob, url: URL.createObjectURL(blob), name: `${card.id.split('/').at(-1)}.png` };
+			made = {
+				blob,
+				url: URL.createObjectURL(blob),
+				name: `${card.id.split('/').at(-1)}.png`,
+				servings: model.view.servings,
+				units: model.effectiveSystem,
+				variants: Object.entries(model.chosenVariants)
+					.map(([key, option]) => `${key}:${option}`)
+					.join(',')
+			};
 			const probe = new File([blob], made.name, { type: 'image/png' });
 			canSend = typeof navigator.canShare === 'function' && navigator.canShare({ files: [probe] });
 		} catch {
@@ -101,7 +118,8 @@
 		}
 		try {
 			await navigator.clipboard.write([new ClipboardItem({ 'image/png': made.blob })]);
-			if (text) status = 'Card copied. Paste it into a chat, then use Copy as text for the words.';
+			if (withText)
+				status = 'Card copied. Paste it into a chat, then use Copy as text for the words.';
 			else chrome.notify('Card copied. Paste it into any chat.');
 		} catch {
 			status = 'This browser cannot copy pictures. Save the image, then attach it.';
@@ -148,7 +166,13 @@
 
 		<figure aria-busy={busy}>
 			{#if made}
-				<img src={made.url} alt="The recipe card for {title}" />
+				<img
+					src={made.url}
+					alt="The recipe card for {title}"
+					data-servings={made.servings}
+					data-units={made.units}
+					data-variants={made.variants}
+				/>
 			{:else}
 				<p class="making">{status || 'Making your card...'}</p>
 			{/if}
