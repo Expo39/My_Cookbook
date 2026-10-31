@@ -141,18 +141,6 @@ pub fn fit_lines(
     (size, lines)
 }
 
-/// How many ingredient lines to show, and how many are left out. One line is spent on "+ n more".
-pub fn ingredient_window(total: usize, fit: usize, cap: usize) -> (usize, usize) {
-    let capacity = fit.min(cap);
-    if total <= capacity {
-        (total, 0)
-    } else if capacity <= 1 {
-        (0, total)
-    } else {
-        (capacity - 1, total - (capacity - 1))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -196,15 +184,6 @@ mod tests {
         assert_eq!(size, 1.0);
         assert_eq!(lines.len(), 2);
         assert!(lines[1].ends_with("..."));
-    }
-
-    #[test]
-    fn the_ingredient_list_spends_a_line_on_the_remainder() {
-        assert_eq!(ingredient_window(5, 8, 12), (5, 0));
-        assert_eq!(ingredient_window(20, 8, 12), (7, 13));
-        assert_eq!(ingredient_window(20, 30, 12), (11, 9));
-        assert_eq!(ingredient_window(3, 1, 12), (0, 3));
-        assert_eq!(ingredient_window(3, 0, 12), (0, 3));
     }
 
     #[test]
