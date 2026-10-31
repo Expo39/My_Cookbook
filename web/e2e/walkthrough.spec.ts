@@ -42,10 +42,22 @@ test('records the walkthrough @walkthrough', async ({ browser }) => {
 	const started = Date.now();
 	const cues: Cue[] = [];
 
+	// The worker's status check and Cloudflare Turnstile are faked too, so nothing leaves the machine.
+	await page.route('**/status', (route) => route.fulfill({ json: { gemini: 'ok' } }));
+	await page.route('https://challenges.cloudflare.com/**', (route) =>
+		route.fulfill({
+			contentType: 'text/javascript',
+			body: `window.turnstile = {
+				render: (box, options) => ((window.__turnstile = options), 'widget'),
+				execute: () => window.__turnstile.callback('walkthrough'),
+				reset: () => {}
+			};`
+		})
+	);
 	await page.route('**/chat', async (route) => {
-		const body = answer
-			.map((text) => `event: delta\ndata: ${JSON.stringify({ text })}\n\n`)
-			.join('');
+		const body =
+			`event: model\ndata: ${JSON.stringify({ model: 'gemini-3.8-flash', fallback: false })}\n\n` +
+			answer.map((text) => `event: delta\ndata: ${JSON.stringify({ text })}\n\n`).join('');
 		await new Promise((resolve) => setTimeout(resolve, 1500));
 		await route.fulfill({
 			status: 200,
@@ -146,6 +158,7 @@ test('records the walkthrough @walkthrough', async ({ browser }) => {
 
 	// Your own recipe
 	await page.goto('edit');
+	await page.getByRole('button', { name: 'Got it' }).click();
 	await say('Add a recipe of your own. A title, the ingredients and the method are all it needs.');
 	await page.getByLabel('Title', { exact: true }).pressSequentially("Nanna's bread pudding", {
 		delay: 60
@@ -155,14 +168,13 @@ test('records the walkthrough @walkthrough', async ({ browser }) => {
 		.fill('Stale bread, milk and sultanas, baked until golden.');
 	await page.getByRole('textbox', { name: 'Servings', exact: true }).fill('6');
 	await page.getByLabel('Section', { exact: true }).selectOption({ index: 1 });
-	await page.getByRole('button', { name: 'Paste a list' }).click();
 	await page
 		.getByLabel('One ingredient per line')
 		.fill('400 g stale bread\n500 ml milk\n2 eggs\n100 g sultanas\n80 g sugar');
-	await say('Paste the whole ingredient list at once.', 2400);
-	await page.getByRole('button', { name: 'Review' }).click();
-	await slowly(1200);
-	await page.getByRole('button', { name: /^Add 5 ingredients/ }).click();
+	await say(
+		'Write the ingredients as on paper. Beside them, they read back as the recipe will.',
+		2400
+	);
 	const step = page.getByLabel('Step 1', { exact: true });
 	await step.scrollIntoViewIfNeeded();
 	await step.pressSequentially('Soak the bread in the milk, then bake for 40 minutes at 180C.', {

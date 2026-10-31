@@ -137,7 +137,12 @@ test('writes screenshots of the admin drawer and the editor', async ({ page }) =
 	});
 	const openDrawer = async () => {
 		await page.getByRole('button', { name: 'Settings' }).click();
-		await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+		const drawer = page.getByRole('dialog', { name: 'Settings' });
+		await expect(drawer).toBeVisible();
+		const owner = drawer.locator('details.owner');
+		if ((await owner.getAttribute('open')) === null) {
+			await drawer.getByText("For the cookbook's owner").click();
+		}
 	};
 
 	for (const scheme of ['light', 'dark'] as const) {
