@@ -151,9 +151,9 @@
 		</p>
 		<h3>Your own items</h3>
 		<p>
-			<strong>Add an item</strong> takes anything else you need, written as you would on paper, such as
-			"2 kg potatoes, the big bag". The amount and the note are picked out for you, and pasting several
-			lines adds them all. Your items are grouped under "Added by you".
+			<strong>Add an item</strong> takes anything else you need: type "potatoes" or "2 kg potatoes" and
+			press Enter. The amount can be changed on the list like any other, and pasting several lines adds
+			them all. Your items are grouped under "Added by you".
 		</p>
 		<h3>Removing lines</h3>
 		<p>
