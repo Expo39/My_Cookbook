@@ -199,7 +199,7 @@
 			</li>
 			<li>Generate it and copy it straight away; GitHub shows it only once.</li>
 			<li>
-				Paste it in <strong>Settings &gt; Sharing to GitHub</strong>, with a password, and choose
+				Paste it in <strong>Settings &gt; For the cookbook's owner</strong>, with a password, and choose
 				<strong>Set up editing</strong>.
 			</li>
 		</ol>

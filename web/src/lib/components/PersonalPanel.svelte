@@ -60,7 +60,7 @@
 	function ask(id: string) {
 		problem = done = '';
 		if (!admin.unlocked) {
-			problem = 'Sharing needs the GitHub token. Unlock it under "Sharing to GitHub" below first.';
+			problem = `Sharing needs the GitHub token. Unlock editing under "For the cookbook's owner" below first.`;
 			onunlock?.();
 			return;
 		}
@@ -91,8 +91,8 @@
 <section class="personal" aria-labelledby="{uid}-title">
 	<h3 id="{uid}-title" class="label">Your recipes</h3>
 	<p class="help">
-		Recipes you add are stored only in this browser on this device. Nobody else can see them unless
-		you share them to GitHub, which needs a GitHub token.
+		Recipes you add stay in this browser, on this device. Nobody else sees them until you share them
+		with everyone.
 	</p>
 
 	{#if personal.loaded}
@@ -198,7 +198,7 @@
 	}
 
 	.personal .label {
-		color: var(--colour-muted);
+		color: var(--colour-primary);
 	}
 
 	.help {

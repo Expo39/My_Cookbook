@@ -39,13 +39,13 @@ The editor is simpler in this mode, so that someone who has never seen a recipe 
 
 ## Sharing a recipe with everyone
 
-Each recipe in **Settings > Your recipes** has **Share with everyone**. Sharing needs the GitHub token: while editing is locked, the button points at the **Sharing to GitHub** panel below it, where the token is set up or unlocked as described in the rest of this guide.
+Each recipe in **Settings > Your recipes** has **Share with everyone**. Sharing needs the GitHub token: while editing is locked, the button points at the **For the cookbook's owner** panel below it, where the token is set up or unlocked as described in the rest of this guide.
 
 Once unlocked, **Share with everyone** asks for confirmation, then commits the recipe to `recipes/<id>.json` on the configured branch (`content(recipes): add <title>`), exactly as the token holder's editor would. From then on the recipe is the cookbook's: the copy on the device is marked as shared and locks, and the cookbook's copy appears after the next deploy. When the deployed index carries the recipe, the shared copy is removed from the device the next time the site loads. A commit that touches only `recipes/` takes CI's fast path (see [DEPLOYMENT.md](DEPLOYMENT.md#the-fast-path)), so it is live in a few minutes.
 
 ## Editing states
 
-Editing is controlled from **Settings** (the sliders icon), under **Sharing to GitHub (optional)**. What that panel shows depends on whether editing has been set up for the site and whether it is unlocked in the current tab.
+Editing is controlled from **Settings** (the sliders icon), under **For the cookbook's owner**. What that panel shows depends on whether editing has been set up for the site and whether it is unlocked in the current tab.
 
 ```mermaid
 stateDiagram-v2
@@ -58,7 +58,7 @@ stateDiagram-v2
     Unlocked --> [*]
 ```
 
-| State | What the Sharing to GitHub panel shows |
+| State | What the owner's panel shows |
 |---|---|
 | Not set up | The set-up form: GitHub token, password, repeated password and an optional AI import secret |
 | Locked | A password field and **Unlock editing** |
@@ -82,7 +82,7 @@ Editing needs a GitHub token that can commit to the repository. The token is enc
 
 ### 2. Set up editing on the site
 
-1. Open **Settings > Sharing to GitHub**. The set-up form appears while no editing key has been published.
+1. Open **Settings > For the cookbook's owner**. The set-up form appears while no editing key has been published.
 2. Paste the token into **GitHub token**.
 3. Choose a password of at least 12 characters and repeat it. A passphrase of several unrelated words is stronger than a short, complex password.
 4. If the AI importer is deployed, paste its secret into **AI import secret** (see [Importing a recipe with AI](#importing-a-recipe-with-ai)). It can be added later.
@@ -107,11 +107,11 @@ If the password may have been guessed, revoke the token on GitHub immediately, c
 
 ## Unlocking on another device
 
-Open **Settings > Sharing to GitHub**, enter the password and press **Unlock editing**. The browser downloads `admin.json` from the site, derives the key and decrypts the token locally. A wrong password shows a short message and nothing else happens. The editor page at `/edit` offers the unlock form itself when a published recipe is opened while editing is locked.
+Open **Settings > For the cookbook's owner**, enter the password and press **Unlock editing**. The browser downloads `admin.json` from the site, derives the key and decrypts the token locally. A wrong password shows a short message and nothing else happens. The editor page at `/edit` offers the unlock form itself when a published recipe is opened while editing is locked.
 
 ## Changing the password or the token
 
-Both options are in **Settings > Sharing to GitHub** while editing is unlocked, and each commits a new `admin.json`. The change reaches other devices with the next deploy.
+Both options are in **Settings > For the cookbook's owner** while editing is unlocked, and each commits a new `admin.json`. The change reaches other devices with the next deploy.
 
 - **Change the password** asks for the current password and the new one (twice), decrypts the stored secrets with the current password and re-encrypts them under the new one. The token itself does not change.
 - **Replace the token or AI secret** is for a token that has expired or been revoked, or for a new import secret. It asks for the password; a field left blank keeps the value already stored.

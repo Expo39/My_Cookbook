@@ -12,7 +12,7 @@ test('light is the default, and the theme choice applies at once and persists ac
 	await expect(html).toHaveAttribute('data-theme', 'light');
 	await page.getByRole('button', { name: 'Settings' }).click();
 	const drawer = page.getByRole('dialog', { name: 'Settings' });
-	await expect(drawer.getByRole('heading', { name: 'Sharing to GitHub (optional)' })).toBeVisible();
+	await expect(drawer.getByText("For the cookbook's owner")).toBeVisible();
 
 	await drawer.getByRole('radio', { name: 'Dark' }).check();
 	await expect(html).toHaveAttribute('data-theme', 'dark');

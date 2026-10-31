@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import Icon from '../Icon.svelte';
+	import InfoTip from '../InfoTip.svelte';
 
 	let {
 		id,
 		label,
 		hint,
+		info,
 		error,
 		optional = false,
 		children
@@ -13,6 +15,8 @@
 		id: string;
 		label: string;
 		hint?: string;
+		/** A longer explanation behind an "i" beside the label. */
+		info?: string;
 		error?: string;
 		optional?: boolean;
 		children: Snippet;
@@ -20,9 +24,12 @@
 </script>
 
 <div class="field">
-	<label for={id}
-		>{label}{#if optional}<span class="opt">optional</span>{/if}</label
-	>
+	<div class="head">
+		<label for={id}
+			>{label}{#if optional}<span class="opt">optional</span>{/if}</label
+		>
+		{#if info}<InfoTip topic={label.toLowerCase()} text={info} />{/if}
+	</div>
 	{@render children()}
 	{#if hint}<p class="hint" id="{id}-hint">{hint}</p>{/if}
 	{#if error}
@@ -36,6 +43,13 @@
 		gap: var(--space-1);
 		align-content: start;
 		min-inline-size: 0;
+	}
+
+	.head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1);
 	}
 
 	label {
