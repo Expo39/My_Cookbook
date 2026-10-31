@@ -34,8 +34,13 @@ export interface ChatOptions {
 	signal?: AbortSignal;
 }
 
-/** Whether the AI answered lately, as far as the service knows; asking it costs no question. */
-export type AiStatus = 'ok' | 'busy';
+/** How the AI has fared lately, as far as the service knows; asking it costs no question. */
+export interface AiStatus {
+	/** Every model was too busy to answer a recent question. */
+	busy: boolean;
+	/** A model Gemini no longer offers, so the fallback is answering until the owner changes it. */
+	retired?: string;
+}
 
 export interface AiClient {
 	/** Throws when the service cannot be reached at all. */

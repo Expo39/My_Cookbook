@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	import { admin } from '$lib/admin/session.svelte';
 	import { AiError, isRetryable, type AiClient, type Turn } from '$lib/ai';
 	import type { Recipe } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
@@ -41,6 +42,8 @@
 	type Reach = 'checking' | 'ready' | 'busy' | 'offline' | 'unreachable';
 	let reach = $state<Reach>('checking');
 	const blocked = $derived(reach === 'offline' || reach === 'unreachable');
+	/** Shown only to the owner, who is the one who can change the model. */
+	let retired = $state<string>();
 	const CHECK_MILLISECONDS = 5000;
 
 	async function check() {
@@ -51,7 +54,8 @@
 		reach = 'checking';
 		try {
 			const status = await client.status(AbortSignal.timeout(CHECK_MILLISECONDS));
-			reach = status === 'busy' ? 'busy' : 'ready';
+			reach = status.busy ? 'busy' : 'ready';
+			retired = status.retired;
 		} catch {
 			reach = navigator.onLine ? 'unreachable' : 'offline';
 		}
@@ -59,6 +63,7 @@
 
 	export function show() {
 		dialog.showModal();
+		void admin.restore();
 		void check();
 	}
 
@@ -211,6 +216,18 @@
 		<p class="note">
 			Answers come from AI and may be wrong. Check times and temperatures yourself.
 		</p>
+
+		{#if retired && admin.unlocked}
+			<div class="reach" role="status">
+				<Icon name="info" size={20} />
+				<p>
+					<strong>For the owner: Gemini no longer offers "{retired}".</strong> The sous-chef is
+					answering with the fallback model meanwhile. Set <code>GEMINI_MODEL</code> in
+					<code>crates/cookbook-worker/wrangler.toml</code> to a current model, then run
+					<code>make worker-deploy</code>.
+				</p>
+			</div>
+		{/if}
 
 		{#if reach === 'offline'}
 			<div class="reach" role="status">

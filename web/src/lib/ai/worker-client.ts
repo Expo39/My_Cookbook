@@ -32,8 +32,8 @@ export class WorkerClient implements AiClient {
 		const response = await this.#fetch(`${this.#endpoint}/status`, { signal, cache: 'no-store' });
 		if (!response.ok)
 			throw new AiError('The sous-chef cannot be reached.', 'unreachable', response.status);
-		const { gemini } = (await response.json()) as { gemini?: string };
-		return gemini === 'busy' ? 'busy' : 'ok';
+		const { gemini, retired } = (await response.json()) as { gemini?: string; retired?: string };
+		return { busy: gemini === 'busy', retired: retired || undefined };
 	}
 
 	async chat(request: ChatRequest, options?: ChatOptions): Promise<ChatReply> {
