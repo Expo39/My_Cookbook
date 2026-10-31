@@ -9,7 +9,6 @@ import type {
 	Unit,
 	Variant
 } from '$lib/types/recipe';
-import { slugify } from './slug';
 
 let counter = 0;
 export const uid = (): string => `r${++counter}`;
@@ -286,10 +285,6 @@ export function formFromRecipe(recipe: Recipe, id: string): FormData {
 export const recipeId = (form: FormData): string =>
 	form.section ? `${form.section}/${form.slug}` : form.slug;
 
-/** The slug follows the title until the author edits it. */
-export const derivedSlug = (form: FormData): string =>
-	form.slugTouched ? form.slug : slugify(form.title);
-
 type Issue = Pick<CheckResult, 'path' | 'message'>;
 
 /** An amount from the two boxes and the unit; a problem is reported once and the amount is left out. */
@@ -316,7 +311,7 @@ function amountFrom(
 	};
 }
 
-export function ingredientFromRow(row: IngredientRow, path: string, issues: Issue[]): Ingredient {
+function ingredientFromRow(row: IngredientRow, path: string, issues: Issue[]): Ingredient {
 	const amount = amountFrom(row.qtyMin, row.qtyMax, row.unit, `${path}.amount.qty`, issues);
 	return {
 		...(row.key.trim() ? { key: row.key.trim() } : {}),

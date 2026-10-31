@@ -1,7 +1,7 @@
 import { SvelteSet } from 'svelte/reactivity';
 import { readList, writeList } from './storage';
 
-export const FAVOURITES_KEY = 'sapori:favourites';
+const FAVOURITES_KEY = 'sapori:favourites';
 
 class Favourites {
 	readonly #ids = new SvelteSet<string>();

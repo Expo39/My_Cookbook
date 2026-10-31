@@ -1,8 +1,8 @@
 import type { UnitSystem } from '$lib/types/recipe';
 import { readStorage, writeStorage } from './storage';
 
-export const UNITS_KEY = 'sapori:units';
-export const UNIT_HINT_KEY = 'sapori:hint:units';
+const UNITS_KEY = 'sapori:units';
+const UNIT_HINT_KEY = 'sapori:hint:units';
 
 class Preferences {
 	units = $state<UnitSystem>('metric');
