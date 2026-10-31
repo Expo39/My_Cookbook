@@ -20,12 +20,11 @@ use worker::{
 use crate::{
     auth::{self, AuthError},
     cors,
-    limits::{self, Limits, Route},
+    limits::{self, Route},
     turnstile,
 };
 
 const KV_BINDING: &str = "RATE_LIMIT";
-const KV_TTL_SECONDS: u64 = 2 * limits::WINDOW_SECONDS;
 /// Set when every model stayed busy, so the site can warn a cook before they ask.
 const BUSY_KEY: &str = "gemini:busy";
 const BUSY_SECONDS: u64 = 120;
@@ -82,7 +81,10 @@ pub async fn handle(mut req: Request, env: Env) -> Result<Response> {
         return Ok(response);
     }
 
-    let outcome = if origin.is_some() && permitted.is_none() {
+    // Only the cookbook's own pages may use the AI routes. A script can forge the header, so this
+    // stops drive-by use from other sites and casual scripts; the limits and Turnstile do the rest.
+    let open = req.path().trim_end_matches('/') == "/status";
+    let outcome = if permitted.is_none() && !open {
         Err(ApiError::new(
             403,
             "forbidden_origin",
@@ -196,37 +198,23 @@ async fn rate_limit(req: &Request, env: &Env, kind: Route) -> std::result::Resul
         .ok()
         .flatten()
         .unwrap_or_else(|| "unknown".to_owned());
-    let limit = Limits::from_lookup(|name| text_var(env, name)).for_route(kind);
-    let now = now_ms() / 1000;
-    let kv = env.kv(KV_BINDING).map_err(|_| unavailable())?;
-    let key = limits::window_key(kind, &ip, now);
-    let count = kv
-        .get(&key)
-        .text()
-        .await
-        .map_err(|_| unavailable())?
-        .and_then(|v| v.parse().ok())
-        .unwrap_or(0);
-    match limits::admit(count, limit, now) {
-        Ok(next) => {
-            kv.put(&key, next.to_string())
-                .map_err(|_| unavailable())?
-                .expiration_ttl(KV_TTL_SECONDS)
-                .execute()
-                .await
-                .map_err(|_| unavailable())?;
-            Ok(())
+    let checks = [
+        (limits::PER_VISITOR, limits::visitor_key(kind, &ip)),
+        (limits::EVERYONE, limits::everyone_key(kind)),
+    ];
+    for (binding, key) in checks {
+        let limiter = env.rate_limiter(binding).map_err(|_| unavailable())?;
+        let outcome = limiter.limit(key).await.map_err(|_| unavailable())?;
+        if !outcome.success {
+            return Err(ApiError::new(
+                429,
+                "rate_limited",
+                "Lots of questions just now. Try again in a minute.",
+            )
+            .retry_after(limits::PERIOD_SECONDS));
         }
-        Err(wait) => Err(ApiError::new(
-            429,
-            "rate_limited",
-            format!(
-                "That is enough for now. Try again in {} minutes.",
-                wait.div_ceil(60)
-            ),
-        )
-        .retry_after(wait)),
     }
+    Ok(())
 }
 
 /// The recipe comes from the deployed site's public data, never from the request body.

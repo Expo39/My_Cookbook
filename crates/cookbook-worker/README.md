@@ -27,7 +27,8 @@ Errors before the answer starts are always `{ error, message }` with an error st
 | `TURNSTILE_SECRET` | secret | optional; when set, `/chat` needs an `X-Turnstile-Token` header |
 | `GEMINI_API_KEY` | secret | Google AI Studio key |
 | `ADMIN_IMPORT_SECRET` | secret | keys the admin proof, see below |
-| `RATE_LIMIT` | KV binding | created by the first deploy |
+| `RATE_LIMIT` | KV binding | short notes (the AI is busy, a model was retired); created by the first deploy |
+| `PER_VISITOR`, `EVERYONE` | rate limiters | 4 a minute per IP address and 20 a minute in all, for `/chat` and `/import` |
 
 No account id is committed. Wrangler takes it from `CLOUDFLARE_ACCOUNT_ID` or from the login.
 

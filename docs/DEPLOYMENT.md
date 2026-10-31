@@ -111,7 +111,7 @@ The static site cannot hold the Gemini key, so the sous-chef and the importer go
 3. Check the variables in `wrangler.toml`:
    - `SITE_URL` is the published site including its base path (`https://expo39.github.io/My_Cookbook`). The Worker fetches each recipe for `/chat` from `<SITE_URL>/data/recipes/<id>.json`, so a published recipe is always discussed as published. Only when that address does not exist (a recipe kept on the cook's own device) is the copy sent with the question used, after it has been checked to be a recipe.
    - `ALLOWED_ORIGINS` lists the origins allowed to call it.
-   - `GEMINI_MODEL`, `RATE_LIMIT_CHAT` and `RATE_LIMIT_IMPORT` tune the model and the hourly limits.
+   - `GEMINI_MODEL` and `GEMINI_FALLBACK_MODEL` choose the models; the `[[ratelimits]]` blocks set how many questions a visitor, and everyone together, may ask a minute.
    - `GEMINI_THINKING_LEVEL` (default `low`) sets how long the model thinks before it answers; `minimal` is faster on the models that accept it, and `default` leaves the choice to the model. A model that refuses the level is asked again without one.
    - `GEMINI_FALLBACK_MODEL`, when set, is tried after the main model has been busy three times in a row, for example a lighter Flash model.
 4. Set `ai.endpoint` in `cookbook.config.json` (or `PUBLIC_AI_ENDPOINT` at build time) to the Worker's URL, and enter the same `ADMIN_IMPORT_SECRET` in the site's editing settings (see [ADMIN.md](ADMIN.md#importing-a-recipe-with-ai)).
