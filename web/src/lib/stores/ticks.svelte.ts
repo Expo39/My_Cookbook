@@ -43,7 +43,14 @@ export class Ticks {
 	}
 
 	toggle(key: string): void {
-		if (!this.#ticked.delete(key)) this.#ticked.add(key);
+		this.set(key, !this.#ticked.has(key));
+	}
+
+	/** Ticks or unticks to match a checkbox, so a lost or repeated click cannot leave them out of step. */
+	set(key: string, ticked: boolean): void {
+		if (ticked === this.#ticked.has(key)) return;
+		if (ticked) this.#ticked.add(key);
+		else this.#ticked.delete(key);
 		this.#save();
 	}
 
