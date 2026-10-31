@@ -3,6 +3,7 @@
 	import type { EditorState } from '$lib/admin/editor-state.svelte';
 	import { ingredientToken, temperatureToken, timerToken } from '$lib/admin/tokens';
 	import Icon from '../Icon.svelte';
+	import InfoTip from '../InfoTip.svelte';
 
 	let { ed, oninsert }: { ed: EditorState; oninsert: (token: string) => void } = $props();
 
@@ -59,15 +60,21 @@
 </script>
 
 <div class="insert">
-	<button
-		type="button"
-		class="btn"
-		aria-expanded={open}
-		aria-controls="{id}-panel"
-		onclick={() => (open = !open)}
-	>
-		<Icon name="plus" size={18} />Insert
-	</button>
+	<div class="opener">
+		<button
+			type="button"
+			class="btn"
+			aria-expanded={open}
+			aria-controls="{id}-panel"
+			onclick={() => (open = !open)}
+		>
+			<Icon name="plus" size={18} />Add a timer, temperature or amount
+		</button>
+		<InfoTip
+			topic="adding a timer, temperature or amount"
+			text="Puts it into the step where the cursor was: a timer the cook can tap, a temperature that also shows in °F, or an ingredient's amount that changes with the servings."
+		/>
+	</div>
 	{#if open}
 		<div class="panel" id="{id}-panel" role="group" aria-label="Insert into the step">
 			<fieldset class="kinds">
@@ -166,6 +173,13 @@
 		display: grid;
 		gap: var(--space-2);
 		justify-items: start;
+	}
+
+	.opener {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1);
 	}
 
 	.panel {
