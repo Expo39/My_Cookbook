@@ -19,10 +19,12 @@
 		<Icon name="download" size={22} />
 		<div class="words">
 			<p>
-				<strong>Keep your recipes safe.</strong>
-				{own.length === 1 ? 'Your recipe is' : `Your ${own.length} recipes are`} only in this browser,
-				so clearing your browsing data would delete {own.length === 1 ? 'it' : 'them'}. A backup
-				file keeps a copy on your device.
+				<strong>Back up your recipes.</strong>
+				{own.length === 1 ? 'The recipe you added is' : `The ${own.length} recipes you added are`} saved
+				only in this browser. If you clear your browsing history or data, {own.length === 1
+					? 'it is'
+					: 'they are'} deleted for good. A backup is a file you keep on this device, and Restore a backup
+				in Settings brings them back.
 			</p>
 			<button type="button" class="save" onclick={() => backup.save(own)}>Save a backup</button>
 		</div>
