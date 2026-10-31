@@ -6,6 +6,7 @@
 	import type { RecipeCard } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
 	import PhotoSlot from './PhotoSlot.svelte';
+	import RecipePhoto from './RecipePhoto.svelte';
 
 	let {
 		card,
@@ -16,7 +17,8 @@
 		onaddlist,
 		onask,
 		edithref,
-		photoToGitHub = false
+		photoToGitHub = false,
+		photoTools = true
 	}: {
 		card: RecipeCard;
 		model: RecipeModel;
@@ -29,6 +31,8 @@
 		edithref?: string;
 		/** Editing is unlocked and the recipe is the cookbook's, so a photo is committed to GitHub. */
 		photoToGitHub?: boolean;
+		/** Off in the editor's preview, where the photo is chosen in its own Photo section. */
+		photoTools?: boolean;
 	} = $props();
 
 	const recipe = $derived(model.data.recipe);
@@ -46,7 +50,11 @@
 </script>
 
 <header>
-	<PhotoSlot id={card.id} title={recipe.title} {photo} toGitHub={photoToGitHub} />
+	{#if photoTools}
+		<PhotoSlot id={card.id} title={recipe.title} {photo} toGitHub={photoToGitHub} />
+	{:else if photo}
+		<RecipePhoto id={card.id} {photo} sizes="(min-width: 64rem) 40rem, 100vw" />
+	{/if}
 	<div class="text">
 		<div class="titles">
 			<h1>{recipe.title}</h1>
