@@ -1,54 +1,47 @@
 <script lang="ts">
 	import '$lib/styles/admin.css';
-	import { checkGroups, summarise } from '$lib/admin/checklist';
+	import { plainWords, summarise } from '$lib/admin/checklist';
 	import type { EditorState } from '$lib/admin/editor-state.svelte';
+	import type { CheckResult } from '$lib/types/recipe';
 	import Icon from '../Icon.svelte';
 
+	/**
+	 * What is left before the recipe can be saved, as a short calm list: each line says what to do
+	 * and takes the cook to the place. Suggestions wait, folded, below.
+	 */
 	let { ed, onjump }: { ed: EditorState; onjump: (path: string) => void } = $props();
-
-	const groups = $derived(checkGroups(ed.results));
 </script>
 
-<section class="panel" aria-labelledby="checklist-title">
-	<h2 id="checklist-title">Checklist</h2>
-	{#if ed.coreReady}
-		<p class="summary" class:bad={ed.errors.length > 0} role="status">
-			{summarise(ed.errors.length, ed.warnings.length)}
-		</p>
-	{:else}
-		<p class="summary" role="status">Loading the checks...</p>
-	{/if}
-
-	<ul class="groups">
-		{#each groups as group (group.id)}
-			{@const failed = group.results.length > 0}
+{#snippet items(results: CheckResult[])}
+	<ul>
+		{#each results as result, index (index)}
 			<li>
-				<p
-					class="group"
-					class:failed={failed && group.level === 'error'}
-					class:advice={failed && group.level === 'warning'}
-				>
-					<Icon
-						name={!failed ? 'checkCircle' : group.level === 'error' ? 'xCircle' : 'alert'}
-						size={20}
-					/>
-					{group.label}
-				</p>
-				{#if failed}
-					<ul class="results">
-						{#each group.results as result, index (index)}
-							<li>
-								<button type="button" class="link" onclick={() => onjump(ed.pathOf(result))}>
-									{result.message}
-								</button>
-								<span class="code">{result.id}</span>
-							</li>
-						{/each}
-					</ul>
-				{/if}
+				<button type="button" class="link" onclick={() => onjump(ed.pathOf(result))}>
+					{plainWords(result)}
+				</button>
 			</li>
 		{/each}
 	</ul>
+{/snippet}
+
+<section class="panel" aria-labelledby="checklist-title">
+	<h2 id="checklist-title">Before you save</h2>
+	{#if !ed.coreReady}
+		<p role="status">Getting ready...</p>
+	{:else}
+		<p class="summary" class:ready={!ed.errors.length} role="status">
+			{#if !ed.errors.length}<Icon name="checkCircle" size={20} />{/if}{summarise(
+				ed.errors.length
+			)}{#if ed.errors.length}:{/if}
+		</p>
+		{#if ed.errors.length}{@render items(ed.errors)}{/if}
+		{#if ed.warnings.length}
+			<details>
+				<summary>Suggestions, if you like ({ed.warnings.length})</summary>
+				{@render items(ed.warnings)}
+			</details>
+		{/if}
+	{/if}
 </section>
 
 <style>
@@ -66,37 +59,41 @@
 	}
 
 	.summary {
-		font-weight: 700;
-	}
-
-	.summary.bad {
-		color: var(--colour-danger);
-	}
-
-	.groups,
-	.results {
-		display: grid;
-		gap: var(--space-2);
-	}
-
-	.group {
 		display: flex;
 		align-items: center;
 		gap: var(--space-2);
-		color: var(--colour-success);
 		font-weight: 700;
 	}
 
-	.group.failed {
-		color: var(--colour-danger);
+	.summary.ready {
+		color: var(--colour-success);
 	}
 
-	.group.advice {
-		color: var(--colour-warning);
+	ul {
+		display: grid;
+		counter-reset: left;
 	}
 
-	.results {
-		margin-inline-start: calc(20px + var(--space-2));
+	li {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-2);
+		counter-increment: left;
+	}
+
+	li::before {
+		content: counter(left);
+		display: grid;
+		flex: none;
+		place-items: center;
+		inline-size: 1.5rem;
+		block-size: 1.5rem;
+		border-radius: var(--radius-pill);
+		background: var(--colour-tint);
+		color: var(--colour-primary);
+		font-family: var(--font-num);
+		font-size: var(--text-xs);
+		font-weight: 700;
 	}
 
 	.link {
@@ -107,12 +104,19 @@
 		color: var(--colour-ink);
 		text-align: start;
 		text-decoration: underline;
-		text-underline-offset: 0.2em;
+		text-decoration-color: var(--colour-line);
+		text-underline-offset: 0.25em;
 	}
 
-	.code {
-		display: block;
-		color: var(--colour-muted);
-		font-size: var(--text-xs);
+	.link:hover {
+		color: var(--colour-primary);
+		text-decoration-color: currentcolor;
+	}
+
+	summary {
+		min-block-size: var(--target);
+		align-content: center;
+		color: var(--colour-primary);
+		font-weight: 700;
 	}
 </style>

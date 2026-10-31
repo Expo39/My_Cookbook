@@ -228,7 +228,7 @@ export function emptyForm(section = ''): FormData {
 		slug: '',
 		slugTouched: false,
 		newSections: [],
-		groups: [emptyGroup()],
+		groups: [{ ...emptyGroup(), items: [] }],
 		steps: [emptyStep()],
 		tips: [],
 		related: [],
