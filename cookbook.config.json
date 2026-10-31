@@ -10,6 +10,7 @@
     }
   },
   "ai": {
-    "endpoint": "https://sapori-ai.antoniogaldes2.workers.dev"
+    "endpoint": "https://sapori-ai.antoniogaldes2.workers.dev",
+    "turnstileSiteKey": "0x4AAAAAAFuT21sTT_fjfaMN"
   }
 }
