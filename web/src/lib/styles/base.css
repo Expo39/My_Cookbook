@@ -78,6 +78,11 @@
 	font-style: normal;
 	font-weight: 600;
 	font-display: swap;
+	/* Literata keeps 0.46em above its digits and 0.31em below, so numbers sat low in pills and
+	   circles. The same total height, split evenly around the digits, centres them. */
+	ascent-override: 110.5%;
+	descent-override: 38.5%;
+	line-gap-override: 0%;
 	src: url('../../../node_modules/@fontsource/literata/files/literata-latin-ext-600-normal.woff2')
 		format('woff2');
 	unicode-range:
@@ -91,6 +96,11 @@
 	font-style: normal;
 	font-weight: 600;
 	font-display: swap;
+	/* Literata keeps 0.46em above its digits and 0.31em below, so numbers sat low in pills and
+	   circles. The same total height, split evenly around the digits, centres them. */
+	ascent-override: 110.5%;
+	descent-override: 38.5%;
+	line-gap-override: 0%;
 	src: url('../../../node_modules/@fontsource/literata/files/literata-latin-600-normal.woff2')
 		format('woff2');
 	unicode-range:
@@ -182,6 +192,8 @@ label,
 input[type='checkbox'],
 input[type='radio'] {
 	cursor: pointer;
+	/* No double-tap zoom on controls, so a quick second tap (unticking a line) is a tap too. */
+	touch-action: manipulation;
 }
 
 button:disabled {
