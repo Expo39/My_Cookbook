@@ -1,46 +1,47 @@
 <script lang="ts">
 	import { base } from '$app/paths';
 	import { cardContent } from '$lib/card/content';
-	import { SHARE_FORMATS, type FormatId } from '$lib/card/layout';
 	import { loadPhoto, renderCard, toBlob } from '$lib/card/render';
 	import { instagram } from '$lib/config';
 	import { loadCore, qrMatrix } from '$lib/core';
+	import { recipeText } from '$lib/kitchen/share-text';
 	import { photoOf, widthUpTo } from '$lib/photo';
+	import { servingsText } from '$lib/recipe/format';
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { canonicalUrl } from '$lib/seo/site';
 	import { download, shareFile, shareLink } from '$lib/share';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import type { RecipeCard } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
-	import Segmented from './Segmented.svelte';
 
-	let { card, model, onprint }: { card: RecipeCard; model: RecipeModel; onprint: () => void } =
-		$props();
+	/**
+	 * Opens on a preview of the recipe card, drawn for what the reader sees now: their servings,
+	 * units and variants, with every ingredient and a code that opens the recipe. The card goes out
+	 * with the recipe's link; a recipe kept on this device has no link, so that option is greyed out.
+	 */
+	let {
+		card,
+		model,
+		local = false,
+		onprint
+	}: { card: RecipeCard; model: RecipeModel; local?: boolean; onprint: () => void } = $props();
 
-	interface Made {
-		blob: Blob;
-		url: string;
-		name: string;
-		format: FormatId;
-		servings: number;
-		units: string;
-		variants: string;
-	}
+	const FORMAT = 'portrait';
 
 	let dialog: HTMLDialogElement;
-	let format = $state<FormatId>('portrait');
-	let made = $state<Made | null>(null);
+	let made = $state<{ blob: Blob; url: string; name: string } | null>(null);
 	let busy = $state(false);
 	let status = $state('');
+	let withText = $state(false);
 
 	const title = $derived(model.data.recipe.title);
-	const options = SHARE_FORMATS.map(({ id, label, ratio }) => ({
-		value: id,
-		label: `${label} ${ratio}`
-	}));
+	const serves = $derived(servingsText(model.view.servings, model.data.recipe.servingsNoun));
+	const link = () => `${location.origin}${location.pathname}${model.search('')}`;
+	const asText = () => recipeText(title, serves, model.view, local ? undefined : link());
 
 	export function show() {
 		dialog.showModal();
+		void make();
 	}
 
 	function reset() {
@@ -49,18 +50,17 @@
 		status = '';
 	}
 
-	/** Draws the card for what the reader sees now: their servings, units and variants. */
-	async function make(): Promise<Made | null> {
+	async function make() {
 		busy = true;
-		status = 'Making your card...';
 		try {
-			const search = model.search('');
 			let qr = null;
-			try {
-				await loadCore();
-				qr = qrMatrix(`${canonicalUrl(card.id)}${search}`) ?? null;
-			} catch {
-				/* the card is still useful without the code */
+			if (!local) {
+				try {
+					await loadCore();
+					qr = qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null;
+				} catch {
+					/* the card is still useful without the code */
+				}
 			}
 			const info = photoOf(card.image);
 			const photo = info
@@ -75,52 +75,42 @@
 				hasPhoto: photo !== null,
 				instagram: instagram?.handle
 			});
-			const blob = await toBlob(await renderCard({ format, content, photo }));
+			const blob = await toBlob(await renderCard({ format: FORMAT, content, photo }));
 			reset();
-			made = {
-				blob,
-				url: URL.createObjectURL(blob),
-				name: `${card.id.split('/').at(-1)}-${format}.png`,
-				format,
-				servings: model.view.servings,
-				units: model.effectiveSystem,
-				variants: Object.entries(model.chosenVariants)
-					.map(([key, option]) => `${key}:${option}`)
-					.join(',')
-			};
-			status = '';
-			return made;
+			made = { blob, url: URL.createObjectURL(blob), name: `${card.id.split('/').at(-1)}.png` };
 		} catch {
-			status = 'The card could not be made. Try again, or share the link instead.';
-			return null;
+			status = 'The card could not be made. Close this and try again.';
 		} finally {
 			busy = false;
 		}
 	}
 
-	async function copyOrShareLink() {
-		const url = `${location.origin}${location.pathname}${model.search('')}`;
-		const outcome = await shareLink(title, url);
+	async function sendCard() {
+		if (!made) return;
+		const file = new File([made.blob], made.name, { type: 'image/png' });
+		const text = withText ? asText() : local ? undefined : link();
+		const outcome = await shareFile(file, title, text);
+		if (outcome === 'shared') dialog.close();
+		if (outcome === 'unsupported' || outcome === 'failed') {
+			status = 'This browser cannot send the image straight away. Save it, then send it.';
+		}
+	}
+
+	async function sendLink() {
+		const outcome = await shareLink(title, link());
 		if (outcome === 'cancelled') return;
 		dialog.close();
 		if (outcome === 'copied') chrome.notify('Link copied');
-		if (outcome === 'failed')
-			chrome.notify('Could not share. Copy the address from the bar instead.', 5000);
+		if (outcome === 'failed') chrome.notify('Could not share. Copy the address instead.', 5000);
 	}
 
-	async function shareCard() {
-		const result = await make();
-		if (!result) return;
-		const file = new File([result.blob], result.name, { type: 'image/png' });
-		const outcome = await shareFile(file, title);
-		if (outcome === 'shared') dialog.close();
-		if (outcome === 'unsupported') status = 'This browser cannot share the image. Save it instead.';
-		if (outcome === 'failed') status = 'Sharing did not work. Save the image instead.';
-	}
-
-	function chooseFormat(value: string) {
-		format = value as FormatId;
-		if (made) void make();
+	async function copyText() {
+		try {
+			await navigator.clipboard.writeText(asText());
+			chrome.notify('Recipe copied. Paste it anywhere.');
+		} catch {
+			status = 'The recipe could not be copied.';
+		}
 	}
 
 	function print() {
@@ -138,47 +128,46 @@
 >
 	<div class="panel">
 		<div class="head">
-			<h2 id="share-title">Share this recipe</h2>
+			<h2 id="share-title">Share</h2>
 			<button type="button" class="close" aria-label="Close" onclick={() => dialog.close()}>
 				<Icon name="x" />
 			</button>
 		</div>
 
-		<Segmented
-			legend="Card format"
-			name="card-format"
-			{options}
-			value={format}
-			onchange={chooseFormat}
-		/>
+		<figure aria-busy={busy}>
+			{#if made}
+				<img src={made.url} alt="The recipe card for {title}" />
+			{:else}
+				<p class="making">{status || 'Making your card...'}</p>
+			{/if}
+		</figure>
+
+		<label class="check">
+			<input type="checkbox" bind:checked={withText} />
+			<span>Send the whole recipe as text too</span>
+		</label>
 
 		<div class="actions">
-			<button type="button" class="primary" disabled={busy} onclick={shareCard}>
-				<Icon name="image" />Share recipe card
+			<button type="button" class="primary" disabled={!made} onclick={sendCard}>
+				<Icon name="send" />Send the card
 			</button>
-			<button type="button" onclick={copyOrShareLink}><Icon name="link" />Share link</button>
-			<button type="button" onclick={print}><Icon name="printer" />Print card</button>
+			<button type="button" disabled={!made} onclick={() => made && download(made.blob, made.name)}>
+				<Icon name="download" />Save image
+			</button>
+			<button type="button" disabled={local} onclick={sendLink}>
+				<Icon name="link" />Send the link
+			</button>
+			<button type="button" onclick={copyText}><Icon name="copy" />Copy as text</button>
+			<button type="button" onclick={print}><Icon name="printer" />Print</button>
 		</div>
 
-		<p class="status" role="status">{status}</p>
-
-		{#if made}
-			<figure>
-				<img
-					src={made.url}
-					alt="Preview of the recipe card for {title}"
-					data-format={made.format}
-					data-servings={made.servings}
-					data-units={made.units}
-					data-variants={made.variants}
-				/>
-				<figcaption>
-					<button type="button" onclick={() => made && download(made.blob, made.name)}>
-						<Icon name="download" />Save image
-					</button>
-				</figcaption>
-			</figure>
+		{#if local}
+			<p class="note">
+				This recipe is only on your device, so it has no link yet. The card and the text can be sent
+				as they are.
+			</p>
 		{/if}
+		{#if made && status}<p class="note" role="status">{status}</p>{/if}
 	</div>
 </dialog>
 
@@ -187,7 +176,7 @@
 		inset: auto 0 0;
 		inline-size: 100%;
 		max-inline-size: none;
-		max-block-size: 92dvh;
+		max-block-size: 94dvh;
 		margin: 0;
 		padding: 0;
 		border: 0;
@@ -210,7 +199,7 @@
 	.panel {
 		display: grid;
 		gap: var(--space-4);
-		padding: var(--space-5) var(--space-5) max(var(--space-5), env(safe-area-inset-bottom, 0px));
+		padding: var(--space-4) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, 0px));
 	}
 
 	.head {
@@ -219,10 +208,48 @@
 		justify-content: space-between;
 	}
 
+	figure {
+		display: grid;
+		place-items: center;
+		min-block-size: 12rem;
+		margin: 0;
+	}
+
+	img {
+		max-inline-size: 100%;
+		max-block-size: 50dvh;
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-s);
+		box-shadow: var(--shadow-float);
+		object-fit: contain;
+	}
+
+	.making {
+		color: var(--colour-muted);
+	}
+
+	.check {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+	}
+
+	.check input {
+		inline-size: 1.25rem;
+		block-size: 1.25rem;
+		accent-color: var(--colour-primary);
+	}
+
+	/* The main action takes a row of its own; the rest pair up, short enough for a phone. */
 	.actions {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: var(--space-2);
+	}
+
+	.primary {
+		grid-column: 1 / -1;
 	}
 
 	button {
@@ -231,12 +258,13 @@
 		justify-content: center;
 		gap: var(--space-2);
 		min-block-size: var(--target);
-		padding-inline: var(--space-4);
+		padding-inline: var(--space-3);
 		border: 1px solid var(--colour-line);
 		border-radius: var(--radius-s);
 		background: var(--colour-surface);
 		color: var(--colour-primary);
 		font-weight: 700;
+		white-space: nowrap;
 		transition: background-color var(--duration-micro);
 	}
 
@@ -245,7 +273,8 @@
 	}
 
 	button:disabled {
-		opacity: 0.6;
+		color: var(--colour-muted);
+		opacity: 0.5;
 	}
 
 	.primary {
@@ -265,25 +294,9 @@
 		background: transparent;
 	}
 
-	.status {
-		min-block-size: 1.6em;
+	.note {
 		color: var(--colour-muted);
 		font-size: var(--text-s);
-	}
-
-	figure {
-		display: grid;
-		justify-items: center;
-		gap: var(--space-3);
-		margin: 0;
-	}
-
-	img {
-		max-inline-size: 100%;
-		max-block-size: 45dvh;
-		border: 1px solid var(--colour-line);
-		border-radius: var(--radius-s);
-		object-fit: contain;
 	}
 
 	@keyframes rise {
@@ -296,11 +309,15 @@
 	@media (min-width: 48rem) {
 		dialog {
 			inset: 0;
-			inline-size: min(34rem, calc(100vw - 2 * var(--space-4)));
+			inline-size: min(30rem, calc(100vw - 2 * var(--space-4)));
 			block-size: fit-content;
 			margin: auto;
 			border: 1px solid var(--colour-line);
 			border-radius: var(--radius-m);
+		}
+
+		.panel {
+			padding: var(--space-5);
 		}
 	}
 </style>

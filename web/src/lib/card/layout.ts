@@ -7,15 +7,8 @@ import { ellipsize, fitLines, ingredientWindow, type Face, type Measure } from '
 
 export const layout = spec;
 
-export type FormatId = 'og' | 'portrait' | 'story' | 'pin';
+export type FormatId = 'og' | 'portrait' | 'story';
 export type Format = (typeof spec.formats)[FormatId];
-
-/** The formats a reader can pick in the share sheet, with the names the sheet gives them. */
-export const SHARE_FORMATS: { id: Exclude<FormatId, 'og'>; label: string; ratio: string }[] = [
-	{ id: 'portrait', label: 'Post', ratio: '4:5' },
-	{ id: 'story', label: 'Story', ratio: '9:16' },
-	{ id: 'pin', label: 'Pin', ratio: '2:3' }
-];
 
 export interface Line {
 	amount: string;
@@ -240,35 +233,49 @@ function sheet(pen: Pen, format: Format, content: Content, measure: Measure) {
 	const qrBox = Math.round(s.qrBox * u);
 	const qrX = Math.round(w - margin - qrBox);
 	const qrY = Math.round(h - format.safeBottom - margin - qrBox);
-	const step = s.lineStep * u;
+	// Every ingredient is shown: the lines shrink to fit, down to a size that still reads, then a
+	// long list runs in two columns. Only a list too long even for that ends in "+ N more".
+	const total = content.ingredients.length;
 	const space = qrY - s.footerGap * u - cursor;
-	const fit = space > 0 ? Math.floor(space / step) : 0;
-	const { shown, more } = ingredientWindow(content.ingredients.length, fit, s.maxLines);
+	const base = s.lineStep * u;
+	const columns = total * base * s.minLineScale > space ? 2 : 1;
+	const wanted = Math.max(Math.ceil(total / columns), 1) * base;
+	const scale = Math.min(1, Math.max(s.minLineScale, space / wanted));
+	const step = base * scale;
+	const rows = space > 0 ? Math.floor(space / step) : 0;
+	const { shown, more } = ingredientWindow(total, rows * columns, total);
+	const perColumn = Math.max(Math.ceil((shown + (more > 0 ? 1 : 0)) / columns), 1);
 
-	const lineSize = s.lineSize * u;
-	const amountRight = margin + s.amountColumn * u;
-	const restX = amountRight + s.amountGap * u;
-	const restWidth = w - margin - restX;
+	const lineSize = s.lineSize * u * scale;
+	const leading = step / lineSize;
+	const gap = s.amountGap * u * scale;
+	const columnGap = 2 * s.amountGap * u;
+	const columnWidth = (w - 2 * margin - (columns - 1) * columnGap) / columns;
+	const share = columns === 2 ? s.pairedAmountShare : 1;
+	const amountWidth = s.amountColumn * u * scale * share;
+	const slot = (i: number) => {
+		const left = margin + Math.floor(i / perColumn) * (columnWidth + columnGap);
+		const amountRight = left + amountWidth;
+		const restX = amountRight + gap;
+		return {
+			top: cursor + (i % perColumn) * step,
+			amountRight,
+			restX,
+			restWidth: left + columnWidth - restX
+		};
+	};
 	content.ingredients.slice(0, shown).forEach((line, i) => {
-		const top = cursor + i * step;
-		const leading = step / lineSize;
+		const { top, amountRight, restX, restWidth } = slot(i);
 		if (line.amount) {
-			const amount = ellipsize(measure, 'num', lineSize, line.amount, s.amountColumn * u);
+			const amount = ellipsize(measure, 'num', lineSize, line.amount, amountWidth);
 			pen.text(amountRight, top, leading, amount, 'num', lineSize, p.ink, true);
 		}
 		const rest = ellipsize(measure, 'body', lineSize, line.rest, restWidth);
 		pen.text(restX, top, leading, rest, 'body', lineSize, p.ink);
 	});
 	if (more > 0) {
-		pen.text(
-			restX,
-			cursor + shown * step,
-			step / lineSize,
-			`+ ${more} more`,
-			'body',
-			lineSize,
-			p.muted
-		);
+		const { top, restX } = slot(shown);
+		pen.text(restX, top, leading, `+ ${more} more`, 'body', lineSize, p.muted);
 	}
 
 	if (content.qr) {
