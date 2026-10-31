@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
+	import { preferences } from '$lib/stores/preferences.svelte';
 	import { stepTick, type Ticks } from '$lib/stores/ticks.svelte';
 	import type { ScaledStep } from '$lib/types/recipe';
+	import Hint from './Hint.svelte';
 	import Icon from './Icon.svelte';
 	import StepText from './StepText.svelte';
 
@@ -26,6 +28,13 @@
 			text: model.data.recipe.steps[number - 1]?.text ?? step.text
 		});
 	const done = $derived(ticks.countOf(steps.map((step, i) => tickOf(step, i + 1))));
+	/** Until the cook has found it, the number circles say they can be tapped. */
+	const showHint = $derived(hydrated && !preferences.stepHintDismissed && done === 0);
+
+	function toggle(tick: string) {
+		ticks.toggle(tick);
+		preferences.dismissStepHint();
+	}
 
 	interface Stage {
 		heading?: string | null;
@@ -54,6 +63,13 @@
 		</div>
 	</div>
 
+	{#if showHint}
+		<Hint
+			text="Tap a step's number to mark it done"
+			ondismiss={() => preferences.dismissStepHint()}
+		/>
+	{/if}
+
 	{#each stages as stage, s (s)}
 		<div class="stage">
 			{#if stage.heading}<h3>{stage.heading}</h3>{/if}
@@ -61,7 +77,7 @@
 				{#each stage.steps as { step, number } (number)}
 					{@const tick = tickOf(step, number)}
 					{@const ticked = ticks.has(tick)}
-					<li class:ticked>
+					<li class:ticked class:beckon={showHint && number === 1}>
 						<input
 							type="checkbox"
 							class="num"
@@ -69,7 +85,7 @@
 							aria-label="Mark step {number} as done"
 							checked={ticked}
 							disabled={!hydrated}
-							onchange={() => ticks.toggle(tick)}
+							onchange={() => toggle(tick)}
 						/>
 						<div class="body">
 							<StepText {step} {recipe} {number} />
@@ -159,22 +175,24 @@
 		margin: 0;
 	}
 
+	input::before,
+	input::after {
+		position: absolute;
+		inset: 0;
+		margin: auto;
+	}
+
 	input::before {
 		content: '';
-		position: absolute;
-		inset: 0.375rem auto auto 50%;
 		inline-size: 2rem;
 		block-size: 2rem;
 		border: 2px solid var(--colour-primary);
 		border-radius: var(--radius-pill);
-		transform: translateX(-50%);
 		transition: background-color var(--duration-micro);
 	}
 
 	input::after {
 		content: attr(data-number);
-		position: absolute;
-		inset: 0.375rem 0 auto;
 		block-size: 2rem;
 		color: var(--colour-primary);
 		line-height: 2rem;
@@ -185,14 +203,25 @@
 		background: var(--colour-primary);
 	}
 
+	/* The first circle breathes a few times, so a new cook sees the numbers can be tapped. */
+	.beckon input::before {
+		animation: beckon 1.6s var(--ease-out) 0.8s 3;
+	}
+
+	@keyframes beckon {
+		50% {
+			box-shadow: 0 0 0 0.4rem var(--colour-tint);
+		}
+	}
+
+	/* A tick drawn as the corner of a box: centred, then lifted by the part that hangs below. */
 	input:checked::after {
 		content: '';
-		inset: 0.8rem auto auto 50%;
-		inline-size: 0.35rem;
-		block-size: 0.65rem;
+		inline-size: 0.4rem;
+		block-size: 0.75rem;
 		border: solid var(--colour-on-primary);
-		border-width: 0 2px 2px 0;
-		transform: translate(-50%, -12%) rotate(45deg);
+		border-width: 0 2.5px 2.5px 0;
+		transform: translateY(-0.1rem) rotate(45deg);
 	}
 
 	input:disabled {
@@ -240,6 +269,7 @@
 
 		input::after {
 			position: static;
+			margin: 0;
 			color: var(--colour-ink);
 			text-align: start;
 		}

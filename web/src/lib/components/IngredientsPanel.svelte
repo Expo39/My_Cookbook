@@ -4,6 +4,7 @@
 	import { ingredientTick, type Ticks } from '$lib/stores/ticks.svelte';
 	import { unitLabel } from '$lib/recipe/format';
 	import type { ScaledIngredient } from '$lib/types/recipe';
+	import Hint from './Hint.svelte';
 	import Icon from './Icon.svelte';
 	import IngredientLine from './IngredientLine.svelte';
 
@@ -60,17 +61,7 @@
 	</div>
 
 	{#if model.ready && anyPickable && !preferences.unitHintDismissed}
-		<p class="hint">
-			<Icon name="info" size={18} />
-			<span>Tap an amount to change its unit</span>
-			<button
-				type="button"
-				aria-label="Dismiss the hint"
-				onclick={() => preferences.dismissUnitHint()}
-			>
-				<Icon name="x" size={18} />
-			</button>
-		</p>
+		<Hint text="Tap an amount to change its unit" ondismiss={() => preferences.dismissUnitHint()} />
 	{/if}
 
 	{#each model.view.groups as group, g (g)}
@@ -139,8 +130,7 @@
 		font-size: var(--text-s);
 	}
 
-	.progress button,
-	.hint button {
+	.progress button {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-1);
@@ -157,21 +147,6 @@
 	.progress button:disabled {
 		color: var(--colour-muted);
 		opacity: 0.6;
-	}
-
-	.hint {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		padding-inline-start: var(--space-3);
-		border: 1px dashed var(--colour-line);
-		border-radius: var(--radius-s);
-		color: var(--colour-muted);
-		font-size: var(--text-s);
-	}
-
-	.hint span {
-		flex: 1;
 	}
 
 	.group {
@@ -223,8 +198,7 @@
 	}
 
 	@media print {
-		.progress,
-		.hint {
+		.progress {
 			display: none;
 		}
 	}
