@@ -155,6 +155,8 @@ test('every page carries a content security policy that allows only the services
 test("the owner's info bubbles stay on screen, and the drawer never scrolls sideways", async ({
 	page
 }) => {
+	// The set-up form carries the bubbles; it shows while no editing key has been published.
+	await page.route('**/admin.json', (route) => route.fulfill({ status: 404, body: '' }));
 	await page.goto('./');
 	await page.getByRole('button', { name: 'Settings' }).click();
 	const drawer = page.getByRole('dialog', { name: 'Settings' });
