@@ -1,26 +1,42 @@
 <script lang="ts">
 	import '$lib/styles/admin.css';
-	import type { EditorState } from '$lib/admin/editor-state.svelte';
-	import { fieldId } from '$lib/admin/editor-state.svelte';
+	import { fieldId, type EditorState } from '$lib/admin/editor-state.svelte';
 	import Icon from '../Icon.svelte';
 	import Field from './Field.svelte';
 	import TextField from './TextField.svelte';
 
-	let { ed, allowNew = true }: { ed: EditorState; allowNew?: boolean } = $props();
+	/** `local` is a recipe kept on this device, whose new sections live only with it. */
+	let { ed, local = false }: { ed: EditorState; local?: boolean } = $props();
 
 	const id = fieldId('section');
+	const NEW = '+new';
+
+	/** A new section is made right where the choice is, without leaving the picker. */
+	let making = $state(false);
 	let title = $state('');
+	let parent = $state('');
 	let problem = $state('');
 
-	const current = $derived(ed.sectionOptions.find((option) => option.path === ed.form.section));
+	const plain = (label: string) => label.replace(' (new)', '');
 
-	function add(parent: string) {
-		if (ed.addSection(parent, title)) {
-			title = '';
-			problem = '';
+	function choose(event: Event) {
+		const value = (event.currentTarget as HTMLSelectElement).value;
+		if (value === NEW) {
+			parent = ed.form.section;
+			making = true;
 		} else {
-			problem = 'Give the section a name first.';
+			ed.form.section = value;
+			making = false;
 		}
+	}
+
+	function add() {
+		if (!ed.addSection(parent, title)) {
+			problem = 'Give the new section a name.';
+			return;
+		}
+		title = problem = '';
+		making = false;
 	}
 </script>
 
@@ -30,41 +46,51 @@
 		label="Section"
 		hint={ed.editing
 			? 'Choosing another section moves the recipe.'
-			: 'Where the recipe sits on the site.'}
+			: 'Where the recipe goes, such as Desserts.'}
 		error={ed.errorFor('section')}
 	>
 		<select
 			{id}
 			class="control"
-			bind:value={ed.form.section}
+			value={making ? NEW : ed.form.section}
+			onchange={choose}
 			aria-invalid={ed.errorFor('section') ? 'true' : undefined}
 		>
 			<option value="" disabled>Choose a section</option>
 			{#each ed.sectionOptions as option (option.path)}
-				<option value={option.path}>{'\u2003'.repeat(option.depth)}{option.label}</option>
+				<option value={option.path}>{' '.repeat(option.depth)}{option.label}</option>
 			{/each}
+			<option value={NEW}>+ New section...</option>
 		</select>
 	</Field>
 
-	{#if allowNew}
-		<div class="add">
+	{#if making}
+		<div class="new" role="group" aria-label="New section">
 			<TextField
 				id="new-section"
-				label="New section"
+				label="Name of the new section"
 				bind:value={title}
-				optional
-				hint="Creates a folder with its own page. Add it inside the chosen section, or at the top."
 				error={problem}
 			/>
+			<Field id="new-section-parent" label="Put it">
+				<select id="new-section-parent" class="control" bind:value={parent}>
+					<option value="">On its own, with the main sections</option>
+					{#each ed.sectionOptions as option (option.path)}
+						<option value={option.path}>Inside {plain(option.label)}</option>
+					{/each}
+				</select>
+			</Field>
+			{#if local}
+				<p class="help">
+					It stays with your recipe on this device, and the recipe shows under "Your recipes" on the
+					home page.
+				</p>
+			{/if}
 			<div class="buttons">
-				{#if current}
-					<button type="button" class="btn" onclick={() => add(ed.form.section)}>
-						<Icon name="plus" size={18} />Add inside {current.label.replace(' (new)', '')}
-					</button>
-				{/if}
-				<button type="button" class="btn" onclick={() => add('')}>
-					<Icon name="plus" size={18} />Add at the top level
+				<button type="button" class="btn primary" onclick={add}>
+					<Icon name="plus" size={18} />Add the section
 				</button>
+				<button type="button" class="btn" onclick={() => (making = false)}>Cancel</button>
 			</div>
 		</div>
 	{/if}
@@ -73,7 +99,7 @@
 		<ul class="created">
 			{#each ed.form.newSections as added (added.path)}
 				<li>
-					<span>{added.title} <code>{added.path}</code></span>
+					<span>New: {added.title}</span>
 					<button
 						type="button"
 						class="icon-btn"
@@ -89,10 +115,18 @@
 </div>
 
 <style>
-	.picker,
-	.add {
+	.picker {
 		display: grid;
 		gap: var(--space-3);
+	}
+
+	.new {
+		display: grid;
+		gap: var(--space-3);
+		padding: var(--space-4);
+		border-inline-start: 3px solid var(--colour-primary);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
 	}
 
 	.buttons {
@@ -115,10 +149,5 @@
 		border: 1px solid var(--colour-line);
 		border-radius: var(--radius-s);
 		background: var(--colour-bg);
-	}
-
-	code {
-		color: var(--colour-muted);
-		font-size: var(--text-xs);
 	}
 </style>

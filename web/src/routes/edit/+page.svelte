@@ -586,7 +586,7 @@
 				</FieldSet>
 
 				<FieldSet legend="Where it lives">
-					<SectionPicker ed={editor} allowNew={!local} />
+					<SectionPicker ed={editor} {local} />
 					{#if !local}{@render address()}{/if}
 				</FieldSet>
 
