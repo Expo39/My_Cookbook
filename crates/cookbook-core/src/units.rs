@@ -109,6 +109,11 @@ const DENSITIES: &[(&str, f64, bool)] = &[
     ("ground-almonds", 96.0, false),
 ];
 
+/// Every food id with a density, for the importer's schema and the house rules.
+pub fn food_ids() -> impl Iterator<Item = &'static str> {
+    DENSITIES.iter().map(|(name, _, _)| *name)
+}
+
 /// Looks a food up by id, dropping trailing segments until one matches (`flour-00-fine` finds `flour-00`).
 pub fn density(food: &str) -> Option<Density> {
     let mut id = food;

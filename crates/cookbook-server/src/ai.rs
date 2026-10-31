@@ -7,7 +7,8 @@ use std::{
 
 use axum::{Json, body::Bytes, extract::State};
 use cookbook_ai::{
-    AiError, chat_request, import_request, parse_chat, parse_import, parse_import_response,
+    AiError, Request as GeminiRequest, chat_request, import_request, parse_chat, parse_import,
+    parse_import_response, repair_request, review_import, settle_import,
 };
 use serde_json::{Value, json};
 
@@ -88,16 +89,32 @@ pub async fn import(
     let gemini = gemini(&state)?;
     throttle(&state.imports, &ip)?;
     let text = parse_import(None, &body)?;
-    let request = import_request(&state.config.gemini, &text);
-    let reply = gemini
-        .generate(&request)
+    let config = &state.config.gemini;
+    let ask = |request: GeminiRequest| {
+        let gemini = gemini.clone();
+        async move {
+            let reply = gemini.generate(&request).await?.reply()?;
+            if reply.truncated {
+                return Err(AiError::Truncated);
+            }
+            Ok(reply.text)
+        }
+    };
+    let answer = ask(import_request(config, &text))
         .await
-        .and_then(|response| response.reply())
         .map_err(|e| Failure::from(&e))?;
-    if reply.truncated {
-        return Err(Failure::from(&AiError::Truncated));
-    }
-    let imported = parse_import_response(&reply.text).map_err(|e| Failure::from(&e))?;
+    let first = review_import(&answer, &text);
+    // The checklist's errors, or an answer that would not parse, go back once for a repair.
+    let imported = match (first.problems, first.draft) {
+        (None, Some(draft)) => draft,
+        (problems, draft) => {
+            let problems = problems.unwrap_or_default();
+            let repaired = ask(repair_request(config, &text, &answer, &problems))
+                .await
+                .and_then(|again| parse_import_response(&again, &text));
+            settle_import(draft, repaired, &text).map_err(|e| Failure::from(&e))?
+        }
+    };
     Ok(Json(
         json!({ "recipe": imported.recipe, "checks": imported.checks }),
     ))

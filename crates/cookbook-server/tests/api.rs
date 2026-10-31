@@ -61,6 +61,40 @@ impl Gemini for Recording {
     }
 }
 
+/// Answers in turn from a script, recording each request, for the importer's repair round.
+struct Scripted {
+    answers: std::sync::Mutex<Vec<String>>,
+    seen: std::sync::Mutex<Vec<String>>,
+}
+
+impl Scripted {
+    fn new(answers: &[&str]) -> Arc<Self> {
+        Arc::new(Self {
+            answers: std::sync::Mutex::new(answers.iter().rev().map(|a| (*a).to_owned()).collect()),
+            seen: std::sync::Mutex::new(Vec::new()),
+        })
+    }
+}
+
+impl Gemini for Scripted {
+    fn generate<'a>(
+        &'a self,
+        request: &'a GeminiRequest,
+    ) -> Pin<Box<dyn Future<Output = Result<GeminiResponse, AiError>> + Send + 'a>> {
+        self.seen
+            .lock()
+            .unwrap()
+            .push(serde_json::to_string(request).unwrap());
+        let text = self.answers.lock().unwrap().pop().unwrap_or_default();
+        Box::pin(async move {
+            GeminiResponse::from_json(
+                &json!({"candidates":[{"content":{"parts":[{"text":text}]},"finishReason":"STOP"}]})
+                    .to_string(),
+            )
+        })
+    }
+}
+
 struct Reply {
     status: StatusCode,
     headers: HeaderMap,
@@ -1246,4 +1280,70 @@ async fn a_failed_check_on_a_linker_leaves_the_tree_as_it_was() {
     assert_eq!(before("mains/lentil-soup.json"), soup);
     assert_eq!(before("mains/linker.json"), broken.as_bytes());
     assert!(!k.path("recipes/sweets/lentil-soup.json").exists());
+}
+
+fn draft(step: &str) -> String {
+    json!({
+        "title": "Imported soup", "summary": "From text.", "servings": 2,
+        "ingredientGroups": [{ "items": [{ "item": "water" }] }],
+        "steps": [{ "text": step }]
+    })
+    .to_string()
+}
+
+async fn import(k: &Kitchen) -> Reply {
+    let cookie = k.login().await;
+    k.call(
+        Method::POST,
+        "/api/ai/import",
+        Some(&cookie),
+        Some(json!({ "text": "Soup: boil water." })),
+    )
+    .await
+}
+
+#[tokio::test]
+async fn a_clean_import_is_asked_for_once() {
+    let gemini = Scripted::new(&[&draft("Boil the water.")]);
+    let k = kitchen_with(Some(gemini.clone()), None);
+    assert_eq!(import(&k).await.status, StatusCode::OK);
+    assert_eq!(gemini.seen.lock().unwrap().len(), 1);
+}
+
+#[tokio::test]
+async fn an_import_the_checklist_fails_is_sent_back_once_and_the_repair_is_kept() {
+    let gemini = Scripted::new(&[&draft("Boil {@missing}."), &draft("Boil the water.")]);
+    let k = kitchen_with(Some(gemini.clone()), None);
+    let reply = import(&k).await;
+    assert_eq!(reply.status, StatusCode::OK);
+    assert_eq!(
+        reply.json()["recipe"]["steps"][0]["text"],
+        "Boil the water."
+    );
+    let seen = gemini.seen.lock().unwrap();
+    assert_eq!(seen.len(), 2);
+    assert!(seen[1].contains("E-TOKEN-UNRESOLVED"), "{}", seen[1]);
+    assert!(seen[1].contains(r#""role":"model""#));
+}
+
+#[tokio::test]
+async fn an_answer_that_is_not_json_gets_one_more_try() {
+    let gemini = Scripted::new(&["Here is your recipe: soup.", &draft("Boil the water.")]);
+    let k = kitchen_with(Some(gemini.clone()), None);
+    let reply = import(&k).await;
+    assert_eq!(reply.status, StatusCode::OK);
+    assert_eq!(reply.json()["recipe"]["title"], "Imported soup");
+    assert_eq!(gemini.seen.lock().unwrap().len(), 2);
+}
+
+#[tokio::test]
+async fn a_worse_repair_keeps_the_first_draft() {
+    let gemini = Scripted::new(&[&draft("Boil {@missing}."), "still not json"]);
+    let k = kitchen_with(Some(gemini.clone()), None);
+    let reply = import(&k).await;
+    assert_eq!(reply.status, StatusCode::OK);
+    assert_eq!(
+        reply.json()["recipe"]["steps"][0]["text"],
+        "Boil {@missing}."
+    );
 }
