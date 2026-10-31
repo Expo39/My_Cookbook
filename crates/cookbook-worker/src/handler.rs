@@ -342,6 +342,11 @@ async fn gemini(
                 },
                 Err(Refusal::Ai(error)) => {
                     console_error!("gemini: {model} attempt {} failed: {error:?}", attempt + 1);
+                    // An unknown model will not appear on a retry, but the fallback may still answer.
+                    if error == AiError::UnknownModel {
+                        last = error;
+                        break;
+                    }
                     if !error.is_retryable() {
                         return Err(from_ai(&error));
                     }
