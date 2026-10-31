@@ -12,7 +12,43 @@
 		{ id: 'your-recipes', title: 'Your own recipes' },
 		{ id: 'sharing', title: 'Sharing a recipe with everyone' },
 		{ id: 'sous-chef', title: 'The sous-chef' },
-		{ id: 'privacy', title: 'Privacy and bots' }
+		{ id: 'privacy', title: 'Privacy and bots' },
+		{ id: 'questions', title: 'Questions and answers' }
+	];
+
+	const questions = [
+		{
+			q: 'What is a part of a recipe?',
+			a: 'Some dishes are made in pieces, such as the pastry and the filling. Each part has its own heading over its ingredients. A simple recipe needs only one list, so it has no parts at all. Two parts with the same name show as two lists with the same heading, so the editor offers to put them together.'
+		},
+		{
+			q: "What is a part's total?",
+			a: 'An optional amount shown beside the part\'s name, for a part weighed out as a whole, such as "Cheese board 1150 g total". It scales with the servings like everything else.'
+		},
+		{
+			q: 'Why do my recipes stay on this device?',
+			a: 'There are no accounts, so a recipe you add is kept in this browser. It is yours to change or delete, and nobody else sees it. Use Export in Settings to keep a copy or move it to another device.'
+		},
+		{
+			q: 'How do I share a recipe with everyone?',
+			a: "Use Share with everyone next to it in Settings > Your recipes. Sharing adds it to the cookbook itself, so it needs the GitHub token, which the cookbook's owner unlocks with the password."
+		},
+		{
+			q: 'Why does the sous-chef say it is busy?',
+			a: 'The AI behind it is shared, and sometimes it is full or out of service for a while. Wait a few minutes and ask again. If it keeps happening, tell Antonio, as the service may need looking at.'
+		},
+		{
+			q: 'Do I need to be online?',
+			a: 'Only the first time. The cookbook keeps the recipes you open, so they work in the kitchen without a signal. Searching every recipe, sharing and the sous-chef need a connection.'
+		},
+		{
+			q: 'How do I switch between grams and cups?',
+			a: 'Each recipe has a units switch beside the ingredients. To open every recipe in the same units, choose them in Settings > Look and units.'
+		},
+		{
+			q: 'Why is there no web address field when I add a recipe?',
+			a: "It is made from the title for you. Only the cookbook's owner can change it, under Change in the editor, which moves the recipe to the new address."
+		}
 	];
 </script>
 
@@ -141,8 +177,9 @@
 		<h3>Adding a recipe</h3>
 		<p>
 			<a href={editHref()}>Add a recipe</a> from the home page, a section page or Settings. A title,
-			the ingredients and the method are all it needs. Paste the ingredient list in one go with
-			<strong>Paste a list</strong>, one ingredient per line, and check the rows it makes. Write the
+			the ingredients and the method are all it needs. Type or paste the ingredient list in one go
+			with <strong>Type or paste a list</strong>, one ingredient per line, and check the rows it
+			makes. A line ending in a colon, such as "For the filling:", starts a new part. Write the
 			method the way you would say it: "bake for 25 minutes at 200°C" becomes a tappable timer and a
 			temperature that converts to Fahrenheit, and the editor shows what it found under each step.
 		</p>
@@ -199,7 +236,8 @@
 			</li>
 			<li>Generate it and copy it straight away; GitHub shows it only once.</li>
 			<li>
-				Paste it in <strong>Settings &gt; For the cookbook's owner</strong>, with a password, and choose
+				Paste it in <strong>Settings &gt; For the cookbook's owner</strong>, with a password, and
+				choose
 				<strong>Set up editing</strong>.
 			</li>
 		</ol>
@@ -247,6 +285,18 @@
 			<code>robots.txt</code> and on every page. Well-behaved crawlers respect that; it cannot stop one
 			that does not.
 		</p>
+	</section>
+
+	<section id="questions" aria-labelledby="questions-title">
+		<h2 id="questions-title">Questions and answers</h2>
+		<div class="faq">
+			{#each questions as item (item.q)}
+				<details>
+					<summary>{item.q}<Icon name="chevronDown" size={20} /></summary>
+					<p>{item.a}</p>
+				</details>
+			{/each}
+		</div>
 	</section>
 
 	<p class="back"><a href="#main"><Icon name="arrowUp" size={18} />Back to the top</a></p>
@@ -339,6 +389,43 @@
 		display: grid;
 		gap: var(--space-3);
 		scroll-margin-block-start: var(--space-4);
+	}
+
+	.faq {
+		border-block-start: 1px solid var(--colour-line);
+	}
+
+	.faq details {
+		border-block-end: 1px solid var(--colour-line);
+	}
+
+	.faq summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-3);
+		min-block-size: var(--target);
+		padding-block: var(--space-3);
+		font-weight: 700;
+		list-style: none;
+	}
+
+	.faq summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.faq summary :global(svg) {
+		flex: none;
+		color: var(--colour-primary);
+		transition: transform var(--duration-micro) var(--ease-out);
+	}
+
+	.faq details[open] summary :global(svg) {
+		transform: rotate(180deg);
+	}
+
+	.faq p {
+		padding-block-end: var(--space-4);
 	}
 
 	h3 {
