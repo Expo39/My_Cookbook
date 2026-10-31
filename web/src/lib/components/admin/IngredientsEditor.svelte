@@ -28,6 +28,17 @@
 	const folded = new SvelteSet<string>();
 
 	const groups = $derived(ed.form.groups);
+
+	/** Stays in view while the cook types, unlike the placeholder. */
+	const EXAMPLES = [
+		['400 g plain flour', 'an amount, then the ingredient'],
+		['2-3 cloves garlic', 'a range'],
+		['1 lemon, zested', 'after a comma: how to prepare it'],
+		['Zest of 1 lemon', 'words before the amount'],
+		['salt to taste', 'no amount'],
+		['1 tbsp honey (optional)', 'can be left out'],
+		['For the filling:', 'starts a new part, with a heading']
+	];
 	const count = (n: number) => `${n} ${n === 1 ? 'ingredient' : 'ingredients'}`;
 
 	/*
@@ -218,6 +229,15 @@
 						Copy a list from anywhere and paste it in. Bullets, numbers and extra spaces are tidied
 						away.
 					</p>
+					<details class="examples" open>
+						<summary>Ways to write a line</summary>
+						<dl>
+							{#each EXAMPLES as [line, meaning] (line)}
+								<dt>{line}</dt>
+								<dd>{meaning}</dd>
+							{/each}
+						</dl>
+					</details>
 				</div>
 
 				<div class="preview" aria-live="polite">
@@ -346,6 +366,34 @@
 		min-block-size: 12rem;
 		field-sizing: content;
 		line-height: 1.7;
+	}
+
+	.examples summary {
+		min-block-size: var(--target);
+		align-content: center;
+		color: var(--colour-primary);
+		font-size: var(--text-s);
+		font-weight: 700;
+	}
+
+	.examples dl {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: var(--space-1) var(--space-3);
+		padding: var(--space-3);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+		font-size: var(--text-s);
+	}
+
+	.examples dt {
+		font-family: var(--font-num);
+		font-weight: 600;
+	}
+
+	.examples dd {
+		margin: 0;
+		color: var(--colour-muted);
 	}
 
 	.preview {
