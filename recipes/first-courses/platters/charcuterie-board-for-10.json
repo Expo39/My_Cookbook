@@ -23,7 +23,7 @@
     {
       "name": "Charcuterie",
       "total": {
-        "qty": 840,
+        "qty": 775,
         "unit": "g"
       },
       "items": [
@@ -36,7 +36,7 @@
         },
         {
           "amount": {
-            "qty": 130,
+            "qty": 125,
             "unit": "g"
           },
           "item": "additional prosciutto or salami"
@@ -64,7 +64,7 @@
         },
         {
           "amount": {
-            "qty": 180,
+            "qty": 175,
             "unit": "g"
           },
           "item": "salami variety"
@@ -111,7 +111,7 @@
         },
         {
           "amount": {
-            "qty": 230,
+            "qty": 225,
             "unit": "g"
           },
           "item": "nuts and dried fruit"
