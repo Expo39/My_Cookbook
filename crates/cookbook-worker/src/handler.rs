@@ -6,7 +6,11 @@ use cookbook_ai::{
     parse_import, parse_import_response, parse_site_recipe, site_recipe_url, stream_endpoint,
     unknown_recipe,
 };
-use futures_util::{StreamExt, stream};
+use futures_util::{
+    StreamExt,
+    future::{Either, select},
+    stream,
+};
 use serde_json::json;
 use worker::{
     ByteStream, Date, Delay, Env, Fetch, Headers, Method, Request, RequestInit, Response, Result,
@@ -300,9 +304,15 @@ fn relay(mut upstream: Response) -> Result<Response> {
     Ok(response)
 }
 
+/// How long one call may wait for Gemini to start answering. A model that has not answered by
+/// then is stuck, not slow, and a cook should not be left watching "Thinking..." for minutes.
+const REPLY_WITHIN: Duration = Duration::from_secs(25);
+
 enum Refusal {
     /// The model does not take the thinking level that was asked for.
     Thinking,
+    /// The model sent nothing back within `REPLY_WITHIN`.
+    Silent,
     Ai(AiError),
 }
 
@@ -340,6 +350,12 @@ async fn gemini(
                     }
                     None => return Err(from_ai(&AiError::Unavailable)),
                 },
+                // Asking a stuck model again only doubles the wait; the fallback may still answer.
+                Err(Refusal::Silent) => {
+                    console_error!("gemini: {model} sent nothing within {REPLY_WITHIN:?}");
+                    last = AiError::Unavailable;
+                    break;
+                }
                 Err(Refusal::Ai(error)) => {
                     console_error!("gemini: {model} attempt {} failed: {error:?}", attempt + 1);
                     // An unknown model will not appear on a retry, but the fallback may still answer.
@@ -380,7 +396,12 @@ async fn send(
         .with_headers(headers)
         .with_body(Some(payload.into()));
     let outgoing = Request::new_with_init(url, &init).map_err(failed)?;
-    let mut response = Fetch::Request(outgoing).send().await.map_err(failed)?;
+    let fetch = Fetch::Request(outgoing);
+    let reply = Box::pin(fetch.send());
+    let mut response = match select(reply, Box::pin(Delay::from(REPLY_WITHIN))).await {
+        Either::Left((result, _)) => result.map_err(failed)?,
+        Either::Right(_) => return Err(Refusal::Silent),
+    };
     let status = response.status_code();
     if (200..300).contains(&status) {
         return Ok(response);
