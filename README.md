@@ -36,9 +36,9 @@ The "Bright Mediterranean" design: sea blue and terracotta on limestone white, w
 |---|---|
 | ![The home page, with the sections as cards under the search box](docs/screenshots/home-desktop.webp) | ![Beef Wellington in the dark theme, with the ingredients beside the method and its timers](docs/screenshots/recipe-desktop-dark.webp) |
 
-| Scaled on a phone | Adding your own recipe | The sous-chef |
-|---|---|---|
-| ![Beef Wellington scaled to 8 servings on a phone, with tappable amounts](docs/screenshots/recipe-phone.webp) | ![The editor on a phone, showing the timers and temperature found in a step written in plain words](docs/screenshots/editor-phone.webp) | ![The sous-chef answering whether the recipe can be made ahead](docs/screenshots/souschef-phone.webp) |
+| Scaled on a phone | Cook mode | Adding your own recipe | The sous-chef |
+|---|---|---|---|
+| ![Beef Wellington scaled to 8 servings on a phone, with tappable amounts](docs/screenshots/recipe-phone.webp) | ![Cook mode on step 3 of Beef Wellington, with the step's own ingredients listed under it and the shallots ticked off](docs/screenshots/cook-mode-phone.webp) | ![The editor on a phone, showing the timers and temperature found in a step written in plain words](docs/screenshots/editor-phone.webp) | ![The sous-chef answering whether the recipe can be made ahead](docs/screenshots/souschef-phone.webp) |
 
 A one-minute walkthrough, with captions, is on the site's [How to use](https://expo39.github.io/My_Cookbook/how-to-use) page.
 
@@ -47,11 +47,12 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 ### Reading and cooking
 
 - Section pages and recipe pages pre-rendered for every folder and recipe, with `Recipe` JSON-LD and Open Graph tags.
-- Search that ignores accents, and an ingredients mode that ranks recipes by how many of their ingredients the cook already has.
-- Cook mode: one step at a time, keyboard and swipe navigation, the step's ingredients beside it, and a screen wake lock where the browser supports one.
+- Search that ignores accents, and an ingredients mode that ranks recipes by how many of their ingredients the cook already has. The search page shows how to search with examples to tap, and offers the ingredients mode when a comma is typed.
+- Small "i" circles explain the less obvious controls: a bubble on hover with a mouse, a note underneath on a phone.
+- Cook mode: one step at a time in large type, with the ingredients that step uses listed under it to tick off (found from the step's words, so recipes need no extra markup), the full list beside it on a wide screen or one tap away on a phone, the next step previewed, a "Ready to serve" screen with the chef's tips at the end, keyboard and swipe navigation, and a screen wake lock where the browser supports one.
 - Timers started from the method, kept as end times so they survive a reload, and able to run side by side.
 - A "serve at" planner that works back from a serving time when the steps carry timings.
-- Ticks on ingredients and steps, private notes, favourites and recently viewed recipes, all kept on the device. Ticks follow the ingredient or step, so they survive an update to the recipe.
+- Ticks on ingredients and steps, private notes, favourites and recently viewed recipes, all kept on the device. Ticks follow the ingredient or step, so they survive an update to the recipe, and cook mode shares them with the recipe page. Until a first step is ticked, a hint and a gently breathing first circle show that a step's number can be tapped.
 - A recipe updated while it is open offers its new version in place, keeping the servings, ticks, timers and list.
 - A how-to page covering every feature, with a recorded walkthrough.
 - Recipe variants (for example vanilla extract or pods), each replacing ingredients, steps and tips by key.
@@ -65,30 +66,37 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 
 ### Sharing
 
-- Share a link through the system share sheet, or copy it.
-- Share cards (Open Graph, portrait and story) rendered at build time, and a card drawn in the browser for the current scale, units and variant.
-- A printable A5 index card.
-- A shopping list that merges ingredients across recipes and can be shared as text.
+- **Share** opens straight onto a recipe card drawn in the browser for the current scale, units and variant, with every ingredient (long ones wrap; long lists run in two columns) and a QR code for the recipe.
+- On a phone, **Send the card** hands the image and the link to the system share sheet (WhatsApp, Messenger, Instagram and so on), optionally with the whole recipe as text; most computers get **Copy the card** instead. **Save image**, **Send the link**, **Copy as text** and **Print** (an A5 index card) sit beside it. A recipe kept on the device has no link yet.
+- Share cards (Open Graph, portrait and story) rendered at build time with the same layout.
+- A shopping list that merges ingredients across recipes and can be shared as text. Your own items are typed as you would write them ("2 kg potatoes"), and any amount can change its number and unit.
 
 ### Your own recipes
 
 - Anyone can add recipes, with no account and no token. They are kept in the browser (IndexedDB), appear on the home page and in their section marked "Yours", and have every feature of a published recipe.
-- The editor is friendly in this mode: paste the ingredient list in one go, write the method in plain words ("bake for 25 minutes at 200C" becomes a timer and a converted temperature), and find the rarer fields folded away.
-- Export, import and clear-all in Settings, and search and favourites include them.
+- The editor is friendly in this mode: write the ingredient list as on paper and watch it read back as you type, write the method in plain words ("bake for 25 minutes at 200C" becomes a timer and a converted temperature), and find the rarer fields folded away.
+- Export (text, CSV or JSON) and clear-all in Settings, a first-time note and a weekly reminder that they live only in this browser, and search and favourites include them.
 - **Share with everyone** hands a recipe to the cookbook with the GitHub token, after which it is the cookbook's.
 
 ### Editing
 
 - An in-site editor with a live preview and the recipe checklist running in WebAssembly as the recipe is typed.
 - One commit per save, carrying the recipe, its photo and any new sections, followed by the CI and deploy status.
+- **Add a photo** on every recipe page, straight from a phone's camera or gallery: committed to GitHub with the recipe when editing is unlocked, kept in this browser otherwise, and sent along when a recipe of one's own is shared.
 - Moving a recipe to another section or address, conflict protection against overwriting a newer version, and a delete check for recipes that still link to it.
 - The `add-recipe` skill for Claude Code, which turns pasted text, a link or a photo into a checked recipe file.
 
 ### AI
 
-- A sous-chef chat on each recipe page, your own recipes included, with the answer streamed as it is written. A busy model is retried with backoff, then an optional fallback model; Cloudflare Turnstile can be switched on.
+- A sous-chef chat on each recipe page, your own recipes included, with the answer streamed as it is written and labelled with the model that wrote it. As it opens it says whether the cook is offline, the service is unreachable or the AI is in high demand. A busy, retired or out-of-quota model hands over to a lighter fallback (Google's newest Flash-Lite), and the cook is told; a silent model is given up after 25 seconds. Cloudflare Turnstile checks that a person is asking, and per-visitor and site-wide limits keep bots from draining the quota.
 - Import from text in the editor, which fills the form for review.
 - Both go through a Cloudflare Worker (or the self-hosted server), so the Gemini key never reaches the browser. Without an AI endpoint, both are hidden.
+
+### Security
+
+- A Content Security Policy on every page: only the site's own scripts run, and the page talks only to the AI worker, GitHub and Turnstile.
+- The editing token is encrypted in the browser with the owner's password, kept per tab, and can only write recipe files.
+- The worker serves only the cookbook's own pages, and the importer needs a signed proof.
 
 ### Offline
 
@@ -162,11 +170,11 @@ The home page lists the top-level sections and recently added recipes, with sear
 
 ### Shopping list
 
-**Add to shopping list** on a recipe adds its ingredients at the current scale. The list (`/shopping-list`) merges the same food across recipes, lets items be ticked off, and **Share list** shares it as text. Adding a recipe again updates its entry instead of doubling it.
+**Add to shopping list** on a recipe adds its ingredients at the current scale. The list (`/shopping-list`) merges the same food across recipes, lets items be ticked off, and **Share list** shares it as text. Adding a recipe again updates its entry instead of doubling it. **Add an item** takes anything else in one box, written as on paper; tapping any amount opens a small card to change its number and unit.
 
 ### Sharing
 
-**Share** opens a sheet with three options: share the link (with the current servings, units and variant in it), share a recipe card image drawn for the current view, or print an A5 index card.
+**Share** opens on a preview of the recipe card for the current view. **Send the card** (or **Copy the card** on a computer) sends it with the link, **Send the link** shares the address with the servings, units and variant in it, **Copy as text** copies the whole recipe, and **Print** prints an A5 index card.
 
 ### Adding a recipe
 

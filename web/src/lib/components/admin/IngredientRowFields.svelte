@@ -26,7 +26,7 @@
 	const amount = {
 		get: () => (row.qtyMax ? `${row.qtyMin}-${row.qtyMax}` : row.qtyMin),
 		set: (value: string) => {
-			const range = value.match(/^\s*(\S+?)\s*(?:-|–|to)\s*(\S+)\s*$/i);
+			const range = value.match(/^\s*(\S+?)\s*(?:-|\u2013|to)\s*(\S+)\s*$/i);
 			[row.qtyMin, row.qtyMax] = range ? [range[1], range[2]] : [value, ''];
 		}
 	};

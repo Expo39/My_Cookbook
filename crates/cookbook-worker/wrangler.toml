@@ -9,15 +9,26 @@ command = "worker-build --release"
 SITE_URL = "https://expo39.github.io/My_Cookbook"
 ALLOWED_ORIGINS = "https://expo39.github.io,http://localhost:5173"
 GEMINI_MODEL = "gemini-3.8-flash"
-RATE_LIMIT_CHAT = "30"
-RATE_LIMIT_IMPORT = "5"
 GEMINI_THINKING_LEVEL = "low"
 # The main model is pinned, so its behaviour only changes on purpose. When Google retires it,
 # the sous-chef carries on with the fallback and tells the owner. The fallback is Google's alias
 # for its newest Flash-Lite, so it never goes out of date.
 GEMINI_FALLBACK_MODEL = "gemini-flash-lite-latest"
 
-# No id is given: `wrangler deploy` creates and links the namespace on the first deploy.
+# Cloudflare's rate limiter counts without storage writes. Each visitor may ask a few questions a
+# minute, and everyone together a few more, so a crowd of addresses cannot drain the AI quota.
+[[ratelimits]]
+name = "PER_VISITOR"
+namespace_id = "1001"
+simple = { limit = 4, period = 60 }
+
+[[ratelimits]]
+name = "EVERYONE"
+namespace_id = "1002"
+simple = { limit = 20, period = 60 }
+
+# Holds short notes (the AI is busy, a model was retired). No id is given: `wrangler deploy`
+# creates and links the namespace on the first deploy.
 [[kv_namespaces]]
 binding = "RATE_LIMIT"
 

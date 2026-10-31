@@ -4,6 +4,7 @@
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import type { PanShape, Unit, UnitSystem } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
+	import InfoTip from './InfoTip.svelte';
 	import Segmented from './Segmented.svelte';
 	import ServingsStepper from './ServingsStepper.svelte';
 
@@ -59,11 +60,14 @@
 	});
 
 	// On a phone the bottom bar is the main control, so this panel starts folded to one summary row.
+	// The page is drawn open for wide screens; on a phone CSS shows it folded until this takes over.
 	let open = $state(true);
+	let settled = $state(false);
 	$effect(() => {
 		const phone = matchMedia('(max-width: 47.99rem)');
 		const sync = () => (open = !phone.matches);
 		sync();
+		settled = true;
 		phone.addEventListener('change', sync);
 		return () => phone.removeEventListener('change', sync);
 	});
@@ -104,7 +108,7 @@
 
 <section aria-labelledby="{id}-title">
 	<h2 id="{id}-title" class="sr-only">Adjust the recipe</h2>
-	<details class="panel" bind:open>
+	<details class="panel" class:settled bind:open>
 		<summary class="fold">
 			<span class="state"
 				><span class="num">{servingsText(model.view.servings, recipe.servingsNoun)}</span>
@@ -155,15 +159,22 @@
 
 			{#if choices.length || recipe.pan}
 				<details class="more-details">
-					<summary><Icon name="chevronDown" size={18} />Scale another way</summary>
+					<summary>
+						<Icon name="chevronDown" size={18} />Scale another way
+						<InfoTip
+							topic="scaling another way"
+							text="Scale from what you have. Say you have 300 g of mince: enter it, and every other amount follows. Where the recipe names a tin, you can scale to a different tin size too."
+						/>
+					</summary>
 					<div class="more">
 						{#if choices.length}
 							<form onsubmit={applyHave} novalidate>
 								<h3 class="label">I have...</h3>
 								<div class="inputs">
 									<label>
-										<span>Ingredient</span>
+										<span id="{id}-have-item">Ingredient</span>
 										<select
+											aria-labelledby="{id}-have-item"
 											value={haveKey}
 											onchange={(event) => chooseIngredient(event.currentTarget.value)}
 										>
@@ -185,8 +196,8 @@
 									</label>
 									{#if haveUnits.length}
 										<label>
-											<span>Unit</span>
-											<select bind:value={haveUnit}>
+											<span id="{id}-have-unit">Unit</span>
+											<select aria-labelledby="{id}-have-unit" bind:value={haveUnit}>
 												{#each haveUnits as unit (unit)}
 													<option value={unit}>{unitLabel(unit)}</option>
 												{/each}
@@ -250,6 +261,12 @@
 				<Icon name="reset" size={16} />Reset
 			</button>
 		</p>
+	{:else if !model.ready}
+		<!-- Holds the row's place when the address scales the recipe (the script in app.html). -->
+		<p class="scaled held" aria-hidden="true">
+			<span>Scaled</span>
+			<button type="button" tabindex="-1"><Icon name="reset" size={16} />Reset</button>
+		</p>
 	{/if}
 
 	{#if notes.length}
@@ -262,6 +279,14 @@
 </section>
 
 <style>
+	.held {
+		visibility: hidden;
+	}
+
+	:global(html:not([data-scaled='amount'])) .held {
+		display: none;
+	}
+
 	section {
 		display: grid;
 		gap: var(--space-3);
@@ -316,11 +341,6 @@
 		margin: 0;
 		padding: 0;
 		border: 0;
-		transition: opacity var(--duration-micro);
-	}
-
-	.controls:disabled {
-		opacity: 0.6;
 	}
 
 	.row {
@@ -341,6 +361,7 @@
 
 	.more-details > summary {
 		display: inline-flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-2);
 		min-block-size: var(--target);
@@ -348,7 +369,7 @@
 		font-weight: 700;
 	}
 
-	.more-details[open] > summary :global(svg) {
+	.more-details[open] > summary > :global(svg) {
 		transform: rotate(180deg);
 	}
 
@@ -454,6 +475,20 @@
 	.notes :global(svg) {
 		flex: none;
 		margin-block-start: 0.15rem;
+	}
+
+	@media (max-width: 47.99rem) {
+		.panel:not(.settled) > :not(.fold) {
+			display: none;
+		}
+
+		.panel:not(.settled) > .fold {
+			margin-block-end: 0;
+		}
+
+		.panel:not(.settled) .scale-label :global(svg) {
+			transform: none;
+		}
 	}
 
 	@media (min-width: 48rem) {

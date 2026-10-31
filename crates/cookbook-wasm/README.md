@@ -10,7 +10,7 @@ The web app does not import these bindings directly; it goes through the typed w
 |---|---|
 | `version()` | the crate version |
 | `scale_recipe(...)` | scales a recipe for a request (servings, multiplier, pan or ingredient), with variants applied |
-| `parse_ingredient_line(line)` | parses one pasted ingredient line into an ingredient |
+| `parse_ingredient_line(line)` | reads one written or pasted ingredient line (list bullets and numbers tidied away) into an ingredient |
 | `check_recipe(recipe, id, context)` | runs the recipe checklist on one recipe |
 | `check_removal(id, recipes)` | lists the recipes that still link to `id` |
 | `SearchEngine` | built from `search.json`; `search(query)` and `ingredientsIHave(have)` |

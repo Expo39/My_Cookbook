@@ -87,7 +87,15 @@
 			<summary>
 				<span>
 					<span class="label">For the cookbook's owner</span>
-					<span class="help">Edit the cookbook and share recipes with everyone.</span>
+					<span class="help">
+						{#if admin.unlocked}
+							Unlocked in this tab.
+						{:else if admin.configured}
+							Set up. Unlock it with the password to edit.
+						{:else}
+							Edit the cookbook and share recipes with everyone.
+						{/if}
+					</span>
 				</span>
 				<Icon name="chevronDown" size={20} />
 			</summary>
@@ -185,6 +193,20 @@
 		gap: var(--space-2);
 		min-block-size: var(--target);
 		font-weight: 700;
+	}
+
+	/* Under the owner's form it reads as a footnote, well apart from the button above it. */
+	.owner .link {
+		align-items: flex-start;
+		justify-self: stretch;
+		margin-block-start: var(--space-2);
+		padding-block-start: var(--space-4);
+		border-block-start: 1px dashed var(--colour-line);
+	}
+
+	.owner .link :global(svg) {
+		flex: none;
+		margin-block-start: 0.15rem;
 	}
 
 	.owner:not([open]) {

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { waitForCore, watchErrors } from './helpers';
+import { ingredients, waitForCore, watchErrors } from './helpers';
 
 const brulee = 'desserts/french-classics/creme-brulee';
 const wellington = 'main-courses/beef-steak/beef-wellington';
@@ -90,6 +90,100 @@ test.describe('cook mode', () => {
 		await expect(side).toContainText('double cream');
 		await page.setViewportSize({ width: 800, height: 900 });
 		await expect(side).toBeHidden();
+	});
+
+	test("lists each step's ingredients from its words, and ticks there are the recipe's ticks", async ({
+		page
+	}) => {
+		await page.goto(`${wellington}?cook=3`);
+		const dialog = page.getByRole('dialog', { name: /Wellington/ });
+		const used = dialog.getByRole('list', { name: 'In this step' });
+		for (const item of ['Beef trimmings', 'shallots', 'red wine', 'beef stock']) {
+			await expect(used).toContainText(item);
+		}
+		await expect(used).not.toContainText('puff pastry');
+
+		const shallots = used.getByRole('checkbox', { name: /shallots/ });
+		await shallots.click();
+		await shallots.click();
+		await expect(shallots).not.toBeChecked();
+		await shallots.click();
+		await expect(shallots).toBeChecked();
+		await expect(dialog.getByText('1 of 12')).toBeVisible();
+
+		await page.keyboard.press('ArrowRight');
+		await expect(dialog.getByText('Nothing new to add here.')).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(dialog).toBeHidden();
+		await expect(ingredients(page).getByRole('checkbox', { name: /shallots/ })).toBeChecked();
+	});
+
+	test('a burst of quick clicks on a line always leaves the box and the tick agreeing', async ({
+		page
+	}) => {
+		await page.goto(`${wellington}?cook=3`);
+		const dialog = page.getByRole('dialog', { name: /Wellington/ });
+		const box = dialog
+			.getByRole('list', { name: 'In this step' })
+			.getByRole('checkbox', { name: /red wine/ });
+		const listed = dialog.getByLabel('All ingredients').getByRole('checkbox', { name: /red wine/ });
+		await box.scrollIntoViewIfNeeded();
+		const area = await box.boundingBox();
+		if (!area) throw new Error('the line is not on screen');
+		const [x, y] = [area.x + area.width / 2, area.y + area.height / 2];
+
+		for (const clicks of [2, 3, 4, 5]) {
+			await page.mouse.click(x, y, { clickCount: clicks, delay: 0 });
+			const ticked = clicks % 2 === 1;
+			await expect(box).toBeChecked({ checked: ticked });
+			await expect(listed).toBeChecked({ checked: ticked });
+			const saved = await page.evaluate(
+				() =>
+					Object.entries(localStorage).find(([key]) => key.startsWith('sapori:ticks:'))?.[1] ?? ''
+			);
+			expect(saved.includes('red wine')).toBe(ticked);
+			if (ticked) await page.mouse.click(x, y);
+		}
+	});
+
+	test('shows the first sentence of the next step', async ({ page }) => {
+		await page.goto(`${wellington}?cook=5`);
+		const next = page.getByRole('dialog', { name: /Wellington/ }).locator('.up-next');
+		await expect(next).toContainText('Up next');
+		await expect(next).toContainText('Spread the duxelles over the cling film');
+	});
+
+	test('the last step leads to a finished screen with the tips, and back to the start', async ({
+		page
+	}) => {
+		await page.goto(`${brulee}?cook=9`);
+		const dialog = cookDialog(page);
+		await dialog.getByRole('button', { name: 'Finish' }).click();
+		await expect(dialog.getByRole('heading', { name: 'Ready to serve' })).toBeFocused();
+		await expect(dialog.getByText('From the chef')).toBeVisible();
+		await dialog.getByRole('button', { name: 'Cook it again' }).click();
+		await expect(dialog.getByText('Step 1 of 9')).toBeVisible();
+
+		await page.goto(`${brulee}?cook=9`);
+		await expect(dialog.getByText('Step 9 of 9')).toBeVisible();
+		await page.keyboard.press('ArrowRight');
+		await dialog.getByRole('button', { name: 'Back to the recipe' }).click();
+		await expect(dialog).toBeHidden();
+		await expect(page).not.toHaveURL(/cook/);
+	});
+
+	test('the page underneath stays where it was, so leaving does not jump', async ({ page }) => {
+		await page.goto(wellington);
+		await waitForCore(page);
+		await page.evaluate(() => scrollTo(0, 200));
+		await page.getByRole('link', { name: 'Start cooking' }).first().click();
+		const dialog = page.getByRole('dialog', { name: /Wellington/ });
+		await expect(dialog).toBeVisible();
+		expect(await page.evaluate(() => scrollY)).toBe(200);
+		await dialog.getByRole('button', { name: 'Exit cook mode' }).click();
+		await expect(dialog).toBeHidden();
+		await expect(page).not.toHaveURL(/cook/);
+		expect(await page.evaluate(() => scrollY)).toBe(200);
 	});
 
 	test('says so when the screen cannot be kept on', async ({ page }) => {
@@ -289,13 +383,12 @@ test.describe('shopping list', () => {
 		await page.goto('shopping-list');
 
 		await page.getByRole('button', { name: 'Add an item' }).click();
-		await page.getByLabel('Item', { exact: true }).fill('lemons');
-		await page.getByLabel('Quantity').fill('2');
+		const box = page.getByLabel('What do you need?');
+		await expect(page.getByText('Ways to add something')).toBeVisible();
+		await box.fill('2 lemons');
 		await page.getByRole('button', { name: 'Add', exact: true }).click();
-		await page.getByLabel('Item', { exact: true }).fill('kitchen roll');
-		await page.getByRole('button', { name: 'Add a note' }).click();
-		await page.getByLabel('Note').fill('the big pack');
-		await page.getByLabel('Item', { exact: true }).press('Enter');
+		await box.fill('kitchen roll, the big pack');
+		await box.press('Enter');
 
 		const own = page.getByRole('region', { name: 'Added by you' });
 		await expect(own.getByRole('button', { name: /lemons: 2, change the amount/ })).toBeVisible();
@@ -304,7 +397,7 @@ test.describe('shopping list', () => {
 		);
 
 		await page.getByRole('heading', { name: 'Shopping list' }).click();
-		await expect(page.getByLabel('Item', { exact: true })).toHaveCount(0);
+		await expect(page.getByLabel('What do you need?')).toHaveCount(0);
 
 		await page.getByRole('button', { name: 'Remove egg yolks' }).click();
 		await expect(page.getByRole('listitem').filter({ hasText: 'egg yolks' })).toHaveCount(0);
@@ -314,6 +407,44 @@ test.describe('shopping list', () => {
 		await page.getByRole('button', { name: 'Remove lemons' }).click();
 		await page.reload();
 		await expect(page.getByRole('listitem').filter({ hasText: 'lemons' })).toHaveCount(0);
+	});
+
+	test('an amount can change unit too, and the editor keeps Done on its own row', async ({
+		page
+	}) => {
+		await page.goto('shopping-list');
+		await page.getByRole('button', { name: 'Add an item' }).click();
+		await page.getByLabel('What do you need?').fill('potatoes');
+		await page.getByLabel('What do you need?').press('Enter');
+		await page.getByRole('heading', { name: 'Shopping list' }).click();
+
+		const potatoes = page.getByRole('listitem').filter({ hasText: 'potatoes' });
+		await potatoes.getByRole('button', { name: 'potatoes: add an amount' }).click();
+		await potatoes.getByLabel('Amount of potatoes').fill('1.5');
+		await potatoes.getByLabel('Unit', { exact: true }).selectOption('kg');
+		const done = potatoes.getByRole('button', { name: 'Done' });
+		const unit = potatoes.getByLabel('Unit', { exact: true });
+		const [doneBox, unitBox] = [await done.boundingBox(), await unit.boundingBox()];
+		expect(Math.abs((doneBox?.y ?? 0) - (unitBox?.y ?? 99))).toBeLessThan(4);
+		await done.click();
+		await expect(
+			potatoes.getByRole('button', { name: /potatoes: 1.5 kg, change the amount/ })
+		).toBeVisible();
+		await page.reload();
+		await expect(potatoes.getByRole('button', { name: /1.5 kg/ })).toBeVisible();
+	});
+
+	test('pasting several lines adds each one, reading the amounts', async ({ page }) => {
+		await page.goto('shopping-list');
+		await page.getByRole('button', { name: 'Add an item' }).click();
+		const box = page.getByLabel('What do you need?');
+		await box.fill('2 kg potatoes\n6 eggs\nkitchen roll');
+		await page.getByRole('button', { name: 'Add', exact: true }).click();
+		const own = page.getByRole('region', { name: 'Added by you' });
+		await expect(own.getByRole('button', { name: /potatoes: 2 kg/ })).toBeVisible();
+		await expect(own.getByRole('button', { name: /eggs: 6/ })).toBeVisible();
+		await expect(own.getByRole('listitem').filter({ hasText: 'kitchen roll' })).toHaveCount(1);
+		await expect(box).toHaveValue('');
 	});
 
 	test('adding a recipe again updates it instead of doubling it', async ({ page }) => {
@@ -392,6 +523,10 @@ test.describe('favourites, recent and notes', () => {
 test.describe('the planner', () => {
 	test('works back from the serving time when the steps carry timings', async ({ page }) => {
 		await page.goto(wellington);
+		const info = page.getByRole('button', { name: 'What is planning backwards?' });
+		await info.click();
+		await expect(info).toHaveAttribute('aria-expanded', 'true');
+		await expect(page.locator('details').filter({ has: info })).not.toHaveAttribute('open', '');
 		await page.getByText('Plan backwards from...').click();
 		await page.getByLabel('Serve at').fill('19:30');
 		await expect(page.getByText(/^Start by/)).toBeVisible();
@@ -443,5 +578,51 @@ test.describe('offline', () => {
 			const response = await request.get(new URL(icon.src, manifestUrl).href);
 			expect(response.ok(), `${icon.src} under ${baseURL}`).toBe(true);
 		}
+	});
+});
+
+test.describe('the timer strip on a reload', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('holds its place before the code runs, so the page does not move down', async ({ page }) => {
+		await page.goto(brulee);
+		await waitForCore(page);
+		await page.getByRole('button', { name: /^Start 15-20 min timer/ }).click();
+		await page.goto('./');
+		const strip = page.locator('section.strip');
+		const height = Math.round((await strip.boundingBox())?.height ?? 0);
+		const main = Math.round((await page.locator('main').boundingBox())?.y ?? 0);
+
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.reload();
+		expect(Math.round((await strip.boundingBox())?.height ?? 0)).toBe(height);
+		expect(Math.round((await page.locator('main').boundingBox())?.y ?? 0)).toBe(main);
+		await expect(strip).toHaveAttribute('aria-hidden', 'true');
+	});
+});
+
+test.describe('a reload in cook mode', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('paints cook mode at once, not the recipe first', async ({ page }) => {
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.goto(`${wellington}?cook=3`);
+		const cover = page.locator('.cook-cover');
+		await expect(cover).toBeVisible();
+		await expect(cover).toContainText('Beef Wellington');
+		await expect(cover.locator('.cover-rail span')).toHaveCount(11);
+
+		await page.unroute('**/_app/immutable/**/*.js');
+		await page.reload();
+		await expect(page.getByRole('dialog', { name: /Wellington/ })).toBeVisible();
+		await expect(cover).toHaveCount(0);
+		await page.keyboard.press('Escape');
+		await expect(page.locator('.cook-cover')).toHaveCount(0);
+	});
+
+	test('a recipe opened without cook mode never shows the cover', async ({ page }) => {
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.goto(wellington);
+		await expect(page.locator('.cook-cover')).toBeHidden();
 	});
 });

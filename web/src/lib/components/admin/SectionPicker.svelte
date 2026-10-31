@@ -104,14 +104,14 @@
 					<option value={top}>None, straight in {topLabel}</option>
 					{#each subs as option (option.path)}
 						<option value={option.path}
-							>{option.depth > 1 ? '— '.repeat(option.depth - 1) : ''}{option.label}</option
+							>{option.depth > 1 ? '\u2014 '.repeat(option.depth - 1) : ''}{option.label}</option
 						>
 					{/each}
 				</select>
 			</Field>
 			{@render adder(
 				top,
-				`New subsection in ${topLabel}`,
+				'New subsection',
 				`A smaller group inside ${topLabel}, such as Cakes inside Desserts. The recipe goes into it.`
 			)}
 		</div>
@@ -152,6 +152,12 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-1);
+	}
+
+	/* Leaves room for the "i", so it stays beside the link and a long label wraps inside it. */
+	.row > .more {
+		max-inline-size: calc(100% - var(--target));
+		text-align: start;
 	}
 
 	.more {

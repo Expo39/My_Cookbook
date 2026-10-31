@@ -9,23 +9,21 @@
   "ingredientGroups": [
     {
       "name": "Cheese",
-      "total": {
-        "qty": 1150,
-        "unit": "g"
-      },
       "items": [
         {
-          "item": "A mix of hard (Parmesan, Pecorino), semi-soft (Gouda, Cheddar), soft (Brie, goat's cheese) and blue cheeses"
+          "amount": {
+            "qty": 1150,
+            "unit": "g"
+          },
+          "item": "mixed cheeses",
+          "note": "hard (Parmesan, Pecorino), semi-soft (Gouda, Cheddar), soft (Brie, goat's cheese) and blue"
         }
       ]
     },
     {
       "name": "Charcuterie",
       "total": {
-        "qty": {
-          "min": 700,
-          "max": 850
-        },
+        "qty": 775,
         "unit": "g"
       },
       "items": [
@@ -38,10 +36,7 @@
         },
         {
           "amount": {
-            "qty": {
-              "min": 100,
-              "max": 150
-            },
+            "qty": 125,
             "unit": "g"
           },
           "item": "additional prosciutto or salami"
@@ -69,10 +64,7 @@
         },
         {
           "amount": {
-            "qty": {
-              "min": 150,
-              "max": 200
-            },
+            "qty": 175,
             "unit": "g"
           },
           "item": "salami variety"
@@ -100,10 +92,7 @@
       "items": [
         {
           "amount": {
-            "qty": {
-              "min": 200,
-              "max": 300
-            },
+            "qty": 250,
             "unit": "g"
           },
           "item": "dip",
@@ -122,10 +111,7 @@
         },
         {
           "amount": {
-            "qty": {
-              "min": 200,
-              "max": 250
-            },
+            "qty": 225,
             "unit": "g"
           },
           "item": "nuts and dried fruit"
@@ -154,6 +140,6 @@
     }
   ],
   "tips": [
-    "Dips add variety and help stretch the portions. When the board is the main event, 150-200 g per person ensures guests leave satisfied. Arrange everything in clusters rather than rows for visual appeal."
+    "Dips add variety and help stretch the portions. When the board is the main event, 150-200 g per person ensures guests leave satisfied. Arrange everything in clusters rather than rows for visual appeal. All the amounts are a guide: change them to suit your guests and what you can find."
   ]
 }

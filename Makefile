@@ -81,9 +81,13 @@ screenshots: build
 	docker compose run --rm -v $(SHOTS):/shots -e SHOTS_DIR=/shots -e SCREENSHOTS=1 -e E2E_PREBUILT=1 dev pnpm --dir web e2e
 
 # Records the how-to video into web/static/video: a scripted run of the built site, then ffmpeg.
+# The dev image has no ffmpeg, so the encoding runs offline in an image that has one.
+FFMPEG_IMAGE ?= bluenviron/mediamtx:1.21.1-ffmpeg
+
 walkthrough: build
 	docker compose run --rm -e E2E_PREBUILT=1 -e WALKTHROUGH=1 dev pnpm --dir web e2e
-	$(RUN) sh scripts/walkthrough-video.sh
+	docker run --rm --network none --user "$$(id -u):$$(id -g)" -v "$(CURDIR):/w" -w /w \
+		--entrypoint sh $(FFMPEG_IMAGE) scripts/walkthrough-video.sh
 
 worker-build:
 	$(RUN) sh -c 'cd crates/cookbook-worker && worker-build --release'

@@ -136,7 +136,7 @@ None of the surveyed apps generates a good shareable *image* card. Crouton expor
 ### What goes on the card
 - Photo (top 40-50%), title, and the subtitle in Maltese/Italian if it exists.
 - One meta row: serves (the **scaled** value), total time, difficulty.
-- Ingredients at the current scale, units and variant: up to about 12 lines, then "+ 4 more".
+- Ingredients at the current scale, units and variant, every one in full: a long line wraps under itself, the text shrinks to fit, and a long list runs in two balanced columns.
 - No method on the image (it never fits legibly); the QR code carries it.
 - QR code (about 220 px, bottom corner, with a quiet zone) linking to the canonical URL **with state**: `/r/first-courses/pasta/one-pot-pasta?serves=6&u=us&v=vanilla:pods`.
 - Small wordmark *Sapori ta' l-kċina* and the short URL as text, for people who will not scan.
