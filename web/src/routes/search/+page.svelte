@@ -5,9 +5,12 @@
 	import PageHead from '$lib/components/PageHead.svelte';
 	import RecipeCard from '$lib/components/RecipeCard.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
-	import { createSearchEngine, loadCore, type SearchEngine } from '$lib/core';
-	import { createSource } from '$lib/data';
+	import type { SearchEngine } from '$lib/core';
+	import { localCards } from '$lib/data/local-card';
 	import { allRecipes } from '$lib/data/tree';
+	import { searchEngine } from '$lib/search/engine';
+	import { haveLocal, searchLocal } from '$lib/search/local';
+	import { personal } from '$lib/stores/personal.svelte';
 	import type { RecipeCard as Card } from '$lib/types/recipe';
 
 	let { data } = $props();
@@ -16,6 +19,9 @@
 
 	const id = $props.id();
 	const cards = $derived(new Map(allRecipes(data.index).map((card) => [card.id, card])));
+	/** Recipes added on this device, which the published index does not know about. */
+	const own = $derived(personal.list.filter((entry) => !entry.shared && !cards.has(entry.id)));
+	const ownCards = $derived(new Map(localCards(data.index, own).map((card) => [card.id, card])));
 
 	let query = $state('');
 	let mode = $state<Mode>('recipes');
@@ -26,6 +32,7 @@
 	interface Result {
 		card: Card;
 		coverage?: { matched: number; total: number };
+		local?: boolean;
 	}
 
 	const results = $derived.by<Result[]>(() => {
@@ -41,7 +48,18 @@
 				const card = cards.get(hit.id);
 				if (card) found.push({ card, coverage: { matched: hit.matched, total: hit.total } });
 			}
+			for (const hit of haveLocal(own, have)) {
+				const card = ownCards.get(hit.id);
+				if (card) found.push({ card, coverage: hit, local: true });
+			}
+			// Fewest missing ingredients first, across the cookbook's recipes and yours alike.
+			const missing = ({ coverage }: Result) => (coverage ? coverage.total - coverage.matched : 0);
+			found.sort((a, b) => missing(a) - missing(b));
 		} else {
+			for (const id of searchLocal(own, text)) {
+				const card = ownCards.get(id);
+				if (card) found.push({ card, local: true });
+			}
 			for (const hit of engine.search(text)) {
 				const card = cards.get(hit.id);
 				if (card) found.push({ card });
@@ -51,6 +69,14 @@
 	});
 
 	const searching = $derived(query.trim() !== '');
+
+	/** A spelling the index knows, offered when a word was not recognised. */
+	const correction = $derived.by(() => {
+		const text = query.trim();
+		if (!engine || !text || mode !== 'recipes') return undefined;
+		const found = engine.suggest(text, 6).find((s) => s.kind === 'correction');
+		return found?.kind === 'correction' ? found.query : undefined;
+	});
 	const title = $derived(searching ? `Search: ${query.trim()}` : 'Search');
 
 	onMount(() => {
@@ -58,15 +84,11 @@
 		query = params.get('q') ?? '';
 		mode = params.get('m') === 'have' ? 'have' : 'recipes';
 		synced = true;
+		void personal.load();
 
-		let loaded: SearchEngine | undefined;
-		(async () => {
-			const source = createSource();
-			const [json] = await Promise.all([source.getSearchIndex(), loadCore()]);
-			loaded = createSearchEngine(json);
-			engine = loaded;
-		})().catch(() => (failed = true));
-		return () => loaded?.free();
+		searchEngine()
+			.then((loaded) => (engine = loaded))
+			.catch(() => (failed = true));
 	});
 
 	$effect(() => {
@@ -84,7 +106,7 @@
 
 <PageHead
 	{title}
-	description="Search Antonio's recipes by name, or by the ingredients you have."
+	description="Search the recipes by name, or by the ingredients you have."
 	path="search"
 />
 
@@ -135,20 +157,30 @@
 			</p>
 		{:else if !engine}
 			<p class="status">Loading search...</p>
-		{:else if results.length === 0}
-			<p class="status">
-				Nothing matches "{query.trim()}". Try fewer words, or switch to the ingredients you have.
-			</p>
 		{:else}
-			<p class="status">
-				<span class="num">{results.length}</span>
-				{results.length === 1 ? 'recipe' : 'recipes'} found
-			</p>
-			<ul>
-				{#each results as { card, coverage } (card.id)}
-					<li><RecipeCard {card} {coverage} /></li>
-				{/each}
-			</ul>
+			{#if correction}
+				<p class="status">
+					Did you mean
+					<button type="button" class="fix" onclick={() => (query = correction ?? query)}
+						>{correction}</button
+					>?
+				</p>
+			{/if}
+			{#if results.length === 0}
+				<p class="status">
+					Nothing matches "{query.trim()}". Try fewer words, or switch to the ingredients you have.
+				</p>
+			{:else}
+				<p class="status">
+					<span class="num">{results.length}</span>
+					{results.length === 1 ? 'recipe' : 'recipes'} found
+				</p>
+				<ul>
+					{#each results as { card, coverage, local } (card.id)}
+						<li><RecipeCard {card} {coverage} {local} /></li>
+					{/each}
+				</ul>
+			{/if}
 		{/if}
 	</section>
 </div>
@@ -203,7 +235,18 @@
 
 	ul {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+		grid-template-columns: var(--card-grid);
 		gap: var(--space-4);
+	}
+
+	.fix {
+		min-block-size: var(--target);
+		padding: 0 var(--space-1);
+		border: 0;
+		background: transparent;
+		color: var(--colour-primary);
+		font: inherit;
+		font-weight: 700;
+		text-decoration: underline;
 	}
 </style>

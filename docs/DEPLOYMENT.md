@@ -23,26 +23,29 @@ There are no repository secrets to configure for Pages: the deploy uses the work
 
 ## The CI and deploy flow
 
-CI (`.github/workflows/ci.yml`) runs on pull requests into `main` and on pushes to `main`. Deploy (`.github/workflows/deploy.yml`) runs only after CI completes successfully on a push to `main`, and publishes the very `site` artifact that CI built, tested and verified; it never rebuilds the site.
+CI (`.github/workflows/ci.yml`) runs on pull requests into `main`, on pushes to `main`, and on demand from the Actions tab. Deploy (`.github/workflows/deploy.yml`) runs only after CI completes successfully on a push to `main` or a manual run on `main`, and publishes the very `site` artifact that CI built, tested and verified; it never rebuilds the site.
 
 ```mermaid
 flowchart TB
-    trigger["Pull request into main, or push to main"] --> changes["changes: did anything outside docs/ and *.md change?"]
-    changes -- "yes" --> rust["rust: fmt, clippy, nextest, Worker wasm build"]
-    changes -- "yes" --> content["content: cookbook-cli check --all"]
-    changes -- "yes" --> core["core-artifacts: wasm, data, cards, generated types"]
-    changes -- "no, docs only" --> skipped["build jobs skipped"]
-    core --> web["web: svelte-check, lint, Vitest"]
+    trigger["Pull request into main, push to main, or Run workflow"] --> changes["changes: what changed, and full or fast?"]
+    changes -- "code, full" --> clippy["clippy: fmt, clippy, Worker wasm build"]
+    changes -- "code, full" --> rust["rust: nextest"]
+    changes -- "code" --> content["content: cookbook-cli check --all"]
+    changes -- "code" --> core["core-artifacts: wasm, data, cards, generated types"]
+    changes -- "docs only" --> skipped["build jobs skipped"]
+    core -- "full" --> web["web: svelte-check, lint, Vitest"]
     core --> build["build: pnpm build, uploads the site artifact"]
-    build --> verify["verify: cookbook-cli verify-site"]
-    build --> e2e["e2e: Playwright against the built site"]
-    rust --> passed["CI passed"]
+    build -- "full" --> verify["verify: cookbook-cli verify-site"]
+    build -- "full" --> e2e["e2e: Playwright against the built site"]
+    clippy --> passed["CI passed"]
+    rust --> passed
     content --> passed
     web --> passed
+    build --> passed
     verify --> passed
     e2e --> passed
     skipped --> passed
-    passed -- "push to main, CI succeeded" --> site["Deploy: is there a site artifact?"]
+    passed -- "on main, CI succeeded" --> site["Deploy: is there a site artifact?"]
     site -- "yes" --> deploy["Deploy the CI artifact to GitHub Pages"]
     site -- "no, docs-only push" --> nodeploy["Nothing to deploy"]
 ```
@@ -50,6 +53,23 @@ flowchart TB
 - **CI passed** is the single required check. It fails if any job failed or was cancelled, and treats skipped jobs as passed, so a docs-only pull request can still be merged.
 - A change that touches only `docs/` or Markdown files skips every build job. On a push to `main`, CI then succeeds without producing a `site` artifact, and the deploy workflow's first job finds no artifact and skips the deploy. The live site is unchanged.
 - CI runs cancel an older run on the same branch when a newer one starts. The in-site editor reports a cancelled run as replaced by a later build, not as a failure.
+- The Rust lints and the Rust tests are separate jobs that run side by side. Their caches are saved from `main` only (`save-if`) under shared keys, so branches and pull requests reuse `main`'s cache without filling the cache quota.
+
+### The fast path
+
+A full run takes about twelve minutes, most of it compiling and testing Rust. When only content has changed, that work proves nothing new, so CI has a fast mode. It still runs `changes`, `content` (the recipe checklist), `core-artifacts` and `build`, so a broken recipe still fails and the deployed site is still built by CI; it skips `clippy`, `rust`, `web`, `verify` and `e2e`. **CI passed** treats the skipped jobs as passed, so the deploy goes ahead.
+
+CI takes the fast path when any of these holds:
+
+- a push touches only `recipes/` (and, optionally, docs and Markdown), which covers every save from the in-site editor;
+- the commit message contains `[fast ci]`;
+- the pull request has the `fast-ci` label (adding or removing the label reruns CI in the matching mode);
+- a manual run is started in fast mode.
+
+To start a manual run: open the repository on GitHub, then **Actions > CI > Run workflow**, choose the branch (`main` to deploy), set **mode** to **fast** or **full**, and press **Run workflow**. A manual run on `main` deploys when it succeeds, in either mode. The mode is written in the run's summary.
+
+Use the fast path for content only. A change to code that skips the tests can still go live, which is exactly what the full run exists to prevent; the pre-push hook still runs `make test` locally either way.
+
 - Deploys never run concurrently and are not cancelled part-way.
 
 ## Protecting main
@@ -61,7 +81,10 @@ Nothing should reach `main` until everything passes.
   2. Turn on **Require a pull request before merging**.
   3. Turn on **Require status checks to pass** and add the **CI passed** check.
   4. Turn on **Block force pushes**.
-  5. Under **Bypass list**, add the **Repository admin** role, allowed **Always**.
+  5. Under **Bypass list**, choose **Add bypass**, tick **Repository admin**, and set it to **Always allow**. This is what lets the in-site editor, and **Share with everyone** in Settings, commit straight to `main`.
+  6. Press **Save changes**.
+
+  If the ruleset already exists (for example as **Protect Main**), open **Settings > Rules > Rulesets > Protect Main**, scroll to **Bypass list**, add **Repository admin** as above and save.
 
   Contributors then reach `main` only through a pull request whose CI is green.
 - **Locally:** run `make hooks` once per clone. It sets `core.hooksPath` to `.githooks`, whose `pre-push` hook runs `make test` before any push to `main` and refuses the push if anything fails. Pushes to other branches are not checked.
@@ -86,10 +109,30 @@ The static site cannot hold the Gemini key, so the sous-chef and the importer go
    ```
 
 3. Check the variables in `wrangler.toml`:
-   - `SITE_URL` is the published site including its base path (`https://expo39.github.io/My_Cookbook`). The Worker fetches each recipe for `/chat` from `<SITE_URL>/data/recipes/<id>.json`, so it only ever discusses published recipes.
+   - `SITE_URL` is the published site including its base path (`https://expo39.github.io/My_Cookbook`). The Worker fetches each recipe for `/chat` from `<SITE_URL>/data/recipes/<id>.json`, so a published recipe is always discussed as published. Only when that address does not exist (a recipe kept on the cook's own device) is the copy sent with the question used, after it has been checked to be a recipe.
    - `ALLOWED_ORIGINS` lists the origins allowed to call it.
    - `GEMINI_MODEL`, `RATE_LIMIT_CHAT` and `RATE_LIMIT_IMPORT` tune the model and the hourly limits.
+   - `GEMINI_THINKING_LEVEL` (default `low`) sets how long the model thinks before it answers; `minimal` is faster on the models that accept it, and `default` leaves the choice to the model. A model that refuses the level is asked again without one.
+   - `GEMINI_FALLBACK_MODEL`, when set, is tried after the main model has been busy three times in a row, for example a lighter Flash model.
 4. Set `ai.endpoint` in `cookbook.config.json` (or `PUBLIC_AI_ENDPOINT` at build time) to the Worker's URL, and enter the same `ADMIN_IMPORT_SECRET` in the site's editing settings (see [ADMIN.md](ADMIN.md#importing-a-recipe-with-ai)).
+
+Answers are streamed to the browser as they are written. When Gemini is busy (a 429 for a per-minute limit, or a 500 or 503), the Worker waits a moment, with a little randomness so that cooks refused together do not return together, and asks again up to three times before it tries the fallback model. Each refusal is logged; `npx wrangler tail` in `crates/cookbook-worker` (inside `make shell`) shows them live.
+
+### Turnstile (optional)
+
+Cloudflare Turnstile keeps scripts from spending the Gemini quota. It is off until the Worker has a `TURNSTILE_SECRET`, so it can be added at any time.
+
+1. In the Cloudflare dashboard, open **Turnstile > Add widget**. Name it, add the site's hostname (`expo39.github.io`, plus `localhost` for development), and choose the **Invisible** widget mode. Cloudflare shows a site key and a secret key.
+2. Store the secret key in the Worker:
+
+   ```sh
+   make shell
+   cd crates/cookbook-worker && npx wrangler secret put TURNSTILE_SECRET
+   ```
+
+3. Put the site key in `cookbook.config.json` as `ai.turnstileSiteKey` (or set `PUBLIC_TURNSTILE_SITE_KEY` at build time), then deploy the site. The site key is public by design.
+
+The browser then fetches a fresh token before each question and sends it in the `X-Turnstile-Token` header, and the Worker checks it with Cloudflare before it calls Gemini. To switch Turnstile off again, delete the secret with `npx wrangler secret delete TURNSTILE_SECRET`; the site key can stay.
 
 `make worker-build` builds the Worker without deploying it. No Cloudflare account id is committed; Wrangler takes it from `CLOUDFLARE_ACCOUNT_ID` or from the token. The routes, limits and the admin proof are documented in [crates/cookbook-worker/README.md](../crates/cookbook-worker/README.md).
 

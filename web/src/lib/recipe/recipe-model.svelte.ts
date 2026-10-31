@@ -1,4 +1,4 @@
-import { convert, scaleRecipe, toggleUnit } from '$lib/core';
+import { convert, scaleRecipe, unitOptions } from '$lib/core';
 import type {
 	Recipe,
 	RecipeData,
@@ -7,7 +7,7 @@ import type {
 	Unit,
 	UnitSystem
 } from '$lib/types/recipe';
-import { TOGGLEABLE, formatShown } from './format';
+import { CONVERTIBLE, formatShown } from './format';
 import { withKeys } from './keys';
 import { parseState, toRequest, writeState, type ScaleChoice, type ViewState } from './url-state';
 
@@ -21,8 +21,8 @@ export class RecipeModel {
 	scale = $state<ScaleChoice>({ kind: 'written' });
 	system = $state<UnitSystem | null>(null);
 	variants = $state<Record<string, string>>({});
-	/** The unit a reader has cycled an amount to, keyed by group and item position. */
-	cycled = $state<Record<string, Unit>>({});
+	/** The unit a reader has picked for an amount, keyed by group and item position. */
+	picked = $state<Record<string, Unit>>({});
 	ready = $state(false);
 
 	constructor(data: RecipeData, defaultSystem: () => UnitSystem) {
@@ -113,7 +113,7 @@ export class RecipeModel {
 
 	setSystem(system: UnitSystem): void {
 		this.system = system;
-		this.cycled = {};
+		this.picked = {};
 	}
 
 	setVariant(key: string, option: string): void {
@@ -122,44 +122,60 @@ export class RecipeModel {
 
 	#amountUnit(item: ScaledIngredient): Unit | undefined {
 		const unit = item.amount?.unit;
-		return unit && TOGGLEABLE.has(unit) ? unit : undefined;
+		return unit && CONVERTIBLE.has(unit) ? unit : undefined;
 	}
 
-	canCycle(item: ScaledIngredient): boolean {
+	/** Whether the amount can be shown in another unit; counts and pinches cannot. */
+	canPick(item: ScaledIngredient): boolean {
 		return this.#amountUnit(item) !== undefined;
 	}
 
-	/** The amount in the unit the reader cycled it to, or `undefined` while it is shown as scaled. */
-	#cycledAmount(position: string, item: ScaledIngredient) {
+	#shownIn(item: ScaledIngredient, to: Unit) {
 		const from = this.#amountUnit(item);
-		const to = this.cycled[position];
 		const amount = item.amount;
-		if (!from || !to || !amount) return undefined;
+		if (!from || !amount) return undefined;
 		const min = convert(amount.min, from, to, item.food ?? undefined);
 		const max = convert(amount.max, from, to, item.food ?? undefined);
-		return min === undefined || max === undefined ? undefined : { min, max, unit: to };
+		return min === undefined || max === undefined ? undefined : formatShown(min, max, to);
+	}
+
+	/** The unit the amount is shown in: the reader's pick, or the scaled amount's own unit. */
+	shownUnit(position: string, item: ScaledIngredient): Unit | undefined {
+		return this.picked[position] ?? item.amount?.unit ?? undefined;
 	}
 
 	amountText(position: string, item: ScaledIngredient): string {
-		const shown = this.#cycledAmount(position, item);
-		return shown ? formatShown(shown.min, shown.max, shown.unit) : (item.amount?.text ?? '');
+		const to = this.picked[position];
+		return (to && this.#shownIn(item, to)) || (item.amount?.text ?? '');
 	}
 
-	/** The unit one more click would show, for the button's label. */
-	nextUnit(position: string, item: ScaledIngredient): Unit | undefined {
+	/** The units of the current system this amount can be shown in, with the amount in each. */
+	unitChoices(position: string, item: ScaledIngredient): { unit: Unit; text: string }[] {
 		const from = this.#amountUnit(item);
-		if (!from || !this.ready) return undefined;
-		const shown = this.#cycledAmount(position, item);
-		const current = shown ?? { max: item.amount?.max ?? 0, unit: from };
-		return toggleUnit(current.max, current.unit)?.unit;
+		if (!from || !this.ready || !item.amount) return [];
+		return unitOptions(item.amount.max, from, this.effectiveSystem).flatMap(({ unit }) => {
+			const text = unit === from ? item.amount?.text : this.#shownIn(item, unit);
+			return text ? [{ unit, text }] : [];
+		});
+	}
+
+	/** The unit one more tap shows: the next one in the current system, wrapping round. */
+	nextUnit(position: string, item: ScaledIngredient): Unit | undefined {
+		const choices = this.unitChoices(position, item);
+		if (choices.length < 2) return undefined;
+		const at = choices.findIndex((choice) => choice.unit === this.shownUnit(position, item));
+		return choices[(at + 1) % choices.length].unit;
 	}
 
 	cycleUnit(position: string, item: ScaledIngredient): void {
 		const next = this.nextUnit(position, item);
-		if (!next) return;
-		const cycled = { ...this.cycled };
-		if (next === this.#amountUnit(item)) delete cycled[position];
-		else cycled[position] = next;
-		this.cycled = cycled;
+		if (next) this.pickUnit(position, item, next);
+	}
+
+	pickUnit(position: string, item: ScaledIngredient, unit: Unit): void {
+		const picked = { ...this.picked };
+		if (unit === this.#amountUnit(item)) delete picked[position];
+		else picked[position] = unit;
+		this.picked = picked;
 	}
 }

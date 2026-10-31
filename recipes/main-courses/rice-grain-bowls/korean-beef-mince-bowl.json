@@ -80,7 +80,8 @@
           "note": "80g per person"
         },
         {
-          "item": "Salt and pepper"
+          "item": "Salt and pepper",
+          "scale": "toTaste"
         },
         {
           "item": "Vegetables and fried eggs",

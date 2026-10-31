@@ -1,6 +1,10 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { localCards } from '$lib/data/local-card';
 	import { countRecipes, descendantRecipes, sectionTrail } from '$lib/data/tree';
-	import { homeHref, pageHref } from '$lib/links';
+	import { editHref, homeHref, pageHref } from '$lib/links';
+	import { personal } from '$lib/stores/personal.svelte';
+	import Icon from './Icon.svelte';
 	import { recipesText } from '$lib/recipe/format';
 	import type { SectionNode, SiteIndex } from '$lib/types/recipe';
 	import Breadcrumb from './Breadcrumb.svelte';
@@ -17,8 +21,20 @@
 		}))
 	]);
 	const count = $derived(countRecipes(section));
+	/** Recipes added on this device that sit in this section or below it. */
+	const mine = $derived(
+		localCards(
+			index,
+			personal.list.filter(
+				(entry) =>
+					!entry.shared && (entry.id.startsWith(`${section.path}/`) || entry.id === section.path)
+			)
+		)
+	);
+
+	onMount(() => void personal.load());
 	const description = $derived(
-		section.summary ?? `${section.title}: ${count} ${recipesText(count)} from Antonio's kitchen.`
+		section.summary ?? `${section.title}: ${count} ${recipesText(count)} from a Maltese kitchen.`
 	);
 </script>
 
@@ -30,12 +46,26 @@
 		<h1>{section.title}</h1>
 		{#if section.summary}<p class="summary">{section.summary}</p>{/if}
 		<p class="count"><span class="num">{count}</span> {recipesText(count)}</p>
+		<a class="add" href={editHref({ section: section.path })}>
+			<Icon name="plus" size={18} />Add a recipe here
+		</a>
 	</header>
+
+	{#if mine.length}
+		<section aria-labelledby="mine-here">
+			<h2 id="mine-here">Your recipes</h2>
+			<ul class="grid">
+				{#each mine as card (card.id)}
+					<li><RecipeCard {card} local /></li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
 
 	{#if section.recipes.length}
 		<ul class="grid">
 			{#each section.recipes as card (card.id)}
-				<li><RecipeCard {card} /></li>
+				<li><RecipeCard {card} showSection={false} /></li>
 			{/each}
 		</ul>
 	{/if}
@@ -49,7 +79,7 @@
 			{#if child.summary}<p class="summary">{child.summary}</p>{/if}
 			<ul class="grid">
 				{#each descendantRecipes(child) as card (card.id)}
-					<li><RecipeCard {card} /></li>
+					<li><RecipeCard {card} showSection={false} /></li>
 				{/each}
 			</ul>
 		</section>
@@ -70,6 +100,24 @@
 
 	header {
 		gap: var(--space-2);
+	}
+
+	.add {
+		display: inline-flex;
+		align-items: center;
+		justify-self: start;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+		padding-inline: var(--space-4);
+		border: 1px dashed var(--colour-primary);
+		border-radius: var(--radius-s);
+		color: var(--colour-primary);
+		font-weight: 700;
+		text-decoration: none;
+	}
+
+	.add:hover {
+		background: var(--colour-tint);
 	}
 
 	.summary,
@@ -98,7 +146,7 @@
 
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+		grid-template-columns: var(--card-grid);
 		gap: var(--space-4);
 	}
 </style>

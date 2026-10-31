@@ -30,6 +30,11 @@ RUN npm install --global "playwright@${PLAYWRIGHT_VERSION}" \
  && npm uninstall --global playwright \
  && rm -rf /var/lib/apt/lists/* /root/.npm
 
+# ffmpeg turns the recorded walkthrough into the how-to video (`make walkthrough`).
+RUN apt-get update \
+ && apt-get install --yes --no-install-recommends ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
+
 RUN corepack enable && corepack prepare "pnpm@${PNPM_VERSION}" --activate \
  && mkdir -p /opt/corepack && cp -r /root/.cache/node/corepack/. /opt/corepack/
 

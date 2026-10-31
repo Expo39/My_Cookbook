@@ -54,7 +54,7 @@ test('a shared link can scale by multiplier', async ({ page }) => {
 	await expect(page).not.toHaveURL(/x=2/);
 });
 
-test('an amount cycles through its units on click, and the hint can be dismissed for good', async ({
+test('an amount toggles through the units of the chosen system only, and the hint can be dismissed for good', async ({
 	page
 }) => {
 	await page.goto(brulee);
@@ -68,8 +68,23 @@ test('an amount cycles through its units on click, and the hint can be dismissed
 	await expect(cream).toHaveAttribute('aria-label', '500 ml, show in l');
 	await cream.click();
 	await expect(cream).toHaveText('0.5 l');
-	await expect(cream).toHaveAttribute('aria-label', '0.5 l, show in tsp');
 	await expect(page.getByText('Tap an amount to change its unit')).toHaveCount(0);
+	const seen = ['500 ml', '0.5 l'];
+	for (let n = 0; n < 3; n++) {
+		await cream.click();
+		seen.push((await cream.textContent()) ?? '');
+	}
+	expect(seen.at(-1)).toBe('500 ml');
+	expect(seen.some((text) => /cup|oz/.test(text))).toBe(false);
+
+	await page.getByRole('radio', { name: 'US', exact: true }).check({ force: true });
+	const us = ingredients(page)
+		.getByRole('button', { name: /, show in / })
+		.first();
+	for (let n = 0; n < 4; n++) {
+		expect(await us.textContent()).not.toMatch(/ml|\bl\b/);
+		await us.click();
+	}
 
 	await page.reload();
 	await waitForCore(page);

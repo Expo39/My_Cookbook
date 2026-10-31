@@ -30,16 +30,25 @@ const texts = (ops: Op[]) => ops.filter((op): op is TextOp => op.kind === 'text'
 
 describe('the sheet layout', () => {
 	const format = layout.formats.portrait;
-	const ops = compose(format, content(), measure);
+	const list = (length: number) =>
+		Array.from({ length }, (_, i) => ({ amount: `${i + 1} g`, rest: `item ${i + 1}` }));
+	const linesFor = (length: number) =>
+		texts(compose(format, content({ ingredients: list(length) }), measure)).map((op) => op.text);
+	const ops = compose(format, content({ ingredients: list(80) }), measure);
+
+	it.each([14, 24])('shows all %i ingredients, shrinking or pairing the lines', (length) => {
+		const lines = linesFor(length);
+		expect(lines.filter((line) => /^item \d+$/.test(line))).toHaveLength(length);
+		expect(lines.some((line) => /more$/.test(line))).toBe(false);
+	});
 
 	it('says how many ingredients are left out', () => {
 		const lines = texts(ops).map((op) => op.text);
 		expect(lines.at(-1)).not.toBe('+ 0 more');
 		const more = lines.find((line) => /^\+ \d+ more$/.test(line));
 		const shown = lines.filter((line) => /^item \d+$/.test(line)).length;
-		expect(more).toBe(`+ ${30 - shown} more`);
+		expect(more).toBe(`+ ${80 - shown} more`);
 		expect(shown).toBeGreaterThan(0);
-		expect(shown).toBeLessThanOrEqual(layout.sheet.maxLines);
 	});
 
 	it('keeps the ingredient list clear of the footer', () => {

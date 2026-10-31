@@ -9,6 +9,13 @@ export const shoppingHref = (): string => resolve('/shopping-list');
 
 export const favouritesHref = (): string => resolve('/favourites');
 
+/** The guide to the cookbook; `part` is the id of one of its sections. */
+export const howToHref = (part = ''): string =>
+	`${resolve('/how-to-use')}${part ? `#${part}` : ''}`;
+
+/** A recipe added on this device; static hosting cannot pre-render it, so it lives under one page. */
+export const mineHref = (id: string): string => `${resolve('/mine')}?id=${encodeURIComponent(id)}`;
+
 export const searchHref = (query = ''): string =>
 	`${resolve('/search')}${query ? `?q=${encodeURIComponent(query)}` : ''}`;
 

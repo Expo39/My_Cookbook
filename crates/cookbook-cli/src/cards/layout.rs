@@ -80,7 +80,10 @@ pub struct Sheet {
     pub line_step: f64,
     pub amount_column: f64,
     pub amount_gap: f64,
-    pub max_lines: usize,
+    /// How far the ingredient lines may shrink so that every one fits on the card.
+    pub min_line_scale: f64,
+    /// How much of the amount column a line keeps when the list runs in two columns.
+    pub paired_amount_share: f64,
     pub footer_gap: f64,
     pub qr_box: f64,
     pub qr_quiet: f64,
@@ -530,30 +533,54 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
     let qr_box = (s.qr_box * u).round();
     let qr_x = (w - margin - qr_box).round();
     let qr_y = (h - format.safe_bottom - margin - qr_box).round();
-    let step = s.line_step * u;
+    // Every ingredient is shown: the lines shrink to fit, down to a size that still reads, then a
+    // long list runs in two columns. Only a list too long even for that ends in "+ N more".
+    let total = content.ingredients.len();
     let space = qr_y - s.footer_gap * u - cursor;
-    let fit = if space > 0.0 {
+    let base = s.line_step * u;
+    let columns = if total as f64 * base * s.min_line_scale > space {
+        2
+    } else {
+        1
+    };
+    let wanted = total.div_ceil(columns).max(1) as f64 * base;
+    let scale = (space / wanted).clamp(s.min_line_scale, 1.0);
+    let step = base * scale;
+    let rows = if space > 0.0 {
         (space / step).floor() as usize
     } else {
         0
     };
-    let (shown, more) = ingredient_window(content.ingredients.len(), fit, s.max_lines);
+    let (shown, more) = ingredient_window(total, rows * columns, total);
+    let per_column = (shown + usize::from(more > 0)).div_ceil(columns).max(1);
 
-    let line_size = s.line_size * u;
-    let amount_right = margin + s.amount_column * u;
-    let rest_x = amount_right + s.amount_gap * u;
-    let rest_width = w - margin - rest_x;
+    let line_size = s.line_size * u * scale;
+    let leading = step / line_size;
+    let gap = s.amount_gap * u * scale;
+    let column_gap = 2.0 * s.amount_gap * u;
+    let column_width = (w - 2.0 * margin - (columns - 1) as f64 * column_gap) / columns as f64;
+    let share = if columns == 2 {
+        s.paired_amount_share
+    } else {
+        1.0
+    };
+    let amount_width = s.amount_column * u * scale * share;
+    // The top, the amount's right edge, the name's left edge and its width for line `i`.
+    let slot = |i: usize| {
+        let left = margin + (i / per_column) as f64 * (column_width + column_gap);
+        let amount_right = left + amount_width;
+        let rest_x = amount_right + gap;
+        (
+            cursor + (i % per_column) as f64 * step,
+            amount_right,
+            rest_x,
+            left + column_width - rest_x,
+        )
+    };
     for (i, line) in content.ingredients.iter().take(shown).enumerate() {
-        let top = cursor + i as f64 * step;
-        let leading = step / line_size;
+        let (top, amount_right, rest_x, rest_width) = slot(i);
         if !line.amount.is_empty() {
-            let amount = ellipsize(
-                measure,
-                Face::Num,
-                line_size,
-                &line.amount,
-                s.amount_column * u,
-            );
+            let amount = ellipsize(measure, Face::Num, line_size, &line.amount, amount_width);
             pen.text(
                 amount_right,
                 top,
@@ -578,11 +605,11 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
         );
     }
     if more > 0 {
-        let top = cursor + shown as f64 * step;
+        let (top, _, rest_x, _) = slot(shown);
         pen.text(
             rest_x,
             top,
-            step / line_size,
+            leading,
             &format!("+ {more} more"),
             Face::Body,
             line_size,

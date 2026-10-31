@@ -117,6 +117,7 @@ body {
 	color: var(--colour-ink);
 	font: 400 var(--text-m) / 1.6 var(--font-body);
 	overflow-wrap: break-word;
+	overflow-x: clip;
 }
 
 h1,
@@ -201,6 +202,15 @@ img {
 ::selection {
 	background: var(--colour-primary);
 	color: var(--colour-on-primary);
+}
+
+/* While a dialog is open only the dialog scrolls, never the page behind it. */
+:root:has(dialog:modal) {
+	overflow: hidden;
+}
+
+dialog {
+	overscroll-behavior: contain;
 }
 
 .sr-only {

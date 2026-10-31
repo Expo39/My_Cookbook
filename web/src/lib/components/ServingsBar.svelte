@@ -106,9 +106,11 @@
 	<h2 id="{id}-title" class="sr-only">Adjust the recipe</h2>
 	<details class="panel" bind:open>
 		<summary class="fold">
-			<span class="num">{servingsText(model.view.servings, recipe.servingsNoun)}</span>
-			<span aria-hidden="true">|</span>
-			<span>{model.effectiveSystem === 'us' ? 'US' : 'Metric'}</span>
+			<span class="state"
+				><span class="num">{servingsText(model.view.servings, recipe.servingsNoun)}</span>
+				<span class="divider" aria-hidden="true"></span>
+				{model.effectiveSystem === 'us' ? 'US' : 'Metric'}</span
+			>
 			<span class="scale-label">Scale<Icon name="chevronDown" size={18} /></span>
 		</summary>
 		<fieldset class="controls" disabled={!model.ready}>
@@ -276,6 +278,20 @@
 		min-block-size: var(--target);
 		color: var(--colour-primary);
 		font-weight: 700;
+	}
+
+	/* One run of text on a shared baseline, so the numeral face and the body face line up. */
+	.state {
+		display: inline-flex;
+		align-items: baseline;
+		gap: var(--space-2);
+	}
+
+	.divider {
+		align-self: center;
+		inline-size: 1px;
+		block-size: 1.1em;
+		background: var(--colour-line);
 	}
 
 	.scale-label {

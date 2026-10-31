@@ -87,7 +87,7 @@ flowchart TB
 | `item` | string | "short pasta" |
 | `note` | string | "penne or rigatoni"; shown after a comma |
 | `optional` | bool | |
-| `scale` | `"linear" \| "discrete" \| "seasoning" \| "fixed" \| "toTaste"` | defaults to `linear`; `discrete` keeps whole pieces (eggs, cloves, tins); `seasoning` shows a range from 0.75x to 1x of the linear change, "start low" |
+| `scale` | `"linear" \| "discrete" \| "seasoning" \| "fixed" \| "toTaste"` | defaults to `linear`; `discrete` keeps whole pieces (eggs, cloves, tins); `seasoning` shows a range from 0.75x to 1x of the linear change, "start low"; `toTaste` marks salt and pepper with no amount, and the site shows "to taste" where the amount would be. Keep the words "to taste" out of `item`: the checklist warns (`W-TO-TASTE`) when they are there, or when salt or pepper has neither an amount nor `toTaste` |
 
 ### Amount
 `{ "qty": number | { "min": number, "max": number }, "unit"?: Unit }`

@@ -8,7 +8,6 @@ use std::{
 use axum::{Json, body::Bytes, extract::State};
 use cookbook_ai::{
     AiError, chat_request, import_request, parse_chat, parse_import, parse_import_response,
-    unknown_recipe,
 };
 use serde_json::{Value, json};
 
@@ -55,12 +54,15 @@ pub async fn chat(
     throttle(&state.chats, &ip)?;
     let input = parse_chat(None, &body)?;
     let snapshot = state.snapshot();
-    let recipe = &snapshot
-        .site
-        .recipes
-        .get(&input.recipe_id)
-        .ok_or_else(|| Failure::from(unknown_recipe()))?
-        .recipe;
+    // A recipe kept on the cook's device is not on the site, so its copy in the request is used.
+    let own;
+    let recipe = match snapshot.site.recipes.get(&input.recipe_id) {
+        Some(published) => &published.recipe,
+        None => {
+            own = input.own_recipe().map_err(Failure::from)?;
+            &own
+        }
+    };
     let request = chat_request(
         &state.config.gemini,
         recipe,

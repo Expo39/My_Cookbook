@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Ticks, ticksKey } from './ticks.svelte';
+import { ingredientTick, stepTick, Ticks, ticksKey } from './ticks.svelte';
 
 beforeEach(() => localStorage.clear());
 
@@ -55,5 +55,31 @@ describe('tick persistence', () => {
 		const ticks = new Ticks('a/one');
 		ticks.load();
 		expect(ticks.count('')).toBe(0);
+	});
+});
+
+describe('what a tick is attached to', () => {
+	it('follows an ingredient by key or by name in its group, never by its amount', () => {
+		expect(ingredientTick({ name: 'Sauce' }, { key: 'oil', item: 'olive oil' })).toBe('i:oil');
+		expect(ingredientTick({ name: 'Sauce' }, { item: ' Salt ' })).toBe('i:Sauce/salt');
+		expect(ingredientTick({}, { item: 'salt' })).not.toBe(
+			ingredientTick({ name: 'Sauce' }, { item: 'salt' })
+		);
+	});
+
+	it('follows a step by key, or by its text, so an inserted step moves nothing', () => {
+		const steps = ['Boil the water.', 'Add the pasta.'];
+		const before = steps.map((text) => stepTick({ text }));
+		const after = ['Salt the water.', ...steps].map((text) => stepTick({ text }));
+		expect(after.slice(1)).toEqual(before);
+		expect(new Set(after).size).toBe(3);
+		expect(stepTick({ key: 'rest', text: 'Rest it.' })).toBe('s:rest');
+	});
+
+	it('counts only the ticks for lines the recipe still has', () => {
+		const ticks = new Ticks('a/one');
+		ticks.toggle('i:gone');
+		ticks.toggle('i:oil');
+		expect(ticks.countOf(['i:oil', 'i:salt'])).toBe(1);
 	});
 });

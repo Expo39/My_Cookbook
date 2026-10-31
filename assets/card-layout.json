@@ -1,12 +1,12 @@
 {
 	"version": 1,
 	"palette": {
-		"bg": "#ece4d3",
-		"surface": "#f5efe2",
-		"ink": "#2a2419",
-		"muted": "#5f5440",
-		"primary": "#45552a",
-		"onPrimary": "#f5efe2"
+		"bg": "#f8f7f3",
+		"surface": "#ffffff",
+		"ink": "#13202b",
+		"muted": "#4b5866",
+		"primary": "#0d4f8b",
+		"onPrimary": "#ffffff"
 	},
 	"fonts": {
 		"display": { "family": "Bitter", "weight": 800 },
@@ -17,8 +17,7 @@
 	"formats": {
 		"og": { "kind": "banner", "width": 1200, "height": 630, "photoShare": 1, "safeTop": 0, "safeBottom": 0 },
 		"portrait": { "kind": "sheet", "width": 1080, "height": 1350, "photoShare": 0.3, "safeTop": 0, "safeBottom": 0 },
-		"story": { "kind": "sheet", "width": 1080, "height": 1920, "photoShare": 0.26, "safeTop": 250, "safeBottom": 250 },
-		"pin": { "kind": "sheet", "width": 1000, "height": 1500, "photoShare": 0.3, "safeTop": 0, "safeBottom": 0 }
+		"story": { "kind": "sheet", "width": 1080, "height": 1920, "photoShare": 0.26, "safeTop": 250, "safeBottom": 250 }
 	},
 	"sheet": {
 		"designWidth": 1080,
@@ -40,7 +39,8 @@
 		"lineStep": 54,
 		"amountColumn": 220,
 		"amountGap": 24,
-		"maxLines": 12,
+		"minLineScale": 0.6,
+		"pairedAmountShare": 0.6,
 		"footerGap": 36,
 		"qrBox": 224,
 		"qrQuiet": 16,

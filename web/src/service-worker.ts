@@ -4,21 +4,25 @@
 /// <reference lib="webworker" />
 
 import { base, build, files, version } from '$service-worker';
+import { DATA_CACHE } from '$lib/kitchen/cache-names';
 
 const sw = self as unknown as ServiceWorkerGlobalScope;
 
 const SHELL = `shell-${version}`;
 const PAGES = 'pages-v1';
-const DATA = 'data-v1';
+const DATA = DATA_CACHE;
 
 // The recipe JSON is large and changes with the content, so it is cached as it is used, not up front.
 // admin.json must always be fetched fresh, or a new password would not unlock until the cache turned over.
+// The how-to video is megabytes that most visitors never play, so it is streamed only when asked for.
 const assets = [
 	...build,
 	// Hidden files such as .gitkeep never reach the deployed artifact, and one missing file fails the install.
 	...files.filter(
 		(file) =>
-			!/\/(data|cards)\//.test(file) && !file.endsWith('/admin.json') && !/\/\.[^/]*$/.test(file)
+			!/\/(data|cards|video)\//.test(file) &&
+			!file.endsWith('/admin.json') &&
+			!/\/\.[^/]*$/.test(file)
 	)
 ];
 const shellPages = ['/', '/offline', '/favourites', '/shopping-list', '/search'].map(

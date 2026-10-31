@@ -5,7 +5,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-const BINARY = /\.(png|jpe?g|webp|gif|ico|woff2?|ttf|wasm|lock)$|pnpm-lock\.yaml$/;
+const BINARY = /\.(png|jpe?g|webp|webm|mp4|gif|ico|woff2?|ttf|wasm|lock)$|pnpm-lock\.yaml$/;
 const SKIP = new Set(['crates/cookbook-cli/tests/fixtures/legacy-index.html']);
 
 const allowed = (code) =>

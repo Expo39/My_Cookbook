@@ -192,26 +192,25 @@ pub fn normalise(qty: f64, unit: Unit) -> (f64, Unit) {
     }
 }
 
-const MASS_CYCLE: [Unit; 4] = [Unit::G, Unit::Kg, Unit::Oz, Unit::Lb];
-const VOLUME_CYCLE: [Unit; 6] = [
-    Unit::Ml,
-    Unit::L,
-    Unit::Tsp,
-    Unit::Tbsp,
-    Unit::Cup,
-    Unit::Floz,
-];
+const METRIC_MASS: [Unit; 2] = [Unit::G, Unit::Kg];
+const METRIC_VOLUME: [Unit; 4] = [Unit::Ml, Unit::L, Unit::Tsp, Unit::Tbsp];
+const US_MASS: [Unit; 2] = [Unit::Oz, Unit::Lb];
+const US_VOLUME: [Unit; 4] = [Unit::Tsp, Unit::Tbsp, Unit::Cup, Unit::Floz];
 
-/// The next unit in the click-to-toggle cycle, with the same physical amount. Pinches do not toggle.
-pub fn toggle_unit(qty: f64, unit: Unit) -> Option<(f64, Unit)> {
-    let cycle: &[Unit] = match unit.dimension() {
-        Dimension::Mass => &MASS_CYCLE,
-        Dimension::Volume => &VOLUME_CYCLE,
-        Dimension::Other => return None,
+/// The units a cook can pick for an amount in `system`, each with the same physical amount, in menu
+/// order. Spoons belong to both systems. Pinches and counts have no choices, so the list is empty.
+pub fn unit_options(qty: f64, unit: Unit, system: UnitSystem) -> Vec<(f64, Unit)> {
+    let units: &[Unit] = match (unit.dimension(), system) {
+        (Dimension::Mass, UnitSystem::Metric) => &METRIC_MASS,
+        (Dimension::Mass, UnitSystem::Us) => &US_MASS,
+        (Dimension::Volume, UnitSystem::Metric) => &METRIC_VOLUME,
+        (Dimension::Volume, UnitSystem::Us) => &US_VOLUME,
+        (Dimension::Other, _) => return Vec::new(),
     };
-    let at = cycle.iter().position(|u| *u == unit)?;
-    let next = cycle[(at + 1) % cycle.len()];
-    Some((convert(qty, unit, next, None)?, next))
+    units
+        .iter()
+        .filter_map(|&to| Some((convert(qty, unit, to, None)?, to)))
+        .collect()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -316,21 +315,44 @@ mod tests {
     }
 
     #[test]
-    fn toggle_cycles_return_to_the_start() {
+    fn options_stay_within_the_chosen_system() {
+        let units = |qty, unit, system| -> Vec<Unit> {
+            unit_options(qty, unit, system)
+                .into_iter()
+                .map(|(_, u)| u)
+                .collect()
+        };
+        assert_eq!(
+            units(500.0, Unit::G, UnitSystem::Metric),
+            [Unit::G, Unit::Kg]
+        );
+        assert_eq!(units(500.0, Unit::G, UnitSystem::Us), [Unit::Oz, Unit::Lb]);
+        assert_eq!(
+            units(2.0, Unit::Cup, UnitSystem::Metric),
+            [Unit::Ml, Unit::L, Unit::Tsp, Unit::Tbsp]
+        );
+        assert_eq!(
+            units(30.0, Unit::Ml, UnitSystem::Us),
+            [Unit::Tsp, Unit::Tbsp, Unit::Cup, Unit::Floz]
+        );
+        assert!(unit_options(1.0, Unit::Pinch, UnitSystem::Metric).is_empty());
+    }
+
+    #[test]
+    fn every_option_converts_back_to_the_written_amount() {
         for unit in [Unit::G, Unit::Ml, Unit::Tsp, Unit::Oz, Unit::Cup] {
-            let (mut qty, mut current) = (7.0, unit);
-            for _ in 0..12 {
-                (qty, current) = toggle_unit(qty, current).unwrap();
-                if current == unit {
-                    break;
+            for system in [UnitSystem::Metric, UnitSystem::Us] {
+                for (qty, to) in unit_options(7.0, unit, system) {
+                    let back = convert(qty, to, unit, None).unwrap();
+                    assert!(
+                        near(back, 7.0, 1e-9),
+                        "{unit:?} via {to:?} came back as {back}"
+                    );
                 }
             }
-            assert_eq!(current, unit);
-            assert!(near(qty, 7.0, 1e-9), "{unit:?} came back as {qty}");
         }
-        assert_eq!(toggle_unit(1.0, Unit::G).unwrap().1, Unit::Kg);
-        assert_eq!(toggle_unit(1.0, Unit::Tsp).unwrap().1, Unit::Tbsp);
-        assert!(toggle_unit(1.0, Unit::Pinch).is_none());
+        let kilos = unit_options(1500.0, Unit::G, UnitSystem::Metric);
+        assert!(near(kilos[1].0, 1.5, 1e-9));
     }
 
     #[test]

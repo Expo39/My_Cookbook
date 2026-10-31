@@ -71,7 +71,7 @@ export function buildRecipeJsonLd({ recipe, view, section, url, image }: Input):
 		description: recipe.summary,
 		author: {
 			'@type': 'Person',
-			name: 'Antonio',
+			name: 'Antonio Galdes',
 			...(instagram ? { sameAs: [instagram.url] } : {})
 		},
 		recipeYield: [String(recipe.servings), servingsText(recipe.servings, recipe.servingsNoun)],

@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 cookbook-ai = { path = "../cookbook-ai" }
+futures-util = { version = "=0.3.34", default-features = false }
 hmac = "=0.13.0"
 serde_json.workspace = true
 sha2 = "=0.11.0"

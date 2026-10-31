@@ -14,7 +14,7 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 	retries: 0,
 	// The e2e budget: the whole run fails past 90 s.
-	globalTimeout: 90_000,
+	globalTimeout: process.env.WALKTHROUGH ? 600_000 : 90_000,
 	timeout: 15_000,
 	expect: { timeout: 3_000 },
 	reporter: process.env.CI ? [['github'], ['list']] : 'list',
@@ -23,31 +23,47 @@ export default defineConfig({
 		reducedMotion: 'reduce',
 		trace: 'retain-on-failure'
 	},
-	projects: process.env.SCREENSHOTS
+	// The walkthrough records the how-to video; it runs only through `make walkthrough`.
+	grepInvert: process.env.WALKTHROUGH ? undefined : /@walkthrough/,
+	projects: process.env.WALKTHROUGH
 		? [
 				{
-					name: 'screenshots',
-					testMatch: '**/screenshots.spec.ts',
-					use: { ...devices['Desktop Chrome'] }
+					name: 'walkthrough',
+					testMatch: '**/walkthrough.spec.ts',
+					use: {
+						...devices['Desktop Chrome'],
+						launchOptions: {
+							slowMo: 60,
+							...(process.env.PW_CHROMIUM ? { executablePath: process.env.PW_CHROMIUM } : {})
+						}
+					}
 				}
 			]
-		: [
-				{
-					name: 'chromium',
-					testIgnore: ['**/mobile.spec.ts', '**/screenshots.spec.ts'],
-					use: { ...devices['Desktop Chrome'] }
-				},
-				{ name: 'mobile', testMatch: '**/mobile.spec.ts', use: { ...devices['Pixel 7'] } },
-				...(process.env.FULL_E2E
-					? [
-							{
-								name: 'mobile-webkit',
-								testMatch: '**/mobile.spec.ts',
-								use: { ...devices['iPhone 14'] }
-							}
-						]
-					: [])
-			],
+		: process.env.SCREENSHOTS
+			? [
+					{
+						name: 'screenshots',
+						testMatch: '**/screenshots.spec.ts',
+						use: { ...devices['Desktop Chrome'] }
+					}
+				]
+			: [
+					{
+						name: 'chromium',
+						testIgnore: ['**/mobile.spec.ts', '**/screenshots.spec.ts', '**/walkthrough.spec.ts'],
+						use: { ...devices['Desktop Chrome'] }
+					},
+					{ name: 'mobile', testMatch: '**/mobile.spec.ts', use: { ...devices['Pixel 7'] } },
+					...(process.env.FULL_E2E
+						? [
+								{
+									name: 'mobile-webkit',
+									testMatch: '**/mobile.spec.ts',
+									use: { ...devices['iPhone 14'] }
+								}
+							]
+						: [])
+				],
 	webServer: {
 		command,
 		url: `http://localhost:${port}${basePath}/`,

@@ -4,7 +4,7 @@
 	import Icon from './Icon.svelte';
 	import ServingsStepper from './ServingsStepper.svelte';
 
-	let { model, cookHref, onshare }: { model: RecipeModel; cookHref: string; onshare: () => void } =
+	let { model, cookHref, onshare }: { model: RecipeModel; cookHref: string; onshare?: () => void } =
 		$props();
 </script>
 
@@ -18,9 +18,11 @@
 	<a class="cook" href={cookHref} data-sveltekit-keepfocus
 		><Icon name="play" size={18} />Start cooking</a
 	>
-	<button type="button" aria-label="Share this recipe" onclick={onshare}>
-		<Icon name="share" />
-	</button>
+	{#if onshare}
+		<button type="button" aria-label="Share this recipe" onclick={onshare}>
+			<Icon name="share" />
+		</button>
+	{/if}
 </div>
 
 <style>

@@ -6,11 +6,12 @@ mod error;
 mod prompts;
 mod request;
 mod schema;
+mod stream;
 mod types;
 
-pub use config::{DEFAULT_MODEL, GeminiConfig, endpoint};
+pub use config::{DEFAULT_MODEL, DEFAULT_THINKING_LEVEL, GeminiConfig, endpoint, stream_endpoint};
 pub use cookbook_core::Recipe;
-pub use error::AiError;
+pub use error::{ATTEMPTS_PER_MODEL, AiError, backoff_ms};
 pub use prompts::{
     HISTORY_TURNS, Imported, MESSAGE_CHARS, Role, Turn, chat_request, import_request,
     parse_import_response,
@@ -20,6 +21,8 @@ pub use request::{
     parse_site_recipe, site_recipe_url, unknown_recipe,
 };
 pub use schema::import_schema;
+pub use stream::{Relay, SseDecoder, delta_event, done_event, error_event, sse_event};
 pub use types::{
-    Candidate, Content, GenerationConfig, Part, PromptFeedback, Reply, Request, Response,
+    Candidate, Content, GenerationConfig, Part, Piece, PromptFeedback, Reply, Request, Response,
+    ThinkingConfig,
 };
