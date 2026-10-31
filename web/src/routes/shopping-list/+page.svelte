@@ -18,7 +18,6 @@
 		type ShoppingItem,
 		type ShoppingLine
 	} from '$lib/kitchen/shopping';
-	import { unitLabel } from '$lib/recipe/format';
 	import { homeHref } from '$lib/links';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import { preferences } from '$lib/stores/preferences.svelte';
@@ -98,7 +97,10 @@
 		shopping.clearAll();
 	}
 
-	/** Typed the way it would be written down: "2 kg potatoes, the big bag", one per line. */
+	/**
+	 * One box: "potatoes" or "2 kg potatoes". An amount it recognises becomes the line's amount chip,
+	 * which can be changed there; a pasted list adds a line for each.
+	 */
 	let own = $state('');
 	let adding = $state(false);
 	let itemField: HTMLTextAreaElement | undefined = $state();
@@ -128,24 +130,13 @@
 		};
 	}
 
-	const typedItems = $derived(
-		own
-			.split('\n')
-			.map((line) => line.trim())
-			.filter(Boolean)
-			.map(toItem)
-	);
-
-	function amountOf(item: ShoppingItem): string {
-		if (item.min === undefined) return '';
-		const qty =
-			item.max !== undefined && item.max !== item.min ? `${item.min}-${item.max}` : item.min;
-		return [qty, item.unit ? unitLabel(item.unit) : ''].filter(Boolean).join(' ');
-	}
-
 	function addOwn(event?: SubmitEvent) {
 		event?.preventDefault();
-		for (const item of typedItems) shopping.addOwn(item);
+		const lines = own
+			.split('\n')
+			.map((line) => line.trim())
+			.filter(Boolean);
+		for (const line of lines) shopping.addOwn(toItem(line));
 		own = '';
 		itemField?.focus();
 	}
@@ -187,36 +178,22 @@
 	{#if ready}
 		{#if adding}
 			<form class="own" onsubmit={addOwn} use:outside={() => (adding = false)}>
-				<label class="label" for="{id}-add">Add to the list</label>
+				<label class="label" for="{id}-add">What do you need?</label>
 				<div class="own-row">
 					<textarea
 						bind:this={itemField}
 						id="{id}-add"
 						rows="1"
 						autocomplete="off"
-						placeholder="2 kg potatoes, the big bag"
+						placeholder="2 kg potatoes"
 						aria-describedby="{id}-add-help"
 						bind:value={own}
 						onkeydown={enter}
 					></textarea>
-					<button type="submit" disabled={!typedItems.length}><Icon name="plus" />Add</button>
+					<button type="submit" disabled={!own.trim()}><Icon name="plus" />Add</button>
 				</div>
-				{#if typedItems.length}
-					<ul class="will-add" aria-label="Will be added">
-						{#each typedItems as item, n (n)}
-							<li>
-								<span class="num">{amountOf(item)}</span>
-								<span
-									>{[item.prefix, item.item].filter(Boolean).join(' ')}{#if item.note}<span
-											class="note">, {item.note}</span
-										>{/if}</span
-								>
-							</li>
-						{/each}
-					</ul>
-				{/if}
 				<p class="help" id="{id}-add-help">
-					Write it as you would on paper. Paste several lines to add them all at once.
+					Press Enter to add it. You can change the amount on the list.
 				</p>
 			</form>
 		{:else}
@@ -397,31 +374,8 @@
 		resize: none;
 	}
 
-	.will-add {
-		display: grid;
-		gap: var(--space-1);
-		padding: var(--space-2) var(--space-3);
-		border-radius: var(--radius-s);
-		background: var(--colour-tint);
-	}
-
-	.will-add li {
-		display: grid;
-		grid-template-columns: var(--amount-slot) minmax(0, 1fr);
-		gap: var(--space-3);
-	}
-
-	.will-add .num {
-		color: var(--colour-primary);
-		text-align: end;
-	}
-
-	.note,
 	.help {
 		color: var(--colour-muted);
-	}
-
-	.help {
 		font-size: var(--text-s);
 	}
 
@@ -508,11 +462,13 @@
 		color: var(--colour-danger);
 	}
 
+	/* As tall in both views, so a card keeps its size whether or not it has a remove button. */
 	.head {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-2);
+		min-block-size: var(--target);
 	}
 
 	h2 {
