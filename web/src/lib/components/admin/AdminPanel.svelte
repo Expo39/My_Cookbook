@@ -14,7 +14,7 @@
 	}: { onnavigate?: () => void; lazy?: boolean; titled?: boolean } = $props();
 
 	const TOKEN_INFO =
-		'A GitHub token is a long password for the cookbook\'s repository. It lets this site save recipes there. Make a fine-grained one for this repository only, with Contents set to read and write.';
+		"A GitHub token is a long password for the cookbook's repository. It lets this site save recipes there. Make a fine-grained one for this repository only, with Contents set to read and write.";
 	const PASSWORD_INFO =
 		'You choose this password. It locks the token, so any of your devices can unlock editing with the password alone. The locked copy is public, so make it long.';
 	const SECRET_INFO =
@@ -133,8 +133,8 @@
 	{:else if admin.unlocked}
 		<p class="state"><Icon name="check" size={18} />Editing is unlocked in this tab.</p>
 		<p class="help">
-			You can change any recipe and share your own with everyone. It locks again when you close
-			the tab.
+			You can change any recipe and share your own with everyone. It locks again when you close the
+			tab.
 		</p>
 		<a class="btn primary" href={editHref()} onclick={onnavigate}>
 			<Icon name="plus" size={18} />New recipe
@@ -219,8 +219,8 @@
 		</form>
 	{:else}
 		<p class="help">
-			Editing is not set up yet. You do this once, on any device: paste a GitHub token and choose
-			a password. After the next deploy, every device unlocks with the password alone.
+			Editing is not set up yet. You do this once, on any device: paste a GitHub token and choose a
+			password. After the next deploy, every device unlocks with the password alone.
 		</p>
 		<form onsubmit={setUp}>
 			<TextField

@@ -54,6 +54,8 @@
 	let ed = $state.raw<EditorState>();
 	let writer: RecipeWriter | undefined;
 	let pane = $state<Pane>('edit');
+	/** The address follows the title; it is folded away until someone wants to change it. */
+	let addressOpen = $state(false);
 	let draft = $state<Draft<FormData> | null>(null);
 	let saving = $state(false);
 	let problem = $state('');
@@ -83,6 +85,10 @@
 	});
 
 	onDestroy(() => (stopped = true));
+
+	$effect(() => {
+		if (ed?.errorFor('slug') || ed?.moving) addressOpen = true;
+	});
 
 	/*
 	 * Anyone can add a recipe, and change or delete the ones they added on this device. The cookbook's
@@ -357,22 +363,28 @@
 	{/snippet}
 
 	{#snippet address()}
-		<TextField
-			id={fieldId('slug')}
-			label="Web address"
-			bind:value={
-				() => editor.slug,
-				(value) => {
-					editor.form.slug = value;
-					editor.form.slugTouched = true;
+		<details class="address" bind:open={addressOpen}>
+			<summary>
+				<span>Web address <code>/{editor.id}</code></span>
+				<span class="change">Change</span>
+			</summary>
+			<TextField
+				id={fieldId('slug')}
+				label="Web address"
+				bind:value={
+					() => editor.slug,
+					(value) => {
+						editor.form.slug = value;
+						editor.form.slugTouched = true;
+					}
 				}
-			}
-			hint={editor.editing
-				? `Changing this moves the recipe. It is at /${editor.originalId} now.`
-				: `Follows the title until you change it: /${editor.id}`}
-			error={editor.errorFor('slug')}
-			onblur={() => editor.touch('slug')}
-		/>
+				hint={editor.editing
+					? `Changing this moves the recipe. It is at /${editor.originalId} now.`
+					: `Follows the title until you change it: /${editor.id}`}
+				error={editor.errorFor('slug')}
+				onblur={() => editor.touch('slug')}
+			/>
+		</details>
 		{#if editor.moving}
 			<p class="notice" role="status">
 				<span>
@@ -710,6 +722,30 @@
 		font-size: var(--text-l);
 		font-weight: 800;
 		cursor: pointer;
+	}
+
+	.address summary {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+		color: var(--colour-muted);
+		font-size: var(--text-s);
+	}
+
+	.address[open] summary {
+		margin-block-end: var(--space-2);
+	}
+
+	.change {
+		color: var(--colour-primary);
+		font-weight: 700;
+	}
+
+	.address[open] .change {
+		display: none;
 	}
 
 	.more-fields {
