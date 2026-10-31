@@ -197,7 +197,11 @@
 	{@const key = ingredientTick(group, item)}
 	{@const [amount, words] = wording(item)}
 	<label class="line" class:ticked={ticks.has(key)}>
-		<input type="checkbox" checked={ticks.has(key)} onchange={() => ticks.toggle(key)} />
+		<input
+			type="checkbox"
+			checked={ticks.has(key)}
+			onchange={(event) => ticks.set(key, event.currentTarget.checked)}
+		/>
 		<span class="amount num">{amount}</span>
 		<span class="item">
 			{words}{#if part}<span class="part">{part}</span>{/if}
