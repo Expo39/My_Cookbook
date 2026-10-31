@@ -169,8 +169,9 @@
 								<h3 class="label">I have...</h3>
 								<div class="inputs">
 									<label>
-										<span>Ingredient</span>
+										<span id="{id}-have-item">Ingredient</span>
 										<select
+											aria-labelledby="{id}-have-item"
 											value={haveKey}
 											onchange={(event) => chooseIngredient(event.currentTarget.value)}
 										>
@@ -192,8 +193,8 @@
 									</label>
 									{#if haveUnits.length}
 										<label>
-											<span>Unit</span>
-											<select bind:value={haveUnit}>
+											<span id="{id}-have-unit">Unit</span>
+											<select aria-labelledby="{id}-have-unit" bind:value={haveUnit}>
 												{#each haveUnits as unit (unit)}
 													<option value={unit}>{unitLabel(unit)}</option>
 												{/each}
