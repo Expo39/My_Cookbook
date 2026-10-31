@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { page } from '$app/state';
 	import {
@@ -19,11 +19,13 @@
 		onsettings
 	}: { sections: { title: string; path: string }[]; onsettings: () => void } = $props();
 
-	const here = (href: string) => (page.url.pathname === href ? 'page' : undefined);
+	// Matched on the route, not the address: prerendered pages write their links relative
+	// ("../../soups"), so an address check never matched on the server and the chip lit up late.
+	const here = (route: string) => (page.route.id === route ? 'page' : undefined);
 
 	const current = (path: string) => {
-		const href = pageHref(path);
-		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
+		const at = page.route.id === '/[...path]' ? (page.params.path ?? '') : '';
+		return at === path || at.startsWith(`${path}/`);
 	};
 
 	let list: HTMLUListElement | undefined = $state();
@@ -41,27 +43,42 @@
 	let glides = $state(false);
 	let settled = false;
 
+	const currentChip = () => list?.querySelector<HTMLElement>('a[aria-current="page"]') ?? null;
+
+	/** Puts the sliding highlight on `chip`, gliding there or jumping. */
+	function place(chip: HTMLElement | null, animate: boolean) {
+		if (!glide) return;
+		glide.classList.toggle('shown', !!chip);
+		glide.classList.toggle('instant', !animate);
+		if (!chip) return;
+		// The jump must be drawn before a glide starts from it.
+		if (animate) void glide.offsetWidth;
+		glide.style.setProperty('--glide-x', `${chip.offsetLeft}px`);
+		glide.style.setProperty('--glide-w', `${chip.offsetWidth}px`);
+	}
+
 	/**
-	 * Slides the highlight to the current section's chip and glides the row to centre it, scrolling the
-	 * row only, never the page. The first placement after a load jumps there with no animation.
+	 * A freshly loaded page keeps the plain filled chip, so a reload draws nothing twice. Just before
+	 * the first move to another page, the sliding highlight takes the chip's place, ready to glide.
 	 */
+	beforeNavigate(() => {
+		if (glides) return;
+		place(currentChip(), false);
+		glides = true;
+	});
+
+	/** Glides the highlight to the new section's chip, and the row to centre it (never the page). */
 	afterNavigate(() => {
-		const chip = list?.querySelector<HTMLElement>('a[aria-current="page"]');
-		if (list && glide) {
-			glides = true;
-			glide.classList.toggle('shown', !!chip);
-			glide.classList.toggle('instant', !settled);
-			if (chip) {
-				glide.style.setProperty('--glide-x', `${chip.offsetLeft}px`);
-				glide.style.setProperty('--glide-w', `${chip.offsetWidth}px`);
-				const smooth = settled && !matchMedia('(prefers-reduced-motion: reduce)').matches;
-				list.scrollTo({
-					left: chip.offsetLeft - (list.clientWidth - chip.offsetWidth) / 2,
-					behavior: smooth ? 'smooth' : 'auto'
-				});
-			}
-			settled = true;
+		const chip = currentChip();
+		const smooth = settled && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (glides) place(chip, smooth);
+		if (list && chip) {
+			list.scrollTo({
+				left: chip.offsetLeft - (list.clientWidth - chip.offsetWidth) / 2,
+				behavior: smooth ? 'smooth' : 'auto'
+			});
 		}
+		settled = true;
 		measure();
 	});
 </script>
@@ -83,7 +100,7 @@
 				class="tool"
 				href={favouritesHref()}
 				aria-label="Favourites"
-				aria-current={here(favouritesHref())}
+				aria-current={here('/favourites')}
 			>
 				<Icon name="heart" />
 			</a>
@@ -91,11 +108,11 @@
 				class="tool"
 				href={shoppingHref()}
 				aria-label="Shopping list"
-				aria-current={here(shoppingHref())}
+				aria-current={here('/shopping-list')}
 			>
 				<Icon name="basket" />
 			</a>
-			<a class="tool" href={howToHref()} aria-label="How to use" aria-current={here(howToHref())}>
+			<a class="tool" href={howToHref()} aria-label="How to use" aria-current={here('/how-to-use')}>
 				<Icon name="help" />
 			</a>
 			<button class="icon" type="button" aria-label="Settings" onclick={onsettings}>

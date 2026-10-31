@@ -29,7 +29,7 @@
 		});
 	const done = $derived(ticks.countOf(steps.map((step, i) => tickOf(step, i + 1))));
 	/** Until the cook has found it, the number circles say they can be tapped. */
-	const showHint = $derived(hydrated && !preferences.stepHintDismissed && done === 0);
+	const showHint = $derived(!preferences.stepHintDismissed && done === 0);
 
 	function toggle(tick: string) {
 		ticks.toggle(tick);
@@ -65,6 +65,7 @@
 
 	{#if showHint}
 		<Hint
+			name="steps"
 			text="Tap a step's number to mark it done"
 			ondismiss={() => preferences.dismissStepHint()}
 		/>

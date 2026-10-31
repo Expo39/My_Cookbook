@@ -81,6 +81,17 @@
 			>
 		{/if}
 	</section>
+{:else if !timers.loaded}
+	<!-- Shown only when the script in app.html knows a timer is running: a strip as tall as one pill. -->
+	<section class="strip waiting" aria-hidden="true" inert>
+		<ul>
+			<li class="pill">
+				<span class="name">Timer</span>
+				<span class="num time">0:00</span>
+				<button type="button"><Icon name="pause" size={18} /></button>
+			</li>
+		</ul>
+	</section>
 {/if}
 
 <style>
@@ -92,6 +103,15 @@
 		border-block-end: 1px solid var(--colour-line);
 		background: var(--colour-surface);
 		box-shadow: var(--shadow-float);
+	}
+
+	/* Without a running timer (known to the script in app.html) the held place is not drawn. */
+	:global(html:not([data-timers])) .waiting {
+		display: none;
+	}
+
+	.waiting .pill {
+		visibility: hidden;
 	}
 
 	ul {

@@ -95,3 +95,16 @@ test('the info circle explains the search in use', async ({ page }) => {
 	await page.getByRole('button', { name: 'What is searching?' }).click();
 	await expect(page.getByText(/Several words find recipes with all of them/)).toBeAttached();
 });
+
+test.describe('a reload of a search', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('waits for the results instead of showing the help first', async ({ page }) => {
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.goto('search?q=pasta');
+		await expect(page.getByRole('heading', { name: 'How to search' })).toBeHidden();
+		await expect(page.getByText('Loading search...')).toBeVisible();
+		await page.goto('search');
+		await expect(page.getByRole('heading', { name: 'How to search' })).toBeVisible();
+	});
+});

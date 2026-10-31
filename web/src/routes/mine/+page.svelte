@@ -46,10 +46,15 @@
 		<a href={homeHref()}>Back to the cookbook</a>
 	</section>
 {:else}
-	<p role="status">Opening your recipe...</p>
+	<p class="opening" role="status">Opening your recipe...</p>
 {/if}
 
 <style>
+	.opening {
+		min-block-size: 70dvh;
+		color: var(--colour-muted);
+	}
+
 	.missing {
 		display: grid;
 		gap: var(--space-3);

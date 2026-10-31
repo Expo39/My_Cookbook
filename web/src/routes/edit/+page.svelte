@@ -714,6 +714,7 @@
 	}
 
 	.page-note {
+		min-block-size: 70dvh;
 		color: var(--colour-muted);
 	}
 

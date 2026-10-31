@@ -24,6 +24,7 @@ interface NewTimer {
  */
 export class Timers {
 	list = $state<TimerState[]>([]);
+	loaded = $state(false);
 	now = $state(0);
 	/** Read out by the strip's live region when a timer finishes. */
 	announcement = $state('');
@@ -44,6 +45,7 @@ export class Timers {
 	load(): void {
 		const stored = readJson(TIMERS_KEY);
 		this.list = Array.isArray(stored) ? stored.filter(isTimerState) : [];
+		this.loaded = true;
 		if (!this.#listening && typeof document !== 'undefined') {
 			this.#listening = true;
 			document.addEventListener('visibilitychange', () => this.tick());

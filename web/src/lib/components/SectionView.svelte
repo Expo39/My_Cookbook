@@ -4,6 +4,7 @@
 	import { countRecipes, descendantRecipes, sectionTrail } from '$lib/data/tree';
 	import { editHref, homeHref, pageHref } from '$lib/links';
 	import { personal } from '$lib/stores/personal.svelte';
+	import CardGhosts from './CardGhosts.svelte';
 	import Icon from './Icon.svelte';
 	import { recipesText } from '$lib/recipe/format';
 	import type { SectionNode, SiteIndex } from '$lib/types/recipe';
@@ -60,6 +61,12 @@
 				{/each}
 			</ul>
 		</section>
+	{:else if !personal.loaded}
+		<!-- Shown, with its heading, only while this browser's recipes for the section are read. -->
+		<section class="waiting" data-ghost-show="mine" aria-hidden="true">
+			<h2>Your recipes</h2>
+			<CardGhosts list="mine" />
+		</section>
 	{/if}
 
 	{#if section.recipes.length}
@@ -96,6 +103,10 @@
 
 	.page {
 		gap: var(--space-5);
+	}
+
+	.waiting {
+		display: none;
 	}
 
 	header {

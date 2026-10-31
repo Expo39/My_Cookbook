@@ -209,3 +209,56 @@ test('a recipe kept on the device can be shared as a card, but has no link yet',
 	await expect(sheet.getByRole('button', { name: 'Send the link' })).toBeDisabled();
 	await expect(sheet.getByText('so it has no link yet')).toBeVisible();
 });
+
+test.describe('the first paint of a reload', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	const top = (page: Page, name: string) =>
+		page
+			.getByRole('heading', { name, exact: true })
+			.evaluate((element) => Math.round(element.getBoundingClientRect().top + scrollY));
+
+	test('holds room for your recipes on the home and section pages, so nothing below jumps', async ({
+		page
+	}) => {
+		await addRecipe(page, "Nanna's minestra");
+		await addRecipe(page, 'Kusksu');
+		await page.goto('./');
+		await expect(page.getByRole('region', { name: 'Your recipes' }).getByRole('link')).toHaveCount(
+			3
+		);
+		const settled = await top(page, 'Recently added');
+
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.reload();
+		await expect(page.locator('ul[data-ghosts="mine"] > li:visible')).toHaveCount(2);
+		await expect(page.getByText('Add your own recipes and cook from them here.')).toBeHidden();
+		expect(Math.abs((await top(page, 'Recently added')) - settled)).toBeLessThanOrEqual(8);
+
+		await page.goto('soups');
+		await expect(page.locator('ul[data-ghosts="mine"] > li:visible')).toHaveCount(2);
+		await page.goto('desserts');
+		await expect(page.locator('ul[data-ghosts="mine"] > li:visible')).toHaveCount(0);
+	});
+
+	test('draws the final page at once for a visitor with nothing saved', async ({ page }) => {
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.goto('./');
+		await expect(page.getByText('Add your own recipes and cook from them here.')).toBeVisible();
+		await expect(page.locator('ul[data-ghosts] > li:visible')).toHaveCount(0);
+		await page.goto('favourites');
+		await expect(page.getByText('No favourites yet.')).toBeVisible();
+	});
+
+	test('holds room for favourites and recently viewed recipes', async ({ page }) => {
+		await page.goto('desserts/french-classics/creme-brulee');
+		await waitForCore(page);
+		await page.getByRole('button', { name: 'Favourite' }).first().click();
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.goto('favourites');
+		await expect(page.locator('ul[data-ghosts="favourites"] > li:visible')).toHaveCount(1);
+		await expect(page.locator('ul[data-ghosts="recent"] > li:visible')).toHaveCount(1);
+		await expect(page.getByText('No favourites yet.')).toBeHidden();
+		await expect(page.getByText('Recipes you open will appear here.')).toBeHidden();
+	});
+});

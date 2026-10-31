@@ -18,6 +18,66 @@
 					var theme = localStorage.getItem('sapori:theme');
 					if (theme === 'dark') document.documentElement.dataset.theme = theme;
 					if (theme === 'system') delete document.documentElement.dataset.theme;
+					var off = ['units', 'steps'].filter(function (hint) {
+						return localStorage.getItem('sapori:hint:' + hint) === '1';
+					});
+					if (off.length) document.documentElement.dataset.hintsOff = off.join(' ');
+
+					// Room for what this browser will add once the page has loaded, so nothing jumps.
+					var read = function (key) {
+						return JSON.parse(localStorage.getItem(key) || 'null');
+					};
+					var path = location.pathname.replace(/\.html$/, '').replace(/\/$/, '');
+					var mine = read('sapori:mine');
+					var counts = {
+						mine: !mine
+							? 0
+							: path === mine.home
+								? mine.sections.length
+								: mine.sections.filter(function (section) {
+										return section === path || section.indexOf(path + '/') === 0;
+									}).length,
+						favourites: (read('sapori:favourites') || []).length,
+						recent: (read('sapori:recent') || []).length
+					};
+					var css = '';
+					for (var list in counts) {
+						var count = Math.min(counts[list], 12);
+						if (!count) continue;
+						var ghosts = 'ul[data-ghosts="' + list + '"][aria-hidden]';
+						css +=
+							ghosts +
+							'{display:grid}' +
+							ghosts +
+							'>li:nth-child(n+' +
+							(count + 1) +
+							'){display:none!important}';
+						css += '[data-ghost-empty="' + list + '"]{display:none!important}';
+						css += '[data-ghost-show="' + list + '"]{display:grid!important}';
+					}
+					if ((read('sapori:timers') || []).length) document.documentElement.dataset.timers = '';
+
+					// What the address asks for, which a prerendered page cannot know until its code runs.
+					var query = new URLSearchParams(location.search);
+					if (query.has('cook')) document.documentElement.dataset.cooking = '';
+					var has = function (key) {
+						return query.has(key);
+					};
+					if (['serves', 'x', 'pan', 'have'].some(has))
+						document.documentElement.dataset.scaled = 'amount';
+					else if (['u', 'v'].some(has)) document.documentElement.dataset.scaled = 'units';
+					if (query.get('q')) document.documentElement.dataset.query = '';
+					var id = /\/mine$/.test(path) ? query.get('id') : null;
+					var page = id ? path + '?id=' + encodeURIComponent(id) : path;
+					var photos = read('sapori:photos') || {};
+					for (var recipe in photos) {
+						if (photos[recipe] === page) document.documentElement.dataset.localPhoto = '';
+					}
+					if (css) {
+						var style = document.createElement('style');
+						style.textContent = css;
+						document.head.appendChild(style);
+					}
 				} catch (error) {
 					/* storage can be blocked; the light theme applies */
 				}
