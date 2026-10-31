@@ -768,6 +768,7 @@
 
 	.first {
 		display: grid;
+		max-inline-size: 44rem;
 		gap: var(--space-3);
 		justify-items: start;
 		margin-block-start: var(--space-2);

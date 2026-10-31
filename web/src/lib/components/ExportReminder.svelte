@@ -60,6 +60,7 @@
 
 	.words {
 		display: grid;
+		max-inline-size: var(--measure);
 		flex: 1;
 		gap: var(--space-2);
 		justify-items: start;
