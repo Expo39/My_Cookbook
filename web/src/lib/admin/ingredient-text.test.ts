@@ -32,7 +32,7 @@ describe('rowToLine', () => {
 
 describe('textToGroups', () => {
 	it('reads each line, tidying bullets, numbers and spaces', () => {
-		const [group] = textToGroups('1.  400g   plain flour\n• 2 eggs\n\n- salt to taste', [
+		const [group] = textToGroups('1.  400g   plain flour\n\u2022 2 eggs\n\n- salt to taste', [
 			emptyGroup()
 		]);
 		expect(group.name).toBe('');
