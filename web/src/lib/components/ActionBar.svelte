@@ -8,14 +8,14 @@
 		$props();
 </script>
 
-<div class="bar">
+<div class="bar" data-action-bar>
 	<ServingsStepper
 		label="Servings"
 		value={formatNumber(model.view.servings)}
 		canDecrease={model.view.servings > 1}
 		onstep={(direction) => model.step(direction)}
 	/>
-	<a class="cook" href={cookHref} data-sveltekit-keepfocus
+	<a class="cook" href={cookHref} data-sveltekit-keepfocus data-sveltekit-noscroll
 		><Icon name="play" size={18} />Start cooking</a
 	>
 	{#if onshare}
@@ -73,6 +73,13 @@
 		border-radius: var(--radius-s);
 		background: transparent;
 		color: var(--colour-primary);
+	}
+
+	/* The page, footer and all, ends clear of the bar. */
+	@media screen and (max-width: 47.99rem) {
+		:global(body:has([data-action-bar])) {
+			padding-block-end: calc(var(--bar-height) + env(safe-area-inset-bottom, 0px));
+		}
 	}
 
 	@media (min-width: 48rem), print {

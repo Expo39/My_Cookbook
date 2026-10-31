@@ -286,7 +286,7 @@
 	{/if}
 </svelte:head>
 
-<article class:enhanced={hydrated} class:printing-card={printingCard}>
+<article class:printing-card={printingCard}>
 	<Breadcrumb {trail} />
 	{#if local}
 		<p class="device">
@@ -383,7 +383,7 @@
 
 	{#if hydrated}<ActionBar {model} {cookHref} onshare={share} />{/if}
 	{#if hydrated && cookStep !== null && CookMode}
-		<CookMode {model} {recipe} step={cookStep} onstep={cookTo} onexit={exitCook} />
+		<CookMode {model} {recipe} {ticks} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
 	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} {local} onprint={printCard} />{/if}
 	{#if hydrated && ai}
@@ -545,11 +545,6 @@
 	@media screen and (max-width: 47.99rem) {
 		.inactive {
 			display: none;
-		}
-
-		/* Keeps the last lines of the page clear of the fixed bar. */
-		.enhanced {
-			padding-block-end: calc(var(--bar-height) + env(safe-area-inset-bottom, 0px));
 		}
 	}
 

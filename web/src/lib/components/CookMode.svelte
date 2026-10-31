@@ -1,14 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import { unlockAudio } from '$lib/kitchen/alert';
 	import { stepTimers } from '$lib/kitchen/timer-ids';
 	import { ScreenAwake } from '$lib/kitchen/wake-lock';
 	import { splitAmount } from '$lib/recipe/format';
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
+	import { stepIngredients } from '$lib/recipe/step-ingredients';
 	import { chrome } from '$lib/stores/chrome.svelte';
 	import { theme } from '$lib/stores/theme.svelte';
+	import { ingredientTick, type Ticks } from '$lib/stores/ticks.svelte';
 	import { timers } from '$lib/stores/timers.svelte';
+	import type { ScaledGroup, ScaledIngredient, ScaledStep } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
 	import StepText from './StepText.svelte';
 	import TimerStrip from './TimerStrip.svelte';
@@ -16,12 +19,14 @@
 	let {
 		model,
 		recipe,
+		ticks,
 		step,
 		onstep,
 		onexit
 	}: {
 		model: RecipeModel;
 		recipe: { id: string; title: string };
+		ticks: Ticks;
 		step: number;
 		onstep: (step: number) => void;
 		/** Told where focus should return to, which the page restores once any navigation has settled. */
@@ -30,30 +35,39 @@
 
 	const id = $props.id();
 	const prefersDark = new MediaQuery('prefers-color-scheme: dark');
+	const wide = new MediaQuery('min-width: 64rem');
 	const SWIPE = 60;
 
 	let dialog: HTMLDialogElement;
+	let pantry = $state<HTMLElement>();
 	let awake = $state(true);
 	let swipe: { x: number; y: number } | undefined;
 	let opener: HTMLElement | null = null;
+	/** The full list as a sheet, on screens too narrow to keep it beside the step. */
+	let listOpen = $state(false);
+	let done = $state(false);
 
 	const steps = $derived(model.view.steps);
+	const groups = $derived(model.view.groups);
 	const total = $derived(steps.length);
 	const current = $derived(steps[step - 1]);
+	const upcoming = $derived<ScaledStep | undefined>(steps[step]);
 	const stage = $derived(steps.slice(0, step).findLast((entry) => entry.heading)?.heading);
 	const dark = $derived(
 		theme.choice === 'dark' || (theme.choice === 'system' && prefersDark.current)
 	);
-	const used = $derived(
-		current.segments.filter(
-			(segment, at, all) =>
-				segment.type === 'ingredient' &&
-				all.findIndex((other) => other.type === 'ingredient' && other.text === segment.text) === at
-		)
+	const byStep = $derived(stepIngredients(steps, groups));
+	const used = $derived(byStep[step - 1] ?? []);
+	const usedLines = $derived(new Set(used.map((entry) => `${entry.group}/${entry.index}`)));
+	const severalParts = $derived(new Set(used.map((entry) => entry.group)).size > 1);
+	const lineCount = $derived(groups.reduce((sum, group) => sum + group.items.length, 0));
+	const tickKeys = $derived(
+		groups.flatMap((group) => group.items.map((item) => ingredientTick(group, item)))
 	);
-	const usedKeys = $derived(
-		used.flatMap((segment) => (segment.type === 'ingredient' ? [segment.key] : []))
-	);
+	const ready = $derived(ticks.countOf(tickKeys));
+	const preview = $derived(upcoming ? sentence(upcoming) : '');
+	/** While the list is a sheet over the step, only the sheet can be used. */
+	const covered = $derived(listOpen && !wide.current);
 
 	onMount(() => {
 		const active = document.activeElement;
@@ -71,8 +85,60 @@
 		};
 	});
 
+	// A new step leaves the finished screen, and brings its lines into view in the full list.
+	$effect(() => {
+		void step;
+		done = false;
+		tick().then(() =>
+			pantry?.querySelector('.current')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+		);
+	});
+
+	/** The step's text without its markup, cut to its first sentence, for "Up next". */
+	function sentence(entry: ScaledStep): string {
+		const text = entry.segments
+			.map((segment) => segment.text)
+			.join('')
+			.trim();
+		const end = text.search(/[.!?](\s|$)/);
+		return end > 0 && end < 140
+			? text.slice(0, end + 1)
+			: text.length > 140
+				? `${text.slice(0, 137)}...`
+				: text;
+	}
+
+	function wording(item: ScaledIngredient): [string, string] {
+		const [before, amount, after] = splitAmount(item.text);
+		return [amount, `${before}${after}`.replace(/\s+/g, ' ').trim()];
+	}
+
 	const previous = () => step > 1 && onstep(step - 1);
-	const next = () => (step < total ? onstep(step + 1) : dialog.close());
+	const next = () => (step < total ? onstep(step + 1) : finish());
+
+	async function finish() {
+		done = true;
+		await tick();
+		dialog.querySelector<HTMLElement>('.done h2')?.focus();
+	}
+
+	async function openList() {
+		listOpen = true;
+		await tick();
+		pantry?.querySelector<HTMLElement>('.close-list')?.focus();
+	}
+
+	function closeList() {
+		listOpen = false;
+		dialog.querySelector<HTMLElement>('.list-button')?.focus();
+	}
+
+	/** Esc closes the sheet first, then cook mode. */
+	function cancel(event: Event) {
+		if (!listOpen) return;
+		event.preventDefault();
+		closeList();
+	}
 
 	/** The dialog keeps the rest of the page inert; this also stops Tab leaving for the browser's own controls. */
 	function wrapTab(event: KeyboardEvent) {
@@ -80,7 +146,7 @@
 			...dialog.querySelectorAll<HTMLElement>(
 				'button:not(:disabled), a[href], input, select, textarea'
 			)
-		].filter((element) => element.getClientRects().length > 0);
+		].filter((element) => element.getClientRects().length > 0 && !element.closest('[inert]'));
 		const [first, last] = [focusable[0], focusable[focusable.length - 1]];
 		const edge = event.shiftKey
 			? document.activeElement === first
@@ -95,9 +161,14 @@
 			return wrapTab(event);
 		}
 		if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+		if (listOpen) return;
 		if (event.key === 'ArrowRight') next();
 		else if (event.key === 'ArrowLeft') previous();
-		else if (event.key === ' ' && !(event.target as Element).closest('button, a, input, select')) {
+		else if (event.key === 'i' && !wide.current) openList();
+		else if (
+			event.key === ' ' &&
+			!(event.target as Element).closest('button, a, input, select, label')
+		) {
 			const first = stepTimers(recipe, step, current.segments)[0];
 			if (!first) return;
 			unlockAudio();
@@ -122,26 +193,48 @@
 
 <svelte:window onkeydown={keydown} />
 
-<dialog bind:this={dialog} aria-labelledby="{id}-title" onclose={() => onexit(opener)}>
+{#snippet line(group: ScaledGroup, item: ScaledIngredient, part?: string | null)}
+	{@const key = ingredientTick(group, item)}
+	{@const [amount, words] = wording(item)}
+	<label class="line" class:ticked={ticks.has(key)}>
+		<input type="checkbox" checked={ticks.has(key)} onchange={() => ticks.toggle(key)} />
+		<span class="amount num">{amount}</span>
+		<span class="item">
+			{words}{#if part}<span class="part">{part}</span>{/if}
+		</span>
+	</label>
+{/snippet}
+
+<dialog
+	bind:this={dialog}
+	aria-labelledby="{id}-title"
+	oncancel={cancel}
+	onclose={() => onexit(opener)}
+>
 	<TimerStrip />
-	<header>
+	<header inert={covered}>
 		<button type="button" class="icon" aria-label="Exit cook mode" onclick={() => dialog.close()}>
 			<Icon name="x" />
 		</button>
 		<div class="heading">
-			<p class="label" id="{id}-title">{recipe.title}</p>
-			<p class="num progress" role="status">Step {step} of {total}</p>
+			<p class="eyebrow label">Cooking</p>
+			<p class="title" id="{id}-title">{recipe.title}</p>
 		</div>
 		<button
 			type="button"
-			class="dark"
+			class="icon"
+			aria-label="Dark theme"
 			aria-pressed={dark}
 			onclick={() => theme.set(dark ? 'light' : 'dark')}
 		>
-			<Icon name="moon" size={18} />Dark
+			<Icon name="moon" size={20} />
 		</button>
 	</header>
-	<progress value={step} max={total} aria-hidden="true"></progress>
+	<div class="rail" aria-hidden="true">
+		{#each { length: total }, s (s)}
+			<span class:past={s + 1 < step || done} class:now={s + 1 === step && !done}></span>
+		{/each}
+	</div>
 	{#if !awake}
 		<p class="notice">
 			<Icon name="info" size={18} />Keep your screen on: this browser can't do it for you
@@ -149,19 +242,33 @@
 	{/if}
 
 	<div class="body">
-		<aside aria-label="All ingredients">
+		<aside
+			bind:this={pantry}
+			class:open={listOpen}
+			aria-labelledby="{id}-list"
+			inert={!wide.current && !listOpen}
+		>
+			<div class="list-head">
+				<h2 class="label" id="{id}-list">All ingredients</h2>
+				<span class="ready"><span class="num">{ready} of {lineCount}</span> ready</span>
+				<button
+					type="button"
+					class="icon close-list"
+					aria-label="Close the list"
+					onclick={closeList}
+				>
+					<Icon name="x" />
+				</button>
+			</div>
 			{#if model.scaled}
 				<p class="scaled num">Scaled to {model.view.servings}</p>
 			{/if}
-			{#each model.view.groups as group, g (g)}
+			{#each groups as group, g (g)}
 				<div class="group">
-					{#if group.name}<h2 class="label">{group.name}</h2>{/if}
+					{#if group.name}<h3 class="label">{group.name}</h3>{/if}
 					<ul>
 						{#each group.items as item, i (i)}
-							{@const [before, amount, after] = splitAmount(item.text)}
-							<li class:current={item.key && usedKeys.includes(item.key)}>
-								{before}{#if amount}<span class="num">{amount}</span>{/if}{after}
-							</li>
+							<li class:current={usedLines.has(`${g}/${i}`)}>{@render line(group, item)}</li>
 						{/each}
 					</ul>
 				</div>
@@ -171,42 +278,108 @@
 		<!-- Swiping is a convenience for wet hands; the buttons and arrow keys do the same. -->
 		<section
 			class="step"
-			aria-label="Step {step}"
+			inert={covered}
+			aria-label={done ? 'Finished' : `Step ${step}`}
 			onpointerdown={pointerdown}
 			onpointerup={pointerup}
 			onpointercancel={() => (swipe = undefined)}
 		>
-			{#key step}
-				<div class="content">
-					{#if stage}<h2 class="label stage">{stage}</h2>{/if}
-					{#if used.length}
-						<ul class="used" aria-label="In this step">
-							{#each used as segment (segment.text)}
-								{@const [before, amount, after] = splitAmount(segment.text)}
-								<li>
-									{before}{#if amount}<span class="num">{amount}</span>{/if}{after}
-								</li>
-							{/each}
-						</ul>
+			{#if done}
+				<div class="content done">
+					<span class="seal"><Icon name="checkCircle" size={40} /></span>
+					<h2 tabindex="-1">Ready to serve</h2>
+					<p class="lede">Every step of {recipe.title} is done. Enjoy it.</p>
+					{#if model.view.tips.length}
+						<div class="tips">
+							<h3 class="label">From the chef</h3>
+							{#each model.view.tips as tip, t (t)}<p>{tip}</p>{/each}
+						</div>
 					{/if}
-					<div class="text"><StepText step={current} {recipe} number={step} /></div>
-					{#if current.hint}
-						<p class="hint"><Icon name="alert" size={18} />{current.hint}</p>
-					{/if}
+					<div class="done-actions">
+						<button type="button" class="nav primary" onclick={() => dialog.close()}>
+							Back to the recipe
+						</button>
+						<button type="button" class="nav" onclick={() => onstep(1)}>
+							<Icon name="reset" size={18} />Cook it again
+						</button>
+					</div>
 				</div>
-			{/key}
+			{:else}
+				{#key step}
+					<div class="content">
+						<div class="marker">
+							<span class="numeral num" aria-hidden="true">{step}</span>
+							<div class="where">
+								<p class="num progress" role="status">Step {step} of {total}</p>
+								{#if stage}<h2 class="label stage">{stage}</h2>{/if}
+							</div>
+						</div>
+
+						<div class="text"><StepText step={current} {recipe} number={step} /></div>
+						{#if current.hint}
+							<p class="hint"><Icon name="alert" size={18} />{current.hint}</p>
+						{/if}
+
+						<section class="for-step" aria-labelledby="{id}-for">
+							<h2 class="label" id="{id}-for">For this step</h2>
+							{#if used.length}
+								<ul aria-label="In this step">
+									{#each used as entry (`${entry.group}/${entry.index}`)}
+										<li>
+											{@render line(
+												groups[entry.group],
+												entry.item,
+												severalParts ? entry.groupName : undefined
+											)}
+										</li>
+									{/each}
+								</ul>
+							{:else}
+								<p class="nothing">Nothing new to add here.</p>
+							{/if}
+						</section>
+
+						{#if upcoming}
+							<div class="up-next">
+								<p class="label">Up next</p>
+								<p class="preview">{preview}</p>
+							</div>
+						{/if}
+					</div>
+				{/key}
+			{/if}
 		</section>
 	</div>
+	{#if covered}
+		<button
+			type="button"
+			class="scrim"
+			aria-label="Close the list"
+			tabindex="-1"
+			onclick={closeList}
+		></button>
+	{/if}
 
-	<footer>
-		<button type="button" class="nav" disabled={step === 1} onclick={previous}>
-			<Icon name="chevronLeft" />Previous
-		</button>
-		<!-- svelte-ignore a11y_autofocus -->
-		<button type="button" class="nav primary" autofocus onclick={next}>
-			{step < total ? 'Next' : 'Finish'}<Icon name="chevronRight" />
-		</button>
-	</footer>
+	{#if !done}
+		<footer inert={covered}>
+			<button type="button" class="nav back" disabled={step === 1} onclick={previous}>
+				<Icon name="chevronLeft" /><span>Previous</span>
+			</button>
+			<button
+				type="button"
+				class="nav list-button"
+				aria-expanded={listOpen}
+				aria-haspopup="dialog"
+				onclick={openList}
+			>
+				<Icon name="basket" size={20} />Ingredients
+			</button>
+			<!-- svelte-ignore a11y_autofocus -->
+			<button type="button" class="nav primary" autofocus onclick={next}>
+				{step < total ? 'Next' : 'Finish'}<Icon name="chevronRight" />
+			</button>
+		</footer>
+	{/if}
 </dialog>
 
 <style>
@@ -232,7 +405,8 @@
 		display: flex;
 		align-items: center;
 		gap: var(--space-3);
-		padding: env(safe-area-inset-top, 0px) var(--gutter) 0;
+		padding: calc(var(--space-2) + env(safe-area-inset-top, 0px)) var(--gutter) var(--space-2);
+		background: var(--colour-surface);
 	}
 
 	.heading {
@@ -241,19 +415,21 @@
 		min-inline-size: 0;
 	}
 
-	.heading .label {
+	.eyebrow {
+		color: var(--colour-accent);
+	}
+
+	.title {
 		overflow: hidden;
-		color: var(--colour-muted);
+		font-family: var(--font-display);
+		font-size: var(--text-l);
+		font-weight: 800;
+		letter-spacing: -0.02em;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 
-	.progress {
-		font-size: var(--text-l);
-	}
-
 	.icon,
-	.dark,
 	.nav {
 		display: inline-flex;
 		align-items: center;
@@ -268,34 +444,34 @@
 		font-weight: 700;
 	}
 
-	.dark {
-		padding-inline: var(--space-3);
-	}
-
-	.dark[aria-pressed='true'] {
+	.icon[aria-pressed='true'] {
+		border-color: var(--colour-primary);
 		background: var(--colour-primary);
 		color: var(--colour-on-primary);
 	}
 
-	progress {
-		appearance: none;
-		inline-size: 100%;
-		block-size: 0.25rem;
-		border: 0;
-		background: var(--colour-line);
-		color: var(--colour-primary);
+	.rail {
+		display: flex;
+		gap: 3px;
+		padding: 0 var(--gutter) var(--space-2);
+		background: var(--colour-surface);
+		border-block-end: 1px solid var(--colour-line);
 	}
 
-	progress::-webkit-progress-bar {
+	.rail span {
+		flex: 1;
+		block-size: 0.3rem;
+		border-radius: var(--radius-pill);
 		background: var(--colour-line);
+		transition: background-color var(--duration-panel) var(--ease-out);
 	}
 
-	progress::-webkit-progress-value {
+	.rail .past {
 		background: var(--colour-primary);
 	}
 
-	progress::-moz-progress-bar {
-		background: var(--colour-primary);
+	.rail .now {
+		background: var(--colour-accent);
 	}
 
 	.notice {
@@ -314,11 +490,7 @@
 		align-items: start;
 		min-block-size: 0;
 		overflow-y: auto;
-		padding: var(--space-5) var(--gutter);
-	}
-
-	aside {
-		display: none;
+		padding: var(--space-5) var(--gutter) var(--space-6);
 	}
 
 	.step {
@@ -331,49 +503,66 @@
 
 	.content {
 		display: grid;
-		gap: var(--space-4);
+		gap: var(--space-5);
 		inline-size: 100%;
-		max-inline-size: 40ch;
+		max-inline-size: 44rem;
 		animation: enter var(--duration-panel) var(--ease-out);
 	}
 
 	@keyframes enter {
 		from {
 			opacity: 0;
-			transform: translateY(0.5rem);
+			transform: translateX(0.75rem);
 		}
 	}
 
-	h2 {
+	h2,
+	h3 {
 		font-family: var(--font-body);
-		letter-spacing: 0.08em;
+	}
+
+	.marker {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
+	}
+
+	.numeral {
+		display: grid;
+		place-items: center;
+		flex: none;
+		inline-size: 4.5rem;
+		block-size: 4.5rem;
+		border: 2px solid var(--colour-accent);
+		border-radius: var(--radius-pill);
+		color: var(--colour-accent);
+		font-size: var(--text-3xl);
+		line-height: 1;
+	}
+
+	.where {
+		display: grid;
+		gap: var(--space-1);
+	}
+
+	.progress {
+		color: var(--colour-muted);
+		font-size: var(--text-m);
 	}
 
 	.stage {
-		color: var(--colour-accent);
-	}
-
-	.used {
-		display: grid;
-		padding: 0 var(--space-3);
-		border: 1px solid var(--colour-line);
-		border-radius: var(--radius-s);
-		background: var(--colour-surface);
-		font-size: var(--text-l);
-	}
-
-	.used li {
-		padding-block: var(--space-2);
-		border-block-end: 1px dashed var(--colour-line);
-	}
-
-	.used li:last-child {
-		border-block-end: 0;
+		color: var(--colour-primary);
+		text-wrap: balance;
 	}
 
 	.text {
 		font-size: var(--text-2xl);
-		line-height: 1.4;
+		line-height: 1.45;
+	}
+
+	.text :global(.timer) {
+		min-block-size: var(--target);
+		padding-inline: var(--space-3);
 	}
 
 	.hint {
@@ -384,17 +573,189 @@
 		font-size: var(--text-s);
 	}
 
+	.for-step {
+		display: grid;
+		gap: var(--space-2);
+		padding: var(--space-4);
+		border: 1px solid var(--colour-line);
+		border-block-start: 4px solid var(--colour-primary);
+		border-radius: var(--radius-m);
+		background: var(--colour-surface);
+	}
+
+	.for-step h2 {
+		color: var(--colour-primary);
+	}
+
+	.nothing {
+		color: var(--colour-muted);
+	}
+
+	/* One grid for the whole list, shared by every row through subgrid, so the boxes, amounts and
+	   words each form one straight column whatever the length of the amounts. */
+	ul {
+		display: grid;
+		grid-template-columns: auto minmax(2.5rem, max-content) minmax(0, 1fr);
+		column-gap: var(--space-3);
+	}
+
+	li {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		border-block-end: 1px dashed var(--colour-line);
+	}
+
+	li:last-child {
+		border-block-end: 0;
+	}
+
+	.line {
+		display: grid;
+		grid-column: 1 / -1;
+		grid-template-columns: subgrid;
+		align-items: baseline;
+		min-block-size: var(--target);
+		padding-block: var(--space-2);
+		cursor: pointer;
+		user-select: none;
+	}
+
+	/* Level with the first line of the words, not the middle of a line that wraps. */
+	.line input {
+		align-self: start;
+		inline-size: 1.25rem;
+		block-size: 1.25rem;
+		margin: calc((1lh - 1.25rem) / 2) 0 0;
+		accent-color: var(--colour-primary);
+	}
+
+	.amount {
+		color: var(--colour-primary);
+	}
+
+	.part {
+		margin-inline-start: var(--space-2);
+		padding: 0 var(--space-2);
+		border-radius: var(--radius-pill);
+		background: var(--colour-tint);
+		color: var(--colour-muted);
+		font-size: var(--text-xs);
+	}
+
+	.ticked .amount,
+	.ticked .item {
+		color: var(--colour-muted);
+		text-decoration: line-through;
+		transition: color var(--duration-micro) var(--ease-out);
+	}
+
+	.for-step .line {
+		font-size: var(--text-l);
+	}
+
+	.up-next {
+		display: grid;
+		gap: var(--space-1);
+		padding-block-start: var(--space-4);
+		border-block-start: 1px dashed var(--colour-line);
+		color: var(--colour-muted);
+	}
+
+	.preview {
+		display: -webkit-box;
+		overflow: hidden;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+	}
+
+	aside {
+		position: fixed;
+		inset: auto 0 0;
+		z-index: 2;
+		display: none;
+		gap: var(--space-3);
+		align-content: start;
+		max-block-size: 80dvh;
+		overflow-y: auto;
+		padding: var(--space-4) var(--gutter) calc(var(--space-5) + env(safe-area-inset-bottom, 0px));
+		border-radius: var(--radius-m) var(--radius-m) 0 0;
+		background: var(--colour-surface);
+		box-shadow: var(--shadow-float);
+	}
+
+	aside.open {
+		display: grid;
+		animation: rise var(--duration-panel) var(--ease-out);
+	}
+
+	@keyframes rise {
+		from {
+			transform: translateY(1.5rem);
+			opacity: 0;
+		}
+	}
+
+	.list-head {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+
+	.list-head h2 {
+		flex: 1;
+	}
+
+	.ready {
+		color: var(--colour-muted);
+		font-size: var(--text-s);
+	}
+
+	.group {
+		display: grid;
+		gap: var(--space-1);
+	}
+
+	.group h3 {
+		color: var(--colour-muted);
+	}
+
+	aside li {
+		border-inline-start: 3px solid transparent;
+		padding-inline-start: var(--space-2);
+	}
+
+	aside .current {
+		border-inline-start-color: var(--colour-primary);
+		background: var(--colour-tint);
+	}
+
+	.scaled {
+		color: var(--colour-primary);
+		font-size: var(--text-s);
+	}
+
+	.scrim {
+		position: fixed;
+		inset: 0;
+		z-index: 1;
+		border: 0;
+		background: var(--colour-scrim);
+	}
+
 	footer {
 		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: var(--space-3);
+		grid-template-columns: auto 1fr 1.3fr;
+		gap: var(--space-2);
 		padding: var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
 		border-block-start: 1px solid var(--colour-line);
 		background: var(--colour-surface);
 	}
 
 	.nav {
-		min-block-size: 4rem;
+		min-block-size: 3.75rem;
+		padding-inline: var(--space-3);
 		font-size: var(--text-l);
 	}
 
@@ -408,9 +769,69 @@
 		opacity: 0.5;
 	}
 
-	.text :global(.timer) {
-		min-block-size: var(--target);
-		padding-inline: var(--space-3);
+	.nav :global(svg) {
+		flex: none;
+	}
+
+	.back span {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	.done {
+		justify-items: center;
+		padding-block-start: var(--space-6);
+		text-align: center;
+	}
+
+	.seal {
+		color: var(--colour-success);
+	}
+
+	.done h2 {
+		font-family: var(--font-display);
+		font-size: var(--text-3xl);
+		letter-spacing: -0.02em;
+	}
+
+	.lede {
+		color: var(--colour-muted);
+		font-size: var(--text-l);
+	}
+
+	.tips {
+		display: grid;
+		gap: var(--space-2);
+		inline-size: 100%;
+		padding: var(--space-4);
+		border-inline-start: 4px solid var(--colour-accent);
+		border-radius: var(--radius-m);
+		background: var(--colour-surface);
+		text-align: start;
+	}
+
+	.tips h3 {
+		color: var(--colour-accent);
+	}
+
+	.done-actions {
+		display: grid;
+		gap: var(--space-3);
+		inline-size: 100%;
+		max-inline-size: 24rem;
+	}
+
+	@media (min-width: 30rem) {
+		.back span {
+			position: static;
+			inline-size: auto;
+			block-size: auto;
+			clip-path: none;
+		}
 	}
 
 	@media (min-width: 48rem) {
@@ -418,15 +839,17 @@
 			font-size: var(--text-3xl);
 		}
 
-		.used {
-			font-size: var(--text-xl);
+		.numeral {
+			inline-size: 5.5rem;
+			block-size: 5.5rem;
+			font-size: var(--text-display);
 		}
 	}
 
 	@media (min-width: 64rem) {
 		.body {
 			grid-template-columns: 22rem minmax(0, 1fr);
-			gap: var(--space-6);
+			gap: var(--space-7);
 			padding-inline: max(var(--gutter), calc((100% - var(--page-max)) / 2));
 		}
 
@@ -435,35 +858,24 @@
 		}
 
 		aside {
+			position: sticky;
+			inset: 0 auto auto;
 			display: grid;
-			gap: var(--space-3);
-			align-content: start;
-			max-block-size: 100%;
-			padding-inline-end: var(--space-4);
-			border-inline-end: 1px solid var(--colour-line);
+			max-block-size: none;
+			padding: var(--space-4);
+			border: 1px solid var(--colour-line);
+			border-radius: var(--radius-m);
+			box-shadow: none;
 		}
 
-		.group {
-			display: grid;
-			gap: var(--space-1);
+		.close-list,
+		.list-button {
+			display: none;
 		}
 
-		aside li {
-			padding: var(--space-1) var(--space-2);
-			border-block-end: 1px dashed var(--colour-line);
-			border-inline-start: 3px solid transparent;
-			color: var(--colour-muted);
-		}
-
-		aside .current {
-			border-inline-start-color: var(--colour-primary);
-			background: var(--colour-tint);
-			color: var(--colour-ink);
-			font-weight: 700;
-		}
-
-		.scaled {
-			color: var(--colour-primary);
+		footer {
+			grid-template-columns: 1fr 1fr;
+			padding-inline: max(var(--gutter), calc((100% - var(--page-max)) / 2));
 		}
 	}
 
