@@ -94,9 +94,14 @@
 		</p>
 		<h3>Searching</h3>
 		<p>
-			Type in the search box at the top of any page, or press <kbd>/</kbd> on a keyboard to jump to it.
-			Suggestions appear as you type: recipes by name, recipes that use an ingredient, and the right spelling
-			when a word is not recognised. Accents do not matter, so "brulee" finds Crème Brûlée.
+			Type in the search box at the top of any page, or press <kbd>/</kbd> on a keyboard to jump to
+			it. Suggestions appear as you type: recipes by name, recipes that use an ingredient, and the
+			right spelling when a word is not recognised. Accents do not matter, so "brulee" finds Crème
+			Brûlée. Several words find recipes with all of them, so "pasta tomato" finds the tomato
+			pastas. To cook from what is in your kitchen, open the search page, choose
+			<strong>I have these ingredients</strong> and list them with commas between, such as "eggs, flour,
+			milk": the recipes you can nearly make come first. The search page shows these examples, and a tap
+			on one tries it.
 		</p>
 		<p>
 			On the <a href={searchHref()}>search page</a>, choose
