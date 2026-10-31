@@ -327,6 +327,12 @@
 		gap: var(--space-5);
 	}
 
+	/* One column no wider than the screen; the inputs' natural width would otherwise widen the page. */
+	.page,
+	.own {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
 	.groups {
 		display: grid;
 		gap: var(--space-6);
@@ -377,11 +383,6 @@
 		text-align: center;
 	}
 
-	.own select {
-		flex: 1;
-		padding-inline: var(--space-2);
-	}
-
 	.own input,
 	.own select {
 		flex: 1;
@@ -393,6 +394,10 @@
 		background: var(--colour-surface);
 		color: var(--colour-ink);
 		font: inherit;
+	}
+
+	.own select {
+		padding-inline: var(--space-2);
 	}
 
 	.start {
@@ -428,6 +433,7 @@
 	}
 
 	.own-row button {
+		flex: none;
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-1);
