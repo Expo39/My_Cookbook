@@ -81,8 +81,9 @@
 
 <style>
 	/*
-	 * Everything is left aligned. The amount slot has a fixed minimum width, so the ingredient names
-	 * line up whether or not a line has an amount, and a long name wraps back under the amount.
+	 * Everything is left aligned. The amount has a column of its own with a fixed minimum width, so
+	 * the ingredient names line up whether or not a line has an amount, and a long name wraps under
+	 * itself, never under the amount.
 	 */
 	li {
 		border-block-end: 1px dashed var(--colour-line);
@@ -166,10 +167,18 @@
 		padding-block: calc((var(--target) - 1.6em) / 2);
 	}
 
+	.line:not(.flush) {
+		display: grid;
+		grid-template-columns: minmax(var(--amount-slot), auto) minmax(0, 1fr);
+		align-items: baseline;
+		column-gap: var(--space-2);
+	}
+
+	.line:not(.flush) > :not(.amount) {
+		grid-column: 2;
+	}
+
 	.amount {
-		display: inline-block;
-		min-inline-size: var(--amount-slot);
-		margin-inline-end: var(--space-2);
 		color: var(--colour-ink);
 	}
 

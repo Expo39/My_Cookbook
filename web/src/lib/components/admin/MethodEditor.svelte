@@ -199,6 +199,12 @@
 		gap: var(--space-1);
 	}
 
+	/* Leaves room for the "i", so it stays beside the link and a long label wraps inside it. */
+	.row > .more {
+		max-inline-size: calc(100% - var(--target));
+		text-align: start;
+	}
+
 	.more {
 		display: inline-flex;
 		align-items: center;

@@ -19,7 +19,12 @@
 	aria-expanded={open}
 	aria-controls={id}
 	data-tip={text}
-	onclick={() => (open = !open)}
+	onclick={(event) => {
+		// Inside a <summary> a click would also open or close its box; the "i" keeps it to itself.
+		event.preventDefault();
+		event.stopPropagation();
+		open = !open;
+	}}
 >
 	<Icon name="info" size={18} />
 </button>
@@ -57,7 +62,6 @@
 			inline-size: 1.75rem;
 			block-size: 1.75rem;
 			margin-block: 0;
-			cursor: help;
 		}
 
 		.tip {

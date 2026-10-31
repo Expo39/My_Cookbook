@@ -111,7 +111,7 @@
 			</Field>
 			{@render adder(
 				top,
-				`New subsection in ${topLabel}`,
+				'New subsection',
 				`A smaller group inside ${topLabel}, such as Cakes inside Desserts. The recipe goes into it.`
 			)}
 		</div>
@@ -152,6 +152,12 @@
 		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-1);
+	}
+
+	/* Leaves room for the "i", so it stays beside the link and a long label wraps inside it. */
+	.row > .more {
+		max-inline-size: calc(100% - var(--target));
+		text-align: start;
 	}
 
 	.more {
