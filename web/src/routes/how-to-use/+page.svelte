@@ -19,7 +19,7 @@
 	const questions = [
 		{
 			q: 'What is a part of a recipe?',
-			a: 'Some dishes are made in pieces, such as the pastry and the filling. Each part has its own heading over its ingredients. A simple recipe needs only one list, so it has no parts at all. Two parts with the same name show as two lists with the same heading, so the editor offers to put them together.'
+			a: 'Some dishes are made in pieces, such as the pastry and the filling. Each part has its own heading over its ingredients. A simple recipe needs only one list, so it has no parts at all. Two parts with the same name show as two lists with the same heading, so the editor points it out.'
 		},
 		{
 			q: "What is a part's total?",
@@ -178,11 +178,12 @@
 		<h3>Adding a recipe</h3>
 		<p>
 			<a href={editHref()}>Add a recipe</a> from the home page, a section page or Settings. A title,
-			the ingredients and the method are all it needs. Type or paste the ingredient list in one go
-			with <strong>Type or paste a list</strong>, one ingredient per line, and check the rows it
-			makes. A line ending in a colon, such as "For the filling:", starts a new part. Write the
-			method the way you would say it: "bake for 25 minutes at 200°C" becomes a tappable timer and a
-			temperature that converts to Fahrenheit, and the editor shows what it found under each step.
+			the ingredients and the method are all it needs. Write the ingredients one per line, as on
+			paper, or paste a list from anywhere; "How it will read" beside the box shows each line as the
+			recipe will. A line ending in a colon, such as "For the filling:", starts a new part.
+			<strong>Line by line</strong> is there for fine-tuning a single ingredient. Write the method the
+			way you would say it: "bake for 25 minutes at 200°C" becomes a tappable timer and a temperature
+			that converts to Fahrenheit, and the editor shows what it found under each step.
 		</p>
 		<p>
 			Your recipe scales, converts and keeps timers like every other recipe, and appears on the home
