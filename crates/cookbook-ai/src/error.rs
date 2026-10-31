@@ -8,6 +8,9 @@ pub enum AiError {
     Quota,
     #[error("The sous-chef is not set up properly at the moment. Please tell Antonio.")]
     InvalidKey,
+    /// Gemini does not know the configured model, usually a mistyped or retired name.
+    #[error("The sous-chef is not set up properly at the moment. Please tell Antonio.")]
+    UnknownModel,
     #[error("The sous-chef would rather not answer that one. Try rephrasing the question.")]
     Blocked,
     #[error("The answer ran out of room before it was finished. Try a shorter question.")]
@@ -66,6 +69,9 @@ impl AiError {
         {
             return Self::InvalidKey;
         }
+        if status == 404 || reported == "NOT_FOUND" {
+            return Self::UnknownModel;
+        }
         Self::Unavailable
     }
 
@@ -84,6 +90,7 @@ impl AiError {
         match self {
             Self::Quota => "quota",
             Self::InvalidKey => "invalid_key",
+            Self::UnknownModel => "unknown_model",
             Self::Blocked => "blocked",
             Self::Truncated => "truncated",
             Self::Empty => "empty",
@@ -98,7 +105,7 @@ impl AiError {
         match self {
             Self::Quota => 429,
             Self::Blocked | Self::Truncated | Self::Empty => 422,
-            Self::InvalidKey | Self::BadOutput(_) => 502,
+            Self::InvalidKey | Self::UnknownModel | Self::BadOutput(_) => 502,
             Self::Unavailable | Self::Busy => 503,
         }
     }
@@ -161,6 +168,17 @@ mod tests {
         assert!(e.is_retryable());
         assert_eq!(e.http_status(), 503);
         assert_eq!(AiError::from_response(429, ""), AiError::Busy);
+    }
+
+    #[test]
+    fn an_unknown_model_is_a_set_up_problem_not_a_busy_one() {
+        let e = AiError::from_response(
+            404,
+            r#"{"error":{"code":404,"status":"NOT_FOUND","message":"models/gemini-x is not found"}}"#,
+        );
+        assert_eq!(e, AiError::UnknownModel);
+        assert!(!e.is_retryable());
+        assert_eq!(e.http_status(), 502);
     }
 
     #[test]
