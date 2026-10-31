@@ -3,173 +3,220 @@
 	import { fieldId, type EditorState } from '$lib/admin/editor-state.svelte';
 	import { SCALE_MODES, UNITS, type IngredientRow } from '$lib/admin/recipe-form';
 	import { suggestKey } from '$lib/admin/slug';
+	import Icon from '../Icon.svelte';
 	import Field from './Field.svelte';
 	import TextField from './TextField.svelte';
 
-	/** `simple` keeps the fields most lines need in view and folds the rest under "More options". */
-	let {
-		ed,
-		row,
-		path,
-		simple = false
-	}: { ed: EditorState; row: IngredientRow; path: string; simple?: boolean } = $props();
+	/**
+	 * One ingredient on one line: amount, unit, ingredient and note. The rarer fields wait behind
+	 * "More", and a folded row lists the ones that are set, so nothing is hidden by surprise.
+	 */
+	let { ed, row, path }: { ed: EditorState; row: IngredientRow; path: string } = $props();
+
+	const id = (part: string) => fieldId(`${path}.${part}`);
+	const qtyPath = $derived(`${path}.amount.qty`);
+	const itemPath = $derived(`${path}.item`);
+	const keyPath = $derived(`${path}.key`);
 
 	const mode = $derived(SCALE_MODES.find((m) => m.value === row.scale));
 	const suggestion = $derived(row.item.trim() ? suggestKey(row.item, ed.keys) : '');
-	const qtyPath = $derived(`${path}.amount.qty`);
+	const errors = $derived([ed.errorFor(qtyPath), ed.errorFor(itemPath)].filter(Boolean));
+	const set = $derived(
+		[
+			row.optional && 'optional',
+			row.scale !== 'linear' && mode?.label.toLowerCase(),
+			row.qtyMax && `up to ${row.qtyMax}`,
+			row.prefix && `"${row.prefix}"`,
+			row.key && `key: ${row.key}`
+		].filter(Boolean) as string[]
+	);
+
+	let more = $state(false);
+	$effect(() => {
+		if (ed.errorFor(keyPath)) more = true;
+	});
 </script>
 
-{#snippet upTo()}
-	<TextField
-		id={fieldId(`${path}.amount.max`)}
-		label="Up to"
-		bind:value={row.qtyMax}
-		inputmode="decimal"
-		numeric
-		optional
-		hint="For a range"
-	/>
-{/snippet}
-
-{#snippet before()}
-	<TextField
-		id={fieldId(`${path}.prefix`)}
-		label="Before the amount"
-		bind:value={row.prefix}
-		optional
-		hint="As in 'Zest of'"
-	/>
-{/snippet}
-
-{#snippet scaling()}
-	<Field id={fieldId(`${path}.scale`)} label="When the servings change" hint={mode?.help}>
-		<select
-			class="control"
-			id={fieldId(`${path}.scale`)}
-			bind:value={row.scale}
-			aria-describedby="{fieldId(`${path}.scale`)}-hint"
-		>
-			{#each SCALE_MODES as option (option.value)}
-				<option value={option.value}>{option.label}</option>
-			{/each}
-		</select>
-	</Field>
-{/snippet}
-
-{#snippet naming()}
-	<TextField
-		id={fieldId(`${path}.key`)}
-		label="Key"
-		bind:value={row.key}
-		optional
-		hint="A short name, used only to mention this ingredient in the method."
-		error={ed.errorFor(`${path}.key`)}
-		onblur={() => ed.touch(`${path}.key`)}
-	/>
-	{#if !row.key && suggestion}
-		<button type="button" class="btn suggest" onclick={() => (row.key = suggestion)}>
-			Use "{suggestion}" as the key
-		</button>
-	{/if}
-{/snippet}
-
 <div class="row" id={fieldId(path)} tabindex="-1">
-	<div class="amount" class:pair={simple}>
-		<TextField
-			id={fieldId(qtyPath)}
-			label="Amount"
-			bind:value={row.qtyMin}
+	<div class="line">
+		<label class="sr-only" for={id('amount.qty')}>Amount</label>
+		<input
+			id={id('amount.qty')}
+			class="control num qty"
 			inputmode="decimal"
-			numeric
-			hint="Such as 250 or 1/2"
-			error={ed.errorFor(qtyPath)}
+			autocomplete="off"
+			placeholder="250"
+			bind:value={row.qtyMin}
+			aria-invalid={ed.errorFor(qtyPath) ? 'true' : undefined}
 			onblur={() => ed.touch(qtyPath)}
 		/>
-		{#if !simple}{@render upTo()}{/if}
-		<Field id={fieldId(`${path}.amount.unit`)} label="Unit">
-			<select class="control" id={fieldId(`${path}.amount.unit`)} bind:value={row.unit}>
-				{#each UNITS as unit (unit.value)}
-					<option value={unit.value}>{unit.label}</option>
-				{/each}
-			</select>
-		</Field>
-	</div>
-	<div class="what" class:pair={simple}>
-		{#if !simple}{@render before()}{/if}
-		<TextField
-			id={fieldId(`${path}.item`)}
-			label="Ingredient"
+		<label class="sr-only" for={id('amount.unit')}>Unit</label>
+		<select id={id('amount.unit')} class="control unit" bind:value={row.unit}>
+			{#each UNITS as unit (unit.value)}
+				<option value={unit.value}>{unit.value ? unit.label : 'none'}</option>
+			{/each}
+		</select>
+		<label class="sr-only" for={id('item')}>Ingredient</label>
+		<input
+			id={id('item')}
+			class="control item"
+			autocomplete="off"
+			placeholder="Ingredient, such as plain flour"
 			bind:value={row.item}
-			error={ed.errorFor(`${path}.item`)}
-			onblur={() => ed.touch(`${path}.item`)}
+			aria-invalid={ed.errorFor(itemPath) ? 'true' : undefined}
+			onblur={() => ed.touch(itemPath)}
 		/>
-		<TextField
-			id={fieldId(`${path}.note`)}
-			label="Note"
+		<label class="sr-only" for={id('note')}>Note</label>
+		<input
+			id={id('note')}
+			class="control note"
+			autocomplete="off"
+			placeholder="Note, such as finely chopped"
 			bind:value={row.note}
-			optional
-			hint="Shown after a comma, as in 'finely chopped'"
 		/>
 	</div>
-	<div class="more">
-		{#if !simple}{@render scaling()}{@render naming()}{/if}
-		<label class="check">
-			<input type="checkbox" bind:checked={row.optional} />
-			<span>Optional ingredient</span>
-		</label>
-		{#if simple}
-			<label class="check">
-				<input
-					type="checkbox"
-					bind:checked={
-						() => row.scale === 'toTaste', (taste) => (row.scale = taste ? 'toTaste' : 'linear')
-					}
-				/>
-				<span>To taste, no amount</span>
-			</label>
+
+	{#each errors as error (error)}
+		<p class="error" role="alert"><Icon name="alert" size={16} />{error}</p>
+	{/each}
+
+	<div class="extras">
+		<button type="button" class="toggle" aria-expanded={more} onclick={() => (more = !more)}>
+			<Icon name="chevronDown" size={16} />{more ? 'Fewer options' : 'More options'}
+		</button>
+		{#if !more}
+			{#each set as chip (chip)}<span class="chip">{chip}</span>{/each}
 		{/if}
 	</div>
-	{#if simple}
-		<details class="options">
-			<summary>More options</summary>
-			<div class="option-fields">
-				{@render upTo()}
-				{@render before()}
-				{@render scaling()}
-				{@render naming()}
-			</div>
-		</details>
+
+	{#if more}
+		<div class="more">
+			<label class="check">
+				<input type="checkbox" bind:checked={row.optional} />
+				<span>Optional ingredient</span>
+			</label>
+			<Field
+				id={id('scale')}
+				label="When the servings change"
+				hint={mode?.help}
+				info="Most amounts double when the servings double. Eggs round to whole ones, and salt or 'to taste' lines grow more gently or not at all."
+			>
+				<select
+					class="control"
+					id={id('scale')}
+					bind:value={row.scale}
+					aria-describedby="{id('scale')}-hint"
+				>
+					{#each SCALE_MODES as option (option.value)}
+						<option value={option.value}>{option.label}</option>
+					{/each}
+				</select>
+			</Field>
+			<TextField
+				id={id('amount.max')}
+				label="Up to"
+				bind:value={row.qtyMax}
+				inputmode="decimal"
+				numeric
+				optional
+				hint="For a range, as in 2 to 3 cloves"
+			/>
+			<TextField
+				id={id('prefix')}
+				label="Before the amount"
+				bind:value={row.prefix}
+				optional
+				hint="As in 'Zest of' 1 lemon"
+			/>
+			<TextField
+				id={id('key')}
+				label="Key"
+				bind:value={row.key}
+				optional
+				info="A short name for this ingredient. The method can then mention it, and its amount follows the servings there too."
+				error={ed.errorFor(keyPath)}
+				onblur={() => ed.touch(keyPath)}
+			/>
+			{#if !row.key && suggestion}
+				<button type="button" class="btn suggest" onclick={() => (row.key = suggestion)}>
+					Use "{suggestion}" as the key
+				</button>
+			{/if}
+		</div>
 	{/if}
 </div>
 
 <style>
+	/* Sized by its own width, since the form shares the screen with the preview on a desk. */
 	.row {
 		display: grid;
-		gap: var(--space-3);
+		gap: var(--space-2);
+		container-type: inline-size;
 	}
 
 	.row:focus {
 		outline: none;
 	}
 
-	.amount,
-	.what,
+	/* Narrow: amount and unit, then the words below. Wider: one line, with the note below or beside. */
+	.line {
+		display: grid;
+		grid-template-columns: 5rem minmax(0, 1fr);
+		gap: var(--space-2);
+	}
+
+	.qty {
+		text-align: center;
+	}
+
+	.item,
+	.note {
+		grid-column: 1 / -1;
+	}
+
+	.extras {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1) var(--space-2);
+	}
+
+	.toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-1);
+		min-block-size: var(--target);
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--colour-primary);
+		font-size: var(--text-s);
+		font-weight: 700;
+	}
+
+	.toggle :global(svg) {
+		transition: transform var(--duration-micro) var(--ease-out);
+	}
+
+	.toggle[aria-expanded='true'] :global(svg) {
+		transform: rotate(180deg);
+	}
+
+	.chip {
+		padding: 0 var(--space-2);
+		border-radius: var(--radius-pill);
+		background: var(--colour-tint);
+		color: var(--colour-primary);
+		font-size: var(--text-xs);
+		font-weight: 700;
+	}
+
 	.more {
 		display: grid;
 		gap: var(--space-3);
-		align-items: start;
-	}
-
-	.options summary {
-		color: var(--colour-primary);
-		font-weight: 700;
-		cursor: pointer;
-	}
-
-	.option-fields {
-		display: grid;
-		gap: var(--space-3);
-		padding-block-start: var(--space-3);
+		padding: var(--space-3);
+		border-radius: var(--radius-s);
+		background: var(--colour-surface);
 	}
 
 	.check {
@@ -189,21 +236,30 @@
 		justify-self: start;
 	}
 
-	@media (min-width: 40rem) {
-		.amount {
-			grid-template-columns: 1fr 1fr 1.2fr;
+	@container (min-width: 20rem) {
+		.line {
+			grid-template-columns: 4rem 6rem minmax(0, 1fr);
 		}
 
-		.what {
-			grid-template-columns: 1fr 1.6fr 1.6fr;
+		.item {
+			grid-column: auto;
+		}
+	}
+
+	@container (min-width: 40rem) {
+		.line {
+			grid-template-columns: 4rem 6rem minmax(0, 1.4fr) minmax(0, 1fr);
 		}
 
-		.pair.amount {
-			grid-template-columns: 1fr 1.6fr;
+		.note {
+			grid-column: auto;
 		}
+	}
 
-		.pair.what {
-			grid-template-columns: 1.6fr 1fr;
+	@container (min-width: 30rem) {
+		.more {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			align-items: start;
 		}
 	}
 </style>

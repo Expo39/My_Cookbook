@@ -13,9 +13,11 @@
   - grouped fieldsets: Basics, Ingredients, Method, Tips, Extras
   - inputs on `--colour-surface` with visible labels and helper text below
 - **Ingredient rows:**
-  - fields: amount, unit select, item, note, plus a scaling-mode menu
-  - rows can be reordered with drag handles and also with buttons (keyboard-accessible)
-  - "Paste ingredients" opens a textarea parsed by the Rust parser into rows for review
+  - one line per ingredient: amount, unit, ingredient and note, with visually hidden labels and plain placeholders; the line is sized by a container query, so it stacks in a narrow column and runs as one line when there is room
+  - "More options" opens the rarer fields (optional, scaling, up to, before the amount, key) in a surface panel; a folded row shows small tint chips for any of them that are set
+  - rows can be reordered with drag handles and also with buttons (keyboard-accessible); ingredient rows keep their buttons beside them at every width
+  - an empty list leads with "Type or paste a list", parsed by the Rust parser into rows for review; a line ending in a colon starts a new part
+- **Parts:** a plain list has no part fields, only "Split into parts" with an "i". Once split, each part is a card headed "Part N" with its count, a fold button, its name, and a folded "Total for this part" that previews how it reads. A name used by an earlier part shows a warning panel with "Move these into part N".
 - **Recipe checklist:**
   - sticky at the bottom (mobile) or the top of the preview (desktop)
   - success, warning and danger rows, each marked with an icon from `Icon.svelte` (not emoji), with the check id in muted text
