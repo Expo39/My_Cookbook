@@ -51,6 +51,7 @@ Every target runs inside the `dev` container unless noted.
 | `make fmt` | Formats Rust with `cargo fmt` and the web code with Prettier. |
 | `make lint` | `cargo fmt --check`, `cargo clippy -D warnings`, `svelte-check --fail-on-warnings`, Prettier and ESLint. |
 | `make screenshots` | Builds the site and writes review screenshots into `SHOTS` (default `web/test-results/shots`). |
+| `make walkthrough` | Records the how-to video and its captions with Playwright, then encodes `web/static/video/how-to-use.webm` and its poster offline in `FFMPEG_IMAGE` (any image with ffmpeg and a shell; the dev image has none). |
 | `make preview` | Builds the production site with the GitHub Pages base path and serves it at http://localhost:5173/My_Cookbook/. |
 | `make worker-deploy` | Deploys the AI Worker; needs `CLOUDFLARE_API_TOKEN`. `make worker-secrets` sets its secrets. |
 | `make shell` | Opens a bash shell in the `dev` container. |
@@ -116,6 +117,10 @@ Rules for end-to-end tests:
 
 - They run against the built site served by `web/scripts/serve-build.mjs`, never against the dev server.
 - All network is mocked with `page.route` (for example `admin.json` and `https://api.github.com/**` in `admin.spec.ts`). No test may reach the internet.
+- The sous-chef needs three fakes, as in `souschef.spec.ts`: Cloudflare Turnstile (`https://challenges.cloudflare.com/**`, a script that hands over a token at once), the Worker's `**/status` and its `**/chat` stream. Without the status fake the sous-chef reports that it cannot be reached.
+- `walkthrough.spec.ts` records the how-to video and only runs under `make walkthrough`. Playwright's recordings carry no mouse pointer, so the spec draws one that glides to each control (`reach`, `tap`) and ripples on each press; move to a control with `tap` rather than `click` so the video can be followed.
+- The "first paint" tests in `recipe.spec.ts` and `mobile.spec.ts` load a recipe with the app's scripts blocked, which is what a reload draws before the code runs: the current section, the phone tabs, the folded servings panel, full-strength controls and closed hints must all be right already. `personal.spec.ts` and `kitchen.spec.ts` do the same for the room held for a visitor's recipes, favourites and a running timer, and `kitchen.spec.ts`, `recipe.spec.ts` and `search.spec.ts` for an address that opens cook mode, scales the recipe or searches.
+- Run `make build` or `make test` while `make dev` is not being used: a build rewrites the generated files, the WASM package and the data the dev server watches, so it restarts, and a page loaded at that moment fails with a 500.
 - `smoke.spec.ts` runs once for every recipe in `web/static/data/manifest.json`, so a new recipe is covered without a new test.
 - `mobile.spec.ts` runs in the Pixel 7 project, and `screenshots.spec.ts` only under `make screenshots`.
 

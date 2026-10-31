@@ -13,7 +13,7 @@ import { GitHubClient } from './github';
 
 const TOKEN_KEY = 'sapori:admin-token';
 const SECRET_KEY = 'sapori:admin-import-secret';
-export const BLOB_PATH = 'web/static/admin.json';
+const BLOB_PATH = 'web/static/admin.json';
 
 export class NotSetUpError extends Error {
 	constructor() {

@@ -107,10 +107,8 @@ test('writes screenshots of the share sheet with a card made', async ({ page }) 
 			await page.goto('main-courses/beef-steak/beef-wellington?serves=8&u=us');
 			await waitForCore(page);
 			await page.getByRole('button', { name: width < 768 ? 'Share this recipe' : 'Share' }).click();
-			const sheet = page.getByRole('dialog', { name: 'Share this recipe' });
-			await expect(sheet).toBeVisible();
-			await sheet.getByRole('button', { name: 'Share recipe card' }).click();
-			await expect(sheet.getByRole('img', { name: /Preview of the recipe card/ })).toBeVisible();
+			const sheet = page.getByRole('dialog', { name: 'Share' });
+			await expect(sheet.getByRole('img', { name: /The recipe card for/ })).toBeVisible();
 			expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
 				width
 			);
@@ -139,7 +137,12 @@ test('writes screenshots of the admin drawer and the editor', async ({ page }) =
 	});
 	const openDrawer = async () => {
 		await page.getByRole('button', { name: 'Settings' }).click();
-		await expect(page.getByRole('dialog', { name: 'Settings' })).toBeVisible();
+		const drawer = page.getByRole('dialog', { name: 'Settings' });
+		await expect(drawer).toBeVisible();
+		const owner = drawer.locator('details.owner');
+		if ((await owner.getAttribute('open')) === null) {
+			await drawer.getByText("For the cookbook's owner").click();
+		}
 	};
 
 	for (const scheme of ['light', 'dark'] as const) {

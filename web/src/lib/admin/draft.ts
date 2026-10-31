@@ -1,6 +1,6 @@
 import { readJson, writeStorage, writeJson } from '$lib/stores/storage';
 
-export const draftKey = (id: string): string => `sapori:draft:${id}`;
+const draftKey = (id: string): string => `sapori:draft:${id}`;
 
 export interface Draft<T> {
 	savedAt: number;

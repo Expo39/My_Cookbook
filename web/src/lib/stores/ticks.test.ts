@@ -16,6 +16,18 @@ describe('tick persistence', () => {
 		expect(second.has('i:0.0')).toBe(false);
 	});
 
+	it('follows a checkbox exactly, however often the same state arrives', () => {
+		const ticks = new Ticks('soups/tomato');
+		ticks.set('i:0.1', true);
+		ticks.set('i:0.1', true);
+		expect(ticks.has('i:0.1')).toBe(true);
+		ticks.set('i:0.1', false);
+		ticks.set('i:0.1', false);
+		expect(ticks.has('i:0.1')).toBe(false);
+		ticks.toggle('i:0.1');
+		expect(ticks.has('i:0.1')).toBe(true);
+	});
+
 	it('keeps each recipe separate', () => {
 		new Ticks('a/one').toggle('i:0.0');
 		const other = new Ticks('a/two');

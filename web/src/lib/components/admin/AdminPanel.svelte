@@ -132,6 +132,18 @@
 		<p class="help">Checking whether editing is set up...</p>
 	{:else if admin.unlocked}
 		<p class="state"><Icon name="check" size={18} />Editing is unlocked in this tab.</p>
+		{#if !admin.server}
+			<ul class="saved" aria-label="What is saved">
+				<li><Icon name="check" size={16} />GitHub token saved</li>
+				<li>
+					{#if admin.aiImportSecret}
+						<Icon name="check" size={16} />AI import secret saved: Import from text is on
+					{:else}
+						<Icon name="minus" size={16} />No AI import secret: Import from text is off
+					{/if}
+				</li>
+			</ul>
+		{/if}
 		<p class="help">
 			You can change any recipe and share your own with everyone. It locks again when you close the
 			tab.
@@ -268,6 +280,19 @@
 </section>
 
 <style>
+	.saved {
+		display: grid;
+		gap: var(--space-1);
+		color: var(--colour-muted);
+		font-size: var(--text-s);
+	}
+
+	.saved li {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
 	.admin,
 	form {
 		display: grid;

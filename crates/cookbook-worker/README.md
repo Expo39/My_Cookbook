@@ -13,7 +13,7 @@ The static site uses the Worker when `ai.endpoint` in `cookbook.config.json` (or
 | `POST /import` | `X-Admin-Proof` header | `{ text }`, at most 20 KB | `{ recipe, checks }` |
 | `OPTIONS *` | none | none | 204 with the CORS headers |
 
-Errors before the answer starts are always `{ error, message }` with an error status, where `message` is fit to show to a cook; an answer that breaks off part way ends with an `error` event of the same shape. Rate limits reply 429 with a `Retry-After` header. Limits default to 30 chat requests and 5 imports per IP per hour (`RATE_LIMIT_CHAT`, `RATE_LIMIT_IMPORT`), counted as a fixed window in Workers KV. The Rate Limiting binding is not exposed by workers-rs yet.
+Errors before the answer starts are always `{ error, message }` with an error status, where `message` is fit to show to a cook; an answer that breaks off part way ends with an `error` event of the same shape. `/chat` and `/import` answer only a request whose `Origin` is in `ALLOWED_ORIGINS`, and refuse any other with 403 `forbidden_origin`; `/status` is open to all. Rate limits reply 429 with a `Retry-After` header. They are counted by Cloudflare's rate limiter (`PER_VISITOR` and `EVERYONE` below), which keeps its counts without any KV writes, so a flood of requests cannot use up the KV quota.
 
 ## Configuration
 
@@ -23,11 +23,12 @@ Errors before the answer starts are always `{ error, message }` with an error st
 | `ALLOWED_ORIGINS` | var | comma-separated, e.g. `https://expo39.github.io,http://localhost:5173` |
 | `GEMINI_MODEL` | var | defaults to the model compiled into `cookbook-ai` |
 | `GEMINI_THINKING_LEVEL` | var | `low` by default; `minimal`, `medium`, `high`, or `default` to send none |
-| `GEMINI_FALLBACK_MODEL` | var | optional; tried after the main model has been busy three times |
+| `GEMINI_FALLBACK_MODEL` | var | optional; takes over when the main model is busy three times, out of quota, retired or silent for 25 s (`gemini-flash-lite-latest` here) |
 | `TURNSTILE_SECRET` | secret | optional; when set, `/chat` needs an `X-Turnstile-Token` header |
 | `GEMINI_API_KEY` | secret | Google AI Studio key |
 | `ADMIN_IMPORT_SECRET` | secret | keys the admin proof, see below |
-| `RATE_LIMIT` | KV binding | created by the first deploy |
+| `RATE_LIMIT` | KV binding | short notes (the AI is busy, a model was retired); created by the first deploy |
+| `PER_VISITOR`, `EVERYONE` | rate limiters | 4 a minute per IP address and 20 a minute in all, for `/chat` and `/import` |
 
 No account id is committed. Wrangler takes it from `CLOUDFLARE_ACCOUNT_ID` or from the login.
 
@@ -72,7 +73,7 @@ The admin UI gets the secret from the same place as the GitHub token: the secret
 | `src/handler.rs` | the thin Workers glue: routing, the Gemini call and the site fetch |
 | `src/auth.rs` | the admin proof check |
 | `src/cors.rs` | `ALLOWED_ORIGINS` and the CORS headers |
-| `src/limits.rs` | the per-IP fixed-window limits in Workers KV |
+| `src/limits.rs` | the keys for the per-visitor and site-wide rate limiters |
 
 ## Tests
 

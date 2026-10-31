@@ -1,43 +1,44 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { backup } from '$lib/stores/backup.svelte';
+	import { deviceNotice } from '$lib/stores/device-notice.svelte';
 	import { personal } from '$lib/stores/personal.svelte';
+	import ExportDialog from './ExportDialog.svelte';
 	import Icon from './Icon.svelte';
 
-	/** A gentle nudge to keep a copy of the recipes kept only in this browser; the × rests it a while. */
+	/** About once a week, a nudge to export the recipes kept only in this browser; the close cross rests it a week. */
 	const own = $derived(personal.list.filter((entry) => !entry.shared));
 	let ready = $state(false);
+	let dialog: ExportDialog | undefined = $state();
 
 	onMount(() => {
-		backup.load();
+		deviceNotice.load();
 		ready = true;
 	});
 </script>
 
-{#if ready && own.length && backup.due(own)}
-	<aside class="reminder" aria-label="Back up your recipes">
-		<Icon name="download" size={22} />
+{#if ready && deviceNotice.due(own.length)}
+	<aside class="reminder" aria-label="Export your recipes">
+		<Icon name="alert" size={22} />
 		<div class="words">
 			<p>
-				<strong>Back up your recipes.</strong>
-				{own.length === 1 ? 'The recipe you added is' : `The ${own.length} recipes you added are`} saved
-				only in this browser. If you clear your browsing history or data, {own.length === 1
-					? 'it is'
-					: 'they are'} deleted for good. A backup is a file you keep on this device, and Restore a backup
-				in Settings brings them back.
+				<strong>Your recipes are only in this browser.</strong> If you clear your browsing data, they
+				are deleted. Export them to keep a copy.
 			</p>
-			<button type="button" class="save" onclick={() => backup.save(own)}>Save a backup</button>
+			<button type="button" class="export" onclick={() => dialog?.show()}>
+				<Icon name="download" size={18} />Export
+			</button>
 		</div>
 		<button
 			type="button"
 			class="close"
-			aria-label="Remind me later"
-			onclick={() => backup.dismiss()}
+			aria-label="Remind me next week"
+			onclick={() => deviceNotice.rest()}
 		>
 			<Icon name="x" size={20} />
 		</button>
 	</aside>
 {/if}
+<ExportDialog bind:this={dialog} />
 
 <style>
 	.reminder {
@@ -59,12 +60,16 @@
 
 	.words {
 		display: grid;
+		max-inline-size: var(--measure);
 		flex: 1;
 		gap: var(--space-2);
 		justify-items: start;
 	}
 
-	.save {
+	.export {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
 		min-block-size: var(--target);
 		padding-inline: var(--space-4);
 		border: 0;

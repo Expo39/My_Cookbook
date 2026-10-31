@@ -235,7 +235,7 @@ export interface Aisle {
 
 // A rough guess from the wording, since recipes carry no aisle. The first match wins, so
 // "chicken stock" is a cupboard item and not meat.
-export const AISLES: Aisle[] = [
+const AISLES: Aisle[] = [
 	{
 		id: 'cupboard',
 		label: 'Store cupboard',
@@ -267,9 +267,9 @@ export const AISLES: Aisle[] = [
 	}
 ];
 
-export const OTHER_AISLE: Pick<Aisle, 'id' | 'label'> = { id: 'other', label: 'Other' };
+const OTHER_AISLE: Pick<Aisle, 'id' | 'label'> = { id: 'other', label: 'Other' };
 
-export function aisleOf(line: Pick<ShoppingLine, 'food' | 'item'>): Pick<Aisle, 'id' | 'label'> {
+function aisleOf(line: Pick<ShoppingLine, 'food' | 'item'>): Pick<Aisle, 'id' | 'label'> {
 	const text = normalise(`${line.food ?? ''} ${line.item}`.replace(/-/g, ' '));
 	return AISLES.find(({ pattern }) => pattern.test(text)) ?? OTHER_AISLE;
 }

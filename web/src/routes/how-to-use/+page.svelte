@@ -4,11 +4,36 @@
 	import PageHead from '$lib/components/PageHead.svelte';
 	import { editHref, favouritesHref, searchHref, shoppingHref } from '$lib/links';
 
+	let video = $state<HTMLVideoElement>();
+
+	/** `lock` is not in every browser's types; where it is missing or refused, nothing happens. */
+	type Lockable = ScreenOrientation & { lock?: (orientation: 'landscape') => Promise<void> };
+
+	/**
+	 * The walkthrough is recorded landscape, so a phone held upright turns it sideways in full screen.
+	 * Android allows this while the video is full screen; iOS's own player turns with the phone.
+	 */
+	let locked = false;
+
+	function turn() {
+		const orientation = screen.orientation as Lockable | undefined;
+		if (document.fullscreenElement === video) {
+			orientation
+				?.lock?.('landscape')
+				.then(() => (locked = true))
+				.catch(() => {});
+		} else if (locked) {
+			orientation?.unlock();
+			locked = false;
+		}
+	}
+
 	const contents = [
 		{ id: 'finding', title: 'Finding a recipe' },
 		{ id: 'cooking', title: 'Cooking from a recipe' },
 		{ id: 'shopping', title: 'The shopping list' },
 		{ id: 'favourites', title: 'Favourites' },
+		{ id: 'sending', title: 'Sending a recipe to someone' },
 		{ id: 'your-recipes', title: 'Your own recipes' },
 		{ id: 'sharing', title: 'Sharing a recipe with everyone' },
 		{ id: 'sous-chef', title: 'The sous-chef' },
@@ -18,28 +43,68 @@
 
 	const questions = [
 		{
+			q: 'What does the small "i" do?',
+			a: 'It explains the thing beside it. Tap it on a phone and the explanation opens underneath; with a mouse, point at it and it appears in a bubble.'
+		},
+		{
+			q: 'How do I send a recipe to a friend?',
+			a: 'Tap Share on the recipe. A picture of the recipe card appears straight away, with every ingredient and a code that opens the recipe. On a phone, Send the card opens your phone\'s share sheet, so it goes straight into WhatsApp, Messenger, Instagram or a message, with the link. Tick "Send the whole recipe as text too" to include the full recipe.'
+		},
+		{
+			q: 'Why does my computer say Copy the card instead of Send the card?',
+			a: 'Most computer browsers cannot hand a picture to other apps the way phones do. Copy the card copies the picture instead: paste it into a chat, such as WhatsApp or Messenger on the web.'
+		},
+		{
+			q: 'Why is Send the link greyed out?',
+			a: 'The recipe is one of your own, kept only on your device, so it has no web address for anyone else to open yet. The card and Copy as text still work.'
+		},
+		{
+			q: 'Are the amounts exact?',
+			a: 'They are a guide. Change them to suit your taste, your guests and what you can find; the servings buttons scale everything together.'
+		},
+		{
+			q: 'What does Scale another way do?',
+			a: 'It scales from what you have instead of from the servings. Say you have 300 g of mince: enter it under "I have...", and every other amount follows. Where the recipe names a tin, you can also scale to the size of yours.'
+		},
+		{
 			q: 'What is a part of a recipe?',
 			a: 'Some dishes are made in pieces, such as the pastry and the filling. Each part has its own heading over its ingredients. A simple recipe needs only one list, so it has no parts at all. Two parts with the same name show as two lists with the same heading, so the editor points it out.'
 		},
 		{
 			q: "What is a part's total?",
-			a: 'An optional amount shown beside the part\'s name, for a part weighed out as a whole, such as "Cheese board 1150 g total". It scales with the servings like everything else.'
+			a: 'An optional amount shown beside the part\'s name, for a part weighed out as a whole, such as "Charcuterie 775 g total". It scales with the servings like everything else.'
+		},
+		{
+			q: 'How do I add a photo to a recipe?',
+			a: "Tap Add a photo where the photo goes, at the top of the recipe. Take a picture or choose one, describe it, and save. It is kept in this browser; with the cookbook's token unlocked it is saved to the cookbook for everyone instead."
 		},
 		{
 			q: 'Why do my recipes stay on this device?',
-			a: 'There are no accounts, so a recipe you add is kept in this browser. It is yours to change or delete, and nobody else sees it. Clearing your browsing data deletes it, so save a backup file from Settings, or from the reminder on the home page. The file also moves your recipes to another device.'
+			a: 'There are no accounts, so a recipe you add is kept in this browser. It is yours to change or delete, and nobody else sees it. Clearing your browsing data deletes it, so export your recipes from Settings now and then to keep a copy, as text, a spreadsheet or JSON.'
 		},
 		{
 			q: 'How do I share a recipe with everyone?',
 			a: "Use Share with everyone next to it in Settings > Your recipes. Sharing adds it to the cookbook itself, so it needs the GitHub token, which the cookbook's owner unlocks with the password."
 		},
 		{
-			q: 'Why does the sous-chef say it is busy?',
-			a: 'The AI behind it is shared, and sometimes it is full or out of service for a while. Wait a few minutes and ask again. If it keeps happening, tell Antonio, as the service may need looking at.'
+			q: 'Why does the sous-chef say the AI is in high demand?',
+			a: 'The AI behind it is shared. When the main model is busy, a lighter one answers instead, and the answer says so. If both are busy, the sous-chef says it is unavailable due to high demand: wait a few minutes and ask again.'
+		},
+		{
+			q: "Why does the sous-chef say it can't be reached?",
+			a: 'Its service did not answer, perhaps for a moment. Everything else in the cookbook works as normal; tap Check again in a little while.'
+		},
+		{
+			q: 'How does cook mode know which ingredients a step uses?',
+			a: 'It reads the step. When a step says "add the shallots and the red wine", those two lines appear under it. When you write a recipe of your own, name the ingredients in the method the way you would say them and cook mode finds them; there is nothing extra to fill in.'
+		},
+		{
+			q: 'Can I cook my own recipes in cook mode?',
+			a: 'Yes. Start cooking works the same on a recipe kept on your device, with its ingredients under each step.'
 		},
 		{
 			q: 'Do I need to be online?',
-			a: 'Only the first time. The cookbook keeps the recipes you open, so they work in the kitchen without a signal. Searching every recipe, sharing and the sous-chef need a connection.'
+			a: 'Only the first time. The cookbook keeps the recipes you open, so they work in the kitchen without a signal. Searching every recipe, sharing and the sous-chef need a connection, and the sous-chef says so when you are offline.'
 		},
 		{
 			q: 'How do I switch between grams and cups?',
@@ -52,6 +117,8 @@
 	];
 </script>
 
+<svelte:document onfullscreenchange={turn} />
+
 <PageHead
 	title="How to use the cookbook"
 	description="Finding, scaling and cooking recipes, the shopping list, adding your own recipes and sharing them."
@@ -63,12 +130,19 @@
 		<h1>How to use the cookbook</h1>
 		<p class="lede">
 			Everything the cookbook can do, from finding tonight's dinner to adding your nanna's recipes.
-			Nothing here needs an account.
+			Nothing here needs an account. Wherever a small "i" appears, tap it (or point at it with a
+			mouse) for a short explanation.
 		</p>
 	</header>
 
 	<figure class="video">
-		<video controls preload="none" playsinline poster="{base}/video/how-to-use.jpg">
+		<video
+			bind:this={video}
+			controls
+			preload="none"
+			playsinline
+			poster="{base}/video/how-to-use.jpg"
+		>
 			<track kind="captions" src="{base}/video/how-to-use.vtt" srclang="en-GB" label="English" />
 			<source src="{base}/video/how-to-use.webm" type="video/webm" />
 		</video>
@@ -96,13 +170,15 @@
 		<p>
 			Type in the search box at the top of any page, or press <kbd>/</kbd> on a keyboard to jump to it.
 			Suggestions appear as you type: recipes by name, recipes that use an ingredient, and the right spelling
-			when a word is not recognised. Accents do not matter, so "brulee" finds Crème Brûlée.
+			when a word is not recognised. Accents do not matter, so "brulee" finds Crème Brûlée, and several
+			words find recipes with all of them, so "pasta tomato" finds the tomato pastas.
 		</p>
 		<p>
-			On the <a href={searchHref()}>search page</a>, choose
-			<strong>I have these ingredients</strong>
-			and list what is in your kitchen, separated by commas. The recipes you can nearly make come first,
-			with how many of their ingredients you already have.
+			To cook from what is in your kitchen, open the <a href={searchHref()}>search page</a>, choose
+			<strong>I have these ingredients</strong> and list them with commas between, such as "eggs, flour,
+			milk". The recipes you can nearly make come first, with how many of their ingredients you already
+			have. The search page shows examples you can tap to try, and if you type a comma in the name search
+			it offers to switch for you.
 		</p>
 	</section>
 
@@ -128,12 +204,25 @@
 			one that finishes soonest is shown, with the rest a tap away. A finished timer sounds, and
 			vibrates where the phone can.
 		</p>
+		<h3>Ticking off</h3>
+		<p>
+			Tick each ingredient as you get it out, and tap a step's number to mark the step done. The
+			ticks are kept if you leave and come back, and <strong>Reset</strong> clears them.
+			<strong>Plan backwards from...</strong> works out when to start each step for the time you want
+			to eat.
+		</p>
 		<h3>Cook mode</h3>
 		<p>
-			<strong>Start cooking</strong> shows one step at a time in large type, with that step's
-			ingredients and timers. The screen stays awake while it is open. Tick ingredients off as you
-			go; ticks are kept if you leave and come back. <strong>Plan backwards from...</strong> works out
-			when to start for the time you want to eat.
+			<strong>Start cooking</strong> shows one step at a time in large type. Under each step,
+			<strong>For this step</strong> lists the ingredients it uses, with their amounts at the
+			servings you chose, to tick off as they go in; these are the same ticks as on the recipe. The
+			whole list is beside the step on a wide screen, and behind <strong>Ingredients</strong> at the
+			bottom on a phone. <strong>Up next</strong> shows what is coming, and the last step ends on
+			<strong>Ready to serve</strong>, with the chef's tips.
+		</p>
+		<p>
+			Swipe, use the arrow keys or the buttons to move between steps. The screen stays awake while
+			it is open.
 		</p>
 	</section>
 
@@ -146,14 +235,17 @@
 		</p>
 		<h3>Changing an amount</h3>
 		<p>
-			Tap a quantity to change it, for example to buy a whole bag. A changed amount turns terracotta
-			and shows what the recipes asked for, with <strong>Back to</strong> to undo it.
+			Tap a quantity to change it, for example to buy a whole bag. A small card opens with minus and
+			plus, the amount and its unit, so 1500 g can become 1.5 kg, or an item added without an amount
+			can be given one. A changed amount turns terracotta and shows what the recipes asked for, with
+			<strong>Back to</strong> to undo it.
 		</p>
 		<h3>Your own items</h3>
 		<p>
 			<strong>Add an item</strong> takes anything else you need: type "potatoes" or "2 kg potatoes" and
-			press Enter. The amount can be changed on the list like any other, and pasting several lines adds
-			them all. Your items are grouped under "Added by you".
+			press Enter. "Ways to add something", beside the box (or under it on a phone), shows the kinds of
+			line it understands. The amount can be changed on the list like any other, and pasting several lines
+			adds them all. Your items are grouped under "Added by you".
 		</p>
 		<h3>Removing lines</h3>
 		<p>
@@ -173,17 +265,49 @@
 		</p>
 	</section>
 
+	<section id="sending" aria-labelledby="sending-title">
+		<h2 id="sending-title">Sending a recipe to someone</h2>
+		<p>
+			<strong>Share</strong> on a recipe opens a picture of its recipe card straight away: the title,
+			the time and servings, every ingredient at the servings and units you chose, and a code that opens
+			the recipe. Long ingredients wrap rather than being cut short, and a long list runs in two columns.
+		</p>
+		<ul class="points">
+			<li>
+				<strong>Send the card</strong> (on a phone) opens the phone's share sheet, so the card goes
+				straight into WhatsApp, Messenger, Instagram or a message, with the recipe's link. Tick
+				<strong>Send the whole recipe as text too</strong> to include the full recipe.
+			</li>
+			<li>
+				<strong>Copy the card</strong> (on most computers) copies the picture to paste into a chat.
+			</li>
+			<li><strong>Save image</strong> keeps the card in your downloads.</li>
+			<li><strong>Send the link</strong> shares, or copies, the recipe's address.</li>
+			<li><strong>Copy as text</strong> copies the whole recipe to paste anywhere.</li>
+			<li><strong>Print</strong> prints the card on an A5 index card.</li>
+		</ul>
+		<p>
+			A recipe of your own has no link yet, so <strong>Send the link</strong> is greyed out; the card
+			and the text work as usual.
+		</p>
+	</section>
+
 	<section id="your-recipes" aria-labelledby="your-recipes-title">
 		<h2 id="your-recipes-title">Your own recipes</h2>
 		<h3>Adding a recipe</h3>
 		<p>
-			<a href={editHref()}>Add a recipe</a> from the home page, a section page or Settings. A title,
-			the ingredients and the method are all it needs. Write the ingredients one per line, as on
-			paper, or paste a list from anywhere; "How it will read" beside the box shows each line as the
-			recipe will. A line ending in a colon, such as "For the filling:", starts a new part.
-			<strong>Line by line</strong> is there for fine-tuning a single ingredient. Write the method the
-			way you would say it: "bake for 25 minutes at 200°C" becomes a tappable timer and a temperature
-			that converts to Fahrenheit, and the editor shows what it found under each step.
+			<a href={editHref()}>Add a recipe</a> from the home page, a section page or Settings. The
+			first time, a note explains where it is kept. A title, the ingredients and the method are all
+			it needs. Choose a <strong>Section</strong>, then a <strong>Subsection</strong> if you like;
+			<strong>New section</strong> and <strong>New subsection</strong> add your own. Write the
+			ingredients one per line, as on paper, or paste a list from anywhere; "How it will read"
+			beside the box shows each line as the recipe will. A line ending in a colon, such as "For the
+			filling:", starts a new part.
+			<strong>Line by line</strong> is there for fine-tuning a single ingredient. Write the method
+			the way you would say it: "bake for 25 minutes at 200°C" becomes a tappable timer and a
+			temperature that converts to Fahrenheit, and the editor shows what it found under each step.
+			<strong>Before you save</strong> lists what is still to fill in, in plain words; tap a point to
+			go straight to it.
 		</p>
 		<p>
 			Your recipe scales, converts and keeps timers like every other recipe, and appears on the home
@@ -196,14 +320,22 @@
 			they do not follow you to another device. Clearing the browser's data for the site deletes
 			them, so keep a copy.
 		</p>
-		<h3>Backing up and clearing</h3>
+		<h3>Adding a photo</h3>
 		<p>
-			In <strong>Settings &gt; Your recipes</strong>, <strong>Save a backup</strong> saves them all
-			to a file on your device, and <strong>Restore a backup</strong> reads such a file back, on
-			this device or another. While recipes are not backed up, the home page reminds you; close the
-			reminder and it comes back two weeks later.
-			<strong>Clear all personal recipes</strong> deletes them from this device after asking how many
-			will go.
+			Every recipe has a place for its photo, above the title on a phone and beside it on a wider
+			screen. Where there is none yet, tap <strong>Add a photo</strong>: take one with the camera or
+			pick one from your photos, describe it in a few words, and save. Without the cookbook's token
+			it is kept in this browser, so only you see it; <strong>Change</strong> swaps it and the bin removes
+			it. A photo on a recipe of yours goes with it when you share it with everyone.
+		</p>
+		<h3>Exporting and clearing</h3>
+		<p>
+			Clearing your browsing data deletes your recipes, so export them now and then.
+			<strong>Settings &gt; Your recipes &gt; Export your recipes</strong> saves them to your
+			downloads as text (to read or print), a spreadsheet (CSV, for Excel or Google Sheets) or JSON
+			(everything, as stored). About once a week the home page reminds you; close it and it waits
+			another week. <strong>Clear all personal recipes</strong> deletes them from this device after asking
+			how many will go.
 		</p>
 	</section>
 
@@ -266,13 +398,15 @@
 		<h2 id="sous-chef-title">The sous-chef</h2>
 		<p>
 			<strong>Ask the sous-chef</strong> on a recipe, your own included, opens a chat about that recipe:
-			swaps, timings, making it ahead. The answer appears as it is written. It is AI, so it can be wrong;
-			check times and temperatures yourself.
+			swaps, timings, making it ahead. The answer appears as it is written, and says which model wrote
+			it. It is AI, so it can be wrong; check times and temperatures yourself.
 		</p>
 		<p>
-			Each connection can ask 30 questions an hour. When many cooks ask at once the sous-chef waits
-			and tries again by itself, and if an answer takes too long you can ask again with
-			<strong>Try again</strong>.
+			As soon as it opens, it tells you if you are offline, if it cannot be reached (with
+			<strong>Check again</strong>), or if the AI is in high demand. When the main model is busy, a
+			lighter one steps in and the answer says so; if both are busy, it says it is unavailable due
+			to high demand, with <strong>Try again</strong>. Each person can ask a few questions a minute,
+			and a quick, usually invisible check from Cloudflare makes sure a person is asking, not a bot.
 		</p>
 	</section>
 
@@ -281,8 +415,9 @@
 		<p>
 			There are no accounts, adverts or trackers. Favourites, the shopping list, notes, timers and
 			your own recipes stay in your browser. A question to the sous-chef is sent, with the recipe it
-			is about, to the cookbook's AI service and on to Google's Gemini to be answered; nothing else
-			leaves your device unless you share a recipe.
+			is about, to the cookbook's AI service and on to Google's Gemini to be answered, and
+			Cloudflare Turnstile checks that a person is asking. Nothing else leaves your device unless
+			you send or share a recipe.
 		</p>
 		<p>
 			Search engines are welcome. AI crawlers are asked not to collect the recipes, both in
@@ -430,6 +565,13 @@
 
 	.faq p {
 		padding-block-end: var(--space-4);
+	}
+
+	.points {
+		display: grid;
+		gap: var(--space-2);
+		padding-inline-start: var(--space-5);
+		list-style: disc;
 	}
 
 	h3 {

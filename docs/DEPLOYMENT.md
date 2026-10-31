@@ -53,6 +53,7 @@ flowchart TB
 - **CI passed** is the single required check. It fails if any job failed or was cancelled, and treats skipped jobs as passed, so a docs-only pull request can still be merged.
 - A change that touches only `docs/` or Markdown files skips every build job. On a push to `main`, CI then succeeds without producing a `site` artifact, and the deploy workflow's first job finds no artifact and skips the deploy. The live site is unchanged.
 - CI runs cancel an older run on the same branch when a newer one starts. The in-site editor reports a cancelled run as replaced by a later build, not as a failure.
+- Every action in the workflows is pinned to a full commit, with its release in a comment, so a moved tag cannot change what runs. Dependabot (`.github/dependabot.yml`) opens a `ci` pull request once a month when a newer release appears.
 - The Rust lints and the Rust tests are separate jobs that run side by side. Their caches are saved from `main` only (`save-if`) under shared keys, so branches and pull requests reuse `main`'s cache without filling the cache quota.
 
 ### The fast path
@@ -111,16 +112,16 @@ The static site cannot hold the Gemini key, so the sous-chef and the importer go
 3. Check the variables in `wrangler.toml`:
    - `SITE_URL` is the published site including its base path (`https://expo39.github.io/My_Cookbook`). The Worker fetches each recipe for `/chat` from `<SITE_URL>/data/recipes/<id>.json`, so a published recipe is always discussed as published. Only when that address does not exist (a recipe kept on the cook's own device) is the copy sent with the question used, after it has been checked to be a recipe.
    - `ALLOWED_ORIGINS` lists the origins allowed to call it.
-   - `GEMINI_MODEL`, `RATE_LIMIT_CHAT` and `RATE_LIMIT_IMPORT` tune the model and the hourly limits.
+   - `GEMINI_MODEL` and `GEMINI_FALLBACK_MODEL` choose the models; the `[[ratelimits]]` blocks set how many questions a visitor, and everyone together, may ask a minute.
    - `GEMINI_THINKING_LEVEL` (default `low`) sets how long the model thinks before it answers; `minimal` is faster on the models that accept it, and `default` leaves the choice to the model. A model that refuses the level is asked again without one.
-   - `GEMINI_FALLBACK_MODEL`, when set, is tried after the main model has been busy three times in a row, for example a lighter Flash model.
+   - `GEMINI_FALLBACK_MODEL`, when set, takes over when the main model has been busy three times in a row, is out of its daily quota, has been retired by Google, or sends nothing for 25 seconds. It is set to `gemini-flash-lite-latest`, Google's alias for its newest Flash-Lite, so it never goes out of date; the main model stays pinned so its behaviour only changes on purpose. When Google retires the main model, the owner sees a notice in the sous-chef (with editing unlocked) naming the model to replace.
 4. Set `ai.endpoint` in `cookbook.config.json` (or `PUBLIC_AI_ENDPOINT` at build time) to the Worker's URL, and enter the same `ADMIN_IMPORT_SECRET` in the site's editing settings (see [ADMIN.md](ADMIN.md#importing-a-recipe-with-ai)).
 
-Answers are streamed to the browser as they are written. When Gemini is busy (a 429 for a per-minute limit, or a 500 or 503), the Worker waits a moment, with a little randomness so that cooks refused together do not return together, and asks again up to three times before it tries the fallback model. Each refusal is logged; `npx wrangler tail` in `crates/cookbook-worker` (inside `make shell`) shows them live.
+Answers are streamed to the browser as they are written. When Gemini is busy (a 429 for a per-minute limit, or a 500 or 503), the Worker waits a moment, with a little randomness so that cooks refused together do not return together, and asks again up to three times before it tries the fallback model, telling the cook it is switching. When every model stays busy, the cook is told the sous-chef is unavailable due to high demand, and `GET /status` reports "busy" for two minutes so the sous-chef can warn the next cook as it opens. Each refusal is logged; `npx wrangler tail` in `crates/cookbook-worker` (inside `make shell`) shows them live.
 
-### Turnstile (optional)
+### Turnstile
 
-Cloudflare Turnstile keeps scripts from spending the Gemini quota. It is off until the Worker has a `TURNSTILE_SECRET`, so it can be added at any time.
+Cloudflare Turnstile keeps scripts from spending the Gemini quota. It is on for this cookbook: the site key is in `cookbook.config.json` and the secret is on the Worker. It stays off for any copy of the project until its Worker has a `TURNSTILE_SECRET`.
 
 1. In the Cloudflare dashboard, open **Turnstile > Add widget**. Name it, add the site's hostname (`expo39.github.io`, plus `localhost` for development), and choose the **Invisible** widget mode. Cloudflare shows a site key and a secret key.
 2. Store the secret key in the Worker:
@@ -131,6 +132,8 @@ Cloudflare Turnstile keeps scripts from spending the Gemini quota. It is off unt
    ```
 
 3. Put the site key in `cookbook.config.json` as `ai.turnstileSiteKey` (or set `PUBLIC_TURNSTILE_SITE_KEY` at build time), then deploy the site. The site key is public by design.
+
+Saving the secret takes effect at once, while the site only starts sending tokens once it is built with the site key. Deploy the site with the key first, then store the secret, or the live sous-chef refuses questions in between.
 
 The browser then fetches a fresh token before each question and sends it in the `X-Turnstile-Token` header, and the Worker checks it with Cloudflare before it calls Gemini. To switch Turnstile off again, delete the secret with `npx wrangler secret delete TURNSTILE_SECRET`; the site key can stay.
 

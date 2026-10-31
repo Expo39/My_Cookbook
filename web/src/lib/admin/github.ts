@@ -23,7 +23,7 @@ export interface TreeEntry {
 	sha: string;
 }
 
-export class GitHubError extends Error {
+class GitHubError extends Error {
 	constructor(
 		message: string,
 		readonly status: number

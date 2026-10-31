@@ -30,7 +30,7 @@ Write it to match the house style:
 - **`summary`:** one or two sentences, 200 characters at most. Anything extra goes into `tips`.
 - **Amounts:**
   - Keep the units as written, but prefer metric. If the source uses cups, convert dry goods with the density of their `food` id, and put the original in `alt` only when that helps.
-  - Ranges are `{"min", "max"}`, e.g. "2-3 cloves".
+  - Ranges are `{"min", "max"}`, but only for counts, e.g. "2-3 cloves". A weight or volume takes one amount, the middle of the source's range ("100-150 g" becomes 125 g), because a wide range pushes the ingredient names out of line on the page. Say in a tip that the amounts are a guide when the source gave ranges.
   - Amounts like "Zest of 1 lemon" use `prefix`.
   - Lines with no amount ("Salt, to taste") have no `amount`. Use `"scale": "toTaste"` when the line says "to taste".
 - **Scaling mode per ingredient:**
@@ -41,6 +41,7 @@ Write it to match the house style:
 - **`food` ids** link an ingredient to the density table, so cups and grams convert and shopping lists merge. Set one only for these known ids: butter, breadcrumbs, cocoa, cornflour, couscous, cream, flour, flour-00, flour-bread, flour-plain, flour-self-raising, flour-wholemeal, ground-almonds, honey, lentils, milk, oats, oil, olive-oil, rice, salt, semolina, sugar, sugar-brown, sugar-caster, sugar-granulated, sugar-icing, water, yoghurt, egg.
 - **Tokens in steps:** these make the method scale and convert with the reader's settings.
   - When a step restates an amount, give that ingredient a `key` and write `{@key}`, or `{@key:amount}` for the amount alone.
+  - Name the ingredients plainly in each step ("add the shallots and the red wine"): cook mode finds a step's ingredients from its words, so no key is needed for that.
   - Oven temperatures: `{temp:220/200}` for conventional/fan. If the source gives only a fan temperature, conventional is fan + 20. The token shows the reader both, so write "Heat the oven to {temp:180/160}", not "a fan oven". Internal or meat temperatures take `!`: `{temp:52-55!}`.
   - Durations: `{timer:12-15}`, `{timer:4h}` or `{timer:30s}`. Name a timer when two can run at once: `{timer:15|sauce}`.
   - Tokenise only exact restatements, and never change a number while doing it.
@@ -71,4 +72,4 @@ Then propose the commit. Do not make it unless asked. The repo's format is `<typ
 - `content(recipes): add Pastizzi tal-Irkotta`
 - `content(recipes): update Beef Wellington`
 
-Recipes can also be added in the site itself: Settings > Unlock editing opens the admin editor, which runs the same checklist in the browser. This skill is the route from the terminal.
+Recipes can also be added in the site itself: Settings > For the cookbook's owner > Unlock editing opens the admin editor, which runs the same checklist in the browser. This skill is the route from the terminal.

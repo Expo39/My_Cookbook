@@ -3,7 +3,14 @@ import { join, relative } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { renderRecipe } from '$lib/data/canonical';
 import type { Recipe } from '$lib/types/recipe';
-import { emptyForm, formFromRecipe, parseQty, recipeFromForm, recipeId } from './recipe-form';
+import {
+	emptyForm,
+	emptyRow,
+	formFromRecipe,
+	parseQty,
+	recipeFromForm,
+	recipeId
+} from './recipe-form';
 
 // Vitest runs from `web/`.
 const root = join(process.cwd(), '..', 'recipes');
@@ -68,18 +75,28 @@ describe('parseQty', () => {
 	});
 });
 
+describe('a new recipe', () => {
+	it('starts with an empty ingredient list, so nothing asks to be filled in until it is written', () => {
+		const form = emptyForm('desserts');
+		expect(form.groups).toHaveLength(1);
+		expect(form.groups[0].items).toEqual([]);
+	});
+});
+
 describe('recipeFromForm', () => {
 	const filled = () => {
 		const form = emptyForm('desserts');
 		form.title = ' Tart ';
 		form.summary = 'Sweet.';
-		form.groups[0].items[0] = {
-			...form.groups[0].items[0],
-			qtyMin: '1',
-			qtyMax: '2',
-			unit: 'cup',
-			item: 'sugar'
-		};
+		form.groups[0].items = [
+			{
+				...emptyRow(),
+				qtyMin: '1',
+				qtyMax: '2',
+				unit: 'cup',
+				item: 'sugar'
+			}
+		];
 		form.steps[0].text = 'Bake.';
 		return form;
 	};

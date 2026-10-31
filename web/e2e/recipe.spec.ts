@@ -94,10 +94,29 @@ test('an amount toggles through the units of the chosen system only, and the hin
 test('the hint can be dismissed without using it', async ({ page }) => {
 	await page.goto(brulee);
 	await waitForCore(page);
-	await page.getByRole('button', { name: 'Dismiss the hint' }).click();
+	await ingredients(page).getByRole('button', { name: 'Dismiss the hint' }).click();
 	await page.reload();
 	await waitForCore(page);
 	await expect(page.getByText('Tap an amount to change its unit')).toHaveCount(0);
+});
+
+test('a hint and a breathing first circle show the steps can be ticked, until one is', async ({
+	page
+}) => {
+	await page.goto(brulee);
+	await waitForCore(page);
+	const hint = method(page).getByText("Tap a step's number to mark it done");
+	await expect(hint).toBeVisible();
+	await expect(method(page).locator('li.beckon')).toHaveCount(1);
+
+	await method(page).getByRole('checkbox', { name: 'Mark step 1 as done' }).check();
+	await expect(hint).toHaveCount(0);
+	await expect(method(page).locator('li.beckon')).toHaveCount(0);
+	await method(page).getByRole('checkbox', { name: 'Mark step 1 as done' }).uncheck();
+	await page.reload();
+	await waitForCore(page);
+	await expect(method(page).getByRole('checkbox', { name: 'Mark step 2 as done' })).toBeEnabled();
+	await expect(hint).toHaveCount(0);
 });
 
 test('ticks stay between visits and can be reset', async ({ page }) => {
@@ -144,14 +163,15 @@ test('oven temperatures follow the units and carry the gas mark', async ({ page 
 test('scaling to a pan and by an ingredient work from the extra controls', async ({ page }) => {
 	await page.goto('desserts/french-classics/creme-brulee');
 	await waitForCore(page);
+	await expect(page.getByRole('button', { name: 'What is scaling another way?' })).toBeVisible();
 	await page.getByText('Scale another way').click();
-	await page.getByLabel('Amount').fill('1000');
-	await page.getByLabel('Unit').selectOption('ml');
+	await page.getByLabel('Amount', { exact: true }).fill('1000');
+	await page.getByLabel('Unit', { exact: true }).selectOption('ml');
 	await page.getByRole('button', { name: 'Scale to this' }).click();
 	await expect(page.getByText('Scaled x2')).toBeVisible();
 	await expect(page).toHaveURL(/have=double-cream:1000ml/);
 
-	await page.getByLabel('Amount').fill('');
+	await page.getByLabel('Amount', { exact: true }).fill('');
 	await page.getByRole('button', { name: 'Scale to this' }).click();
 	await expect(page.getByText('Enter an amount above zero.')).toBeVisible();
 });
@@ -179,4 +199,54 @@ test('counts use the singular when there is one', async ({ page }) => {
 	await page.goto('./');
 	await expect(page.getByText('1 recipe', { exact: true }).first()).toBeVisible();
 	await expect(page.getByText('1 recipes')).toHaveCount(0);
+});
+
+test.describe('the first paint of a reload', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('shows every control at full strength, with the hints for a new cook', async ({ page }) => {
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.goto(brulee);
+		await expect(page.getByRole('link', { name: 'Start cooking' }).first()).toBeVisible();
+		for (const name of ['Favourite', 'More servings']) {
+			const control = page.getByRole('button', { name }).first();
+			await expect(control).toBeDisabled();
+			expect(await control.evaluate((element) => getComputedStyle(element).opacity)).toBe('1');
+		}
+		expect(
+			await page
+				.locator('.panel .controls')
+				.evaluate((element) => getComputedStyle(element).opacity)
+		).toBe('1');
+		await expect(page.getByText('Tap an amount to change its unit')).toBeVisible();
+		await expect(page.getByText("Tap a step's number to mark it done")).toBeVisible();
+	});
+});
+
+test.describe('a reload of a scaled recipe', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('holds back the written amounts, and nothing that shows moves', async ({ page }) => {
+		const url = `${brulee}?serves=8&u=us`;
+		await page.goto(url);
+		await waitForCore(page);
+		const barTop = async () =>
+			Math.round(
+				(await page.getByRole('region', { name: 'Adjust the recipe' }).boundingBox())?.y ?? 0
+			);
+		const settled = await barTop();
+
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.reload();
+		// What waits for the core stays hidden and appears in its final place; nothing above moves.
+		for (const hidden of ['.columns', '.serves', '.panel .state']) {
+			await expect(page.locator(hidden).first()).toHaveCSS('visibility', 'hidden');
+		}
+		expect(Math.abs((await barTop()) - settled)).toBeLessThanOrEqual(2);
+		await expect(page.locator('p.scaled.held')).toBeAttached();
+
+		await page.goto(brulee);
+		await expect(page.locator('.columns')).toHaveCSS('visibility', 'visible');
+		await expect(page.locator('p.scaled.held')).toBeHidden();
+	});
 });

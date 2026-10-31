@@ -54,7 +54,7 @@ export interface SearchEngine {
 	free(): void;
 }
 
-export class CoreNotLoadedError extends Error {
+class CoreNotLoadedError extends Error {
 	constructor() {
 		super('The WASM core is not loaded: await loadCore() on the client first.');
 	}

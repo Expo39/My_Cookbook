@@ -39,11 +39,40 @@ test('the bottom bar sits at the foot of the screen and clears the content', asy
 	expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 
 	await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
-	const lastBottom = await page
-		.locator('article')
-		.first()
-		.evaluate((element) => element.getBoundingClientRect().bottom);
-	expect(lastBottom).toBeGreaterThan(0);
+	// The whole page, down to the footer's last line, ends above the bar.
+	const lastBottom = await page.evaluate(() =>
+		Math.max(
+			...[...document.querySelectorAll('footer *')]
+				.filter((element) => element.childElementCount === 0 && element.textContent?.trim())
+				.map((element) => element.getBoundingClientRect().bottom)
+		)
+	);
+	const barTop = (await bar.boundingBox())?.y ?? 0;
+	expect(lastBottom).toBeLessThanOrEqual(barTop);
+});
+
+test('in cook mode the full list opens as a sheet, and Esc closes the sheet before cook mode', async ({
+	page
+}) => {
+	await page.goto(`${wellington}?cook=3`);
+	const dialog = page.getByRole('dialog', { name: /Wellington/ });
+	const sheet = dialog.getByLabel('All ingredients');
+	await expect(dialog.getByRole('list', { name: 'In this step' })).toContainText('red wine');
+	await expect(sheet).toBeHidden();
+
+	await dialog.getByRole('button', { name: 'Ingredients' }).click();
+	await expect(sheet).toBeVisible();
+	await expect(sheet.locator('li.current')).toHaveCount(4);
+	await expect(sheet.getByRole('button', { name: 'Close the list' })).toBeFocused();
+	const wine = sheet.getByRole('checkbox', { name: /red wine/ });
+	await wine.check();
+	await expect(wine).toBeChecked();
+
+	await page.keyboard.press('Escape');
+	await expect(sheet).toBeHidden();
+	await expect(dialog).toBeVisible();
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
 });
 
 test('every touch target on the phone view is at least 44 px', async ({ page }) => {
@@ -143,7 +172,7 @@ test('the share sheet is a bottom sheet on a phone', async ({ page }) => {
 	await page.goto(wellington);
 	await waitForCore(page);
 	await page.getByRole('button', { name: 'Share this recipe' }).click();
-	const sheet = page.getByRole('dialog', { name: 'Share this recipe' });
+	const sheet = page.getByRole('dialog', { name: 'Share' });
 	await expect(sheet).toBeVisible();
 	const box = await sheet.boundingBox();
 	const viewport = page.viewportSize();
@@ -152,4 +181,67 @@ test('the share sheet is a bottom sheet on a phone', async ({ page }) => {
 	for (const button of await sheet.getByRole('button').all()) {
 		expect((await button.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
 	}
+});
+
+test('nothing scrolls sideways on a narrow phone, even with the add-item form open', async ({
+	page
+}) => {
+	await page.setViewportSize({ width: 320, height: 640 });
+	for (const path of ['./', 'search', 'how-to-use', wellington, 'edit']) {
+		await page.goto(path);
+		expect(await page.evaluate(() => document.documentElement.scrollWidth), path).toBe(320);
+	}
+	await page.goto('shopping-list');
+	await page.getByRole('button', { name: 'Add an item' }).click();
+	expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
+});
+
+test.describe('the first paint of a reload', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('already looks finished before the code runs, so nothing is drawn twice', async ({
+		page
+	}) => {
+		await page.goto(wellington);
+		await page.evaluate(() => {
+			localStorage.setItem('sapori:hint:units', '1');
+			localStorage.setItem('sapori:hint:steps', '1');
+		});
+		// With the app's code held back, what shows is exactly what a reload paints first.
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.reload();
+
+		const nav = page.getByRole('navigation', { name: 'Sections' });
+		await expect(nav.getByRole('link', { name: 'Main Courses' })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		await expect(page.getByRole('tab', { name: 'Ingredients' })).toHaveAttribute(
+			'aria-selected',
+			'true'
+		);
+		await expect(method(page)).toBeHidden();
+		await expect(page.locator('.panel .controls')).toBeHidden();
+		await expect(page.locator('.bar').getByRole('link', { name: 'Start cooking' })).toBeVisible();
+		await expect(page.getByText('Tap an amount to change its unit')).toBeHidden();
+		await expect(page.getByText("Tap a step's number to mark it done")).toBeHidden();
+	});
+});
+
+test("the owner's Add a photo is a compact strip that keeps the page within the screen", async ({
+	page
+}) => {
+	await page.addInitScript(() => sessionStorage.setItem('sapori:admin-token', 'test-token'));
+	await page.route('https://api.github.com/**', (route) =>
+		route.fulfill({ json: { permissions: { push: true } } })
+	);
+	await page.goto(wellington);
+	const add = page.getByRole('button', { name: 'Add a photo' });
+	await expect(add).toBeVisible();
+	expect((await add.boundingBox())?.height ?? 0).toBeLessThan(100);
+	const width = await page.evaluate(() => [
+		document.documentElement.scrollWidth,
+		document.documentElement.clientWidth
+	]);
+	expect(width[0]).toBeLessThanOrEqual(width[1]);
 });

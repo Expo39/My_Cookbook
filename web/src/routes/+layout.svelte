@@ -2,6 +2,7 @@
 	import '$lib/styles/tokens.css';
 	import '$lib/styles/base.css';
 	import { onMount } from 'svelte';
+	import { dev } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
 	import BackToTop from '$lib/components/BackToTop.svelte';
 	import OfflineBanner from '$lib/components/OfflineBanner.svelte';
@@ -17,6 +18,15 @@
 	import { preferences } from '$lib/stores/preferences.svelte';
 	import { theme } from '$lib/stores/theme.svelte';
 	import { timers } from '$lib/stores/timers.svelte';
+	// The same files base.css names, so the build gives them one address. Asked for with the page,
+	// they are ready for the first paint instead of swapping in after it.
+	import bitter from '@fontsource/bitter/files/bitter-latin-800-normal.woff2?url';
+	import atkinson from '@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-400-normal.woff2?url';
+	import atkinsonBold from '@fontsource/atkinson-hyperlegible/files/atkinson-hyperlegible-latin-700-normal.woff2?url';
+	import literata from '@fontsource/literata/files/literata-latin-600-normal.woff2?url';
+
+	// The dev server names these files by another path than the CSS, so it would fetch each twice.
+	const fonts = dev ? [] : [bitter, atkinson, atkinsonBold, literata];
 
 	let { data, children } = $props();
 
@@ -33,6 +43,12 @@
 		void personal.load().then(() => personal.forgetPublished(published));
 	});
 </script>
+
+<svelte:head>
+	{#each fonts as font (font)}
+		<link rel="preload" href={font} as="font" type="font/woff2" crossorigin="anonymous" />
+	{/each}
+</svelte:head>
 
 <a class="skip" href="#main">Skip to content</a>
 {#if !chrome.cooking}<TimerStrip />{/if}
