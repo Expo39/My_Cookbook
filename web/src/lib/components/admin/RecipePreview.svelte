@@ -74,6 +74,7 @@
 			cookHref=""
 			onshare={() => {}}
 			onaddlist={() => {}}
+			photoTools={false}
 		/>
 		<IngredientsPanel {model} {ticks} hydrated={false} />
 		<MethodPanel {model} {ticks} hydrated={false} recipe={{ id: card.id, title: card.title }} />

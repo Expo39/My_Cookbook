@@ -439,6 +439,21 @@ test.describe('the editor', () => {
 		await expect(drawer.getByText('No AI import secret: Import from text is off')).toBeVisible();
 	});
 
+	test('offers one place to add a photo in the editor, its Photo section, not the preview', async ({
+		page
+	}) => {
+		await mockGitHub(page);
+		await unlocked(page);
+		await page.goto('edit?section=desserts');
+		await expect(saveButton(page)).toBeEnabled();
+		const preview = page.getByRole('region', { name: 'Preview' });
+		await expect(preview).toBeVisible();
+		await expect(preview.getByRole('button', { name: 'Add a photo' })).toHaveCount(0);
+		await expect(preview.locator('figure.slot')).toHaveCount(0);
+		await expect(page.locator('input[type="file"]')).toHaveCount(1);
+		await expect(page.locator('#photo-file')).toBeAttached();
+	});
+
 	test('edits a recipe and changes nothing else in its file', async ({ page }) => {
 		const github = await mockGitHub(page);
 		await unlocked(page);
