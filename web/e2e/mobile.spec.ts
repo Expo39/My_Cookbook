@@ -195,3 +195,53 @@ test('nothing scrolls sideways on a narrow phone, even with the add-item form op
 	await page.getByRole('button', { name: 'Add an item' }).click();
 	expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(320);
 });
+
+test.describe('the first paint of a reload', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	test('already looks finished before the code runs, so nothing is drawn twice', async ({
+		page
+	}) => {
+		await page.goto(wellington);
+		await page.evaluate(() => {
+			localStorage.setItem('sapori:hint:units', '1');
+			localStorage.setItem('sapori:hint:steps', '1');
+		});
+		// With the app's code held back, what shows is exactly what a reload paints first.
+		await page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+		await page.reload();
+
+		const nav = page.getByRole('navigation', { name: 'Sections' });
+		await expect(nav.getByRole('link', { name: 'Main Courses' })).toHaveAttribute(
+			'aria-current',
+			'page'
+		);
+		await expect(page.getByRole('tab', { name: 'Ingredients' })).toHaveAttribute(
+			'aria-selected',
+			'true'
+		);
+		await expect(method(page)).toBeHidden();
+		await expect(page.locator('.panel .controls')).toBeHidden();
+		await expect(page.locator('.bar').getByRole('link', { name: 'Start cooking' })).toBeVisible();
+		await expect(page.getByText('Tap an amount to change its unit')).toBeHidden();
+		await expect(page.getByText("Tap a step's number to mark it done")).toBeHidden();
+	});
+});
+
+test("the owner's Add a photo is a compact strip that keeps the page within the screen", async ({
+	page
+}) => {
+	await page.addInitScript(() => sessionStorage.setItem('sapori:admin-token', 'test-token'));
+	await page.route('https://api.github.com/**', (route) =>
+		route.fulfill({ json: { permissions: { push: true } } })
+	);
+	await page.goto(wellington);
+	const add = page.getByRole('button', { name: 'Add a photo' });
+	await expect(add).toBeVisible();
+	expect((await add.boundingBox())?.height ?? 0).toBeLessThan(100);
+	const width = await page.evaluate(() => [
+		document.documentElement.scrollWidth,
+		document.documentElement.clientWidth
+	]);
+	expect(width[0]).toBeLessThanOrEqual(width[1]);
+});

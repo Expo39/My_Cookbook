@@ -75,6 +75,10 @@
 			a: 'An optional amount shown beside the part\'s name, for a part weighed out as a whole, such as "Charcuterie 775 g total". It scales with the servings like everything else.'
 		},
 		{
+			q: 'How do I add a photo to a recipe?',
+			a: "Tap Add a photo where the photo goes, at the top of the recipe. Take a picture or choose one, describe it, and save. It is kept in this browser; with the cookbook's token unlocked it is saved to the cookbook for everyone instead."
+		},
+		{
 			q: 'Why do my recipes stay on this device?',
 			a: 'There are no accounts, so a recipe you add is kept in this browser. It is yours to change or delete, and nobody else sees it. Clearing your browsing data deletes it, so export your recipes from Settings now and then to keep a copy, as text, a spreadsheet or JSON.'
 		},
@@ -315,6 +319,14 @@
 			Recipes you add are stored only in this browser on this device. Nobody else can see them, and
 			they do not follow you to another device. Clearing the browser's data for the site deletes
 			them, so keep a copy.
+		</p>
+		<h3>Adding a photo</h3>
+		<p>
+			Every recipe has a place for its photo, above the title on a phone and beside it on a wider
+			screen. Where there is none yet, tap <strong>Add a photo</strong>: take one with the camera or
+			pick one from your photos, describe it in a few words, and save. Without the cookbook's token
+			it is kept in this browser, so only you see it; <strong>Change</strong> swaps it and the bin removes
+			it. A photo on a recipe of yours goes with it when you share it with everyone.
 		</p>
 		<h3>Exporting and clearing</h3>
 		<p>

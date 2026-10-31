@@ -286,7 +286,20 @@
 	{/if}
 </svelte:head>
 
-<article class:printing-card={printingCard}>
+<article class:printing-card={printingCard} class:settling={!model.ready}>
+	{#if !hydrated || (cookStep !== null && !CookMode)}
+		<!-- Drawn only when the address asks for cook mode (the script in app.html), so a reload
+		     goes straight to it instead of showing the recipe first. -->
+		<div class="cook-cover" aria-hidden="true">
+			<div class="cover-head">
+				<p class="label">Cooking</p>
+				<p class="cover-title">{data.recipe.title}</p>
+			</div>
+			<div class="cover-rail">
+				{#each { length: model.view.steps.length }, s (s)}<span></span>{/each}
+			</div>
+		</div>
+	{/if}
 	<Breadcrumb {trail} />
 	{#if local}
 		<p class="device">
@@ -320,42 +333,41 @@
 		onaddlist={addToList}
 		onask={ai ? () => chef?.show() : undefined}
 		edithref={local || admin.unlocked ? editHref({ id: card.id }) : undefined}
+		photoToGitHub={hydrated && !local && admin.unlocked}
 	/>
 	<ServingsBar {model} />
 
-	{#if hydrated}
-		<div class="tabs" role="tablist" aria-label="Recipe sections">
-			{#each tabs as { id: tabId, label } (tabId)}
-				<button
-					type="button"
-					role="tab"
-					id="{id}-tab-{tabId}"
-					aria-selected={tab === tabId}
-					aria-controls="{id}-panel-{tabId}"
-					tabindex={tab === tabId ? 0 : -1}
-					onclick={() => (tab = tabId)}
-					onkeydown={moveTab}>{label}</button
-				>
-			{/each}
-		</div>
-	{/if}
+	<div class="tabs" role="tablist" aria-label="Recipe sections">
+		{#each tabs as { id: tabId, label } (tabId)}
+			<button
+				type="button"
+				role="tab"
+				id="{id}-tab-{tabId}"
+				aria-selected={tab === tabId}
+				aria-controls="{id}-panel-{tabId}"
+				tabindex={tab === tabId ? 0 : -1}
+				onclick={() => (tab = tabId)}
+				onkeydown={moveTab}>{label}</button
+			>
+		{/each}
+	</div>
 
 	<div class="columns">
 		<div
 			class="ingredients"
-			class:inactive={hydrated && tab !== 'ingredients'}
+			class:inactive={tab !== 'ingredients'}
 			role="tabpanel"
 			id="{id}-panel-ingredients"
-			aria-labelledby={hydrated ? `${id}-tab-ingredients` : undefined}
+			aria-labelledby="{id}-tab-ingredients"
 		>
 			<IngredientsPanel {model} {ticks} {hydrated} />
 		</div>
 		<div
 			class="method"
-			class:inactive={hydrated && tab !== 'method'}
+			class:inactive={tab !== 'method'}
 			role="tabpanel"
 			id="{id}-panel-method"
-			aria-labelledby={hydrated ? `${id}-tab-method` : undefined}
+			aria-labelledby="{id}-tab-method"
 		>
 			<Planner steps={model.view.steps} />
 			<MethodPanel {model} {ticks} {hydrated} {recipe} />
@@ -381,7 +393,7 @@
 		</section>
 	{/if}
 
-	{#if hydrated}<ActionBar {model} {cookHref} onshare={share} />{/if}
+	<ActionBar {model} {cookHref} onshare={share} />
 	{#if hydrated && cookStep !== null && CookMode}
 		<CookMode {model} {recipe} {ticks} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
@@ -393,6 +405,59 @@
 </article>
 
 <style>
+	.cook-cover {
+		position: fixed;
+		inset: 0;
+		z-index: 30;
+		display: none;
+		flex-direction: column;
+		background: var(--colour-bg);
+	}
+
+	:global(html[data-cooking]) .cook-cover {
+		display: flex;
+	}
+
+	.cover-head {
+		display: grid;
+		padding: calc(var(--space-2) + env(safe-area-inset-top, 0px)) var(--gutter) var(--space-2)
+			calc(var(--gutter) + var(--target) + var(--space-3));
+		background: var(--colour-surface);
+	}
+
+	.cover-head .label {
+		color: var(--colour-accent);
+	}
+
+	.cover-title {
+		font-family: var(--font-display);
+		font-size: var(--text-l);
+		font-weight: 800;
+		letter-spacing: -0.02em;
+	}
+
+	.cover-rail {
+		display: flex;
+		gap: 3px;
+		padding: 0 var(--gutter) var(--space-2);
+		border-block-end: 1px solid var(--colour-line);
+		background: var(--colour-surface);
+	}
+
+	.cover-rail span {
+		flex: 1;
+		block-size: 0.3rem;
+		border-radius: var(--radius-pill);
+		background: var(--colour-line);
+	}
+
+	/* A scaled address: the written amounts are not shown first and then changed. */
+	:global(html[data-scaled])
+		.settling
+		:is(:global(.columns), :global(.tabs), :global(.state), :global(output), :global(.serves)) {
+		visibility: hidden;
+	}
+
 	.update {
 		position: sticky;
 		inset-block-start: var(--space-2);
