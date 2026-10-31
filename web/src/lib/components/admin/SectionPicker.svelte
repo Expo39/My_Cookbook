@@ -5,81 +5,43 @@
 	import Field from './Field.svelte';
 	import TextField from './TextField.svelte';
 
-	/** `local` is a recipe kept on this device, whose new sections live only with it. */
+	/**
+	 * Two plain choices: the main section, then a subsection inside it if the cook wants one. A new
+	 * section or subsection is added from the link under each, never from inside the dropdowns.
+	 * `local` is a recipe kept on this device, whose new sections live only with it.
+	 */
 	let { ed, local = false }: { ed: EditorState; local?: boolean } = $props();
 
 	const id = fieldId('section');
-	const NEW = '+new';
-
-	/** A new section is made right where the choice is, without leaving the picker. */
-	let making = $state(false);
-	let title = $state('');
-	let parent = $state('');
-	let problem = $state('');
-
 	const plain = (label: string) => label.replace(' (new)', '');
 
-	function choose(event: Event) {
-		const value = (event.currentTarget as HTMLSelectElement).value;
-		if (value === NEW) {
-			parent = ed.form.section;
-			making = true;
-		} else {
-			ed.form.section = value;
-			making = false;
-		}
-	}
+	const top = $derived(ed.form.section.split('/')[0]);
+	const mains = $derived(ed.sectionOptions.filter((option) => !option.path.includes('/')));
+	const subs = $derived(
+		top ? ed.sectionOptions.filter((option) => option.path.startsWith(`${top}/`)) : []
+	);
+	const topLabel = $derived(plain(mains.find((option) => option.path === top)?.label ?? ''));
+
+	/** Where a new section goes: '' for a main section, or the main section it sits inside. */
+	let addingTo = $state<string | null>(null);
+	let title = $state('');
+	let problem = $state('');
 
 	function add() {
-		if (!ed.addSection(parent, title)) {
-			problem = 'Give the new section a name.';
+		if (addingTo === null) return;
+		if (!ed.addSection(addingTo, title)) {
+			problem = 'Give it a name.';
 			return;
 		}
 		title = problem = '';
-		making = false;
+		addingTo = null;
 	}
 </script>
 
-<div class="picker">
-	<Field
-		{id}
-		label="Section"
-		hint={ed.editing
-			? 'Choosing another section moves the recipe.'
-			: 'Where the recipe goes, such as Desserts.'}
-		error={ed.errorFor('section')}
-	>
-		<select
-			{id}
-			class="control"
-			value={making ? NEW : ed.form.section}
-			onchange={choose}
-			aria-invalid={ed.errorFor('section') ? 'true' : undefined}
-		>
-			<option value="" disabled>Choose a section</option>
-			{#each ed.sectionOptions as option (option.path)}
-				<option value={option.path}>{' '.repeat(option.depth)}{option.label}</option>
-			{/each}
-			<option value={NEW}>+ New section...</option>
-		</select>
-	</Field>
-
-	{#if making}
-		<div class="new" role="group" aria-label="New section">
-			<TextField
-				id="new-section"
-				label="Name of the new section"
-				bind:value={title}
-				error={problem}
-			/>
-			<Field id="new-section-parent" label="Put it">
-				<select id="new-section-parent" class="control" bind:value={parent}>
-					<option value="">On its own, with the main sections</option>
-					{#each ed.sectionOptions as option (option.path)}
-						<option value={option.path}>Inside {plain(option.label)}</option>
-					{/each}
-				</select>
-			</Field>
+{#snippet adder(parent: string, label: string)}
+	{#if addingTo === parent}
+		<div class="new" role="group" aria-label={label}>
+			<TextField id="new-section" label="Name" bind:value={title} error={problem} />
 			{#if local}
 				<p class="help">
 					It stays with your recipe on this device, and the recipe shows under "Your recipes" on the
@@ -87,11 +49,59 @@
 				</p>
 			{/if}
 			<div class="buttons">
-				<button type="button" class="btn primary" onclick={add}>
-					<Icon name="plus" size={18} />Add the section
-				</button>
-				<button type="button" class="btn" onclick={() => (making = false)}>Cancel</button>
+				<button type="button" class="btn primary" onclick={add}>Add</button>
+				<button type="button" class="btn" onclick={() => (addingTo = null)}>Cancel</button>
 			</div>
+		</div>
+	{:else}
+		<button type="button" class="more" onclick={() => ((addingTo = parent), (problem = ''))}>
+			<Icon name="plus" size={16} />{label}
+		</button>
+	{/if}
+{/snippet}
+
+<div class="picker">
+	<div class="choice">
+		<Field
+			{id}
+			label="Section"
+			hint={ed.editing ? 'Choosing another section moves the recipe.' : undefined}
+			error={ed.errorFor('section')}
+		>
+			<select
+				{id}
+				class="control"
+				value={top}
+				onchange={(event) => (ed.form.section = (event.currentTarget as HTMLSelectElement).value)}
+				aria-invalid={ed.errorFor('section') ? 'true' : undefined}
+			>
+				<option value="" disabled>Choose one</option>
+				{#each mains as option (option.path)}
+					<option value={option.path}>{option.label}</option>
+				{/each}
+			</select>
+		</Field>
+		{@render adder('', 'New section')}
+	</div>
+
+	{#if top}
+		<div class="choice">
+			<Field id="{id}-sub" label="Subsection" optional>
+				<select
+					id="{id}-sub"
+					class="control"
+					value={ed.form.section}
+					onchange={(event) => (ed.form.section = (event.currentTarget as HTMLSelectElement).value)}
+				>
+					<option value={top}>None, straight in {topLabel}</option>
+					{#each subs as option (option.path)}
+						<option value={option.path}
+							>{option.depth > 1 ? '— '.repeat(option.depth - 1) : ''}{option.label}</option
+						>
+					{/each}
+				</select>
+			</Field>
+			{@render adder(top, `New subsection in ${topLabel}`)}
 		</div>
 	{/if}
 
@@ -115,9 +125,32 @@
 </div>
 
 <style>
-	.picker {
+	.picker,
+	.choice {
 		display: grid;
-		gap: var(--space-3);
+		gap: var(--space-2);
+	}
+
+	.picker {
+		gap: var(--space-4);
+	}
+
+	.more {
+		display: inline-flex;
+		align-items: center;
+		justify-self: start;
+		gap: var(--space-1);
+		min-block-size: var(--target);
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--colour-primary);
+		font-size: var(--text-s);
+		font-weight: 700;
+	}
+
+	.more:hover {
+		text-decoration: underline;
 	}
 
 	.new {
@@ -149,5 +182,16 @@
 		border: 1px solid var(--colour-line);
 		border-radius: var(--radius-s);
 		background: var(--colour-bg);
+	}
+
+	@media (min-width: 40rem) {
+		.picker:has(> .choice + .choice) {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			align-items: start;
+		}
+
+		.created {
+			grid-column: 1 / -1;
+		}
 	}
 </style>
