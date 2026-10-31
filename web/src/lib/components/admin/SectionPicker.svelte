@@ -2,6 +2,7 @@
 	import '$lib/styles/admin.css';
 	import { fieldId, type EditorState } from '$lib/admin/editor-state.svelte';
 	import Icon from '../Icon.svelte';
+	import InfoTip from '../InfoTip.svelte';
 	import Field from './Field.svelte';
 	import TextField from './TextField.svelte';
 
@@ -38,7 +39,7 @@
 	}
 </script>
 
-{#snippet adder(parent: string, label: string)}
+{#snippet adder(parent: string, label: string, info: string)}
 	{#if addingTo === parent}
 		<div class="new" role="group" aria-label={label}>
 			<TextField id="new-section" label="Name" bind:value={title} error={problem} />
@@ -54,9 +55,12 @@
 			</div>
 		</div>
 	{:else}
-		<button type="button" class="more" onclick={() => ((addingTo = parent), (problem = ''))}>
-			<Icon name="plus" size={16} />{label}
-		</button>
+		<div class="row">
+			<button type="button" class="more" onclick={() => ((addingTo = parent), (problem = ''))}>
+				<Icon name="plus" size={16} />{label}
+			</button>
+			<InfoTip topic={label.toLowerCase()} text={info} />
+		</div>
 	{/if}
 {/snippet}
 
@@ -81,7 +85,11 @@
 				{/each}
 			</select>
 		</Field>
-		{@render adder('', 'New section')}
+		{@render adder(
+			'',
+			'New section',
+			'A new main section, alongside First Courses or Desserts. Once it is added you can choose it, then add subsections inside it if you need them.'
+		)}
 	</div>
 
 	{#if top}
@@ -101,7 +109,11 @@
 					{/each}
 				</select>
 			</Field>
-			{@render adder(top, `New subsection in ${topLabel}`)}
+			{@render adder(
+				top,
+				`New subsection in ${topLabel}`,
+				`A smaller group inside ${topLabel}, such as Cakes inside Desserts. The recipe goes into it.`
+			)}
 		</div>
 	{/if}
 
@@ -133,6 +145,13 @@
 
 	.picker {
 		gap: var(--space-4);
+	}
+
+	.row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1);
 	}
 
 	.more {
