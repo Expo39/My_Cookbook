@@ -79,7 +79,7 @@
 	{#if recipe.origin}<p class="origin">From {recipe.origin}</p>{/if}
 
 	<div class="actions">
-		{#if hydrated}<a class="cook" href={cookHref} data-sveltekit-keepfocus
+		{#if hydrated}<a class="cook" href={cookHref} data-sveltekit-keepfocus data-sveltekit-noscroll
 				><Icon name="play" size={18} />Start cooking</a
 			>{/if}
 		<button

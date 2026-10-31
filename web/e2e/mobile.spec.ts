@@ -39,11 +39,40 @@ test('the bottom bar sits at the foot of the screen and clears the content', asy
 	expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
 
 	await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
-	const lastBottom = await page
-		.locator('article')
-		.first()
-		.evaluate((element) => element.getBoundingClientRect().bottom);
-	expect(lastBottom).toBeGreaterThan(0);
+	// The whole page, down to the footer's last line, ends above the bar.
+	const lastBottom = await page.evaluate(() =>
+		Math.max(
+			...[...document.querySelectorAll('footer *')]
+				.filter((element) => element.childElementCount === 0 && element.textContent?.trim())
+				.map((element) => element.getBoundingClientRect().bottom)
+		)
+	);
+	const barTop = (await bar.boundingBox())?.y ?? 0;
+	expect(lastBottom).toBeLessThanOrEqual(barTop);
+});
+
+test('in cook mode the full list opens as a sheet, and Esc closes the sheet before cook mode', async ({
+	page
+}) => {
+	await page.goto(`${wellington}?cook=3`);
+	const dialog = page.getByRole('dialog', { name: /Wellington/ });
+	const sheet = dialog.getByLabel('All ingredients');
+	await expect(dialog.getByRole('list', { name: 'In this step' })).toContainText('red wine');
+	await expect(sheet).toBeHidden();
+
+	await dialog.getByRole('button', { name: 'Ingredients' }).click();
+	await expect(sheet).toBeVisible();
+	await expect(sheet.locator('li.current')).toHaveCount(4);
+	await expect(sheet.getByRole('button', { name: 'Close the list' })).toBeFocused();
+	const wine = sheet.getByRole('checkbox', { name: /red wine/ });
+	await wine.check();
+	await expect(wine).toBeChecked();
+
+	await page.keyboard.press('Escape');
+	await expect(sheet).toBeHidden();
+	await expect(dialog).toBeVisible();
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
 });
 
 test('every touch target on the phone view is at least 44 px', async ({ page }) => {

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { waitForCore, watchErrors } from './helpers';
+import { ingredients, waitForCore, watchErrors } from './helpers';
 
 const brulee = 'desserts/french-classics/creme-brulee';
 const wellington = 'main-courses/beef-steak/beef-wellington';
@@ -90,6 +90,72 @@ test.describe('cook mode', () => {
 		await expect(side).toContainText('double cream');
 		await page.setViewportSize({ width: 800, height: 900 });
 		await expect(side).toBeHidden();
+	});
+
+	test("lists each step's ingredients from its words, and ticks there are the recipe's ticks", async ({
+		page
+	}) => {
+		await page.goto(`${wellington}?cook=3`);
+		const dialog = page.getByRole('dialog', { name: /Wellington/ });
+		const used = dialog.getByRole('list', { name: 'In this step' });
+		for (const item of ['Beef trimmings', 'shallots', 'red wine', 'beef stock']) {
+			await expect(used).toContainText(item);
+		}
+		await expect(used).not.toContainText('puff pastry');
+
+		const shallots = used.getByRole('checkbox', { name: /shallots/ });
+		await shallots.click();
+		await shallots.click();
+		await expect(shallots).not.toBeChecked();
+		await shallots.click();
+		await expect(shallots).toBeChecked();
+		await expect(dialog.getByText('1 of 12')).toBeVisible();
+
+		await page.keyboard.press('ArrowRight');
+		await expect(dialog.getByText('Nothing new to add here.')).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(dialog).toBeHidden();
+		await expect(ingredients(page).getByRole('checkbox', { name: /shallots/ })).toBeChecked();
+	});
+
+	test('shows the first sentence of the next step', async ({ page }) => {
+		await page.goto(`${wellington}?cook=5`);
+		const next = page.getByRole('dialog', { name: /Wellington/ }).locator('.up-next');
+		await expect(next).toContainText('Up next');
+		await expect(next).toContainText('Spread the duxelles over the cling film');
+	});
+
+	test('the last step leads to a finished screen with the tips, and back to the start', async ({
+		page
+	}) => {
+		await page.goto(`${brulee}?cook=9`);
+		const dialog = cookDialog(page);
+		await dialog.getByRole('button', { name: 'Finish' }).click();
+		await expect(dialog.getByRole('heading', { name: 'Ready to serve' })).toBeFocused();
+		await expect(dialog.getByText('From the chef')).toBeVisible();
+		await dialog.getByRole('button', { name: 'Cook it again' }).click();
+		await expect(dialog.getByText('Step 1 of 9')).toBeVisible();
+
+		await page.keyboard.press('ArrowLeft');
+		await page.goto(`${brulee}?cook=9`);
+		await page.keyboard.press('ArrowRight');
+		await dialog.getByRole('button', { name: 'Back to the recipe' }).click();
+		await expect(dialog).toBeHidden();
+		await expect(page).not.toHaveURL(/cook/);
+	});
+
+	test('the page underneath stays where it was, so leaving does not jump', async ({ page }) => {
+		await page.goto(wellington);
+		await waitForCore(page);
+		await page.evaluate(() => scrollTo(0, 200));
+		await page.getByRole('link', { name: 'Start cooking' }).first().click();
+		const dialog = page.getByRole('dialog', { name: /Wellington/ });
+		await expect(dialog).toBeVisible();
+		expect(await page.evaluate(() => scrollY)).toBe(200);
+		await dialog.getByRole('button', { name: 'Exit cook mode' }).click();
+		await expect(dialog).toBeHidden();
+		await expect(page).not.toHaveURL(/cook/);
+		expect(await page.evaluate(() => scrollY)).toBe(200);
 	});
 
 	test('says so when the screen cannot be kept on', async ({ page }) => {
@@ -429,6 +495,10 @@ test.describe('favourites, recent and notes', () => {
 test.describe('the planner', () => {
 	test('works back from the serving time when the steps carry timings', async ({ page }) => {
 		await page.goto(wellington);
+		const info = page.getByRole('button', { name: 'What is planning backwards?' });
+		await info.click();
+		await expect(info).toHaveAttribute('aria-expanded', 'true');
+		await expect(page.locator('details').filter({ has: info })).not.toHaveAttribute('open', '');
 		await page.getByText('Plan backwards from...').click();
 		await page.getByLabel('Serve at').fill('19:30');
 		await expect(page.getByText(/^Start by/)).toBeVisible();
