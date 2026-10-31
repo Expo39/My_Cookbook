@@ -12,7 +12,7 @@ The crate does no IO, so it compiles for both native targets and `wasm32-unknown
 | `scale` | `scale`, `apply_variants` and `factor_for`: scaling by servings, multiplier, pan size or one ingredient, with per-ingredient modes and warnings |
 | `units` | units, conversion (`convert`, `toggle_unit`), the density table, °F and gas mark |
 | `format` | display rounding and formatting: `display_amount`, `format_minutes`, `servings_label` |
-| `parse` | `parse_ingredient_line`, used by the editor's paste feature |
+| `parse` | `parse_ingredient_line`, which reads the editor's written ingredient list and the shopping list's own items |
 | `tokens` | the step tokens (`{@key}`, `{temp:...}`, `{timer:...}`): parsing and rendering |
 | `search` | the search index, accent-insensitive search, and ingredient coverage ("what can I make") |
 | `site` | the shapes the site reads (`SiteIndex`, `RecipeData`, `Manifest`) and `build_site` |

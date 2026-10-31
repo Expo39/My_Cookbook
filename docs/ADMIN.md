@@ -29,11 +29,12 @@ The other ways to add a recipe are the `add-recipe` skill for Claude Code and ed
 The editor is simpler in this mode, so that someone who has never seen a recipe file can fill it in:
 
 - A short introduction says that a title, the ingredients and the method are all a recipe needs.
-- **Paste a list** leads the ingredients: one ingredient per line, read with the same parser the site uses. Each row shows the amount, unit, ingredient and note, with **Optional ingredient** and **To taste, no amount** as tick boxes; "Up to", "Before the amount", the scaling mode and the key are under **More options**, and a group's total is under **Group total (optional)**.
-- The method is written in plain words. "Bake for 25 minutes at 200C" is saved as `Bake for {timer:25} at {temp:200}`, so the cook gets a timer and a converted temperature, and the editor lists what it found under each step. Hours and minutes, ranges ("20-25 minutes"), seconds, Fahrenheit and fan temperatures ("180°C (160°C fan)") are recognised. When the recipe is opened again the tokens are shown as the same words. **Insert** still adds ingredient references and named timers.
+- The first time, a note at the top says the recipe is kept only in this browser, with **Got it**.
+- The ingredients are written as on paper, one per line, in the same way as for the cookbook's own recipes (see [Form sections](#form-sections)). The key is not offered here.
+- The method is written in plain words. "Bake for 25 minutes at 200C" is saved as `Bake for {timer:25} at {temp:200}`, so the cook gets a timer and a converted temperature, and the editor lists what it found under each step. Hours and minutes, ranges ("20-25 minutes"), seconds, Fahrenheit and fan temperatures ("180°C (160°C fan)") are recognised. When the recipe is opened again the tokens are shown as the same words. The insert tools are not offered, since plain words cover them.
 - The local name, what a serving is called, the difficulty, tags, tips and related recipes are under **More details (optional)**.
-- The web address follows the title and is not shown, new sections cannot be created, and photos and the AI import are not offered; all of these belong to the cookbook.
-- The checklist pane is called **To do**.
+- The web address follows the title and is not shown, and photos and the AI import are not offered; all of these belong to the cookbook. A new section or subsection can still be added; it stays with the recipe on the device, and the recipe shows under "Your recipes".
+- The checks pane is called **To do**.
 
 **Settings > Your recipes** counts the recipes on the device, says plainly that they live only in this browser, and has **Export your recipes** (text, a CSV spreadsheet or JSON) and **Clear all personal recipes**, which asks first and names how many will be deleted. There is no import: the browser is asked to keep the site's storage, but clearing the site's data deletes the recipes, so the cook is told when they first add one (a note in the editor with **Got it**) and reminded about once a week on the home page, with **Export** and a close button that rests it for a week.
 
@@ -122,23 +123,23 @@ With editing unlocked, **New recipe** in Settings opens a blank form that saves 
 
 When an existing recipe is opened, the editor loads it from the repository (or the server) as it is stored now, not from the published site, so an edit always starts from the latest saved version.
 
-The form sits beside a checklist and a live preview. On a phone these become three tabs: **Edit**, **To do** and **Preview**.
+The form sits beside the checks ("Before you save") and a live preview. On a phone these become three tabs: **Edit**, **To do** and **Preview**.
 
 ### Form sections
 
 - **Basics.** Title, local name, summary, servings and what one serving is called, prep, cook and rest times in minutes, difficulty and tags.
-- **Where it lives.** The section, chosen from the tree, and the web address. A new subsection can be added inside the chosen section or at the top level; new sections are created in the same commit as the recipe. For a new recipe the web address follows the title until it is edited by hand. Changing the section or address of an existing recipe moves it (see [Moving a recipe](#moving-a-recipe)).
+- **Where it lives.** A **Section**, then an optional **Subsection** inside it. **New section** and **New subsection** under each add one, each with an "i" explaining it; new sections are created in the same commit as the recipe. The web address follows the title and is folded away behind **Change**, which opens it by itself when it has a problem or the recipe is being moved. Changing the section or address of an existing recipe moves it (see [Moving a recipe](#moving-a-recipe)).
 - **Photo.** A JPEG, PNG or WebP image. It is scaled to at most 1600 px wide and re-encoded as a JPEG in the browser, which also drops location data. A description (alt text) is required. A photo narrower than 1200 px gets a warning.
-- **Ingredients.** Groups of rows, each with an amount, unit, ingredient, note and a scaling mode ("When the servings change"), so salt can stay to taste and eggs stay whole. Rows can be reordered by dragging or with the arrow buttons. **Paste ingredients** reads one ingredient per line with the same parser the site uses and adds the rows for review.
-- **Method.** One field per step, with an optional stage heading and hands-on and waiting minutes. **Insert into the step** adds an ingredient amount, a temperature or a timer as a token (`{@flour}`, `{temp:180}`, `{timer:25}`); [RECIPE_FORMAT.md](RECIPE_FORMAT.md) lists the tokens.
+- **Ingredients.** **Write the list** is the main way: one ingredient per line, as on paper ("400 g plain flour", "2-3 cloves garlic, crushed", "salt to taste", "1 tbsp honey (optional)"), read as it is typed with the same parser the site uses. Bullets, list numbers and extra spaces are tidied away, and a line ending in a colon ("For the filling:") starts a new part with its own heading. **How it will read** shows each line as the recipe will, and marks a line whose amount was not recognised; **Ways to write a line** stays in view as a reminder. A line that still reads the same keeps everything the list cannot show (its key, scaling, other units). **Line by line** is for fine-tuning: each row has the amount (a range such as "2-3" is typed in the same box), unit, ingredient and note, with **More options** for "Can it be left out?", what happens to the amount when the servings change, and, for the cookbook's own recipes, the key. A part has a name, a fold button and an optional total; two parts with the same name are pointed out, with **Move these into part N**.
+- **Method.** One field per step. **Add a heading above this step** opens an optional heading for a method in stages ("Day 1: the night before"). **Hands-on time** and **Waiting time** take minutes, each with an "i". For the cookbook's own recipes, **Add a timer, temperature or amount** puts an ingredient amount, a temperature or a timer into the step as a token (`{@flour}`, `{temp:180}`, `{timer:25}`); [RECIPE_FORMAT.md](RECIPE_FORMAT.md) lists the tokens.
 - **Tips.** The recipe's tips, one per row.
 - **Related recipes.** Other recipes that pair with this one, chosen by searching.
 - **Variants.** Shown and kept exactly as they are, but not editable in the form. Change them in the recipe's JSON file.
 - **Delete.** Only on an existing recipe (see [Deleting a recipe](#deleting-a-recipe)).
 
-### The checklist
+### Before you save
 
-The checklist panel runs the same checks as `cookbook-cli check`, live in WebAssembly, after every change. Errors switch **Save recipe** off; warnings are shown but allowed. Each result names the check and links to the field it is about.
+The **Before you save** panel runs the same checks as `cookbook-cli check`, live in WebAssembly, after every change, and lists what is left in plain words ("Give the recipe a name.", "Add the ingredients."), numbered, with no check codes. Each point takes the cook to its field. Errors keep the recipe from saving; suggestions are folded under **Suggestions, if you like**. The save bar reads "3 things left to fill in" or "Ready to save".
 
 ### The preview
 
