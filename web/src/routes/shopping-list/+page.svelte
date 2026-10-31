@@ -47,7 +47,7 @@
 	const chosen = (line: ShoppingLine) => {
 		const original = quantityText(line);
 		const own = ownOnly(line) ? undefined : shopping.amountOf(line.key);
-		const needed = line.max;
+		const needed = { qty: line.max, unit: line.unit ?? null };
 		return own
 			? { ...line, min: own.qty, max: own.qty, unit: own.unit, original, needed, edited: true }
 			: { ...line, original, needed, edited: false };
@@ -102,6 +102,14 @@
 	 * which can be changed there; a pasted list adds a line for each.
 	 */
 	let own = $state('');
+	const WAYS = [
+		['potatoes', 'just the name'],
+		['2 kg potatoes', 'with an amount'],
+		['6 eggs', 'a number of things'],
+		['500 g mince, beef', 'a note after a comma'],
+		['milk, oat', 'a note, no amount'],
+		['kitchen roll', 'anything, not only food']
+	];
 	let adding = $state(false);
 	let itemField: HTMLTextAreaElement | undefined = $state();
 
@@ -178,23 +186,34 @@
 	{#if ready}
 		{#if adding}
 			<form class="own" onsubmit={addOwn} use:outside={() => (adding = false)}>
-				<label class="label" for="{id}-add">What do you need?</label>
-				<div class="own-row">
-					<textarea
-						bind:this={itemField}
-						id="{id}-add"
-						rows="1"
-						autocomplete="off"
-						placeholder="2 kg potatoes"
-						aria-describedby="{id}-add-help"
-						bind:value={own}
-						onkeydown={enter}
-					></textarea>
-					<button type="submit" disabled={!own.trim()}><Icon name="plus" />Add</button>
+				<div class="own-entry">
+					<label class="label" for="{id}-add">What do you need?</label>
+					<div class="own-row">
+						<textarea
+							bind:this={itemField}
+							id="{id}-add"
+							rows="1"
+							autocomplete="off"
+							placeholder="2 kg potatoes"
+							aria-describedby="{id}-add-help"
+							bind:value={own}
+							onkeydown={enter}
+						></textarea>
+						<button type="submit" disabled={!own.trim()}><Icon name="plus" />Add</button>
+					</div>
+					<p class="help" id="{id}-add-help">
+						Press Enter to add it. You can change the amount and unit on the list.
+					</p>
 				</div>
-				<p class="help" id="{id}-add-help">
-					Press Enter to add it. You can change the amount on the list.
-				</p>
+				<div class="ways">
+					<p class="label">Ways to add something</p>
+					<dl>
+						{#each WAYS as [typed, meaning] (typed)}
+							<dt>{typed}</dt>
+							<dd>{meaning}</dd>
+						{/each}
+					</dl>
+				</div>
 			</form>
 		{:else}
 			<button type="button" class="start" onclick={startAdding}>
@@ -281,12 +300,12 @@
 									value={line.max}
 									unit={line.unit ?? null}
 									disabled={shopping.isTicked(line.key)}
-									onset={(qty) =>
+									onset={(qty, unit) =>
 										ownOnly(line)
-											? shopping.setOwnAmount(line.key, qty)
-											: qty === line.needed
+											? shopping.setOwnAmount(line.key, qty, unit)
+											: qty === line.needed.qty && unit === line.needed.unit
 												? shopping.resetAmount(line.key)
-												: shopping.setAmount(line.key, { qty, unit: line.unit ?? null })}
+												: shopping.setAmount(line.key, { qty, unit })}
 									onreset={() => shopping.resetAmount(line.key)}
 								/>
 							{/snippet}
@@ -349,10 +368,53 @@
 		color: var(--colour-muted);
 	}
 
+	/* The box, with the ways to fill it beside it on a wide screen and beneath it on a phone. */
 	.own {
 		display: grid;
+		gap: var(--space-4);
+		max-inline-size: 56rem;
+	}
+
+	.own-entry {
+		display: grid;
 		gap: var(--space-2);
-		max-inline-size: 36rem;
+		align-content: start;
+	}
+
+	.ways {
+		display: grid;
+		gap: var(--space-2);
+		align-content: start;
+		padding: var(--space-3) var(--space-4);
+		border-radius: var(--radius-m);
+		background: var(--colour-tint);
+	}
+
+	.ways .label {
+		color: var(--colour-primary);
+	}
+
+	.ways dl {
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: var(--space-1) var(--space-3);
+		font-size: var(--text-s);
+	}
+
+	.ways dt {
+		font-family: var(--font-num);
+		font-weight: 600;
+	}
+
+	.ways dd {
+		margin: 0;
+		color: var(--colour-muted);
+	}
+
+	@media (min-width: 48rem) {
+		.own {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 18rem);
+		}
 	}
 
 	.own-row {
