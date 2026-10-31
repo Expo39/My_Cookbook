@@ -12,7 +12,8 @@ GEMINI_MODEL = "gemini-3.8-flash"
 RATE_LIMIT_CHAT = "30"
 RATE_LIMIT_IMPORT = "5"
 GEMINI_THINKING_LEVEL = "low"
-# GEMINI_FALLBACK_MODEL = "a lighter Flash model, tried when the main one stays busy"
+# A lighter model, tried when the main one stays busy.
+GEMINI_FALLBACK_MODEL = "gemini-3.5-flash-lite"
 
 # No id is given: `wrangler deploy` creates and links the namespace on the first deploy.
 [[kv_namespaces]]
