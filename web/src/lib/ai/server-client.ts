@@ -22,7 +22,7 @@ export class ServerClient implements AiClient {
 
 	/** The server is the site's own origin, so it is reachable whenever this page is. */
 	status(): Promise<AiStatus> {
-		return Promise.resolve('ok');
+		return Promise.resolve({ busy: false });
 	}
 
 	chat(request: ChatRequest, options?: ChatOptions): Promise<ChatReply> {

@@ -29,6 +29,9 @@ const KV_TTL_SECONDS: u64 = 2 * limits::WINDOW_SECONDS;
 /// Set when every model stayed busy, so the site can warn a cook before they ask.
 const BUSY_KEY: &str = "gemini:busy";
 const BUSY_SECONDS: u64 = 120;
+/// Holds the name of a model Gemini no longer knows, so the owner hears of it from the site.
+const RETIRED_KEY: &str = "gemini:retired";
+const RETIRED_SECONDS: u64 = 24 * 60 * 60;
 
 fn text_var(env: &Env, name: &str) -> Option<String> {
     env.var(name).ok().map(|v| v.to_string())
@@ -312,15 +315,20 @@ fn answer(
                             }
                             Err(_) => (error_event(&AiError::Unavailable), None),
                         },
-                        Err(error) if try_next(&error) && at + 1 < models.len() => (
-                            sse_event("status", &json!({ "state": "fallback" })),
-                            Some(Phase::Asking(at + 1, request)),
-                        ),
                         Err(error) => {
-                            if error.is_retryable() {
-                                mark_busy(&env).await;
+                            let next = after_failure(&env, &models[at], &error).await
+                                && at + 1 < models.len();
+                            if next {
+                                (
+                                    sse_event("status", &json!({ "state": "fallback" })),
+                                    Some(Phase::Asking(at + 1, request)),
+                                )
+                            } else {
+                                if error.is_retryable() {
+                                    mark_busy(&env).await;
+                                }
+                                (error_event(&error), None)
                             }
-                            (error_event(&error), None)
                         }
                     }
                 }
@@ -353,12 +361,33 @@ const REPLY_WITHIN: Duration = Duration::from_secs(25);
 /// A cheap check the site makes when the sous-chef opens: no Gemini call, only whether the last
 /// questions found every model busy. Reaching it at all also tells the site the Worker is up.
 async fn status(env: &Env) -> std::result::Result<Response, ApiError> {
-    let busy = match env.kv(KV_BINDING) {
-        Ok(kv) => kv.get(BUSY_KEY).text().await.ok().flatten().is_some(),
-        Err(_) => false,
+    let (busy, retired) = match env.kv(KV_BINDING) {
+        Ok(kv) => (
+            kv.get(BUSY_KEY).text().await.ok().flatten().is_some(),
+            kv.get(RETIRED_KEY).text().await.ok().flatten(),
+        ),
+        Err(_) => (false, None),
     };
-    let body = json!({ "gemini": if busy { "busy" } else { "ok" } }).to_string();
+    let body =
+        json!({ "gemini": if busy { "busy" } else { "ok" }, "retired": retired }).to_string();
     json_response(200, &body).map_err(|_| unavailable())
+}
+
+/// Remembers for a day that Gemini no longer offers `model`. Best effort, like `mark_busy`.
+async fn mark_retired(env: &Env, model: &str) {
+    if let Ok(kv) = env.kv(KV_BINDING)
+        && let Ok(put) = kv.put(RETIRED_KEY, model)
+    {
+        let _ = put.expiration_ttl(RETIRED_SECONDS).execute().await;
+    }
+}
+
+/// What to do after `model` failed: note a retired model, then say whether the next is worth trying.
+async fn after_failure(env: &Env, model: &str, error: &AiError) -> bool {
+    if *error == AiError::UnknownModel {
+        mark_retired(env, model).await;
+    }
+    try_next(error)
 }
 
 /// Remembers for a short while that Gemini is overloaded. Best effort: a failed write only means
@@ -450,8 +479,12 @@ async fn gemini(
     for model in config.models() {
         match ask_model(&key, model, &mut request, false).await {
             Ok(response) => return Ok(response),
-            Err(error) if try_next(&error) => last = error,
-            Err(error) => return Err(from_ai(&error)),
+            Err(error) => {
+                if !after_failure(env, model, &error).await {
+                    return Err(from_ai(&error));
+                }
+                last = error;
+            }
         }
     }
     if last.is_retryable() {

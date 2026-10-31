@@ -12,8 +12,10 @@ GEMINI_MODEL = "gemini-3.8-flash"
 RATE_LIMIT_CHAT = "30"
 RATE_LIMIT_IMPORT = "5"
 GEMINI_THINKING_LEVEL = "low"
-# A lighter model, tried when the main one stays busy.
-GEMINI_FALLBACK_MODEL = "gemini-3.5-flash-lite"
+# The main model is pinned, so its behaviour only changes on purpose. When Google retires it,
+# the sous-chef carries on with the fallback and tells the owner. The fallback is Google's alias
+# for its newest Flash-Lite, so it never goes out of date.
+GEMINI_FALLBACK_MODEL = "gemini-flash-lite-latest"
 
 # No id is given: `wrangler deploy` creates and links the namespace on the first deploy.
 [[kv_namespaces]]
