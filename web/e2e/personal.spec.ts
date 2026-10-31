@@ -95,7 +95,7 @@ test('the ingredient list reads back as it is written, and line by line keeps ev
 	await expect(page.getByText('Ways to write a line')).toBeVisible();
 	await page
 		.getByLabel('One ingredient per line')
-		.fill('1. 400g  plain flour\n• 2 eggs\nFor the filling:\n500 g ricotta\n250');
+		.fill('1. 400g  plain flour\n\u2022 2 eggs\nFor the filling:\n500 g ricotta\n250');
 	const reads = page.getByRole('heading', { name: 'How it will read' }).locator('..');
 	await expect(reads.getByRole('listitem')).toHaveCount(4);
 	await expect(reads.getByText('For the filling')).toBeVisible();
@@ -154,7 +154,7 @@ test('your recipes export as text, a spreadsheet or JSON', async ({ page }) => {
 	await expect(drawer.getByText(/Saved only in this browser on this device/)).toBeVisible();
 	for (const [label, extension, opening] of [
 		['Text', 'txt', 'Ross il-forn\n4 servings'],
-		['Spreadsheet (CSV)', 'csv', '﻿Title,Section,Servings'],
+		['Spreadsheet (CSV)', 'csv', '\uFEFFTitle,Section,Servings'],
 		['JSON', 'json', '{\n  "kind": "sapori-recipes"']
 	] as const) {
 		await drawer.getByRole('button', { name: 'Export your recipes' }).click();

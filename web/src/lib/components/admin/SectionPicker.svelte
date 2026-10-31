@@ -104,7 +104,7 @@
 					<option value={top}>None, straight in {topLabel}</option>
 					{#each subs as option (option.path)}
 						<option value={option.path}
-							>{option.depth > 1 ? '— '.repeat(option.depth - 1) : ''}{option.label}</option
+							>{option.depth > 1 ? '\u2014 '.repeat(option.depth - 1) : ''}{option.label}</option
 						>
 					{/each}
 				</select>

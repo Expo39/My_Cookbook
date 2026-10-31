@@ -5,7 +5,7 @@
 	import ExportDialog from './ExportDialog.svelte';
 	import Icon from './Icon.svelte';
 
-	/** About once a week, a nudge to export the recipes kept only in this browser; × rests it a week. */
+	/** About once a week, a nudge to export the recipes kept only in this browser; the close cross rests it a week. */
 	const own = $derived(personal.list.filter((entry) => !entry.shared));
 	let ready = $state(false);
 	let dialog: ExportDialog | undefined = $state();

@@ -191,13 +191,13 @@ describe('the ingredient list on a sheet', () => {
 		expect(parts.length).toBeGreaterThan(1);
 		expect(parts.map((op) => op.text).join(' ')).toBe(long);
 		expect(new Set(parts.map((op) => op.x)).size).toBe(1);
-		expect(ops.some((op) => op.text.includes('…'))).toBe(false);
+		expect(ops.some((op) => op.text.includes('\u2026'))).toBe(false);
 	});
 
 	it('moves an amount too wide for its column into the words, whole', () => {
 		const ops = linesOf([{ amount: '200-300 g of very finely grated', rest: 'cheese' }]);
 		expect(ops.some((op) => op.text.startsWith('200-300 g of very'))).toBe(true);
-		expect(ops.some((op) => op.text.includes('…'))).toBe(false);
+		expect(ops.some((op) => op.text.includes('\u2026'))).toBe(false);
 	});
 
 	it('runs a long list in two columns before leaving anything out', () => {
