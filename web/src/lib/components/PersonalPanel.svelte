@@ -92,8 +92,9 @@
 <section class="personal" aria-labelledby="{uid}-title">
 	<h3 id="{uid}-title" class="label">Your recipes</h3>
 	<p class="help">
-		Recipes you add stay in this browser, on this device. Nobody else sees them until you share them
-		with everyone.
+		Recipes you add are saved only in this browser. Clearing your browsing history or data deletes
+		them, so save a backup now and then: it is a file you keep, and Restore a backup brings them
+		back.
 	</p>
 
 	{#if personal.loaded}

@@ -33,6 +33,8 @@
 	let busy = $state(false);
 	let status = $state('');
 	let withText = $state(false);
+	/** Phones hand the picture to other apps; most computers cannot, so there it is copied instead. */
+	let canSend = $state(false);
 
 	const title = $derived(model.data.recipe.title);
 	const serves = $derived(servingsText(model.view.servings, model.data.recipe.servingsNoun));
@@ -78,6 +80,8 @@
 			const blob = await toBlob(await renderCard({ format: FORMAT, content, photo }));
 			reset();
 			made = { blob, url: URL.createObjectURL(blob), name: `${card.id.split('/').at(-1)}.png` };
+			const probe = new File([blob], made.name, { type: 'image/png' });
+			canSend = typeof navigator.canShare === 'function' && navigator.canShare({ files: [probe] });
 		} catch {
 			status = 'The card could not be made. Close this and try again.';
 		} finally {
@@ -87,12 +91,20 @@
 
 	async function sendCard() {
 		if (!made) return;
-		const file = new File([made.blob], made.name, { type: 'image/png' });
 		const text = withText ? asText() : local ? undefined : link();
-		const outcome = await shareFile(file, title, text);
-		if (outcome === 'shared') dialog.close();
-		if (outcome === 'unsupported' || outcome === 'failed') {
-			status = 'This browser cannot send the image straight away. Save it, then send it.';
+		if (canSend) {
+			const file = new File([made.blob], made.name, { type: 'image/png' });
+			const outcome = await shareFile(file, title, text);
+			if (outcome === 'shared') dialog.close();
+			if (outcome === 'failed') status = 'The card could not be sent. Save it instead.';
+			return;
+		}
+		try {
+			await navigator.clipboard.write([new ClipboardItem({ 'image/png': made.blob })]);
+			if (text) status = 'Card copied. Paste it into a chat, then use Copy as text for the words.';
+			else chrome.notify('Card copied. Paste it into any chat.');
+		} catch {
+			status = 'This browser cannot copy pictures. Save the image, then attach it.';
 		}
 	}
 
@@ -149,7 +161,7 @@
 
 		<div class="actions">
 			<button type="button" class="primary" disabled={!made} onclick={sendCard}>
-				<Icon name="send" />Send the card
+				<Icon name={canSend ? 'send' : 'copy'} />{canSend ? 'Send the card' : 'Copy the card'}
 			</button>
 			<button type="button" disabled={!made} onclick={() => made && download(made.blob, made.name)}>
 				<Icon name="download" />Save image
