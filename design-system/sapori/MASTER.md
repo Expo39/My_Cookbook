@@ -47,6 +47,17 @@ All fonts are self-hosted as woff2 under `web/static/fonts/`, subset to Latin + 
 - Depth comes from lines and tints, not shadows. Only floating layers (the drawer, the cook-mode timer strip, toasts) get `--shadow-float`.
 - Page gutter: at least 16px at every width. Content max-width is 72rem, and the reading column is 68ch.
 
+## Loading and reloading
+The prerendered page is the finished page, so a reload draws nothing twice:
+- Anything visible is drawn by the server, not added once the page's code runs: the phone tabs, the bottom bar, Start cooking, the hints.
+- A control waiting for the code or the recipe core is disabled but keeps its normal look. Greyed styles are only for a control that is unavailable for a reason the cook can see (a Reset with nothing ticked, the stepper at its limit), so target the control's own `[disabled]`, not `:disabled`, which also matches everything inside a disabled fieldset.
+- The current section and tool are worked out from the route, which the server knows; prerendered links are relative, so comparing them with the address only works in the browser.
+- State kept in the browser that changes what is drawn (the theme, closed hints) is applied by the small script in `app.html` before the first paint.
+- The four Latin font files are preloaded, so text is never drawn in the fallback face first.
+- A panel that is open on wide screens and folded on a phone is folded by CSS until the code takes over.
+- The address can ask for a view the prerendered file cannot know, since one file serves every query. The script in `app.html` reads it and the page adapts before its code runs: `?cook` draws a cover in cook mode's colours (header, title and progress rail) that the real cook mode replaces, so a reload never shows the recipe first; a scaling address (`serves`, `x`, `pan`, `have`, `u`, `v`) keeps the amounts, servings and everything below the servings bar hidden until the scaled values are ready, holding the "Scaled" row's place, so the written amounts never show and then change; a search query hides the help and says "Loading search..."; and the editor's and a device recipe's loading notes keep the footer down at 70% of the screen.
+- What a browser adds after loading holds its place from the first paint. Its recipes on the home and section pages, its favourites and recently viewed recipes, and a running timer's strip are read from storage after the page draws, so the script in `app.html` reads a small summary (`sapori:mine`, the favourites, recent and timer lists) and shows that many empty card shapes (`CardGhosts.svelte`, 10rem tall like a card) or an invisible pill in a held strip. The "nothing here yet" notes are drawn at once and hidden by the same script when there will be cards, so someone with nothing saved sees the final page straight away.
+
 ## Motion
 - Use Svelte transitions and CSS; no GSAP. Durations are 150 ms for micro-interactions, 220 ms for panels, and exits faster than entrances.
 - Meaningful motion only: ticking off an ingredient (the strike-through plus a fade to muted), a step advance in cook mode, the drawer opening, a timer finishing (a pulse on the accent).
