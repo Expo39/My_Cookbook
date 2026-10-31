@@ -204,6 +204,15 @@ img {
 	color: var(--colour-on-primary);
 }
 
+/* While a dialog is open only the dialog scrolls, never the page behind it. */
+:root:has(dialog:modal) {
+	overflow: hidden;
+}
+
+dialog {
+	overscroll-behavior: contain;
+}
+
 .sr-only {
 	position: absolute;
 	inline-size: 1px;

@@ -173,7 +173,7 @@ The home page lists the top-level sections and recently added recipes, with sear
 There are four routes, and all of them end in the same recipe checklist (`cookbook-cli check`), so a recipe cannot go live unless every check passes.
 
 - **On the device.** **Add a recipe** on the home page opens the editor without any token; the recipe is saved in the browser. **Share with everyone** in **Settings > Your recipes** later commits it to the cookbook with the GitHub token.
-- **The in-site editor.** Open **Settings**, then **Sharing to GitHub**, and unlock editing with the password. **New recipe** opens a blank form; every recipe page has an **Edit** button. Saving commits to GitHub and shows the build status. The first set-up and the rest of the editor are described in [docs/ADMIN.md](docs/ADMIN.md).
+- **The in-site editor.** Open **Settings**, then **For the cookbook's owner**, and unlock editing with the password. **New recipe** opens a blank form; every recipe page has an **Edit** button. Saving commits to GitHub and shows the build status. The first set-up and the rest of the editor are described in [docs/ADMIN.md](docs/ADMIN.md).
 - **The `add-recipe` skill.** In Claude Code, paste a recipe, a link or a photo. The skill writes the JSON file under `recipes/`, runs the checklist and proposes a commit.
 - **By hand.** Write the JSON file following [docs/RECIPE_FORMAT.md](docs/RECIPE_FORMAT.md), then run `make check`.
 

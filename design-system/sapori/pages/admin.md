@@ -26,5 +26,5 @@
 
 # Settings drawer: overrides
 
-- Order: Theme, Default units, **Your recipes**, a link explaining the token, password and AI secret, **Sharing to GitHub (optional)**, then "How to use the cookbook".
+- Order, as surface cards on the page ground under a sticky header: **Look and units** (theme, default units), **Your recipes**, **Help** (how to use, questions and answers), then **For the cookbook's owner**, a closed disclosure holding the editing panel and the link explaining the token, password and AI secret. It opens itself when editing is unlocked or a share needs the token. Fields with more to explain carry an "i" that opens a tint note underneath. Only the drawer scrolls while it is open.
 - **Your recipes:** the storage note in muted small text; a bold count with the device icon; one row per recipe (title link, then a small primary "Share with everyone" link-button with the upload icon), which expands in place to a tint confirmation; then a full-width primary **Add a recipe**, Export and Import as an equal two-column grid, and a full-width danger **Clear all personal recipes** whose confirmation dialog names the count.

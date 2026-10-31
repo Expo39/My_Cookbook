@@ -7,7 +7,18 @@
 	import Icon from '../Icon.svelte';
 	import TextField from './TextField.svelte';
 
-	let { onnavigate, lazy = false }: { onnavigate?: () => void; lazy?: boolean } = $props();
+	let {
+		onnavigate,
+		lazy = false,
+		titled = true
+	}: { onnavigate?: () => void; lazy?: boolean; titled?: boolean } = $props();
+
+	const TOKEN_INFO =
+		'A GitHub token is a long password for the cookbook\'s repository. It lets this site save recipes there. Make a fine-grained one for this repository only, with Contents set to read and write.';
+	const PASSWORD_INFO =
+		'You choose this password. It locks the token, so any of your devices can unlock editing with the password alone. The locked copy is public, so make it long.';
+	const SECRET_INFO =
+		'Only needed for "Import from text", which turns a pasted recipe into a form. It is the secret set on the AI worker.';
 
 	const uid = $props.id();
 	let busy = $state(false);
@@ -109,13 +120,22 @@
 	}
 </script>
 
-<section bind:this={section} class="admin" aria-labelledby="{uid}-title">
-	<h3 id="{uid}-title" class="label">Sharing to GitHub (optional)</h3>
+<section
+	bind:this={section}
+	class="admin"
+	aria-labelledby={titled ? `${uid}-title` : undefined}
+	aria-label={titled ? undefined : 'Editing the cookbook'}
+>
+	{#if titled}<h3 id="{uid}-title" class="label">Editing the cookbook</h3>{/if}
 
 	{#if admin.configured === null && !admin.unlocked}
-		<p class="help">Looking for the editing key...</p>
+		<p class="help">Checking whether editing is set up...</p>
 	{:else if admin.unlocked}
-		<p class="state"><Icon name="lock" size={18} />Editing is unlocked.</p>
+		<p class="state"><Icon name="check" size={18} />Editing is unlocked in this tab.</p>
+		<p class="help">
+			You can change any recipe and share your own with everyone. It locks again when you close
+			the tab.
+		</p>
 		<a class="btn primary" href={editHref()} onclick={onnavigate}>
 			<Icon name="plus" size={18} />New recipe
 		</a>
@@ -155,14 +175,16 @@
 					<TextField
 						id="{uid}-token"
 						label="New GitHub token"
+						info={TOKEN_INFO}
 						type="password"
 						bind:value={token}
 						optional
-						hint="A fine-grained token for this repository, with Contents set to read and write."
+						hint="Leave it blank to keep the current one."
 					/>
 					<TextField
 						id="{uid}-secret"
 						label="AI import secret"
+						info={SECRET_INFO}
 						type="password"
 						bind:value={aiSecret}
 						optional
@@ -180,6 +202,9 @@
 			</details>
 		{/if}
 	{:else if admin.configured}
+		<p class="help">
+			Enter the cookbook's password to change its recipes or share your own with everyone.
+		</p>
 		<form onsubmit={unlock}>
 			<TextField
 				id="{uid}-unlock"
@@ -194,24 +219,25 @@
 		</form>
 	{:else}
 		<p class="help">
-			Editing has not been set up yet. This happens once: the token and password stay out of the
-			repository, apart from an encrypted copy that lets any of your devices unlock editing.
+			Editing is not set up yet. You do this once, on any device: paste a GitHub token and choose
+			a password. After the next deploy, every device unlocks with the password alone.
 		</p>
 		<form onsubmit={setUp}>
 			<TextField
 				id="{uid}-token"
 				label="GitHub token"
+				info={TOKEN_INFO}
 				type="password"
 				bind:value={token}
-				hint="A fine-grained token for this repository only, with Contents set to read and write."
 			/>
 			<TextField
 				id="{uid}-pw"
 				label="Password"
+				info={PASSWORD_INFO}
 				type="password"
 				bind:value={password}
 				autocomplete="new-password"
-				hint="At least {MIN_PASSWORD} characters. The encrypted file is public, so a long password is the only thing that protects the token."
+				hint="At least {MIN_PASSWORD} characters."
 			/>
 			<TextField
 				id="{uid}-repeat"
@@ -223,10 +249,11 @@
 			<TextField
 				id="{uid}-ai"
 				label="AI import secret"
+				info={SECRET_INFO}
 				type="password"
 				bind:value={aiSecret}
 				optional
-				hint="Only if the recipe importer is set up on the Worker."
+				hint="Leave it blank if you do not use Import from text."
 			/>
 			<button class="btn primary" disabled={busy}
 				>{busy ? 'Setting up...' : 'Set up editing'}</button
