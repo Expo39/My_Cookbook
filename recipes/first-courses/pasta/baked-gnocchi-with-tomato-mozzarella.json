@@ -50,7 +50,11 @@
           "scale": "discrete"
         },
         {
-          "item": "Pinch of chilli flakes",
+          "amount": {
+            "qty": 1,
+            "unit": "pinch"
+          },
+          "item": "chilli flakes",
           "optional": true
         },
         {
@@ -112,7 +116,7 @@
           "note": "chopped"
         },
         {
-          "item": "Kosher salt and black pepper to taste",
+          "item": "Kosher salt and black pepper",
           "scale": "toTaste"
         }
       ]

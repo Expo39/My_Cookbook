@@ -30,7 +30,9 @@ pub use schema::{
     ScaleMode, Scaling, Section, ServingsNoun, Step, StepTime, Times, Unit, Variant, VariantOption,
     parse_recipe, parse_section,
 };
-pub use search::{Coverage, RecipeSummary, SearchHit, SearchIndex, SummaryIngredient, tokenise};
+pub use search::{
+    Coverage, RecipeSummary, SearchHit, SearchIndex, Suggestion, SummaryIngredient, tokenise,
+};
 pub use site::{
     CardImage, ImageMeta, Manifest, RecipeCard, RecipeData, SectionNode, Site, SiteIndex,
     TimesSummary, build_site, build_site_with_images,
@@ -38,5 +40,5 @@ pub use site::{
 pub use tokens::{RenderedSegment, Segment, parse_tokens, render_segments, render_text, temp_text};
 pub use units::{
     Density, Dimension, TempKind, UnitSystem, convert, density, fahrenheit, gas_mark, normalise,
-    toggle_unit,
+    unit_options,
 };

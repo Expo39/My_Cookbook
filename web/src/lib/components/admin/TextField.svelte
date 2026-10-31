@@ -7,6 +7,7 @@
 		label,
 		value = $bindable(''),
 		hint,
+		info,
 		error,
 		optional = false,
 		type = 'text',
@@ -25,6 +26,7 @@
 		label: string;
 		value?: string;
 		hint?: string;
+		info?: string;
 		error?: string;
 		optional?: boolean;
 		type?: 'text' | 'password' | 'url';
@@ -49,7 +51,7 @@
 	);
 </script>
 
-<Field {id} {label} {optional} hint={shown} {error}>
+<Field {id} {label} {optional} {info} hint={shown} {error}>
 	{#if rows}
 		<textarea
 			{id}

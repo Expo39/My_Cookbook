@@ -10,6 +10,7 @@ import {
 	type FormData,
 	type IngredientRow
 } from './recipe-form';
+import { tokensToWords, wordsToTokens, type Found } from './plain-steps';
 import { slugify, suggestKey } from './slug';
 
 export interface Photo {
@@ -54,6 +55,8 @@ export class EditorState {
 	readonly original: Recipe | undefined;
 	readonly existingIds: string[];
 	readonly existingFolders: string[];
+	/** Steps are written in plain words; times and oven temperatures become tokens when saved. */
+	readonly plainSteps: boolean;
 
 	form = $state<FormData>(emptyForm());
 	photo = $state<Photo | null>(null);
@@ -62,7 +65,13 @@ export class EditorState {
 	readonly touched = new SvelteSet<string>();
 	#baseline = '';
 
-	constructor(options: { index: SiteIndex; id?: string; recipe?: Recipe; section?: string }) {
+	constructor(options: {
+		index: SiteIndex;
+		id?: string;
+		recipe?: Recipe;
+		section?: string;
+		plainSteps?: boolean;
+	}) {
 		this.index = options.index;
 		this.existingIds = $derived(allRecipes(this.index).map((card) => card.id));
 		this.existingFolders = $derived(folders(this.index.sections));
@@ -73,6 +82,10 @@ export class EditorState {
 			options.recipe && options.id
 				? formFromRecipe(options.recipe, options.id)
 				: emptyForm(options.section ?? '');
+		this.plainSteps = options.plainSteps ?? false;
+		if (this.plainSteps) {
+			for (const step of this.form.steps) step.text = tokensToWords(step.text);
+		}
 		this.#baseline = this.#snapshot();
 	}
 
@@ -99,6 +112,9 @@ export class EditorState {
 	}
 
 	restore(form: FormData): void {
+		if (this.plainSteps) {
+			for (const step of form.steps) step.text = tokensToWords(step.text);
+		}
 		this.form = reissue(form);
 	}
 
@@ -156,16 +172,22 @@ export class EditorState {
 		}
 	}
 
+	/** Each step's text as it is saved, with what was turned into a timer or a temperature. */
+	steps = $derived.by<{ text: string; found: Found[] }[]>(() =>
+		this.form.steps.map((step) =>
+			this.plainSteps ? wordsToTokens(step.text) : { text: step.text, found: [] }
+		)
+	);
+
 	built = $derived.by(() => {
 		const src = this.photo
 			? `${this.slug}.jpg`
 			: this.moving && this.form.imageSrc
 				? `${this.slug}${this.form.imageSrc.slice(this.form.imageSrc.lastIndexOf('.'))}`
 				: undefined;
-		const { recipe, issues } = recipeFromForm(
-			$state.snapshot(this.form) as FormData,
-			src ? { src } : undefined
-		);
+		const form = $state.snapshot(this.form) as FormData;
+		form.steps.forEach((step, i) => (step.text = this.steps[i]?.text ?? step.text));
+		const { recipe, issues } = recipeFromForm(form, src ? { src } : undefined);
 		// The WASM core reads an `undefined` field as a unit value, so only what JSON keeps goes to it.
 		return { recipe: JSON.parse(JSON.stringify(recipe)) as Recipe, issues };
 	});

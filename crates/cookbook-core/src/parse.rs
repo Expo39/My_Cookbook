@@ -192,13 +192,25 @@ const PREFIXES: &[&str] = &[
     "juice of",
 ];
 
+const BULLETS: [char; 9] = [
+    '-', '*', '\u{2022}', '\u{2013}', '\u{2014}', '\u{00b7}', '\u{25aa}', '\u{25e6}', '\u{2023}',
+];
+
+/// Drops what a copied list puts before each line: a bullet or dash, or a number such as "3." or
+/// "3)". "1.5 kg" keeps its number, since a list number is followed by a space.
+fn strip_list_marker(s: &str) -> &str {
+    let s = s.trim_start_matches(BULLETS).trim_start();
+    let digits = s.find(|c: char| !c.is_ascii_digit()).unwrap_or(0);
+    match s[digits..].strip_prefix(['.', ')']) {
+        Some(rest) if (1..=2).contains(&digits) && rest.starts_with(' ') => rest.trim_start(),
+        _ => s,
+    }
+}
+
 /// Parses a free-text line such as "130ml (9tbsp) olive oil" into an ingredient.
 pub fn parse_ingredient_line(line: &str) -> Result<Ingredient, IngredientParseError> {
     let collapsed = line.split_whitespace().collect::<Vec<_>>().join(" ");
-    let mut text = collapsed
-        .trim_start_matches(['-', '\u{2022}', '*'])
-        .trim()
-        .to_owned();
+    let mut text = strip_list_marker(&collapsed).trim().to_owned();
     if text.is_empty() {
         return Err(IngredientParseError::Empty);
     }
@@ -310,6 +322,23 @@ pub fn parse_ingredient_line(line: &str) -> Result<Ingredient, IngredientParseEr
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn copied_list_markers_are_dropped() {
+        for line in [
+            "3. 200 g flour",
+            "12) 200 g flour",
+            "\u{2013} 200 g flour",
+            "\u{2022}  200g   flour",
+        ] {
+            let parsed = parse_ingredient_line(line).unwrap();
+            assert_eq!(parsed.item.as_deref(), Some("flour"), "{line}");
+            assert_eq!(parsed.amount.unwrap().unit, Some(Unit::G), "{line}");
+        }
+        let potatoes = parse_ingredient_line("1.5 kg potatoes").unwrap();
+        assert_eq!(potatoes.item.as_deref(), Some("potatoes"));
+        assert_eq!(potatoes.amount.unwrap().unit, Some(Unit::Kg));
+    }
+
     use super::*;
     use serde_json::json;
 

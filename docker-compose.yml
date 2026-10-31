@@ -23,6 +23,7 @@ services:
       - PUBLIC_BACKEND
       - PUBLIC_SITE_URL
       - PUBLIC_AI_ENDPOINT
+      - PUBLIC_TURNSTILE_SITE_KEY
       - FULL_E2E
       - CI
       - GITHUB_SHA

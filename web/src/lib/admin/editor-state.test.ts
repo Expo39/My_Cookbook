@@ -174,3 +174,32 @@ describe('moving an existing recipe', () => {
 		expect(ed.results.map((result) => result.id)).toContain('F-ID-EXISTS');
 	});
 });
+
+describe('steps in plain words', () => {
+	const stored = {
+		title: 'Bread',
+		summary: 'A loaf.',
+		servings: 1,
+		ingredientGroups: [],
+		steps: [{ text: 'Bake {timer:40} at {temp:220}.' }]
+	};
+	const opened = (plainSteps: boolean) =>
+		new EditorState({ index, id: 'soups/bread', recipe: stored, plainSteps });
+
+	it('shows tokens as words, and saves the words as tokens again', () => {
+		const ed = opened(true);
+		expect(ed.form.steps[0].text).toBe('Bake 40 minutes at 220°C.');
+		expect(ed.dirty).toBe(false);
+		ed.form.steps[0].text = 'Bake 35 minutes at 200C.';
+		expect(ed.built.recipe.steps[0].text).toBe('Bake {timer:35} at {temp:200}.');
+		expect(ed.steps[0].found.map((item) => item.kind)).toEqual(['timer', 'temp']);
+	});
+
+	it('leaves the tokens alone in the full editor', () => {
+		const ed = opened(false);
+		expect(ed.form.steps[0].text).toBe(stored.steps[0].text);
+		ed.form.steps[0].text = 'Bake 35 minutes.';
+		expect(ed.built.recipe.steps[0].text).toBe('Bake 35 minutes.');
+		expect(ed.steps[0].found).toEqual([]);
+	});
+});

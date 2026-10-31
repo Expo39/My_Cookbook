@@ -5,7 +5,9 @@ test('home to section to recipe, and back by breadcrumb', async ({ page }) => {
 	const errors = watchErrors(page);
 	await page.goto('./');
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText("Sapori ta' l-kċina");
-	await expect(page.getByText("Antonio's recipes from a Maltese kitchen")).toBeVisible();
+	await expect(
+		page.getByText('Recipes from a Maltese kitchen by Antonio Galdes, with room for your own')
+	).toBeVisible();
 
 	await page.getByRole('main').getByRole('link', { name: 'First Courses' }).click();
 	await expect(page).toHaveURL(/\/first-courses$/);
@@ -25,7 +27,7 @@ test('home to section to recipe, and back by breadcrumb', async ({ page }) => {
 	expect(errors()).toEqual([]);
 });
 
-test('home shows a card for every top-level section and three recent recipes', async ({ page }) => {
+test('home shows a card for every top-level section and four recent recipes', async ({ page }) => {
 	await page.goto('./');
 	const main = page.getByRole('main');
 	for (const name of ['First Courses', 'Main Courses', 'Soups', 'Desserts', 'Sides']) {
@@ -33,7 +35,7 @@ test('home shows a card for every top-level section and three recent recipes', a
 	}
 	await expect(
 		page.getByRole('region', { name: 'Recently added' }).getByRole('article')
-	).toHaveCount(3);
+	).toHaveCount(4);
 });
 
 test('an unknown address shows the not-found page', async ({ page }) => {

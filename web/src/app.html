@@ -1,21 +1,25 @@
 <!doctype html>
-<html lang="en-GB">
+<html lang="en-GB" data-theme="light">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+		/>
 		<meta name="color-scheme" content="light dark" />
+		<meta name="robots" content="noai, noimageai" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
 		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/icons/apple-touch-icon.png" />
-		<meta name="theme-color" content="#ece4d3" media="(prefers-color-scheme: light)" />
-		<meta name="theme-color" content="#221d15" media="(prefers-color-scheme: dark)" />
+		<meta name="theme-color" content="#f8f7f3" />
 		<script>
 			(function () {
 				try {
 					var theme = localStorage.getItem('sapori:theme');
-					if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+					if (theme === 'dark') document.documentElement.dataset.theme = theme;
+					if (theme === 'system') delete document.documentElement.dataset.theme;
 				} catch (error) {
-					/* storage can be blocked; the system theme applies */
+					/* storage can be blocked; the light theme applies */
 				}
 			})();
 		</script>

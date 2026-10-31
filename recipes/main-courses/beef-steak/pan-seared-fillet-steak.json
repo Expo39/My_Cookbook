@@ -31,7 +31,8 @@
           "item": "butter"
         },
         {
-          "item": "Salt and black pepper"
+          "item": "Salt and black pepper",
+          "scale": "toTaste"
         },
         {
           "amount": {

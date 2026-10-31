@@ -12,7 +12,7 @@ import {
 	parseIngredientLine,
 	qrMatrix,
 	scaleRecipe,
-	toggleUnit,
+	unitOptions,
 	version,
 	type Recipe
 } from './index';
@@ -92,10 +92,11 @@ describe('the WASM core', () => {
 		expect(results.map((r) => r.recipe)).toEqual(['mains/stew']);
 	});
 
-	it('converts and toggles units and formats temperatures', () => {
+	it('converts units, offers the units of one system, and formats temperatures', () => {
 		expect(convert(1, 'kg', 'g')).toBe(1000);
-		expect(toggleUnit(500, 'g')?.unit).not.toBe('g');
-		expect(toggleUnit(1, 'pinch')).toBeUndefined();
+		expect(unitOptions(500, 'g', 'metric').map((o) => o.unit)).toEqual(['g', 'kg']);
+		expect(unitOptions(500, 'g', 'us').map((o) => o.unit)).toEqual(['oz', 'lb']);
+		expect(unitOptions(1, 'pinch', 'metric')).toEqual([]);
 		expect(formatTemperature(200, 'metric', 180)).toBe('200 °C (180 °C fan)');
 		expect(formatTemperature(200, 'us')).toMatch(/°F$/);
 		expect(formatTemperature(52, 'metric', undefined, { maxCelsius: 55, internal: true })).toBe(

@@ -98,7 +98,8 @@
           "item": "olive oil"
         },
         {
-          "item": "Salt and black pepper"
+          "item": "Salt and black pepper",
+          "scale": "toTaste"
         }
       ]
     }

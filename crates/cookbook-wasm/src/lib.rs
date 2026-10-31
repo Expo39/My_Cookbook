@@ -92,6 +92,11 @@ impl SearchEngine {
         to_js(&self.index.search(query))
     }
 
+    /// Up to `limit` suggestions for a query still being typed.
+    pub fn suggest(&self, query: &str, limit: usize) -> Result<JsValue, JsError> {
+        to_js(&self.index.suggest(query, limit))
+    }
+
     #[wasm_bindgen(js_name = ingredientsIHave)]
     pub fn ingredients_i_have(&self, have: Vec<String>) -> Result<JsValue, JsError> {
         let have: Vec<&str> = have.iter().map(String::as_str).collect();
@@ -99,14 +104,16 @@ impl SearchEngine {
     }
 }
 
-/// The next unit in the click-to-toggle cycle, as `{ qty, unit }`, or `undefined` for a pinch.
+/// The units a cook can pick for an amount in `system` ("metric" or "us"), as `[{ qty, unit }]`; empty for a pinch.
 #[wasm_bindgen]
-pub fn toggle_unit(qty: f64, unit: JsValue) -> Result<JsValue, JsError> {
+pub fn unit_options(qty: f64, unit: JsValue, system: JsValue) -> Result<JsValue, JsError> {
     let unit: core::Unit = from_js(unit)?;
-    match core::toggle_unit(qty, unit) {
-        Some((qty, unit)) => to_js(&serde_json::json!({ "qty": qty, "unit": unit })),
-        None => Ok(JsValue::UNDEFINED),
-    }
+    let system: core::UnitSystem = from_js(system)?;
+    let options: Vec<_> = core::unit_options(qty, unit, system)
+        .into_iter()
+        .map(|(qty, unit)| serde_json::json!({ "qty": qty, "unit": unit }))
+        .collect();
+    to_js(&options)
 }
 
 /// Renders a temperature such as "200 °C (180 °C fan)" or "52-55 °C" for the chosen system ("metric" or "us").

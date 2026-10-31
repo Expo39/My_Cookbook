@@ -46,7 +46,8 @@
           "item": "honey"
         },
         {
-          "item": "Salt and black pepper"
+          "item": "Salt and black pepper",
+          "scale": "toTaste"
         },
         {
           "item": "Orange zest",

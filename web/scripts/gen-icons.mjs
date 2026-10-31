@@ -1,10 +1,10 @@
-// Draws the app icon (a cream "S" and a prickly-pear dot on caper green) as an SVG and as PNGs,
+// Draws the app icon (a white "S" and a terracotta dot on sea blue) as an SVG and as PNGs,
 // with no dependencies, so the build needs nothing beyond Node. Output goes to static/icons.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { deflateSync, crc32 } from 'node:zlib';
 
 const out = new URL('../static/icons/', import.meta.url);
-const colours = { ground: [0x45, 0x55, 0x2a], letter: [0xf5, 0xef, 0xe2], dot: [0xa3, 0x25, 0x3f] };
+const colours = { ground: [0x0d, 0x4f, 0x8b], letter: [0xff, 0xff, 0xff], dot: [0xf0, 0x8a, 0x5d] };
 const hex = (rgb) => `#${rgb.map((n) => n.toString(16).padStart(2, '0')).join('')}`;
 
 // Everything is drawn on a 512 grid. The S is two half-turns of radius R joined at the middle.

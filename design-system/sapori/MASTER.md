@@ -1,28 +1,28 @@
 # Sapori design system: master
 
-Page files in `pages/` override this file where they differ. This file was seeded with the `ui-ux-pro-max` skill and then replaced with the chosen direction: "Limestone" with Literata numerals. The reference specimen is https://claude.ai/artifact/LBhVBdgGfa3YLDKYJaHLey.
+Page files in `pages/` override this file where they differ. This file was seeded with the `ui-ux-pro-max` skill. The current direction is "Bright Mediterranean" with Literata numerals.
 
-**Concept:** a Maltese kitchen, with honey-coloured globigerina limestone, capers and prickly pears. The tone is editorial and food-first. It is warm without being rustic, and there are no blog flourishes.
+**Concept:** a Maltese kitchen on a bright day: sun-bleached limestone walls, the deep blue of the sea off Marsaxlokk, and terracotta pots. The page is light and airy so the food carries the colour. The tone is editorial and food-first, with no blog flourishes.
 
 ## Colour tokens
 All colours come from these semantic tokens in `web/src/lib/styles/tokens.css`. Components never use raw hex values.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--colour-bg` | `#ece4d3` | `#221d15` | page |
-| `--colour-surface` | `#f5efe2` | `#2c261b` | cards, panels, inputs |
-| `--colour-ink` | `#2a2419` | `#f1e9d8` | body text |
-| `--colour-muted` | `#5f5440` | `#c0b296` | secondary text, meta |
-| `--colour-primary` | `#45552a` | `#b5c58a` | caper green: headings, links, controls, focus ring |
-| `--colour-on-primary` | `#f5efe2` | `#1b1a10` | text on primary fills |
-| `--colour-accent` | `#a3253f` | `#ec8199` | prickly pear: timers, tips, favourites, one highlight per view |
-| `--colour-line` | `#d3c6aa` | `#43392a` | borders, dividers, dashed ingredient rules |
-| `--colour-tint` | `#e2dcc4` | `#353021` | servings bar, selected states |
-| `--colour-danger` | `#9b2c1c` | `#f0907c` | destructive actions, checklist errors |
-| `--colour-warning` | `#7a5a00` | `#e6c15a` | checklist warnings |
-| `--colour-success` | `#3d6b2e` | `#9fd08a` | checklist passes, "saved" |
+| `--colour-bg` | `#f8f7f3` | `#0e1620` | page: limestone white / night sea |
+| `--colour-surface` | `#ffffff` | `#15202c` | cards, panels, inputs |
+| `--colour-ink` | `#13202b` | `#eef2f6` | body text |
+| `--colour-muted` | `#4b5866` | `#a9b6c3` | secondary text, meta |
+| `--colour-primary` | `#0d4f8b` | `#8cc0ee` | sea blue: headings, links, controls, focus ring |
+| `--colour-on-primary` | `#ffffff` | `#08233d` | text on primary and accent fills |
+| `--colour-accent` | `#b5441a` | `#f08a5d` | terracotta: timers, favourites, one highlight per view |
+| `--colour-line` | `#d9dfe5` | `#2b3947` | borders, dividers, dashed ingredient rules |
+| `--colour-tint` | `#e6eef7` | `#1d2c3c` | servings bar, selected states |
+| `--colour-danger` | `#b42318` | `#f59a8a` | destructive actions, checklist errors |
+| `--colour-warning` | `#865700` | `#e8c062` | checklist warnings |
+| `--colour-success` | `#2f6b2f` | `#8fd18a` | checklist passes, "saved" |
 
-- Every text/background pairing must pass WCAG AA (4.5:1 for body text, 3:1 for large text and UI).
+- Every text/background pairing must pass WCAG AA (4.5:1 for body text, 3:1 for large text and UI). `scripts/check-contrast.mjs` checks the pairings in light and dark; it runs in `make test-fast` and CI.
 - The accent is used sparingly, once or twice per view.
 - Banned: purple, indigo or teal gradients; gradient text; glassmorphism; neon; any palette not built from these tokens.
 

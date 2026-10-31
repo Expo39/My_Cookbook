@@ -9,6 +9,8 @@ export interface ShoppingItem {
 	min?: number;
 	max?: number;
 	unit?: Unit | null;
+	/** Seasoned to taste, so it has no amount to buy. */
+	toTaste?: boolean;
 }
 
 export interface ShoppingRecipe {
@@ -28,6 +30,7 @@ export interface ShoppingLine {
 	min?: number;
 	max?: number;
 	unit?: Unit | null;
+	toTaste?: boolean;
 	recipes: { id: string; title: string }[];
 }
 
@@ -108,6 +111,7 @@ export function itemsFromGroups(groups: ScaledGroup[]): ShoppingItem[] {
 			prefix: item.prefix,
 			item: item.item,
 			note: item.note,
+			...(item.toTaste ? { toTaste: true } : {}),
 			...(item.amount
 				? { min: item.amount.min, max: item.amount.max, unit: item.amount.unit ?? null }
 				: {})
@@ -144,6 +148,7 @@ export function mergeLines(
 					lines.push(line);
 					order.push(line);
 				}
+				if (item.toTaste) lines[0].toTaste = true;
 				add(lines[0]);
 				continue;
 			}
@@ -204,7 +209,8 @@ function pick(item: ShoppingItem) {
 		prefix: item.prefix,
 		item: item.item,
 		note: item.note,
-		unit: item.unit ?? null
+		unit: item.unit ?? null,
+		...(item.toTaste ? { toTaste: true } : {})
 	};
 }
 
@@ -294,7 +300,7 @@ export function groupByRecipe(
 ): LineGroup[] {
 	return recipes.map((recipe) => ({
 		id: recipe.id,
-		label: `${recipe.title} (${recipe.serves})`,
+		label: recipe.serves ? `${recipe.title} (${recipe.serves})` : recipe.title,
 		lines: mergeLines([recipe], convert, system)
 	}));
 }

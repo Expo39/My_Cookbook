@@ -96,24 +96,36 @@ describe('the recipe model', () => {
 		expect(model.view.groups[0].items[0].amount?.text).toContain('cup');
 	});
 
-	it('cycles an amount through its units and back, and forgets the cycle on a unit change', () => {
+	it('toggles only through the units of the chosen system, and forgets a pick on a system change', () => {
 		const model = make();
 		const item = () => model.view.groups[0].items[1];
 		expect(model.amountText('0.1', item())).toBe('250 g');
-		model.cycleUnit('0.1', item());
+		expect(model.unitChoices('0.1', item())).toEqual([
+			{ unit: 'g', text: '250 g' },
+			{ unit: 'kg', text: '0.25 kg' }
+		]);
+		model.pickUnit('0.1', item(), 'kg');
 		expect(model.amountText('0.1', item())).toBe('0.25 kg');
-		for (let n = 0; n < 3; n++) model.cycleUnit('0.1', item());
-		expect(model.amountText('0.1', item())).toBe('250 g');
+		expect(model.shownUnit('0.1', item())).toBe('kg');
+		model.pickUnit('0.1', item(), 'g');
+		expect(model.picked).toEqual({});
+
+		expect(model.nextUnit('0.1', item())).toBe('kg');
 		model.cycleUnit('0.1', item());
+		model.cycleUnit('0.1', item());
+		expect(model.amountText('0.1', item())).toBe('250 g');
+
+		model.pickUnit('0.1', item(), 'kg');
 		model.setSystem('us');
-		expect(model.cycled).toEqual({});
+		expect(model.picked).toEqual({});
+		expect(model.unitChoices('0.1', item()).map((c) => c.unit)).toEqual(['oz', 'lb']);
 	});
 
-	it('does not offer to cycle a count', () => {
+	it('does not offer a unit for a count', () => {
 		const model = make();
-		expect(model.canCycle(model.view.groups[0].items[2])).toBe(true);
+		expect(model.canPick(model.view.groups[0].items[2])).toBe(true);
 		expect(
-			model.canCycle({ ...model.view.groups[0].items[0], amount: { text: '2', min: 2, max: 2 } })
+			model.canPick({ ...model.view.groups[0].items[0], amount: { text: '2', min: 2, max: 2 } })
 		).toBe(false);
 	});
 });

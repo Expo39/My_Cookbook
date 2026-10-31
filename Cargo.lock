@@ -544,6 +544,7 @@ name = "cookbook-worker"
 version = "0.1.0"
 dependencies = [
  "cookbook-ai",
+ "futures-util",
  "hmac",
  "serde_json",
  "sha2",

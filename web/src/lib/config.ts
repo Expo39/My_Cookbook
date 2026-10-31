@@ -1,6 +1,6 @@
 export interface SiteConfig {
 	site?: { url?: string; basePath?: string };
-	ai?: { endpoint?: string };
+	ai?: { endpoint?: string; turnstileSiteKey?: string };
 	social?: {
 		instagram?: { enabled?: boolean; handle?: string };
 	};

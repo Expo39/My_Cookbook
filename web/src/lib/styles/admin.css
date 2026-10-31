@@ -17,7 +17,7 @@ textarea.control {
 	border-color: var(--colour-danger);
 }
 
-.control:read-only {
+.control:read-only:not(select) {
 	background: var(--colour-tint);
 }
 

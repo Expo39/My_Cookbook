@@ -2,7 +2,7 @@
 	import { onMount, tick, untrack } from 'svelte';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { page } from '$app/state';
-	import { afterNavigate, replaceState } from '$app/navigation';
+	import { afterNavigate, invalidate, replaceState } from '$app/navigation';
 	import type { QrMatrix } from '$lib/card/layout';
 	import { createAiClient } from '$lib/ai';
 	import { loadCore, qrMatrix } from '$lib/core';
@@ -13,6 +13,7 @@
 	import { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { buildRecipeJsonLd, toScriptJson } from '$lib/seo/recipe-jsonld';
 	import { CARD_SIZES, canonicalUrl, cardUrl } from '$lib/seo/site';
+	import { LiveRecipe, watchesUpdates } from '$lib/kitchen/live.svelte';
 	import { itemsFromGroups } from '$lib/kitchen/shopping';
 	import { servingsText } from '$lib/recipe/format';
 	import { chrome } from '$lib/stores/chrome.svelte';
@@ -25,6 +26,7 @@
 	import { siteTitle } from '$lib/title';
 	import type { RecipeCard as Card, RecipeData, SiteIndex } from '$lib/types/recipe';
 	import ActionBar from './ActionBar.svelte';
+	import Icon from './Icon.svelte';
 	import Breadcrumb from './Breadcrumb.svelte';
 	import IngredientsPanel from './IngredientsPanel.svelte';
 	import MethodPanel from './MethodPanel.svelte';
@@ -38,7 +40,18 @@
 	import ShareSheet from './ShareSheet.svelte';
 	import SousChef from './SousChef.svelte';
 
-	let { card, data, index }: { card: Card; data: RecipeData; index: SiteIndex } = $props();
+	let {
+		card,
+		data,
+		index,
+		local = false
+	}: {
+		card: Card;
+		data: RecipeData;
+		index: SiteIndex;
+		/** Added on this device: not published, so there is no public page or link; the card can still be sent. */
+		local?: boolean;
+	} = $props();
 
 	type Tab = 'ingredients' | 'method';
 	const tabs: { id: Tab; label: string }[] = [
@@ -52,6 +65,12 @@
 	const ticks = untrack(() => new Ticks(card.id));
 	const notes = untrack(() => new Notes(card.id));
 	const recipe = untrack(() => ({ id: card.id, title: data.recipe.title }));
+	/** A recipe on this device cannot change anywhere else, so only published ones are watched. */
+	const live = untrack(() =>
+		local || !watchesUpdates ? undefined : new LiveRecipe(card.id, () => data.recipe)
+	);
+	let updating = $state(false);
+	let dismissed = $state(false);
 
 	let hydrated = $state(false);
 	let restored = $state(false);
@@ -114,11 +133,27 @@
 		restored = true;
 		hydrated = true;
 		chrome.hasActionBar = true;
+		// Coming back to the tab is when an update is worth looking for.
+		const look = () => document.visibilityState === 'visible' && void live?.check();
+		document.addEventListener('visibilitychange', look);
+		window.addEventListener('focus', look);
 		loadCore()
 			.then(() => (model.ready = true))
 			.catch(() => chrome.notify('Scaling could not load. The recipe is shown as written.', 6000));
-		return () => (chrome.hasActionBar = false);
+		return () => {
+			chrome.hasActionBar = false;
+			document.removeEventListener('visibilitychange', look);
+			window.removeEventListener('focus', look);
+		};
 	});
+
+	/** Reloads the recipe's data in place: servings, ticks, timers and the list are all kept. */
+	async function showUpdate() {
+		if (!live) return;
+		updating = true;
+		await live.prepare();
+		await invalidate((url) => url.pathname === live.url);
+	}
 
 	$effect(() => {
 		if (!restored) return;
@@ -211,7 +246,7 @@
 	async function printCard() {
 		try {
 			await loadCore();
-			printQr = qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null;
+			printQr = local ? null : (qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null);
 		} catch {
 			printQr = null;
 		}
@@ -229,24 +264,53 @@
 	}
 </script>
 
-<PageHead
-	title={data.recipe.title}
-	{description}
-	path={card.id}
-	type="article"
-	image={{
-		url: cardUrl(card.id),
-		...CARD_SIZES.og,
-		alt: `Recipe card for ${data.recipe.title}, from ${siteTitle}`
-	}}
-/>
+{#if !local}
+	<PageHead
+		title={data.recipe.title}
+		{description}
+		path={card.id}
+		type="article"
+		image={{
+			url: cardUrl(card.id),
+			...CARD_SIZES.og,
+			alt: `Recipe card for ${data.recipe.title}, from ${siteTitle}`
+		}}
+	/>
+{/if}
 <svelte:head>
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -- the JSON is escaped by toScriptJson -->
-	{@html jsonLdTag}
+	{#if local}
+		<title>{data.recipe.title} | {siteTitle}</title>
+	{:else}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- the JSON is escaped by toScriptJson -->
+		{@html jsonLdTag}
+	{/if}
 </svelte:head>
 
 <article class:enhanced={hydrated} class:printing-card={printingCard}>
 	<Breadcrumb {trail} />
+	{#if local}
+		<p class="device">
+			<Icon name="device" size={18} />
+			<span>Your recipe. It is kept in this browser only, so only you can see it.</span>
+		</p>
+	{/if}
+	{#if live?.updated && !dismissed && cookStep === null}
+		<div class="update" role="status">
+			<Icon name="info" size={18} />
+			<span>This recipe was updated.</span>
+			<button type="button" class="show" disabled={updating} onclick={showUpdate}>
+				{updating ? 'Loading...' : 'Show the new version'}
+			</button>
+			<button
+				type="button"
+				class="later"
+				aria-label="Keep this version for now"
+				onclick={() => (dismissed = true)}
+			>
+				<Icon name="x" size={18} />
+			</button>
+		</div>
+	{/if}
 	<RecipeHeader
 		{card}
 		{model}
@@ -255,7 +319,7 @@
 		onshare={share}
 		onaddlist={addToList}
 		onask={ai ? () => chef?.show() : undefined}
-		edithref={admin.unlocked ? editHref({ id: card.id }) : undefined}
+		edithref={local || admin.unlocked ? editHref({ id: card.id }) : undefined}
 	/>
 	<ServingsBar {model} />
 
@@ -321,7 +385,7 @@
 	{#if hydrated && cookStep !== null && CookMode}
 		<CookMode {model} {recipe} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
-	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} onprint={printCard} />{/if}
+	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} {local} onprint={printCard} />{/if}
 	{#if hydrated && ai}
 		<SousChef bind:this={chef} client={ai} recipeId={card.id} recipe={data.recipe} />
 	{/if}
@@ -329,9 +393,81 @@
 </article>
 
 <style>
+	.update {
+		position: sticky;
+		inset-block-start: var(--space-2);
+		z-index: 6;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2) var(--space-3);
+		margin-block-end: var(--space-4);
+		padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+		border: 1px solid var(--colour-line);
+		border-inline-start: 4px solid var(--colour-primary);
+		border-radius: var(--radius-m);
+		background: var(--colour-surface);
+		box-shadow: var(--shadow-float);
+		font-weight: 700;
+	}
+
+	.update > :global(svg) {
+		flex: none;
+		color: var(--colour-primary);
+	}
+
+	.update span {
+		flex: 1 1 auto;
+	}
+
+	.update button {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-block-size: var(--target);
+		border-radius: var(--radius-s);
+		font-weight: 700;
+	}
+
+	.show {
+		padding-inline: var(--space-4);
+		border: 0;
+		background: var(--colour-primary);
+		color: var(--colour-on-primary);
+	}
+
+	.show:disabled {
+		opacity: 0.7;
+	}
+
+	.later {
+		inline-size: var(--target);
+		padding: 0;
+		border: 0;
+		background: transparent;
+		color: var(--colour-muted);
+	}
+
+	.later:hover {
+		background: var(--colour-tint);
+	}
+
 	article {
 		display: grid;
 		gap: var(--space-5);
+	}
+
+	.device {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		padding: var(--space-2) var(--space-3);
+		border: 1px dashed var(--colour-primary);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+		color: var(--colour-primary);
+		font-size: var(--text-s);
+		font-weight: 700;
 	}
 
 	.tabs {
@@ -402,7 +538,7 @@
 
 	.related ul {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+		grid-template-columns: var(--card-grid);
 		gap: var(--space-4);
 	}
 
@@ -428,15 +564,6 @@
 		}
 	}
 
-	@media (min-width: 64rem) {
-		.ingredients {
-			position: sticky;
-			inset-block-start: var(--space-5);
-			max-block-size: calc(100dvh - 2 * var(--space-5));
-			overflow-y: auto;
-		}
-	}
-
 	@media print {
 		article {
 			gap: var(--space-3);
@@ -457,12 +584,6 @@
 			grid-template-columns: 30% 1fr;
 			gap: var(--space-4);
 			align-items: start;
-		}
-
-		.ingredients {
-			position: static;
-			max-block-size: none;
-			overflow: visible;
 		}
 	}
 </style>

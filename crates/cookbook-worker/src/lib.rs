@@ -5,6 +5,7 @@ pub mod auth;
 pub mod cors;
 mod handler;
 pub mod limits;
+pub mod turnstile;
 
 use worker::{Context, Env, Request, Response, Result, event};
 

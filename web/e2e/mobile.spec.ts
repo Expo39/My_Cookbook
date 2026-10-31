@@ -81,18 +81,21 @@ test('every touch target on the phone view is at least 44 px', async ({ page }) 
 	expect(small).toEqual([]);
 });
 
-test('the header and breadcrumb stay on one line, and the servings panel starts folded', async ({
+test('the sections stay on one row with the current one in view, the breadcrumb shows the whole trail, and the servings panel starts folded', async ({
 	page
 }) => {
 	await page.goto(wellington);
 	await waitForCore(page);
-	const height = (selector: string) =>
-		page
-			.locator(selector)
-			.first()
-			.evaluate((element) => element.getBoundingClientRect().height);
-	expect(await height('nav[aria-label="Sections"] ul')).toBeLessThan(50);
-	expect(await height('nav[aria-label="Breadcrumb"] ol')).toBeLessThan(50);
+	const sections = page.getByRole('navigation', { name: 'Sections' });
+	const row = await sections.locator('ul').evaluate((list) => list.getBoundingClientRect().height);
+	expect(row).toBeLessThan(70);
+	await expect(sections.getByRole('link', { name: 'Main Courses' })).toBeInViewport();
+
+	const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' });
+	for (const name of ['Home', 'Main Courses', 'Beef & Steak']) {
+		await expect(crumbs.getByRole('link', { name, exact: true })).toBeVisible();
+	}
+	await expect(crumbs.locator('[aria-current="page"]')).toBeHidden();
 
 	const panel = page.getByRole('region', { name: 'Adjust the recipe' });
 	const stepper = panel.getByRole('group', { name: 'Servings' });

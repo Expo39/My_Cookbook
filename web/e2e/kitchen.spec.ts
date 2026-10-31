@@ -209,9 +209,7 @@ test.describe('shopping list', () => {
 
 	test('merges recipes, ticks, clears and shares', async ({ page }) => {
 		await page.goto('shopping-list');
-		await expect(
-			page.getByText('Your list is empty. Add ingredients from any recipe.')
-		).toBeVisible();
+		await expect(page.getByText(/^Your list is empty/)).toBeVisible();
 
 		await page.goto(`${brulee}?x=2`);
 		await waitForCore(page);
@@ -252,9 +250,70 @@ test.describe('shopping list', () => {
 
 		await page.getByRole('button', { name: 'Clear all' }).click();
 		await page.getByRole('button', { name: 'Tap again to clear all' }).click();
+		await expect(page.getByText(/^Your list is empty/)).toBeVisible();
+	});
+
+	test("a quantity can be changed to buy extra, and put back to the recipes' amount", async ({
+		page
+	}) => {
+		await page.goto(brulee);
+		await waitForCore(page);
+		await page.getByRole('button', { name: 'Add to shopping list' }).click();
+		await page.goto('shopping-list');
+
+		const sugar = page.getByRole('listitem').filter({ hasText: 'caster sugar' });
+		await sugar.getByRole('button', { name: /caster sugar: 50 g, change the amount/ }).click();
+		await sugar.getByRole('button', { name: 'More caster sugar' }).click();
+		await sugar.getByRole('button', { name: 'Done' }).click();
+		await expect(sugar.getByRole('button', { name: /60 g, change the amount/ })).toBeVisible();
+		await expect(sugar).toContainText('Recipe: 50 g');
+
+		await page.reload();
+		await expect(sugar).toContainText('Recipe: 50 g');
+		await sugar.getByRole('button', { name: /60 g, change the amount/ }).click();
+		await sugar.getByRole('button', { name: 'Back to 50 g' }).click();
+		await expect(sugar).not.toContainText('Recipe:');
+
+		const yolks = page.getByRole('listitem').filter({ hasText: 'egg yolks' });
 		await expect(
-			page.getByText('Your list is empty. Add ingredients from any recipe.')
+			yolks.getByRole('button', { name: /egg yolks: 5, change the amount/ })
 		).toBeVisible();
+	});
+
+	test('the cook can add their own items, in their own group, and remove any line', async ({
+		page
+	}) => {
+		await page.goto(brulee);
+		await waitForCore(page);
+		await page.getByRole('button', { name: 'Add to shopping list' }).click();
+		await page.goto('shopping-list');
+
+		await page.getByRole('button', { name: 'Add an item' }).click();
+		await page.getByLabel('Item', { exact: true }).fill('lemons');
+		await page.getByLabel('Quantity').fill('2');
+		await page.getByRole('button', { name: 'Add', exact: true }).click();
+		await page.getByLabel('Item', { exact: true }).fill('kitchen roll');
+		await page.getByRole('button', { name: 'Add a note' }).click();
+		await page.getByLabel('Note').fill('the big pack');
+		await page.getByLabel('Item', { exact: true }).press('Enter');
+
+		const own = page.getByRole('region', { name: 'Added by you' });
+		await expect(own.getByRole('button', { name: /lemons: 2, change the amount/ })).toBeVisible();
+		await expect(own.getByRole('listitem').filter({ hasText: 'kitchen roll' })).toContainText(
+			'the big pack'
+		);
+
+		await page.getByRole('heading', { name: 'Shopping list' }).click();
+		await expect(page.getByLabel('Item', { exact: true })).toHaveCount(0);
+
+		await page.getByRole('button', { name: 'Remove egg yolks' }).click();
+		await expect(page.getByRole('listitem').filter({ hasText: 'egg yolks' })).toHaveCount(0);
+		await page.getByRole('button', { name: 'Undo' }).click();
+		await expect(page.getByRole('listitem').filter({ hasText: 'egg yolks' })).toHaveCount(1);
+
+		await page.getByRole('button', { name: 'Remove lemons' }).click();
+		await page.reload();
+		await expect(page.getByRole('listitem').filter({ hasText: 'lemons' })).toHaveCount(0);
 	});
 
 	test('adding a recipe again updates it instead of doubling it', async ({ page }) => {

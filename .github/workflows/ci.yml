@@ -3,8 +3,17 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    # A label added or removed (fast-ci) runs CI again in the matching mode.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'full runs every job; fast checks the content, builds and deploys, skipping the Rust tests, the web checks and the browser tests'
+        type: choice
+        options: [full, fast]
+        default: full
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -25,11 +34,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     outputs:
-      code: ${{ steps.filter.outputs.code }}
+      # A manual run always builds; paths-filter has nothing to compare it with.
+      code: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.code == 'true' }}
+      fast: ${{ steps.mode.outputs.fast }}
     steps:
       - uses: actions/checkout@v7
       - name: Text is ASCII apart from names, degrees and fractions
         run: node scripts/check-ascii.mjs
+      - name: Colour tokens pass WCAG AA in light and dark
+        run: node scripts/check-contrast.mjs
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -39,10 +52,37 @@ jobs:
               - '**'
               - '!docs/**'
               - '!**/*.md'
+            beyond_recipes:
+              - '**'
+              - '!recipes/**'
+              - '!docs/**'
+              - '!**/*.md'
+      # The fast path: a manual run in fast mode, "[fast ci]" in the commit message, the fast-ci label on
+      # the pull request, or a change to recipes only. It still checks the content and builds the site.
+      - id: mode
+        env:
+          MODE: ${{ inputs.mode }}
+          MESSAGE: ${{ github.event.head_commit.message }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          EVENT: ${{ github.event_name }}
+          CODE: ${{ steps.filter.outputs.code }}
+          BEYOND_RECIPES: ${{ steps.filter.outputs.beyond_recipes }}
+        run: |
+          fast=false
+          if [ "$EVENT" = workflow_dispatch ]; then
+            [ "$MODE" = fast ] && fast=true
+          else
+            case "$MESSAGE" in *'[fast ci]'*) fast=true ;; esac
+            case "$LABELS" in *'"fast-ci"'*) fast=true ;; esac
+            [ "$CODE" = true ] && [ "$BEYOND_RECIPES" = false ] && fast=true
+          fi
+          echo "fast=$fast" >> "$GITHUB_OUTPUT"
+          echo "CI mode: $([ "$fast" = true ] && echo fast || echo full)" >> "$GITHUB_STEP_SUMMARY"
 
-  rust:
+  # Lints and tests run side by side; each was half of one 11-minute job.
+  clippy:
     needs: changes
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.fast != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -53,14 +93,32 @@ jobs:
           components: clippy, rustfmt
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: clippy
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: The worker builds for Workers
+        run: cargo build -p cookbook-worker -p cookbook-ai --target wasm32-unknown-unknown
+
+  rust:
+    needs: changes
+    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.fast != 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: native
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - uses: taiki-e/install-action@v2
         with:
           tool: nextest@0.9.148
-      - run: cargo fmt --all --check
-      - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo nextest run --workspace
-      - name: The worker builds for Workers
-        run: cargo build -p cookbook-worker -p cookbook-ai --target wasm32-unknown-unknown
 
   content:
     needs: changes
@@ -73,6 +131,9 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: native
+          save-if: false
       - run: cargo run --quiet -p cookbook-cli -- check --all
 
   core-artifacts:
@@ -87,6 +148,9 @@ jobs:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: artifacts
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - uses: taiki-e/install-action@v2
         with:
           tool: wasm-bindgen@${{ env.WASM_BINDGEN_VERSION }}
@@ -125,7 +189,7 @@ jobs:
 
   web:
     needs: [changes, core-artifacts]
-    if: needs.changes.outputs.code == 'true'
+    if: needs.changes.outputs.code == 'true' && needs.changes.outputs.fast != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     defaults:
@@ -183,7 +247,8 @@ jobs:
           retention-days: 7
 
   verify:
-    needs: build
+    needs: [changes, build]
+    if: needs.changes.outputs.fast != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -192,6 +257,9 @@ jobs:
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: native
+          save-if: false
       - uses: actions/download-artifact@v8
         with:
           name: site
@@ -200,7 +268,8 @@ jobs:
         run: cargo run --quiet -p cookbook-cli -- verify-site web/build
 
   e2e:
-    needs: build
+    needs: [changes, build]
+    if: needs.changes.outputs.fast != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
@@ -237,11 +306,12 @@ jobs:
         run: pnpm exec playwright install-deps chromium
       - run: pnpm e2e --project=chromium
 
-  # The one check branch protection requires: a skipped job (docs-only change) counts as a pass.
+  # The one check branch protection requires: a skipped job (a docs-only change, or a job the fast path
+  # leaves out) counts as a pass.
   passed:
     name: CI passed
     if: always()
-    needs: [changes, rust, content, core-artifacts, web, build, verify, e2e]
+    needs: [changes, clippy, rust, content, core-artifacts, web, build, verify, e2e]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:

@@ -83,25 +83,29 @@ export interface FormData {
 export const SCALE_MODES: { value: ScaleMode; label: string; help: string }[] = [
 	{
 		value: 'linear',
-		label: 'Scales evenly',
+		label: 'goes up and down with them',
 		help: 'Twice the servings, twice the amount. Right for most ingredients.'
 	},
 	{
 		value: 'discrete',
-		label: 'Whole pieces',
+		label: 'rounds to whole pieces',
 		help: 'Rounds to whole items, such as eggs, cloves or tins.'
 	},
 	{
 		value: 'seasoning',
-		label: 'Seasoning',
+		label: 'grows more gently, like salt',
 		help: 'Grows more slowly than the rest, so salt and spice are not overdone. The page says to start low.'
 	},
 	{
 		value: 'fixed',
-		label: 'Stays the same',
+		label: 'stays the same',
 		help: 'The amount never changes, such as a pan greased once or a garnish.'
 	},
-	{ value: 'toTaste', label: 'To taste', help: 'No amount is shown; the line reads "to taste".' }
+	{
+		value: 'toTaste',
+		label: 'is added to taste',
+		help: 'No amount is shown; the line reads "to taste".'
+	}
 ];
 
 export const UNITS: { value: Unit | ''; label: string }[] = [
@@ -224,7 +228,7 @@ export function emptyForm(section = ''): FormData {
 		slug: '',
 		slugTouched: false,
 		newSections: [],
-		groups: [emptyGroup()],
+		groups: [{ ...emptyGroup(), items: [] }],
 		steps: [emptyStep()],
 		tips: [],
 		related: [],

@@ -2,14 +2,29 @@
 	import { clockText } from '$lib/kitchen/timer-math';
 	import { timers } from '$lib/stores/timers.svelte';
 	import Icon from './Icon.svelte';
+
+	let expanded = $state(false);
+
+	/** Finished timers first, then whichever ends soonest: on a phone only the first is shown folded. */
+	const ordered = $derived(
+		[...timers.list].sort((a, b) => {
+			const rank = (t: (typeof timers.list)[number]) =>
+				timers.status(t) === 'finished' ? -1 : timers.remaining(t);
+			return rank(a) - rank(b);
+		})
+	);
+	const more = $derived(ordered.length - 1);
+	$effect(() => {
+		if (more < 1) expanded = false;
+	});
 </script>
 
 <div class="sr-only" role="status">{timers.announcement}</div>
 
 {#if timers.list.length}
-	<section class="strip" aria-label="Timers">
-		<ul>
-			{#each timers.list as timer (timer.id)}
+	<section class="strip" class:expanded aria-label="Timers">
+		<ul id="timer-list">
+			{#each ordered as timer (timer.id)}
 				{@const status = timers.status(timer)}
 				<li
 					class="pill"
@@ -17,7 +32,7 @@
 					class:paused={status === 'paused'}
 					data-timer={timer.id}
 				>
-					<span class="name">{timer.name}</span>
+					<span class="name" title={timer.name}>{timer.name}</span>
 					<span class="num time"
 						>{status === 'finished' ? 'Done' : clockText(timers.remaining(timer))}</span
 					>
@@ -54,6 +69,17 @@
 				</li>
 			{/each}
 		</ul>
+		{#if more > 0}
+			<button
+				type="button"
+				class="more-timers"
+				aria-expanded={expanded}
+				aria-controls="timer-list"
+				onclick={() => (expanded = !expanded)}
+				>{#if expanded}Show fewer{:else}<span class="num">+{more}</span>
+					{more === 1 ? 'timer' : 'timers'}{/if}</button
+			>
+		{/if}
 	</section>
 {/if}
 
@@ -91,14 +117,14 @@
 		scroll-snap-align: start;
 	}
 
+	/* Names wrap rather than being cut short, so a cook can always tell which timer is which. */
 	.name {
 		margin-inline-end: var(--space-1);
-		max-inline-size: 10rem;
-		overflow: hidden;
+		max-inline-size: 14rem;
+		padding-block: var(--space-1);
 		font-size: var(--text-s);
 		font-weight: 700;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		line-height: 1.3;
 	}
 
 	.time {
@@ -151,6 +177,56 @@
 
 	.finished :focus-visible {
 		outline-color: var(--colour-on-primary);
+	}
+
+	.more-timers {
+		display: none;
+	}
+
+	/*
+	 * A phone shows one full-width timer, the one that ends soonest, with a button for the rest. Opened,
+	 * every timer gets its own row, so nothing scrolls sideways.
+	 */
+	@media (max-width: 39.99rem) {
+		.strip {
+			display: grid;
+			gap: var(--space-2);
+		}
+
+		ul {
+			display: grid;
+			padding: 0;
+			overflow: visible;
+		}
+
+		.pill {
+			display: grid;
+			align-items: center;
+			grid-template-columns: minmax(0, 1fr) auto;
+			grid-auto-columns: var(--target);
+			grid-auto-flow: column;
+			padding-inline: var(--space-3) 0;
+			border-radius: var(--radius-m);
+		}
+
+		.name {
+			max-inline-size: none;
+		}
+
+		.strip:not(.expanded) .pill:not(:first-child) {
+			display: none;
+		}
+
+		.more-timers {
+			display: inline-flex;
+			align-items: center;
+			justify-self: start;
+			gap: var(--space-1);
+			min-inline-size: auto;
+			padding-inline: var(--space-3);
+			border: 1px solid var(--colour-line);
+			color: var(--colour-accent);
+		}
 	}
 
 	@media print {

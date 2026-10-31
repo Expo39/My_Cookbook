@@ -2,7 +2,8 @@
 import { createHmac } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
 import type { Recipe } from '$lib/types/recipe';
-import { AiError, HISTORY_TURNS, MESSAGE_CHARS, recentTurns } from './client';
+import { AiError, HISTORY_TURNS, isRetryable, MESSAGE_CHARS, recentTurns } from './client';
+import { SseReader } from './sse';
 import { adminProof } from './proof';
 import { ServerClient } from './server-client';
 import { WorkerClient } from './worker-client';
@@ -11,6 +12,21 @@ const recipe = { title: 'Soup' } as Recipe;
 const json = (body: unknown, init: ResponseInit = {}) =>
 	new Response(JSON.stringify(body), { status: 200, ...init });
 const request = { recipeId: 'soups/soup', recipe, history: [], question: ' Can I freeze it? ' };
+const human = async () => undefined;
+
+/** A streamed answer, delivered in pieces of `size` characters. */
+function streamed(events: string, size = 5): Response {
+	const bytes = new TextEncoder().encode(events);
+	const body = new ReadableStream<Uint8Array>({
+		start(controller) {
+			for (let i = 0; i < bytes.length; i += size) controller.enqueue(bytes.slice(i, i + size));
+			controller.close();
+		}
+	});
+	return new Response(body, { headers: { 'content-type': 'text/event-stream' } });
+}
+
+const event = (name: string, data: unknown) => `event: ${name}\ndata: ${JSON.stringify(data)}\n\n`;
 
 function mocked(response: Response | Error) {
 	return vi.fn<typeof fetch>(async () => {
@@ -50,7 +66,7 @@ describe('recentTurns', () => {
 describe('WorkerClient', () => {
 	it('posts the chat to the endpoint and returns the reply', async () => {
 		const fetcher = mocked(json({ reply: 'Yes, for three months.', truncated: false }));
-		const client = new WorkerClient('https://ai.example.test/', fetcher);
+		const client = new WorkerClient('https://ai.example.test/', fetcher, human);
 		const result = await client.chat(request);
 		expect(result).toEqual({ reply: 'Yes, for three months.', truncated: false });
 		const [url, init] = fetcher.mock.calls[0];
@@ -66,7 +82,7 @@ describe('WorkerClient', () => {
 
 	it('sends the admin proof with an import', async () => {
 		const fetcher = mocked(json({ recipe, checks: [] }));
-		await new WorkerClient('https://ai.example.test', fetcher).importRecipe(
+		await new WorkerClient('https://ai.example.test', fetcher, human).importRecipe(
 			'Soup\n1 onion',
 			'1.ab'
 		);
@@ -83,7 +99,9 @@ describe('WorkerClient', () => {
 				{ status: 429, headers: { 'retry-after': '1200' } }
 			)
 		);
-		const error = await new WorkerClient('https://x.test', fetcher).chat(request).catch((e) => e);
+		const error = await new WorkerClient('https://x.test', fetcher, human)
+			.chat(request)
+			.catch((e) => e);
 		expect(error).toBeInstanceOf(AiError);
 		expect(error).toMatchObject({
 			message: 'That is enough for now. Try again in 20 minutes.',
@@ -96,16 +114,90 @@ describe('WorkerClient', () => {
 	it('stays calm when the reply is not JSON or the network is down', async () => {
 		const broken = await new WorkerClient(
 			'https://x.test',
-			mocked(new Response('oops', { status: 502 }))
+			mocked(new Response('oops', { status: 502 })),
+			human
 		)
 			.chat(request)
 			.catch((e) => e);
 		expect(broken.message).toMatch(/could not answer just now/);
-		const offline = await new WorkerClient('https://x.test', mocked(new TypeError('failed')))
+		const offline = await new WorkerClient('https://x.test', mocked(new TypeError('failed')), human)
 			.chat(request)
 			.catch((e) => e);
 		expect(offline).toMatchObject({ code: 'offline', status: 0 });
 		expect(offline.message).toMatch(/connection/);
+	});
+});
+
+describe('a streamed answer', () => {
+	it('arrives piece by piece and ends with whether it was cut short', async () => {
+		const fetcher = mocked(
+			streamed(
+				event('delta', { text: 'Yes, for ' }) +
+					event('delta', { text: 'three months.' }) +
+					event('done', { truncated: false })
+			)
+		);
+		const seen: string[] = [];
+		const reply = await new WorkerClient('https://x.test', fetcher, human).chat(request, {
+			onText: (text) => seen.push(text)
+		});
+		expect(reply).toEqual({ reply: 'Yes, for three months.', truncated: false });
+		expect(seen).toEqual(['Yes, for ', 'Yes, for three months.']);
+	});
+
+	it('reports an error event with its message', async () => {
+		const fetcher = mocked(
+			streamed(event('error', { error: 'blocked', message: 'Try rephrasing the question.' }))
+		);
+		const error = await new WorkerClient('https://x.test', fetcher, human)
+			.chat(request)
+			.catch((e) => e);
+		expect(error).toMatchObject({ code: 'blocked', message: 'Try rephrasing the question.' });
+		expect(isRetryable(error)).toBe(false);
+	});
+
+	it('treats a stream that stops without finishing as interrupted, worth asking again', async () => {
+		const fetcher = mocked(streamed(event('delta', { text: 'Half' })));
+		const error = await new WorkerClient('https://x.test', fetcher, human)
+			.chat(request)
+			.catch((e) => e);
+		expect(error).toMatchObject({ code: 'interrupted' });
+		expect(isRetryable(error)).toBe(true);
+	});
+
+	it('sends the Turnstile token when the site has one', async () => {
+		const fetcher = mocked(json({ reply: 'Yes.', truncated: false }));
+		await new WorkerClient('https://x.test', fetcher, async () => 'tok').chat(request);
+		expect(new Headers(fetcher.mock.calls[0][1]?.headers).get('x-turnstile-token')).toBe('tok');
+	});
+
+	it('says a busy sous-chef is worth retrying, and a daily limit is not', () => {
+		expect(isRetryable(new AiError('x', 'busy', 503))).toBe(true);
+		expect(isRetryable(new AiError('x', 'quota', 429))).toBe(false);
+		expect(isRetryable(new AiError('x', 'rate_limited', 429))).toBe(false);
+		expect(isRetryable(new AiError('x', 'not_configured', 503))).toBe(false);
+	});
+});
+
+describe('SseReader', () => {
+	it('finds events however the text is split, with CRLF line ends', () => {
+		const text = 'event: delta\r\ndata: {"a":1}\r\n\r\ndata: plain\n\n';
+		for (const size of [1, 2, 7, text.length]) {
+			const reader = new SseReader();
+			const found = [];
+			for (let i = 0; i < text.length; i += size)
+				found.push(...reader.push(text.slice(i, i + size)));
+			expect(found).toEqual([
+				{ event: 'delta', data: '{"a":1}' },
+				{ event: 'message', data: 'plain' }
+			]);
+		}
+	});
+
+	it('reads a last event that has no blank line after it', () => {
+		const reader = new SseReader();
+		expect(reader.push('data: x')).toEqual([]);
+		expect(reader.finish()).toEqual([{ event: 'message', data: 'x' }]);
 	});
 });
 

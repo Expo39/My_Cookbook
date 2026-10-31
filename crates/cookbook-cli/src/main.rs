@@ -159,6 +159,7 @@ fn web_schema() -> serde_json::Value {
     generator.subschema_for::<cookbook_core::CheckContext>();
     generator.subschema_for::<cookbook_core::RecipeFile>();
     generator.subschema_for::<cookbook_core::SearchHit>();
+    generator.subschema_for::<cookbook_core::Suggestion>();
     generator.subschema_for::<cookbook_core::Coverage>();
     serde_json::json!({
         "$schema": "https://json-schema.org/draft/2020-12/schema",

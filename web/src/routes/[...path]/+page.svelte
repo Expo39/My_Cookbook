@@ -8,7 +8,8 @@
 {#if data.kind === 'section'}
 	<SectionView section={data.section} index={data.index} />
 {:else}
-	{#key data.card.id}
+	<!-- A new version of the same recipe is a new object, so the view starts afresh from it. -->
+	{#key data.recipe}
 		<RecipeView card={data.card} data={data.recipe} index={data.index} />
 	{/key}
 {/if}
