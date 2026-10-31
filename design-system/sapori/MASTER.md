@@ -35,6 +35,8 @@ All fonts are self-hosted as woff2 under `web/static/fonts/`, subset to Latin + 
 | `--font-body` | Atkinson Hyperlegible 400/700 | all running text and UI |
 | `--font-num` | Literata 600, `tabular-nums` | **every numeral that is data**: amounts, times, servings, timers, step numbers |
 
+- Literata keeps more room above its digits than below, so its `@font-face` rules set `ascent-override: 110.5%` and `descent-override: 38.5%` (the same total height, split evenly around the digits). Numbers then sit in the middle of any pill or circle with plain flex or line-height centring; never nudge them with offsets.
+
 - Type scale (rem): 0.82, 0.9, 1, 1.15, 1.35, 1.7, 2.2 and 3 (display only). The body is 1rem/1.6 with a line length of at most 68ch.
 - Headings use `text-wrap: balance`. Uppercase labels are 0.78rem with +0.08em tracking.
 - Banned fonts: Inter, Roboto, Poppins, Montserrat, Space Grotesk, Playfair, Fraunces, and a system-ui stack as the brand face (it is allowed only as a fallback).
@@ -55,7 +57,7 @@ All fonts are self-hosted as woff2 under `web/static/fonts/`, subset to Latin + 
 - Icon-only buttons need an `aria-label`.
 
 ## Interaction and accessibility (from ui-ux-pro-max priorities 1-9)
-- Touch targets are at least 44x44 px, with at least 8 px between them. `cursor: pointer` on everything clickable.
+- Touch targets are at least 44x44 px, with at least 8 px between them. `cursor: pointer` on everything clickable, and `touch-action: manipulation` on every control, so a quick second tap (unticking a line) is never taken for a double-tap zoom.
 - Focus is visible everywhere as a 2 px `--colour-primary` outline with a 2 px offset. Never remove it.
 - Labels are visible on every input and never placeholder-only. Errors sit next to their field and say how to fix the problem. The one exception is a dense repeated row (an ingredient line by line, the shopping list's amount card), where the columns make each box plain; those keep visually hidden labels.
 - Anything that needs explaining gets an "i" (`InfoTip.svelte`) beside its label: with a mouse, hover or focus shows a dark bubble (`--colour-ink` ground, at most 20rem); on touch, a tap opens a tint note with a primary edge on its own line. It has a normal pointer cursor and no hover ring, and inside a `<summary>` it never opens or closes the box.
