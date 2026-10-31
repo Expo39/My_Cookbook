@@ -18,6 +18,23 @@ const EXTENSIONS: Record<string, string> = {
 	'image/webp': 'webp'
 };
 
+const SLUG = '[a-z0-9]+(?:-[a-z0-9]+)*';
+/** A file the editor may write: a recipe, a section or a photo, inside `recipes/` and nowhere else. */
+const WRITABLE = new RegExp(
+	`^recipes/(?:${SLUG}/)*(?:${SLUG}\\.json|_section\\.json|${SLUG}\\.(?:jpg|png|webp))$`
+);
+
+/**
+ * Refuses a change outside the recipes before anything reaches GitHub. The editor only makes
+ * well-formed paths, but the token can write anywhere, so the writer checks for itself.
+ */
+function checkPaths(changes: FileChange[]): FileChange[] {
+	const stray = changes.find((change) => !WRITABLE.test(change.path));
+	if (stray)
+		throw new WriteError(`Nothing was saved: "${stray.path}" is not a recipe file.`, 'path');
+	return changes;
+}
+
 const folderOf = (id: string) => id.slice(0, id.lastIndexOf('/'));
 const slugOf = (id: string) => id.slice(id.lastIndexOf('/') + 1);
 const extensionOf = (file: string) => file.slice(file.lastIndexOf('.'));
@@ -104,7 +121,7 @@ export class GitHubWriter implements RecipeWriter {
 		const verb = extras.isNew ? 'add' : 'update';
 		const commit = await this.#client.commit(
 			this.#ref,
-			changes,
+			checkPaths(changes),
 			`content(recipes): ${verb} ${recipe.title}`
 		);
 		this.#staged.clear();
@@ -158,7 +175,7 @@ export class GitHubWriter implements RecipeWriter {
 
 		const commit = await this.#client.commit(
 			this.#ref,
-			[...this.#staged.values(), ...changes],
+			checkPaths([...this.#staged.values(), ...changes]),
 			`content(recipes): move ${recipe.title}`
 		);
 		this.#staged.clear();
@@ -176,7 +193,7 @@ export class GitHubWriter implements RecipeWriter {
 		}
 		const commit = await this.#client.commit(
 			this.#ref,
-			changes,
+			checkPaths(changes),
 			`content(recipes): remove ${extras.title}`
 		);
 		return { id, commit };

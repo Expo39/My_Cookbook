@@ -19,7 +19,7 @@ export function toExport(entries: LocalRecipe[]): string {
 }
 
 /** One CSV row; a cell with a comma, quote or line break is quoted, as spreadsheets expect. */
-export const csvRow = (cells: (string | number | undefined)[]): string =>
+export const csvRow = (cells: (string | number | null | undefined)[]): string =>
 	cells
 		.map((cell) => {
 			const text = String(cell ?? '');
