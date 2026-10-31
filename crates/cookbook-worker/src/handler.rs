@@ -2,9 +2,9 @@ use std::time::Duration;
 
 use cookbook_ai::{
     ATTEMPTS_PER_MODEL, AiError, ApiError, GeminiConfig, Recipe, Relay, Request as GeminiRequest,
-    Response as GeminiResponse, backoff_ms, chat_request, endpoint, import_request, parse_chat,
-    parse_import, parse_import_response, parse_site_recipe, site_recipe_url, stream_endpoint,
-    unknown_recipe,
+    Response as GeminiResponse, backoff_ms, chat_request, endpoint, error_event, import_request,
+    parse_chat, parse_import, parse_import_response, parse_site_recipe, site_recipe_url, sse_event,
+    stream_endpoint, unknown_recipe,
 };
 use futures_util::{
     StreamExt,
@@ -26,6 +26,9 @@ use crate::{
 
 const KV_BINDING: &str = "RATE_LIMIT";
 const KV_TTL_SECONDS: u64 = 2 * limits::WINDOW_SECONDS;
+/// Set when every model stayed busy, so the site can warn a cook before they ask.
+const BUSY_KEY: &str = "gemini:busy";
+const BUSY_SECONDS: u64 = 120;
 
 fn text_var(env: &Env, name: &str) -> Option<String> {
     env.var(name).ok().map(|v| v.to_string())
@@ -108,6 +111,9 @@ pub async fn handle(mut req: Request, env: Env) -> Result<Response> {
 
 async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, ApiError> {
     let path = req.path();
+    if path.trim_end_matches('/') == "/status" {
+        return status(env).await;
+    }
     let kind = match path.trim_end_matches('/') {
         "/chat" => Route::Chat,
         "/import" => Route::Import,
@@ -156,13 +162,13 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
                 found => found?,
             };
             let request = chat_request(&config, &recipe, &input.history, &input.question);
-            let upstream = gemini(env, &config, &request, true).await?;
-            return relay(upstream).map_err(|_| unavailable());
+            let key = gemini_key(env)?;
+            return answer(env.clone(), &config, request, key).map_err(|_| unavailable());
         }
         Route::Import => {
             let text = parse_import(declared, &body)?;
             let request = import_request(&config, &text);
-            let mut upstream = gemini(env, &config, &request, false).await?;
+            let mut upstream = gemini(env, &config, &request).await?;
             let answer = upstream
                 .text()
                 .await
@@ -277,26 +283,62 @@ async fn human(req: &Request, env: &Env) -> std::result::Result<(), ApiError> {
     }
 }
 
-/// Relays Gemini's streamed answer to the browser as `delta` events and a closing `done`, or an
-/// `error` event when the answer breaks off.
-fn relay(mut upstream: Response) -> Result<Response> {
-    let chunks = upstream.stream()?;
-    let events = stream::unfold(
-        Some((chunks, Relay::new())),
-        |state: Option<(ByteStream, Relay)>| async move {
-            let (mut chunks, mut relay) = state?;
-            let (out, more) = match chunks.next().await {
-                Some(Ok(bytes)) => (relay.push(&bytes), true),
-                Some(Err(error)) => {
-                    console_error!("gemini: the stream broke off: {error}");
-                    (relay.fail(&AiError::Unavailable), false)
+enum Phase {
+    /// Asking the model at this place in the list.
+    Asking(usize, GeminiRequest),
+    /// Relaying that model's streamed answer.
+    Answering(ByteStream, Relay),
+}
+
+/// Answers a question as server-sent events, starting at once so the cook hears what is going on:
+/// a `status` event `{ state: "fallback" }` when the main model is too busy and a lighter one is
+/// asked instead, then `delta` events and a closing `done`, or an `error` event.
+fn answer(
+    env: Env,
+    config: &GeminiConfig,
+    request: GeminiRequest,
+    key: String,
+) -> Result<Response> {
+    let models: Vec<String> = config.models().into_iter().map(str::to_owned).collect();
+    let events = stream::unfold(Some(Phase::Asking(0, request)), move |phase| {
+        let (env, models, key) = (env.clone(), models.clone(), key.clone());
+        async move {
+            let (out, next) = match phase? {
+                Phase::Asking(at, mut request) => {
+                    match ask_model(&key, &models[at], &mut request, true).await {
+                        Ok(mut upstream) => match upstream.stream() {
+                            Ok(chunks) => {
+                                (String::new(), Some(Phase::Answering(chunks, Relay::new())))
+                            }
+                            Err(_) => (error_event(&AiError::Unavailable), None),
+                        },
+                        Err(error) if try_next(&error) && at + 1 < models.len() => (
+                            sse_event("status", &json!({ "state": "fallback" })),
+                            Some(Phase::Asking(at + 1, request)),
+                        ),
+                        Err(error) => {
+                            if error.is_retryable() {
+                                mark_busy(&env).await;
+                            }
+                            (error_event(&error), None)
+                        }
+                    }
                 }
-                None => (relay.end(), false),
+                Phase::Answering(mut chunks, mut relay) => match chunks.next().await {
+                    Some(Ok(bytes)) => {
+                        let out = relay.push(&bytes);
+                        (out, Some(Phase::Answering(chunks, relay)))
+                    }
+                    Some(Err(error)) => {
+                        console_error!("gemini: the stream broke off: {error}");
+                        (relay.fail(&AiError::Unavailable), None)
+                    }
+                    None => (relay.end(), None),
+                },
             };
-            let next = more.then_some((chunks, relay));
             Some((Ok::<Vec<u8>, worker::Error>(out.into_bytes()), next))
-        },
-    );
+        }
+    });
     let mut response = Response::from_stream(events)?;
     let headers = response.headers_mut();
     headers.set("Content-Type", "text/event-stream; charset=utf-8")?;
@@ -308,6 +350,27 @@ fn relay(mut upstream: Response) -> Result<Response> {
 /// then is stuck, not slow, and a cook should not be left watching "Thinking..." for minutes.
 const REPLY_WITHIN: Duration = Duration::from_secs(25);
 
+/// A cheap check the site makes when the sous-chef opens: no Gemini call, only whether the last
+/// questions found every model busy. Reaching it at all also tells the site the Worker is up.
+async fn status(env: &Env) -> std::result::Result<Response, ApiError> {
+    let busy = match env.kv(KV_BINDING) {
+        Ok(kv) => kv.get(BUSY_KEY).text().await.ok().flatten().is_some(),
+        Err(_) => false,
+    };
+    let body = json!({ "gemini": if busy { "busy" } else { "ok" } }).to_string();
+    json_response(200, &body).map_err(|_| unavailable())
+}
+
+/// Remembers for a short while that Gemini is overloaded. Best effort: a failed write only means
+/// the next cook is not warned in advance.
+async fn mark_busy(env: &Env) {
+    if let Ok(kv) = env.kv(KV_BINDING)
+        && let Ok(put) = kv.put(BUSY_KEY, "1")
+    {
+        let _ = put.expiration_ttl(BUSY_SECONDS).execute().await;
+    }
+}
+
 enum Refusal {
     /// The model does not take the thinking level that was asked for.
     Thinking,
@@ -316,65 +379,83 @@ enum Refusal {
     Ai(AiError),
 }
 
-/// Calls Gemini and returns its successful response unread. A busy model is asked again after a
-/// short, jittered wait, then the fallback model is tried, so several cooks asking at once are
-/// served in turn instead of being told the sous-chef is unavailable.
+fn gemini_key(env: &Env) -> std::result::Result<String, ApiError> {
+    env.secret("GEMINI_API_KEY")
+        .map(|key| key.to_string())
+        .map_err(|_| unavailable())
+}
+
+/// Whether the next model is worth trying after `error`: a busy, stuck or unknown model says
+/// nothing about the others.
+fn try_next(error: &AiError) -> bool {
+    error.is_retryable() || *error == AiError::UnknownModel
+}
+
+/// Asks one model, again after a short jittered wait while it is busy, and returns its successful
+/// response unread.
+async fn ask_model(
+    key: &str,
+    model: &str,
+    request: &mut GeminiRequest,
+    streamed: bool,
+) -> std::result::Result<Response, AiError> {
+    let url = if streamed {
+        stream_endpoint(model)
+    } else {
+        endpoint(model)
+    };
+    let mut last = AiError::Unavailable;
+    let mut attempt = 0;
+    while attempt < ATTEMPTS_PER_MODEL {
+        match send(key, &url, request).await {
+            Ok(response) => return Ok(response),
+            Err(Refusal::Thinking) => match request.without_thinking() {
+                Some(plain) => {
+                    console_error!("gemini: {model} refused the thinking level; asking without it");
+                    *request = plain;
+                }
+                None => return Err(AiError::Unavailable),
+            },
+            // Asking a stuck model again only doubles the wait.
+            Err(Refusal::Silent) => {
+                console_error!("gemini: {model} sent nothing within {REPLY_WITHIN:?}");
+                return Err(AiError::Unavailable);
+            }
+            Err(Refusal::Ai(error)) => {
+                console_error!("gemini: {model} attempt {} failed: {error:?}", attempt + 1);
+                if !error.is_retryable() {
+                    return Err(error);
+                }
+                last = error;
+                attempt += 1;
+                if attempt < ATTEMPTS_PER_MODEL {
+                    let wait = backoff_ms(attempt - 1, js_sys::Math::random());
+                    Delay::from(Duration::from_millis(wait)).await;
+                }
+            }
+        }
+    }
+    Err(last)
+}
+
+/// Calls Gemini for the importer: the main model, then the fallback when the main one is busy.
 async fn gemini(
     env: &Env,
     config: &GeminiConfig,
     request: &GeminiRequest,
-    streamed: bool,
 ) -> std::result::Result<Response, ApiError> {
-    let key = env
-        .secret("GEMINI_API_KEY")
-        .map_err(|_| unavailable())?
-        .to_string();
+    let key = gemini_key(env)?;
     let mut request = request.clone();
     let mut last = AiError::Unavailable;
     for model in config.models() {
-        let url = if streamed {
-            stream_endpoint(model)
-        } else {
-            endpoint(model)
-        };
-        let mut attempt = 0;
-        while attempt < ATTEMPTS_PER_MODEL {
-            match send(&key, &url, &request).await {
-                Ok(response) => return Ok(response),
-                Err(Refusal::Thinking) => match request.without_thinking() {
-                    Some(plain) => {
-                        console_error!(
-                            "gemini: {model} refused the thinking level; asking without it"
-                        );
-                        request = plain;
-                    }
-                    None => return Err(from_ai(&AiError::Unavailable)),
-                },
-                // Asking a stuck model again only doubles the wait; the fallback may still answer.
-                Err(Refusal::Silent) => {
-                    console_error!("gemini: {model} sent nothing within {REPLY_WITHIN:?}");
-                    last = AiError::Unavailable;
-                    break;
-                }
-                Err(Refusal::Ai(error)) => {
-                    console_error!("gemini: {model} attempt {} failed: {error:?}", attempt + 1);
-                    // An unknown model will not appear on a retry, but the fallback may still answer.
-                    if error == AiError::UnknownModel {
-                        last = error;
-                        break;
-                    }
-                    if !error.is_retryable() {
-                        return Err(from_ai(&error));
-                    }
-                    last = error;
-                    attempt += 1;
-                    if attempt < ATTEMPTS_PER_MODEL {
-                        let wait = backoff_ms(attempt - 1, js_sys::Math::random());
-                        Delay::from(Duration::from_millis(wait)).await;
-                    }
-                }
-            }
+        match ask_model(&key, model, &mut request, false).await {
+            Ok(response) => return Ok(response),
+            Err(error) if try_next(&error) => last = error,
+            Err(error) => return Err(from_ai(&error)),
         }
+    }
+    if last.is_retryable() {
+        mark_busy(env).await;
     }
     Err(from_ai(&last))
 }

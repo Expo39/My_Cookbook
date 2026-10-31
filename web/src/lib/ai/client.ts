@@ -29,10 +29,17 @@ export interface ImportResult {
 export interface ChatOptions {
 	/** Called with the answer so far each time more of it arrives. */
 	onText?: (text: string) => void;
+	/** Called when the main model is too busy and a lighter one is asked instead. */
+	onFallback?: () => void;
 	signal?: AbortSignal;
 }
 
+/** Whether the AI answered lately, as far as the service knows; asking it costs no question. */
+export type AiStatus = 'ok' | 'busy';
+
 export interface AiClient {
+	/** Throws when the service cannot be reached at all. */
+	status(signal?: AbortSignal): Promise<AiStatus>;
 	chat(request: ChatRequest, options?: ChatOptions): Promise<ChatReply>;
 	/** `proof` is `adminProof(secret)`; the server backend uses the session cookie instead. */
 	importRecipe(text: string, proof?: string): Promise<ImportResult>;
@@ -111,7 +118,7 @@ export async function chatPost(
 	url: string,
 	body: unknown,
 	init: RequestInit,
-	{ onText, signal }: ChatOptions = {}
+	{ onText, onFallback, signal }: ChatOptions = {}
 ): Promise<ChatReply> {
 	const response = await send(fetcher, url, body, { ...init, signal });
 	if (!response.headers.get('content-type')?.includes('text/event-stream') || !response.body) {
@@ -133,7 +140,9 @@ export async function chatPost(
 					error?: string;
 					message?: string;
 				};
-				if (event === 'delta' && parsed.text) {
+				if (event === 'status') {
+					onFallback?.();
+				} else if (event === 'delta' && parsed.text) {
 					text += parsed.text;
 					onText?.(text);
 				} else if (event === 'done') {
