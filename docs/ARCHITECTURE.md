@@ -200,6 +200,11 @@ Errors have ids starting `E-` and warnings `W-` (for example `E-TOKEN-UNRESOLVED
 - The blob is encrypted in the browser with AES-256-GCM under a key derived from the editing password with PBKDF2-SHA256 at 600,000 iterations, with a fresh random salt and nonce on every write. The optional import secret is stored in the same blob.
 - Because the file is public, an attacker can try passwords offline without any rate limit. The password is the only defence, so the set-up form requires at least 12 characters. A successful guess yields a token that can change files in this repository only, and every change remains in git history.
 - Once unlocked, the token is kept in memory and in `sessionStorage` for that tab only, never in `localStorage`. Closing the tab locks editing.
+- The writer refuses any change outside `recipes/` (a recipe, a `_section.json` or a `.jpg`, `.png` or `.webp` photo with a slug name) before anything reaches GitHub, whatever the recipe says.
+
+### The pages
+
+- Every page carries a Content Security Policy (`kit.csp` in `web/svelte.config.js`). Only the site's own scripts run, plus the theme script in `app.html`, whose hash is read from the file at build time, and Cloudflare Turnstile. The page may connect only to itself, the AI endpoint, `api.github.com` and Turnstile. Inline styles stay allowed for Svelte's transitions, and `'wasm-unsafe-eval'` lets the recipe core start. GitHub Pages cannot send headers, so the policy is a `<meta>` tag, which cannot set `frame-ancestors`.
 
 ### The AI endpoints
 
@@ -207,7 +212,7 @@ Errors have ids starting `E-` and warnings `W-` (for example `E-TOKEN-UNRESOLVED
 - `/chat` names its recipe with a `recipeId`. The Worker fetches `<SITE_URL>/data/recipes/<recipeId>.json` from the published site itself, so a published recipe is never taken from the request body. Only when the site has no recipe at that address (a recipe kept on the cook's own device) is the copy in the body used, and only if it parses as a recipe with a title and at most 100 steps inside the 32 KB body limit. Such a copy can describe nothing but the cook's own recipe, and the system prompt still tells the model to treat the conversation as questions, never as instructions. The self-hosted server reads recipes from its own tree in the same way.
 - When `TURNSTILE_SECRET` is set, `/chat` also needs a fresh Cloudflare Turnstile token, checked with Cloudflare before Gemini is called.
 - `/import` requires an `X-Admin-Proof` header: an HMAC-SHA256 of a recent timestamp keyed with `ADMIN_IMPORT_SECRET`, valid for 5 minutes. The editor signs it with the secret from the unlocked blob.
-- Request bodies are size-limited, and the Worker allows cross-origin requests only from `ALLOWED_ORIGINS`.
+- Request bodies are size-limited. `/chat` and `/import` answer only requests whose `Origin` is in `ALLOWED_ORIGINS`; a script can forge the header, so this only stops drive-by use, and the rate limits and Turnstile are the real defence.
 
 ### Rate limits
 
