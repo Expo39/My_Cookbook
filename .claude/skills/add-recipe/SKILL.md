@@ -30,7 +30,7 @@ Write it to match the house style:
 - **`summary`:** one or two sentences, 200 characters at most. Anything extra goes into `tips`.
 - **Amounts:**
   - Keep the units as written, but prefer metric. If the source uses cups, convert dry goods with the density of their `food` id, and put the original in `alt` only when that helps.
-  - Ranges are `{"min", "max"}`, e.g. "2-3 cloves".
+  - Ranges are `{"min", "max"}`, but only for counts, e.g. "2-3 cloves". A weight or volume takes one amount, the middle of the source's range ("100-150 g" becomes 125 g), because a wide range pushes the ingredient names out of line on the page. Say in a tip that the amounts are a guide when the source gave ranges.
   - Amounts like "Zest of 1 lemon" use `prefix`.
   - Lines with no amount ("Salt, to taste") have no `amount`. Use `"scale": "toTaste"` when the line says "to taste".
 - **Scaling mode per ingredient:**
@@ -71,4 +71,4 @@ Then propose the commit. Do not make it unless asked. The repo's format is `<typ
 - `content(recipes): add Pastizzi tal-Irkotta`
 - `content(recipes): update Beef Wellington`
 
-Recipes can also be added in the site itself: Settings > Unlock editing opens the admin editor, which runs the same checklist in the browser. This skill is the route from the terminal.
+Recipes can also be added in the site itself: Settings > For the cookbook's owner > Unlock editing opens the admin editor, which runs the same checklist in the browser. This skill is the route from the terminal.

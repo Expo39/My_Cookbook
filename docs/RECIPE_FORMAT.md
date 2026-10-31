@@ -94,6 +94,8 @@ flowchart TB
 
 Units: `g kg ml l tsp tbsp cup oz lb floz pinch`. With no unit the amount is a count, e.g. 2 eggs.
 
+Keep ranges for counts ("2-3 cloves"). Give a weight or volume one amount, the middle of the range: a wide range such as "100-150 g" pushes the ingredient names out of line on the page and on the share card. When the amounts are approximate, say so in a tip.
+
 ### Step
 `{ "heading"?: string, "text": string, "key"?: string, "time"?: { "active"?: minutes, "passive"?: minutes } }`. `heading` starts a titled stage of the method (e.g. "Day 1: the night before"); following steps belong to it until the next heading. The per-step time drives the "serve at" planner. Inline tokens in `text`:
 

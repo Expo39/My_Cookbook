@@ -3,16 +3,15 @@
 - **Header:** title (display 2.2-3rem), `titleLocal` in italic muted, meta row (prep / cook / rest / difficulty, numerals in `--font-num`), tags, favourite and share buttons.
 - **Servings bar:**
   - a tint panel with a minus/plus stepper (output in `--font-num` 1.15rem) and a multiplier menu (half, 2x, 3x)
-  - "I have..." scaling and a Metric/US switch
+  - "Scale another way" (a folded "I have..." and tin size), with an "i" in its bar that explains it without opening it, and a Metric/US switch
   - when scaled, the amounts that changed are shown in `--colour-primary`
-- **Desktop (>= 64rem):** two columns. Ingredients go in a sticky left column (`top: var(--space-5)`, 22rem wide); the method goes on the right with numbered steps.
-- **Tablet (>= 48rem):** the same two columns, without the sticky column.
+- **Tablet and desktop (>= 48rem):** two columns, the ingredients on the left (at most 22rem) and the method on the right with numbered steps. The whole page scrolls as one; the ingredients never scroll in a box of their own.
 - **Mobile:**
   - Ingredients | Method segmented tabs
   - a bottom action bar fixed at `padding-bottom: env(safe-area-inset-bottom)` holding Servings, Start cooking and Share
   - content is padded so nothing sits under the bar
 - **Ingredients:**
-  - a checkbox, then one left-aligned line: the amount (`--font-num`) in a slot at least `--amount-slot` (4.5rem) wide, then the item. A long item wraps back under the amount, and hints sit beneath in muted italics, also starting under the amount
+  - a checkbox, then one left-aligned line: the amount (`--font-num`) in a slot at least `--amount-slot` (4.5rem) wide, then the item, in a column of its own: a long item wraps under itself, never under the amount, and hints sit beneath it in muted italics
   - a line with no amount keeps the slot empty, so every item starts at the same place; a `toTaste` line shows "to taste" in the slot in muted italics
   - tapping an amount toggles it to the next unit of the chosen system (metric: g, kg; ml, l, tsp, tbsp. US: oz, lb; tsp, tbsp, cup, fl oz), wrapping back to the written unit
   - dashed `--colour-line` row rules; group names in uppercase labels
@@ -22,5 +21,8 @@
   - Scaling hints ("check from the original time", "cook in batches") appear as small warning-coloured notes under the affected step.
   - The chef's tip is a surface panel with an accent uppercase label.
 - **Update banner:** when the open recipe was redeployed, a sticky floating notice (surface, 4 px primary left rule, `--shadow-float`) says "This recipe was updated" with a primary "Show the new version" button and a muted close cross. It is held back while cook mode is open, and applying it keeps the servings, ticks, timers and list.
-- **Your own recipe:** the same page at `/mine?id=`, with a device note under the breadcrumb, an Edit button, and no share or JSON-LD.
+- **Your own recipe:** the same page at `/mine?id=`, with a device note under the breadcrumb, an Edit button and no JSON-LD. Share works, without the link.
+- **Share sheet:** a side-free dialog (bottom sheet on a phone, centred on a wide screen) titled "Share", opening straight onto the recipe card preview (`--shadow-float`, at most half the screen tall). Under it a checkbox "Send the whole recipe as text too", then a full-width primary **Send the card** (or **Copy the card** where the browser cannot send files) and a two-column grid of short buttons: Save image, Send the link (greyed out, with a muted note, for a recipe on the device), Copy as text, Print.
+- **Share card:** one portrait format. Every ingredient is shown in full: a long one wraps under itself, an amount too wide for its column joins the words, the text shrinks to `minLineScale`, then the list runs in two balanced columns (the amount column narrowed by `pairedAmountShare`). Only a list too long even for that ends in "+ N more".
 - **Footer:** related recipes as compact cards; "Ask the sous-chef" (when AI is configured) opens a side drawer on desktop and a bottom sheet on mobile. The sheet rides above the phone keyboard. While waiting, three bouncing primary dots read "Thinking...", then "Still thinking... N s" after 4 s; the answer then streams into its bubble behind a blinking caret. A failed question stays in the log, dashed and faded, beside a warning row with **Try again**.
+- **Sous-chef status:** as it opens, a tint notice with a warning edge says when the cook is offline (the question box is disabled), when the service cannot be reached (disabled, with **Check again**), or when the AI is in high demand (still enabled). While a lighter model takes over, the waiting bubble reads "High demand: switching to a lighter model...". Each answer ends with a small muted line naming its model, and the owner (editing unlocked) sees a notice when the main model has been retired.

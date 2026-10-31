@@ -20,24 +20,24 @@ Run everything from the repository root through `make`, which uses the dev conta
 
 ## Structure
 
-| Path                      | Contents                                                                                                                                             |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/routes/`             | the home page, the catch-all `[...path]` route for sections and recipes, `search`, `shopping-list`, `favourites`, `offline` and the editor at `edit` |
-| `src/lib/components/`     | the page components, with the editor's components in `admin/`                                                                                        |
-| `src/lib/data/`           | the data seams: `RecipeSource` and `RecipeWriter`, with static, GitHub and server implementations                                                    |
-| `src/lib/core/`           | the typed wrapper over the WASM bindings                                                                                                             |
-| `src/lib/admin/`          | the editor's session, encryption, GitHub client, form model and drafts                                                                               |
-| `src/lib/ai/`             | the AI client, for the Worker or the server, and the import proof                                                                                    |
-| `src/lib/recipe/`         | the recipe view model and the URL view state                                                                                                         |
-| `src/lib/kitchen/`        | the shopping list, timers, the planner, wake lock and sharing text                                                                                   |
-| `src/lib/card/`           | the browser-drawn share card, from `assets/card-layout.json`                                                                                         |
-| `src/lib/seo/`            | `Recipe` JSON-LD and site metadata                                                                                                                   |
-| `src/lib/stores/`         | on-device state: favourites, recently viewed, notes, ticks, timers, the shopping list, theme and preferences                                         |
-| `src/lib/styles/`         | the design tokens, base styles and editor styles                                                                                                     |
-| `src/lib/types/recipe.ts` | the generated TypeScript types                                                                                                                       |
-| `src/service-worker.ts`   | the offline cache                                                                                                                                    |
-| `e2e/`                    | the Playwright suite                                                                                                                                 |
-| `scripts/`                | `gen-icons.mjs`, `gen-types.mjs` and `serve-build.mjs`                                                                                               |
+| Path                      | Contents                                                                                                                                                                                                                            |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/routes/`             | the home page, the catch-all `[...path]` route for sections and recipes, `search`, `shopping-list`, `favourites`, `mine` (your own recipes), `how-to-use` (the guide and questions and answers), `offline` and the editor at `edit` |
+| `src/lib/components/`     | the page components, with the editor's components in `admin/`                                                                                                                                                                       |
+| `src/lib/data/`           | the data seams: `RecipeSource` and `RecipeWriter`, with static, GitHub, server and on-device implementations, and the export                                                                                                        |
+| `src/lib/core/`           | the typed wrapper over the WASM bindings                                                                                                                                                                                            |
+| `src/lib/admin/`          | the editor's session, encryption, GitHub client, form model, drafts, the written ingredient list and the plain-words checks                                                                                                         |
+| `src/lib/ai/`             | the AI client, for the Worker or the server, with the status check and Turnstile, and the import proof                                                                                                                              |
+| `src/lib/recipe/`         | the recipe view model and the URL view state                                                                                                                                                                                        |
+| `src/lib/kitchen/`        | the shopping list, timers, the planner, wake lock and sharing text                                                                                                                                                                  |
+| `src/lib/card/`           | the browser-drawn share card, from `assets/card-layout.json`                                                                                                                                                                        |
+| `src/lib/seo/`            | `Recipe` JSON-LD and site metadata                                                                                                                                                                                                  |
+| `src/lib/stores/`         | on-device state: favourites, recently viewed, notes, ticks, timers, the shopping list, your own recipes, the storage notice, theme and preferences                                                                                  |
+| `src/lib/styles/`         | the design tokens, base styles and editor styles                                                                                                                                                                                    |
+| `src/lib/types/recipe.ts` | the generated TypeScript types                                                                                                                                                                                                      |
+| `src/service-worker.ts`   | the offline cache                                                                                                                                                                                                                   |
+| `e2e/`                    | the Playwright suite                                                                                                                                                                                                                |
+| `scripts/`                | `gen-icons.mjs`, `gen-types.mjs` and `serve-build.mjs`                                                                                                                                                                              |
 
 ## Data seams
 

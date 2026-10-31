@@ -103,6 +103,7 @@ Two things limit the exposure:
 
 - The token is scoped to one repository and to Contents only. It cannot read other repositories, change settings or see secrets.
 - Once unlocked, the token is held in memory and in `sessionStorage` for that tab. It is never written to `localStorage`.
+- The editor refuses to save any file outside `recipes/` (a recipe, a section file or a photo), so even a tampered recipe cannot make it write elsewhere in the repository.
 
 If the password may have been guessed, revoke the token on GitHub immediately, create a new one and set up again. Deleting `web/static/admin.json` removes the old copy from the site, though not from git history.
 
