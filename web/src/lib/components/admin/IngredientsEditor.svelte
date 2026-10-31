@@ -29,6 +29,10 @@
 
 	const groups = $derived(ed.form.groups);
 
+	const PLACEHOLDER = ['400 g plain flour', '2 eggs', '1 lemon, zested', 'salt to taste'].join(
+		'\n'
+	);
+
 	/** Stays in view while the cook types, unlike the placeholder. */
 	const EXAMPLES = [
 		['400 g plain flour', 'an amount, then the ingredient'],
@@ -231,7 +235,7 @@
 						id={fieldId('ingredientGroups')}
 						class="control list"
 						rows="10"
-						placeholder={'400 g plain flour\n2 eggs\n1 lemon, zested\nsalt to taste'}
+						placeholder={PLACEHOLDER}
 						disabled={!ed.coreReady}
 						bind:value={text}
 						oninput={typed}

@@ -61,3 +61,6 @@ web/static/icons/
 # built from recipes/ by `make cards` and `make data`
 web/static/cards/
 web/static/img/
+
+# Wrangler keeps account details and build caches here.
+.wrangler/
