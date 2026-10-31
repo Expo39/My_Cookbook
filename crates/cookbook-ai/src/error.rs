@@ -17,7 +17,7 @@ pub enum AiError {
     Truncated,
     #[error("The sous-chef had nothing to say. Please try again.")]
     Empty,
-    #[error("The sous-chef is busy at the moment. Try again in a few minutes.")]
+    #[error("The sous-chef is unavailable due to high demand. Try again in a few minutes.")]
     Unavailable,
     #[error("Lots of cooks are asking at once. Try again in a minute.")]
     Busy,

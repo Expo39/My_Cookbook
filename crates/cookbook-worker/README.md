@@ -8,7 +8,8 @@ The static site uses the Worker when `ai.endpoint` in `cookbook.config.json` (or
 
 | route | auth | body | success |
 |---|---|---|---|
-| `POST /chat` | per-IP limit, and a Turnstile token when `TURNSTILE_SECRET` is set | `{ recipeId, history, question, recipe? }`, at most 32 KB; `recipe` is read only when the site has no recipe at `recipeId` | a `text/event-stream`: `delta` events `{ text }`, then `done` `{ truncated }`, or an `error` event `{ error, message }` |
+| `POST /chat` | per-IP limit, and a Turnstile token when `TURNSTILE_SECRET` is set | `{ recipeId, history, question, recipe? }`, at most 32 KB; `recipe` is read only when the site has no recipe at `recipeId` | a `text/event-stream`, started at once: a `status` event `{ state: "fallback" }` when the main model stays busy and `GEMINI_FALLBACK_MODEL` is asked instead, `delta` events `{ text }`, then `done` `{ truncated }`, or an `error` event `{ error, message }` |
+| `GET /status` | none | nothing | `{ gemini: "ok" \| "busy" }`, "busy" for two minutes after every model stayed busy. It never calls Gemini; the site asks it when the sous-chef opens, and treats no answer as the Worker being unreachable |
 | `POST /import` | `X-Admin-Proof` header | `{ text }`, at most 20 KB | `{ recipe, checks }` |
 | `OPTIONS *` | none | none | 204 with the CORS headers |
 

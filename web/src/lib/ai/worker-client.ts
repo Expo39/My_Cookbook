@@ -4,6 +4,7 @@ import {
 	chatPost,
 	post,
 	type AiClient,
+	type AiStatus,
 	type ChatOptions,
 	type ChatReply,
 	type ChatRequest,
@@ -25,6 +26,14 @@ export class WorkerClient implements AiClient {
 		this.#endpoint = endpoint.replace(/\/$/, '');
 		this.#fetch = fetcher;
 		this.#human = human;
+	}
+
+	async status(signal?: AbortSignal): Promise<AiStatus> {
+		const response = await this.#fetch(`${this.#endpoint}/status`, { signal, cache: 'no-store' });
+		if (!response.ok)
+			throw new AiError('The sous-chef cannot be reached.', 'unreachable', response.status);
+		const { gemini } = (await response.json()) as { gemini?: string };
+		return gemini === 'busy' ? 'busy' : 'ok';
 	}
 
 	async chat(request: ChatRequest, options?: ChatOptions): Promise<ChatReply> {

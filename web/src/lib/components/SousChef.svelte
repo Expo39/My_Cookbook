@@ -30,10 +30,36 @@
 	let sending = $state(false);
 	let error = $state('');
 	let seconds = $state(0);
+	/** A lighter model is answering because the main one is too busy. */
+	let lighter = $state(false);
 	let controller: AbortController | undefined;
+
+	/**
+	 * Whether the sous-chef can answer, checked the moment it opens so a cook knows before asking.
+	 * Only "offline" and "unreachable" stop a question; everything else in the cookbook works regardless.
+	 */
+	type Reach = 'checking' | 'ready' | 'busy' | 'offline' | 'unreachable';
+	let reach = $state<Reach>('checking');
+	const blocked = $derived(reach === 'offline' || reach === 'unreachable');
+	const CHECK_MILLISECONDS = 5000;
+
+	async function check() {
+		if (!navigator.onLine) {
+			reach = 'offline';
+			return;
+		}
+		reach = 'checking';
+		try {
+			const status = await client.status(AbortSignal.timeout(CHECK_MILLISECONDS));
+			reach = status === 'busy' ? 'busy' : 'ready';
+		} catch {
+			reach = navigator.onLine ? 'unreachable' : 'offline';
+		}
+	}
 
 	export function show() {
 		dialog.showModal();
+		void check();
 	}
 
 	async function toEnd() {
@@ -45,7 +71,7 @@
 
 	async function ask(text: string) {
 		const asked = text.trim();
-		if (!asked || sending) return;
+		if (!asked || sending || blocked) return;
 		// A question that got no answer is dropped from what the sous-chef reads, and from the log.
 		messages = messages.filter((message) => !message.failed);
 		const history = messages.map(({ role, text }) => ({ role, text }));
@@ -55,6 +81,7 @@
 		error = '';
 		sending = true;
 		seconds = 0;
+		lighter = false;
 		const clock = setInterval(() => seconds++, 1000);
 		void toEnd();
 		try {
@@ -67,6 +94,7 @@
 						{ recipeId, recipe, history, question: asked },
 						{
 							signal: controller.signal,
+							onFallback: () => (lighter = true),
 							onText: (sofar) => {
 								if (messages.length === answer) {
 									messages.push({ role: 'model', text: '', streaming: true });
@@ -78,6 +106,7 @@
 					);
 					if (messages.length === answer) messages.push({ role: 'model', text: '' });
 					messages[answer] = { role: 'model', text: reply.reply, truncated: reply.truncated };
+					reach = 'ready';
 					return;
 				} catch (failure) {
 					const started = messages.length > answer;
@@ -91,6 +120,11 @@
 						isRetryable(failure);
 					if (!retry) {
 						messages[asking].failed = true;
+						if (failure instanceof AiError && failure.code === 'offline') {
+							reach = navigator.onLine ? 'unreachable' : 'offline';
+						} else if (failure instanceof AiError && isRetryable(failure)) {
+							reach = 'busy';
+						}
 						error = timedOut
 							? 'The sous-chef is taking too long to answer. Try again.'
 							: failure instanceof AiError
@@ -127,6 +161,16 @@
 			void ask(question);
 		}
 	}
+
+	onMount(() => {
+		const changed = () => dialog.open && void check();
+		window.addEventListener('online', changed);
+		window.addEventListener('offline', changed);
+		return () => {
+			window.removeEventListener('online', changed);
+			window.removeEventListener('offline', changed);
+		};
+	});
 
 	/*
 	 * A phone keyboard covers the bottom of the page in browsers that do not resize the layout for it
@@ -168,6 +212,35 @@
 			Answers come from AI and may be wrong. Check times and temperatures yourself.
 		</p>
 
+		{#if reach === 'offline'}
+			<div class="reach" role="status">
+				<Icon name="wifiOff" size={20} />
+				<p>
+					<strong>You're offline.</strong> The sous-chef needs the internet. The recipe, timers and shopping
+					list all keep working.
+				</p>
+			</div>
+		{:else if reach === 'unreachable'}
+			<div class="reach" role="status">
+				<Icon name="alert" size={20} />
+				<p>
+					<strong>The sous-chef can't be reached right now.</strong> Everything else in the cookbook works
+					as normal.
+				</p>
+				<button type="button" class="retry" onclick={check}>
+					<Icon name="reset" size={18} />Check again
+				</button>
+			</div>
+		{:else if reach === 'busy'}
+			<div class="reach" role="status">
+				<Icon name="clock" size={20} />
+				<p>
+					<strong>The AI is in high demand right now.</strong> Answers may come from a lighter model,
+					or not at all. If so, try again in a few minutes.
+				</p>
+			</div>
+		{/if}
+
 		<ol class="log" role="log" aria-label="Conversation" bind:this={log}>
 			{#each messages as message, i (i)}
 				<li class={message.role} class:failed={message.failed}>
@@ -185,8 +258,11 @@
 					<ul>
 						{#each suggestions as suggestion (suggestion)}
 							<li>
-								<button type="button" class="chip" onclick={() => ask(suggestion)}
-									>{suggestion}</button
+								<button
+									type="button"
+									class="chip"
+									disabled={blocked}
+									onclick={() => ask(suggestion)}>{suggestion}</button
 								>
 							</li>
 						{/each}
@@ -199,7 +275,9 @@
 					<p>
 						<span class="dots" aria-hidden="true"><span></span><span></span><span></span></span>
 						<span>
-							{#if seconds < PATIENT_SECONDS}
+							{#if lighter}
+								High demand: switching to a lighter model...
+							{:else if seconds < PATIENT_SECONDS}
 								Thinking...
 							{:else}
 								Still thinking... <span class="num">{seconds}</span>&nbsp;s
@@ -229,9 +307,10 @@
 					rows="2"
 					maxlength="1000"
 					bind:value={question}
+					disabled={blocked}
 					onkeydown={enter}
 				></textarea>
-				<button type="submit" class="send" disabled={sending || !question.trim()}>
+				<button type="submit" class="send" disabled={sending || blocked || !question.trim()}>
 					<Icon name="send" />Send
 				</button>
 			</div>
@@ -265,9 +344,10 @@
 		background: var(--colour-scrim);
 	}
 
+	/* A column whose conversation takes the room left, whichever notices sit above or below it. */
 	.panel {
-		display: grid;
-		grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+		display: flex;
+		flex-direction: column;
 		gap: var(--space-3);
 		min-block-size: 0;
 		padding: var(--space-4) var(--space-4) max(var(--space-4), env(safe-area-inset-bottom, 0px));
@@ -285,6 +365,7 @@
 	}
 
 	.log {
+		flex: 1;
 		display: grid;
 		align-content: start;
 		gap: var(--space-3);
@@ -409,6 +490,27 @@
 
 	.retry {
 		flex: none;
+	}
+
+	.reach {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		gap: var(--space-2) var(--space-3);
+		padding: var(--space-3);
+		border-inline-start: 3px solid var(--colour-warning);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+		font-size: var(--text-s);
+	}
+
+	.reach > :global(svg) {
+		flex: none;
+		color: var(--colour-warning);
+	}
+
+	.reach p {
+		flex: 1 1 14rem;
 	}
 
 	label {

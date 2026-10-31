@@ -3,6 +3,7 @@ import {
 	chatPost,
 	post,
 	type AiClient,
+	type AiStatus,
 	type ChatOptions,
 	type ChatReply,
 	type ChatRequest,
@@ -17,6 +18,11 @@ export class ServerClient implements AiClient {
 	constructor(base = '', fetcher: typeof fetch = fetch) {
 		this.#prefix = `${base}/api/ai`;
 		this.#fetch = fetcher;
+	}
+
+	/** The server is the site's own origin, so it is reachable whenever this page is. */
+	status(): Promise<AiStatus> {
+		return Promise.resolve('ok');
 	}
 
 	chat(request: ChatRequest, options?: ChatOptions): Promise<ChatReply> {
