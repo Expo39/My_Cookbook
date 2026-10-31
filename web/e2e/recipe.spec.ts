@@ -144,14 +144,15 @@ test('oven temperatures follow the units and carry the gas mark', async ({ page 
 test('scaling to a pan and by an ingredient work from the extra controls', async ({ page }) => {
 	await page.goto('desserts/french-classics/creme-brulee');
 	await waitForCore(page);
+	await expect(page.getByRole('button', { name: 'What is scaling another way?' })).toBeVisible();
 	await page.getByText('Scale another way').click();
-	await page.getByLabel('Amount').fill('1000');
-	await page.getByLabel('Unit').selectOption('ml');
+	await page.getByLabel('Amount', { exact: true }).fill('1000');
+	await page.getByLabel('Unit', { exact: true }).selectOption('ml');
 	await page.getByRole('button', { name: 'Scale to this' }).click();
 	await expect(page.getByText('Scaled x2')).toBeVisible();
 	await expect(page).toHaveURL(/have=double-cream:1000ml/);
 
-	await page.getByLabel('Amount').fill('');
+	await page.getByLabel('Amount', { exact: true }).fill('');
 	await page.getByRole('button', { name: 'Scale to this' }).click();
 	await expect(page.getByText('Enter an amount above zero.')).toBeVisible();
 });

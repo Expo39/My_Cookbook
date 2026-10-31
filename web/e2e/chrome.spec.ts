@@ -54,20 +54,21 @@ test('the back-to-top button appears after scrolling and works', async ({ page }
 	await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
 });
 
-test('the ingredients column stays in view while the method scrolls on a wide screen', async ({
+test('on a wide screen the ingredients scroll with the page, not in a box of their own', async ({
 	page
 }) => {
 	await page.setViewportSize({ width: 1280, height: 800 });
 	await page.goto(wellington);
 	await expect(page.getByRole('tablist')).toBeHidden();
 	const column = page.locator('[id$="panel-ingredients"]');
-	await method(page)
-		.getByRole('heading', { name: 'Day 2: assembly, 3-4 hours before serving' })
-		.scrollIntoViewIfNeeded();
-	await page.evaluate(() => scrollBy(0, 300));
-	const box = await column.boundingBox();
-	expect(box?.y).toBeGreaterThanOrEqual(0);
-	expect(box?.y).toBeLessThan(40);
+	const style = await column.evaluate((element) => {
+		const { position, overflowY } = getComputedStyle(element);
+		return { position, overflowY };
+	});
+	expect(style).toEqual({ position: 'static', overflowY: 'visible' });
+	const before = (await column.boundingBox())?.y ?? 0;
+	await page.evaluate(() => scrollBy(0, 600));
+	expect((await column.boundingBox())?.y ?? 0).toBeLessThan(before - 500);
 });
 
 test('the print view keeps the title, meta, ingredients and method only', async ({ page }) => {
@@ -99,4 +100,54 @@ test('the footer links to Instagram when the site config turns it on', async ({ 
 	await page.goto('./');
 	const link = page.getByRole('link', { name: /More recipes on Instagram/ });
 	await expect(link).toHaveAttribute('href', 'https://www.instagram.com/tonys_foods/');
+});
+
+test('settings are grouped into cards, the owner part is folded, and the page behind stays still', async ({
+	page
+}) => {
+	await page.goto('./');
+	await page.evaluate(() => scrollTo(0, 400));
+	// On a wide screen the header scrolls away; a click that scrolled back to it would hide the check.
+	await page
+		.getByRole('button', { name: 'Settings' })
+		.evaluate((button: HTMLElement) => button.click());
+	const drawer = page.getByRole('dialog', { name: 'Settings' });
+	for (const name of ['Look and units', 'Your recipes', 'Help']) {
+		await expect(drawer.getByRole('heading', { name })).toBeVisible();
+	}
+	await expect(drawer.getByRole('link', { name: 'Questions and answers' })).toBeVisible();
+	await expect(drawer.getByRole('button', { name: 'Set up editing' })).toBeHidden();
+	await expect(page.locator('html')).toHaveCSS('overflow', 'hidden');
+	await page.mouse.wheel(0, 800);
+	expect(await page.evaluate(() => scrollY)).toBe(400);
+	await page.keyboard.press('Escape');
+	await expect(page.locator('html')).not.toHaveCSS('overflow', 'hidden');
+	expect(await page.evaluate(() => scrollY)).toBe(400);
+});
+
+test('an info circle inside a folded box explains without opening the box', async ({ page }) => {
+	await page.setViewportSize({ width: 1280, height: 800 });
+	await page.goto('desserts/french-classics/creme-brulee');
+	const box = page.locator('details.more-details');
+	const info = page.getByRole('button', { name: 'What is scaling another way?' });
+	await info.click();
+	await expect(box).not.toHaveAttribute('open', '');
+	await expect(info).toHaveAttribute('aria-expanded', 'true');
+	await expect(info).toHaveCSS('cursor', 'pointer');
+});
+
+test('every page carries a content security policy that allows only the services it uses', async ({
+	page
+}) => {
+	await page.goto('./');
+	const policy = await page
+		.locator('meta[http-equiv="content-security-policy"]')
+		.getAttribute('content');
+	expect(policy).toContain("default-src 'self'");
+	expect(policy).toContain("object-src 'none'");
+	expect(policy).toMatch(
+		/script-src 'self' 'wasm-unsafe-eval' 'sha256-[^']+' https:\/\/challenges\.cloudflare\.com/
+	);
+	expect(policy).toMatch(/connect-src 'self' \S+workers\.dev https:\/\/api\.github\.com/);
+	expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
 });

@@ -289,13 +289,12 @@ test.describe('shopping list', () => {
 		await page.goto('shopping-list');
 
 		await page.getByRole('button', { name: 'Add an item' }).click();
-		await page.getByLabel('Item', { exact: true }).fill('lemons');
-		await page.getByLabel('Quantity').fill('2');
+		const box = page.getByLabel('What do you need?');
+		await expect(page.getByText('Ways to add something')).toBeVisible();
+		await box.fill('2 lemons');
 		await page.getByRole('button', { name: 'Add', exact: true }).click();
-		await page.getByLabel('Item', { exact: true }).fill('kitchen roll');
-		await page.getByRole('button', { name: 'Add a note' }).click();
-		await page.getByLabel('Note').fill('the big pack');
-		await page.getByLabel('Item', { exact: true }).press('Enter');
+		await box.fill('kitchen roll, the big pack');
+		await box.press('Enter');
 
 		const own = page.getByRole('region', { name: 'Added by you' });
 		await expect(own.getByRole('button', { name: /lemons: 2, change the amount/ })).toBeVisible();
@@ -304,7 +303,7 @@ test.describe('shopping list', () => {
 		);
 
 		await page.getByRole('heading', { name: 'Shopping list' }).click();
-		await expect(page.getByLabel('Item', { exact: true })).toHaveCount(0);
+		await expect(page.getByLabel('What do you need?')).toHaveCount(0);
 
 		await page.getByRole('button', { name: 'Remove egg yolks' }).click();
 		await expect(page.getByRole('listitem').filter({ hasText: 'egg yolks' })).toHaveCount(0);
@@ -314,6 +313,44 @@ test.describe('shopping list', () => {
 		await page.getByRole('button', { name: 'Remove lemons' }).click();
 		await page.reload();
 		await expect(page.getByRole('listitem').filter({ hasText: 'lemons' })).toHaveCount(0);
+	});
+
+	test('an amount can change unit too, and the editor keeps Done on its own row', async ({
+		page
+	}) => {
+		await page.goto('shopping-list');
+		await page.getByRole('button', { name: 'Add an item' }).click();
+		await page.getByLabel('What do you need?').fill('potatoes');
+		await page.getByLabel('What do you need?').press('Enter');
+		await page.getByRole('heading', { name: 'Shopping list' }).click();
+
+		const potatoes = page.getByRole('listitem').filter({ hasText: 'potatoes' });
+		await potatoes.getByRole('button', { name: 'potatoes: add an amount' }).click();
+		await potatoes.getByLabel('Amount of potatoes').fill('1.5');
+		await potatoes.getByLabel('Unit', { exact: true }).selectOption('kg');
+		const done = potatoes.getByRole('button', { name: 'Done' });
+		const unit = potatoes.getByLabel('Unit', { exact: true });
+		const [doneBox, unitBox] = [await done.boundingBox(), await unit.boundingBox()];
+		expect(Math.abs((doneBox?.y ?? 0) - (unitBox?.y ?? 99))).toBeLessThan(4);
+		await done.click();
+		await expect(
+			potatoes.getByRole('button', { name: /potatoes: 1.5 kg, change the amount/ })
+		).toBeVisible();
+		await page.reload();
+		await expect(potatoes.getByRole('button', { name: /1.5 kg/ })).toBeVisible();
+	});
+
+	test('pasting several lines adds each one, reading the amounts', async ({ page }) => {
+		await page.goto('shopping-list');
+		await page.getByRole('button', { name: 'Add an item' }).click();
+		const box = page.getByLabel('What do you need?');
+		await box.fill('2 kg potatoes\n6 eggs\nkitchen roll');
+		await page.getByRole('button', { name: 'Add', exact: true }).click();
+		const own = page.getByRole('region', { name: 'Added by you' });
+		await expect(own.getByRole('button', { name: /potatoes: 2 kg/ })).toBeVisible();
+		await expect(own.getByRole('button', { name: /eggs: 6/ })).toBeVisible();
+		await expect(own.getByRole('listitem').filter({ hasText: 'kitchen roll' })).toHaveCount(1);
+		await expect(box).toHaveValue('');
 	});
 
 	test('adding a recipe again updates it instead of doubling it', async ({ page }) => {

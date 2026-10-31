@@ -61,3 +61,37 @@ test('a misspelt query is offered the spelling the cookbook knows', async ({ pag
 	await expect(page.getByRole('main').getByLabel('Search recipes')).toHaveValue('wellington');
 	await expect(page.getByRole('link', { name: 'Beef Wellington' })).toBeVisible();
 });
+
+test('the search page shows how to search, and each example tries itself', async ({ page }) => {
+	await page.goto('search');
+	const guide = page.getByRole('heading', { name: 'How to search' }).locator('..');
+	await expect(guide).toBeVisible();
+	await guide.getByRole('button', { name: 'pasta tomato' }).click();
+	const field = page.getByRole('main').getByLabel('Search recipes', { exact: true });
+	await expect(field).toHaveValue('pasta tomato');
+	await expect(page.getByText(/recipes? found/)).toBeVisible();
+	await expect(guide).toBeHidden();
+
+	await field.fill('');
+	await page.getByRole('radio', { name: 'I have these ingredients' }).check({ force: true });
+	await page.getByRole('button', { name: 'eggs, flour, milk' }).click();
+	await expect(page.getByLabel('Ingredients you have', { exact: true })).toHaveValue(
+		'eggs, flour, milk'
+	);
+	await expect(page.getByText(/recipes? found/)).toBeVisible();
+});
+
+test('a comma in the name search offers the ingredients search instead', async ({ page }) => {
+	await page.goto('search?q=eggs%2C%20flour');
+	await expect(page.getByText('Looks like a list of ingredients.')).toBeVisible();
+	await page.getByRole('button', { name: 'Search by ingredients' }).click();
+	await expect(page.getByRole('radio', { name: 'I have these ingredients' })).toBeChecked();
+	await expect(page.getByText('Looks like a list of ingredients.')).toHaveCount(0);
+	await expect(page).toHaveURL(/m=have/);
+});
+
+test('the info circle explains the search in use', async ({ page }) => {
+	await page.goto('search');
+	await page.getByRole('button', { name: 'What is searching?' }).click();
+	await expect(page.getByText(/Several words find recipes with all of them/)).toBeAttached();
+});
