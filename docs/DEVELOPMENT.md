@@ -57,6 +57,7 @@ Every target runs inside the `dev` container unless noted.
 | `make shell` | Opens a bash shell in the `dev` container. |
 | `make ascii` | Fails on non-ASCII text outside accented letters, the degree sign and fraction glyphs. `make lint` runs it, and so does CI. |
 | `make worker-build` | Builds the Cloudflare Worker without deploying it. |
+| `make import-eval` | Runs the recipe importer on real Gemini over the samples in `crates/cookbook-ai/prompts/samples`, with the old short instruction and the current one, and prints errors, warnings, repairs, tokens and any numbers not in the source. Each import is saved in `web/test-results/import-eval`. It reads a Google AI Studio key from `.gemini-key` (git-ignored) and passes it only to the container. `IMPORT_MODEL=gemini-flash-lite-latest` picks another model; the free tier allows about fifteen requests a minute, so the run pauses between samples. |
 | `make server` | Runs `cookbook-server` in the `dev` container on port 8080, serving `web/build`. |
 | `make selfhost` | Builds and starts the `selfhost` service (`docker/server.Dockerfile`) on the host. |
 | `make hooks` | Sets `core.hooksPath` to `.githooks`, enabling the pre-push hook. Runs on the host. |

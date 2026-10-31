@@ -209,6 +209,15 @@ The full editor still has its **Photo** field for the cookbook's recipes, descri
 
 When the site has an AI endpoint (`ai.endpoint` in `cookbook.config.json`, `PUBLIC_AI_ENDPOINT`, or the self-hosted server with `GEMINI_API_KEY`), a new recipe has **Import from text**. Pasting any recipe text fills the form for review. Nothing is saved by the import, and the checklist runs on the result like any other recipe.
 
+The importer runs on Gemini's fast models, which follow explicit rules far better than they infer them, so it is guided and checked at every step:
+
+- **The house rules.** Gemini is given `crates/cookbook-ai/prompts/recipe-style.md` word for word, with a worked example (`example-input.txt` and `example-output.json`). The `add-recipe` skill follows the same file, so a recipe reads the same however it was added. A test keeps the worked example passing the checklist.
+- **A tight schema.** The answer must be JSON in the recipe's shape, every ingredient needs a name, and `food` can only be an id the density table knows.
+- **One repair round.** When the checklist finds errors, the answer is not JSON, or two or more ingredients the text gives with an amount are missing, the problems go back to Gemini once to fix. The better of the two answers is kept.
+- **Mending in code** (`crates/cookbook-ai/src/restore.rs`), comparing the answer with the pasted text: an amount the model dropped is put back from the text, read with the editor's own ingredient parser, and flagged with a warning to check (`W-IMPORT-AMOUNT`); a `{@key}` token stays only where the method repeats the amount; a size such as "23cm tin" taken for a temperature goes back to a number; times come only from the text's own labels ("Prep: 15 mins"); a tip must come from the text, and the "this amount is a guide" tip is written in code when a weight or volume range became its middle; `seasoning` and `fixed` scaling stay only on seasonings and per-item amounts; and a repeated line is dropped. Ingredients still missing after the repair are named in a warning (`W-IMPORT-MISSING`). Nothing is added that the text does not write.
+
+Review the form before saving all the same: a wrong amount that the text itself gives cannot be caught. `make import-eval` tries the importer on real Gemini (see [DEVELOPMENT.md](DEVELOPMENT.md#make-targets)).
+
 The importer is for the editor only. On GitHub Pages the Worker requires a proof signed with `ADMIN_IMPORT_SECRET`, so the same secret must be entered in the set-up form or under **Replace the token or AI secret**, where it is encrypted with the token. The Worker's rate limiter allows each visitor four requests a minute, and everyone together twenty. See [crates/cookbook-worker/README.md](../crates/cookbook-worker/README.md) for the Worker side.
 
 ## Self-hosted mode
