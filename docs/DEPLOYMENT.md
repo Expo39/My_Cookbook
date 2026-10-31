@@ -62,7 +62,7 @@ A full run takes about twelve minutes, most of it compiling and testing Rust. Wh
 
 CI takes the fast path when any of these holds:
 
-- a push touches only `recipes/` (and, optionally, docs and Markdown), which covers every save from the in-site editor;
+- a push touches only `recipes/` and the owner's key file `web/static/admin.json` (and, optionally, docs and Markdown), which covers every save from the in-site editor, every photo added from a recipe page, and setting up or replacing the token;
 - the commit message contains `[fast ci]`;
 - the pull request has the `fast-ci` label (adding or removing the label reruns CI in the matching mode);
 - a manual run is started in fast mode.
@@ -70,6 +70,12 @@ CI takes the fast path when any of these holds:
 To start a manual run: open the repository on GitHub, then **Actions > CI > Run workflow**, choose the branch (`main` to deploy), set **mode** to **fast** or **full**, and press **Run workflow**. A manual run on `main` deploys when it succeeds, in either mode. The mode is written in the run's summary.
 
 Use the fast path for content only. A change to code that skips the tests can still go live, which is exactly what the full run exists to prevent; the pre-push hook still runs `make test` locally either way.
+
+### A merged pull request is not tested twice
+
+When a push to `main` merges a pull request, the `changes` job looks for that pull request and compares trees: if the files on `main` are exactly those of the pull request's last commit, and CI succeeded on that commit, the push has nothing new to test. It then skips every test job, `content` included, and only runs `core-artifacts` and `build` to produce the site for the deploy (another run's build cannot be reused). The summary says "Already tested in the pull request".
+
+The files match whenever the branch was up to date with `main` when it was merged, so turning on **Require branches to be up to date before merging** in the ruleset (below) makes this the usual case. When they differ, for example because `main` moved on and the merge brought the two together, the push runs CI in full as before. A pull request that passed only the fast path (the `fast-ci` label) carries that choice over to `main`.
 
 - Deploys never run concurrently and are not cancelled part-way.
 
@@ -80,7 +86,7 @@ Nothing should reach `main` until everything passes.
 - **On GitHub:** in **Settings > Rules > Rulesets**, create a branch ruleset:
   1. Set **Enforcement status** to **Active** and target the default branch (`main`).
   2. Turn on **Require a pull request before merging**.
-  3. Turn on **Require status checks to pass** and add the **CI passed** check.
+  3. Turn on **Require status checks to pass** and add the **CI passed** check. Tick **Require branches to be up to date before merging**, so that a merge is exactly what its pull request tested and the push to `main` does not test it again.
   4. Turn on **Block force pushes**.
   5. Under **Bypass list**, choose **Add bypass**, tick **Repository admin**, and set it to **Always allow**. This is what lets the in-site editor, and **Share with everyone** in Settings, commit straight to `main`.
   6. Press **Save changes**.
