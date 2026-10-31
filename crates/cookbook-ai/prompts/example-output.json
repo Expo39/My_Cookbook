@@ -1,0 +1,60 @@
+{
+	"title": "Baked Ricotta Pasta",
+	"summary": "Rigatoni in a garlicky tomato sauce, baked under ricotta, Parmesan and lemon zest.",
+	"servings": 4,
+	"times": { "prep": 15, "cook": 35 },
+	"ingredientGroups": [
+		{
+			"name": "Pasta",
+			"items": [
+				{ "amount": { "qty": 400, "unit": "g" }, "item": "rigatoni" },
+				{
+					"key": "oil",
+					"food": "olive-oil",
+					"amount": { "qty": 1, "unit": "tbsp" },
+					"item": "olive oil"
+				},
+				{
+					"amount": { "qty": { "min": 2, "max": 3 } },
+					"item": "garlic cloves",
+					"note": "crushed",
+					"scale": "discrete"
+				},
+				{
+					"amount": { "qty": 1 },
+					"item": "tin of chopped tomatoes",
+					"note": "400 g",
+					"scale": "discrete"
+				},
+				{ "item": "salt and pepper", "scale": "toTaste" }
+			]
+		},
+		{
+			"name": "Topping",
+			"items": [
+				{ "amount": { "qty": 250, "unit": "g" }, "item": "ricotta" },
+				{ "amount": { "qty": 90, "unit": "g" }, "item": "Parmesan", "note": "grated" },
+				{ "prefix": "Zest of", "amount": { "qty": 1 }, "item": "lemon", "scale": "discrete" },
+				{ "item": "fresh basil", "note": "to serve", "optional": true }
+			]
+		}
+	],
+	"steps": [
+		{ "text": "Heat the oven to {temp:200/180}." },
+		{
+			"text": "Cook the rigatoni in a large pan of salted boiling water for {timer:10}, then drain."
+		},
+		{
+			"text": "Meanwhile, warm {@oil} in a frying pan and fry the garlic for {timer:1}. Add the tomatoes, season with salt and pepper, and simmer for {timer:10-12}."
+		},
+		{ "text": "Stir the pasta into the sauce and tip it into a baking dish." },
+		{
+			"text": "Mix the ricotta with half of the Parmesan and the lemon zest. Spoon it over the pasta and scatter the rest of the Parmesan on top."
+		},
+		{ "text": "Bake for {timer:15}, until golden. Scatter with the basil to serve." }
+	],
+	"tips": [
+		"The tomato sauce can be made a day ahead and kept in the fridge.",
+		"The amount of Parmesan is a guide: the recipe gave a range, so use more or less to taste."
+	]
+}

@@ -3,8 +3,8 @@ use std::time::Duration;
 use cookbook_ai::{
     ATTEMPTS_PER_MODEL, AiError, ApiError, GeminiConfig, Recipe, Relay, Request as GeminiRequest,
     Response as GeminiResponse, backoff_ms, chat_request, endpoint, error_event, import_request,
-    parse_chat, parse_import, parse_import_response, parse_site_recipe, site_recipe_url, sse_event,
-    stream_endpoint, unknown_recipe,
+    parse_chat, parse_import, parse_import_response, parse_site_recipe, repair_request,
+    review_import, settle_import, site_recipe_url, sse_event, stream_endpoint, unknown_recipe,
 };
 use futures_util::{
     StreamExt,
@@ -172,19 +172,21 @@ async fn route(req: &mut Request, env: &Env) -> std::result::Result<Response, Ap
         }
         Route::Import => {
             let text = parse_import(declared, &body)?;
-            let request = import_request(&config, &text);
-            let mut upstream = gemini(env, &config, &request).await?;
-            let answer = upstream
-                .text()
-                .await
-                .map_err(|_| from_ai(&AiError::Unavailable))?;
-            let reply = GeminiResponse::from_json(&answer)
-                .and_then(|response| response.reply())
-                .map_err(|e| from_ai(&e))?;
-            if reply.truncated {
-                return Err(from_ai(&AiError::Truncated));
-            }
-            let imported = parse_import_response(&reply.text).map_err(|e| from_ai(&e))?;
+            let answer = import_reply(env, &config, &import_request(&config, &text)).await?;
+            let first = review_import(&answer, &text);
+            // The checklist's errors, or an answer that would not parse, go back once for a repair.
+            let imported = match (first.problems, first.draft) {
+                (None, Some(draft)) => draft,
+                (problems, draft) => {
+                    let problems = problems.unwrap_or_default();
+                    let repair = repair_request(&config, &text, &answer, &problems);
+                    let repaired = match import_reply(env, &config, &repair).await {
+                        Ok(again) => parse_import_response(&again, &text),
+                        Err(_) => Err(AiError::Unavailable),
+                    };
+                    settle_import(draft, repaired, &text).map_err(|e| from_ai(&e))?
+                }
+            };
             json!({ "recipe": imported.recipe, "checks": imported.checks })
         }
     };
@@ -458,6 +460,26 @@ async fn ask_model(
         }
     }
     Err(last)
+}
+
+/// One import answer from Gemini, as the text of its JSON.
+async fn import_reply(
+    env: &Env,
+    config: &GeminiConfig,
+    request: &GeminiRequest,
+) -> std::result::Result<String, ApiError> {
+    let mut upstream = gemini(env, config, request).await?;
+    let answer = upstream
+        .text()
+        .await
+        .map_err(|_| from_ai(&AiError::Unavailable))?;
+    let reply = GeminiResponse::from_json(&answer)
+        .and_then(|response| response.reply())
+        .map_err(|e| from_ai(&e))?;
+    if reply.truncated {
+        return Err(from_ai(&AiError::Truncated));
+    }
+    Ok(reply.text)
 }
 
 /// Calls Gemini for the importer: the main model, then the fallback when the main one is busy.

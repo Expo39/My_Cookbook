@@ -1,6 +1,6 @@
 //! Reduces the recipe's JSON Schema to the OpenAPI subset that Gemini's `responseSchema` accepts.
 
-use cookbook_core::Recipe;
+use cookbook_core::{Recipe, food_ids};
 use serde_json::{Map, Value, json};
 
 /// Properties the importer does not ask for: they need the rest of the collection or open-ended maps.
@@ -38,7 +38,41 @@ pub fn import_schema() -> Value {
     if let Some(required) = schema.get_mut("required").and_then(Value::as_array_mut) {
         required.retain(|r| r.as_str().is_none_or(|r| !OMITTED.contains(&r)));
     }
+    limit_foods(&mut schema);
     schema
+}
+
+/// Ingredient objects are found by their `food` property. A free-text `food` lets a small model
+/// invent ids the density table does not know, so the schema offers only the ones it does; and
+/// `item` is required, so a line cannot come back as a nameless piece (an amount or a prefix alone).
+fn limit_foods(node: &mut Value) {
+    match node {
+        Value::Object(object) => {
+            let ingredient = object
+                .get("properties")
+                .is_some_and(|properties| properties.get("food").is_some());
+            if ingredient {
+                if let Some(food) = object
+                    .get_mut("properties")
+                    .and_then(|properties| properties.get_mut("food"))
+                    .and_then(Value::as_object_mut)
+                {
+                    food.insert("enum".into(), json!(food_ids().collect::<Vec<_>>()));
+                }
+                let required = object.entry("required").or_insert_with(|| json!([]));
+                if let Some(required) = required.as_array_mut()
+                    && !required.iter().any(|name| name == "item")
+                {
+                    required.push(json!("item"));
+                }
+            }
+            for child in object.values_mut() {
+                limit_foods(child);
+            }
+        }
+        Value::Array(items) => items.iter_mut().for_each(limit_foods),
+        _ => {}
+    }
 }
 
 fn resolve<'a>(node: &'a Value, defs: &'a Value) -> &'a Value {
@@ -206,6 +240,19 @@ mod tests {
         }
         let required = schema["required"].as_array().unwrap();
         assert!(required.iter().any(|r| r == "steps"));
+    }
+
+    #[test]
+    fn food_offers_only_the_ids_the_density_table_knows() {
+        let schema = import_schema();
+        let food = &schema["properties"]["ingredientGroups"]["items"]["properties"]["items"]["items"]
+            ["properties"]["food"];
+        let ids = food["enum"].as_array().unwrap();
+        assert!(ids.iter().any(|id| id == "olive-oil"));
+        assert!(
+            ids.iter()
+                .all(|id| cookbook_core::density(id.as_str().unwrap()).is_some())
+        );
     }
 
     #[test]
