@@ -3,10 +3,11 @@
 	import { onMount } from 'svelte';
 	import { admin } from '$lib/admin/session.svelte';
 	import { createWriter } from '$lib/data';
-	import { parseExport, toExport } from '$lib/data/local-export';
+	import { parseExport } from '$lib/data/local-export';
 	import { WriteError } from '$lib/data/writer';
 	import { editHref, mineHref } from '$lib/links';
 	import { chrome } from '$lib/stores/chrome.svelte';
+	import { backup } from '$lib/stores/backup.svelte';
 	import { personal } from '$lib/stores/personal.svelte';
 	import Modal from './admin/Modal.svelte';
 	import Icon from './Icon.svelte';
@@ -25,16 +26,16 @@
 	const handedOver = $derived(personal.list.filter((entry) => entry.shared));
 	const count = (n: number) => `${n} ${n === 1 ? 'recipe' : 'recipes'}`;
 
-	onMount(() => void personal.load());
+	onMount(() => {
+		void personal.load();
+		backup.load();
+	});
 
-	function download() {
-		const blob = new Blob([toExport(personal.list)], { type: 'application/json' });
-		const link = document.createElement('a');
-		link.href = URL.createObjectURL(blob);
-		link.download = `my-recipes-${new Date().toISOString().slice(0, 10)}.json`;
-		link.click();
-		setTimeout(() => URL.revokeObjectURL(link.href), 1000);
-	}
+	const lastBackup = $derived(
+		backup.saved
+			? `Last backup: ${new Date(backup.saved).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}.`
+			: 'Not backed up yet.'
+	);
 
 	async function upload(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
@@ -149,12 +150,12 @@
 		</a>
 		<div class="files">
 			{#if personal.list.length}
-				<button type="button" class="btn" onclick={download}>
-					<Icon name="download" size={18} />Export
+				<button type="button" class="btn" onclick={() => backup.save(personal.list)}>
+					<Icon name="download" size={18} />Save a backup
 				</button>
 			{/if}
 			<button type="button" class="btn" onclick={() => picker?.click()}>
-				<Icon name="upload" size={18} />Import
+				<Icon name="upload" size={18} />Restore a backup
 			</button>
 			<input
 				bind:this={picker}
@@ -164,6 +165,8 @@
 				onchange={upload}
 			/>
 		</div>
+
+		{#if personal.list.length}<p class="help">{lastBackup}</p>{/if}
 
 		{#if own.length}
 			<button type="button" class="btn danger" onclick={() => clearDialog?.show()}>
@@ -180,7 +183,7 @@
 
 <Modal bind:this={clearDialog} title="Clear all personal recipes?">
 	<p>
-		This deletes {count(own.length)} from this device for good. Export them first if you want to keep
+		This deletes {count(own.length)} from this device for good. Save a backup first if you want to keep
 		a copy.
 	</p>
 	<div class="buttons">
