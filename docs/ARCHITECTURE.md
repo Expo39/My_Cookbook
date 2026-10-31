@@ -213,8 +213,7 @@ Errors have ids starting `E-` and warnings `W-` (for example `E-TOKEN-UNRESOLVED
 
 | Endpoint | Limit |
 |---|---|
-| Worker `POST /chat` | 30 per hour per IP address (`RATE_LIMIT_CHAT`), fixed window in Workers KV |
-| Worker `POST /import` | 5 per hour per IP address (`RATE_LIMIT_IMPORT`) |
+| Worker `POST /chat` and `POST /import` | 4 a minute per IP address (`PER_VISITOR`) and 20 a minute for everyone together (`EVERYONE`), counted by Cloudflare's rate limiter with no KV writes; only requests from an allowed origin are served |
 | Server `POST /api/session` (sign-in) | 5 failed attempts per 15 minutes per address |
 | Server `POST /api/ai/chat` | 30 per hour per address |
 | Server `POST /api/ai/import` | 5 per hour per address |
