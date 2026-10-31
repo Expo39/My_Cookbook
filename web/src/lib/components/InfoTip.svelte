@@ -10,6 +10,19 @@
 
 	const id = $props.id();
 	let open = $state(false);
+
+	/**
+	 * The bubble starts at the "i" and runs right; near the screen's right edge it moves left just
+	 * enough to stay on screen, so it never runs off the page or makes it scroll sideways.
+	 */
+	function place(event: Event) {
+		const button = event.currentTarget as HTMLElement;
+		const margin = 16;
+		const width = Math.min(320, innerWidth * 0.8);
+		const left = button.getBoundingClientRect().left - 8;
+		const shift = Math.max(margin - left, Math.min(0, innerWidth - margin - (left + width)));
+		button.style.setProperty('--tip-shift', `${shift}px`);
+	}
 </script>
 
 <button
@@ -19,6 +32,8 @@
 	aria-expanded={open}
 	aria-controls={id}
 	data-tip={text}
+	onpointerenter={place}
+	onfocus={place}
 	onclick={(event) => {
 		// Inside a <summary> a click would also open or close its box; the "i" keeps it to itself.
 		event.preventDefault();
@@ -73,7 +88,7 @@
 			content: attr(data-tip);
 			position: absolute;
 			inset-block-start: calc(100% + var(--space-1));
-			inset-inline-start: calc(-1 * var(--space-2));
+			inset-inline-start: calc(-1 * var(--space-2) + var(--tip-shift, 0px));
 			z-index: 20;
 			inline-size: max-content;
 			max-inline-size: min(20rem, 80vw);

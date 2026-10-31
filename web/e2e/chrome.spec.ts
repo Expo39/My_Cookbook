@@ -151,3 +151,28 @@ test('every page carries a content security policy that allows only the services
 	expect(policy).toMatch(/connect-src 'self' \S+workers\.dev https:\/\/api\.github\.com/);
 	expect(policy).not.toMatch(/script-src[^;]*'unsafe-inline'/);
 });
+
+test("the owner's info bubbles stay on screen, and the drawer never scrolls sideways", async ({
+	page
+}) => {
+	await page.goto('./');
+	await page.getByRole('button', { name: 'Settings' }).click();
+	const drawer = page.getByRole('dialog', { name: 'Settings' });
+	await drawer.getByText("For the cookbook's owner").click();
+	const tips = drawer.getByRole('button', { name: /^What is/ });
+	await expect(tips.first()).toBeVisible();
+	const width = page.viewportSize()?.width ?? 0;
+	for (let i = 0; i < (await tips.count()); i++) {
+		await tips.nth(i).hover();
+		const right = await tips.nth(i).evaluate((button) => {
+			const bubble = getComputedStyle(button, '::after');
+			return (
+				button.getBoundingClientRect().left + parseFloat(bubble.left) + parseFloat(bubble.width)
+			);
+		});
+		expect(right).toBeLessThanOrEqual(width);
+		expect(await drawer.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+			true
+		);
+	}
+});
