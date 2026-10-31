@@ -58,11 +58,3 @@ export function fitLines(
 	}
 	return { size, lines: lines.map((line) => ellipsize(measure, face, size, line, max)) };
 }
-
-/** How many ingredient lines to show, and how many are left out. One line is spent on "+ n more". */
-export function ingredientWindow(total: number, fit: number, cap: number) {
-	const capacity = Math.min(fit, cap);
-	if (total <= capacity) return { shown: total, more: 0 };
-	if (capacity <= 1) return { shown: 0, more: total };
-	return { shown: capacity - 1, more: total - (capacity - 1) };
-}

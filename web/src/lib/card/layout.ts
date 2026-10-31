@@ -3,7 +3,7 @@
  * build-time renderer in `crates/cookbook-cli/src/cards/layout.rs` reads too, so both draw the same card.
  */
 import spec from '../../../../assets/card-layout.json';
-import { ellipsize, fitLines, ingredientWindow, type Face, type Measure } from './text';
+import { ellipsize, fitLines, wrap, type Face, type Measure } from './text';
 
 export const layout = spec;
 
@@ -98,6 +98,82 @@ const metaLine = (content: Content) =>
 	[content.total, content.serves].filter(Boolean).join('  |  ');
 
 const scaled = (sizes: number[], u: number) => sizes.map((size) => size * u);
+
+interface Placed {
+	amount: string;
+	parts: string[];
+	column: number;
+	row: number;
+}
+
+/**
+ * Where each ingredient goes on a sheet, shown in full: a long one wraps under itself, and an
+ * amount too wide for its column joins the words. The lines shrink a step at a time to a size that
+ * still reads, then the list runs in two balanced columns, keeping each ingredient's lines
+ * together. Only a list too long even for that ends in "+ N more".
+ */
+export function planList(lines: Line[], space: number, width: number, u: number, measure: Measure) {
+	const s = spec.sheet;
+	const columnGap = 2 * s.amountGap * u;
+	const attempt = (columns: number, scale: number, partial: boolean) => {
+		const size = s.lineSize * u * scale;
+		const step = s.lineStep * u * scale;
+		const gap = s.amountGap * u * scale;
+		const columnWidth = (width - (columns - 1) * columnGap) / columns;
+		const amountWidth = s.amountColumn * u * scale * (columns === 2 ? s.pairedAmountShare : 1);
+		const items = lines.map((line) => {
+			const fits = measure('num', size, line.amount) <= amountWidth;
+			const rest = fits || !line.amount ? line.rest : `${line.amount} ${line.rest}`;
+			return {
+				amount: fits ? line.amount : '',
+				parts: wrap(measure, 'body', size, rest, columnWidth - amountWidth - gap)
+			};
+		});
+		const rows = space > 0 ? Math.floor(space / step) : 0;
+		const total = items.reduce((sum, item) => sum + item.parts.length, 0);
+		const target = Math.min(rows, Math.ceil(total / columns));
+		const placed: Placed[] = [];
+		let column = 0;
+		let row = 0;
+		for (const item of items) {
+			const height = item.parts.length;
+			if (row > 0 && row + height > target && column < columns - 1) {
+				column += 1;
+				row = 0;
+			}
+			if (row + height > rows) {
+				if (!partial) return undefined;
+				break;
+			}
+			placed.push({ ...item, column, row });
+			row += height;
+		}
+		// A cut list keeps a line free for "+ N more".
+		while (placed.length < items.length && placed.length && row >= rows) {
+			const last = placed.pop() as Placed;
+			({ column, row } = last);
+		}
+		const more = items.length - placed.length;
+		return {
+			size,
+			step,
+			gap,
+			columnGap,
+			columnWidth,
+			amountWidth,
+			placed,
+			more,
+			moreAt: { column, row }
+		};
+	};
+	for (const columns of [1, 2]) {
+		for (let scale = 1; scale >= s.minLineScale - 1e-9; scale -= 0.05) {
+			const plan = attempt(columns, scale, false);
+			if (plan) return plan;
+		}
+	}
+	return attempt(2, s.minLineScale, true) as NonNullable<ReturnType<typeof attempt>>;
+}
 
 /** The operations for one card, in painting order. */
 export function compose(format: Format, content: Content, measure: Measure): Op[] {
@@ -233,49 +309,27 @@ function sheet(pen: Pen, format: Format, content: Content, measure: Measure) {
 	const qrBox = Math.round(s.qrBox * u);
 	const qrX = Math.round(w - margin - qrBox);
 	const qrY = Math.round(h - format.safeBottom - margin - qrBox);
-	// Every ingredient is shown: the lines shrink to fit, down to a size that still reads, then a
-	// long list runs in two columns. Only a list too long even for that ends in "+ N more".
-	const total = content.ingredients.length;
 	const space = qrY - s.footerGap * u - cursor;
-	const base = s.lineStep * u;
-	const columns = total * base * s.minLineScale > space ? 2 : 1;
-	const wanted = Math.max(Math.ceil(total / columns), 1) * base;
-	const scale = Math.min(1, Math.max(s.minLineScale, space / wanted));
-	const step = base * scale;
-	const rows = space > 0 ? Math.floor(space / step) : 0;
-	const { shown, more } = ingredientWindow(total, rows * columns, total);
-	const perColumn = Math.max(Math.ceil((shown + (more > 0 ? 1 : 0)) / columns), 1);
-
-	const lineSize = s.lineSize * u * scale;
-	const leading = step / lineSize;
-	const gap = s.amountGap * u * scale;
-	const columnGap = 2 * s.amountGap * u;
-	const columnWidth = (w - 2 * margin - (columns - 1) * columnGap) / columns;
-	const share = columns === 2 ? s.pairedAmountShare : 1;
-	const amountWidth = s.amountColumn * u * scale * share;
-	const slot = (i: number) => {
-		const left = margin + Math.floor(i / perColumn) * (columnWidth + columnGap);
-		const amountRight = left + amountWidth;
-		const restX = amountRight + gap;
-		return {
-			top: cursor + (i % perColumn) * step,
-			amountRight,
-			restX,
-			restWidth: left + columnWidth - restX
-		};
+	const list = planList(content.ingredients, space, w - 2 * margin, u, measure);
+	const leading = list.step / list.size;
+	const slot = (column: number) => {
+		const amountRight = margin + column * (list.columnWidth + list.columnGap) + list.amountWidth;
+		return { amountRight, restX: amountRight + list.gap };
 	};
-	content.ingredients.slice(0, shown).forEach((line, i) => {
-		const { top, amountRight, restX, restWidth } = slot(i);
-		if (line.amount) {
-			const amount = ellipsize(measure, 'num', lineSize, line.amount, amountWidth);
-			pen.text(amountRight, top, leading, amount, 'num', lineSize, p.ink, true);
-		}
-		const rest = ellipsize(measure, 'body', lineSize, line.rest, restWidth);
-		pen.text(restX, top, leading, rest, 'body', lineSize, p.ink);
-	});
-	if (more > 0) {
-		const { top, restX } = slot(shown);
-		pen.text(restX, top, leading, `+ ${more} more`, 'body', lineSize, p.muted);
+	for (const item of list.placed) {
+		const { amountRight, restX } = slot(item.column);
+		item.parts.forEach((part, k) => {
+			const top = cursor + (item.row + k) * list.step;
+			if (k === 0 && item.amount) {
+				pen.text(amountRight, top, leading, item.amount, 'num', list.size, p.ink, true);
+			}
+			pen.text(restX, top, leading, part, 'body', list.size, p.ink);
+		});
+	}
+	if (list.more > 0) {
+		const { restX } = slot(list.moreAt.column);
+		const top = cursor + list.moreAt.row * list.step;
+		pen.text(restX, top, leading, `+ ${list.more} more`, 'body', list.size, p.muted);
 	}
 
 	if (content.qr) {

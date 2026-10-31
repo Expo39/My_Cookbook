@@ -6,7 +6,7 @@ use std::collections::BTreeMap;
 use cookbook_core::QrMatrix;
 use serde::Deserialize;
 
-use super::text::{Face, Measure, ellipsize, fit_lines, ingredient_window};
+use super::text::{Face, Measure, ellipsize, fit_lines, wrap};
 
 pub const LAYOUT_JSON: &str = include_str!("../../../../assets/card-layout.json");
 
@@ -404,6 +404,131 @@ fn banner(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measu
     );
 }
 
+struct Placed {
+    amount: String,
+    parts: Vec<String>,
+    column: usize,
+    row: usize,
+}
+
+struct ListPlan {
+    size: f64,
+    step: f64,
+    gap: f64,
+    column_gap: f64,
+    column_width: f64,
+    amount_width: f64,
+    placed: Vec<Placed>,
+    more: usize,
+    more_at: (usize, usize),
+}
+
+/// Where each ingredient goes on a sheet, shown in full: a long one wraps under itself, and an
+/// amount too wide for its column joins the words. The lines shrink a step at a time to a size that
+/// still reads, then the list runs in two balanced columns, keeping each ingredient's lines
+/// together. Only a list too long even for that ends in "+ N more".
+fn plan_list(
+    s: &Sheet,
+    lines: &[Line],
+    space: f64,
+    width: f64,
+    u: f64,
+    measure: &dyn Measure,
+) -> ListPlan {
+    let column_gap = 2.0 * s.amount_gap * u;
+    let attempt = |columns: usize, scale: f64, partial: bool| -> Option<ListPlan> {
+        let size = s.line_size * u * scale;
+        let step = s.line_step * u * scale;
+        let gap = s.amount_gap * u * scale;
+        let column_width = (width - (columns - 1) as f64 * column_gap) / columns as f64;
+        let share = if columns == 2 {
+            s.paired_amount_share
+        } else {
+            1.0
+        };
+        let amount_width = s.amount_column * u * scale * share;
+        let items: Vec<(String, Vec<String>)> = lines
+            .iter()
+            .map(|line| {
+                let fits = measure.width(Face::Num, size, &line.amount) <= amount_width;
+                let rest = if fits || line.amount.is_empty() {
+                    line.rest.clone()
+                } else {
+                    format!("{} {}", line.amount, line.rest)
+                };
+                let amount = if fits {
+                    line.amount.clone()
+                } else {
+                    String::new()
+                };
+                let parts = wrap(
+                    measure,
+                    Face::Body,
+                    size,
+                    &rest,
+                    column_width - amount_width - gap,
+                );
+                (amount, parts)
+            })
+            .collect();
+        let rows = if space > 0.0 {
+            (space / step).floor() as usize
+        } else {
+            0
+        };
+        let total: usize = items.iter().map(|(_, parts)| parts.len()).sum();
+        let target = rows.min(total.div_ceil(columns));
+        let mut placed: Vec<Placed> = Vec::new();
+        let (mut column, mut row) = (0, 0);
+        for (amount, parts) in &items {
+            let height = parts.len();
+            if row > 0 && row + height > target && column < columns - 1 {
+                column += 1;
+                row = 0;
+            }
+            if row + height > rows {
+                if !partial {
+                    return None;
+                }
+                break;
+            }
+            placed.push(Placed {
+                amount: amount.clone(),
+                parts: parts.clone(),
+                column,
+                row,
+            });
+            row += height;
+        }
+        // A cut list keeps a line free for "+ N more".
+        while placed.len() < items.len() && row >= rows {
+            let Some(last) = placed.pop() else { break };
+            (column, row) = (last.column, last.row);
+        }
+        Some(ListPlan {
+            size,
+            step,
+            gap,
+            column_gap,
+            column_width,
+            amount_width,
+            more: items.len() - placed.len(),
+            placed,
+            more_at: (column, row),
+        })
+    };
+    for columns in [1, 2] {
+        let mut scale = 1.0;
+        while scale >= s.min_line_scale - 1e-9 {
+            if let Some(plan) = attempt(columns, scale, false) {
+                return plan;
+            }
+            scale -= 0.05;
+        }
+    }
+    attempt(2, s.min_line_scale, true).expect("a partial plan always exists")
+}
+
 fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measure) {
     let layout = pen.layout;
     let (s, p) = (&layout.sheet, &layout.palette);
@@ -533,86 +658,52 @@ fn sheet(pen: &mut Pen, format: &Format, content: &Content, measure: &dyn Measur
     let qr_box = (s.qr_box * u).round();
     let qr_x = (w - margin - qr_box).round();
     let qr_y = (h - format.safe_bottom - margin - qr_box).round();
-    // Every ingredient is shown: the lines shrink to fit, down to a size that still reads, then a
-    // long list runs in two columns. Only a list too long even for that ends in "+ N more".
-    let total = content.ingredients.len();
     let space = qr_y - s.footer_gap * u - cursor;
-    let base = s.line_step * u;
-    let columns = if total as f64 * base * s.min_line_scale > space {
-        2
-    } else {
-        1
+    let list = plan_list(s, &content.ingredients, space, w - 2.0 * margin, u, measure);
+    let leading = list.step / list.size;
+    let slot = |column: usize| {
+        let amount_right =
+            margin + column as f64 * (list.column_width + list.column_gap) + list.amount_width;
+        (amount_right, amount_right + list.gap)
     };
-    let wanted = total.div_ceil(columns).max(1) as f64 * base;
-    let scale = (space / wanted).clamp(s.min_line_scale, 1.0);
-    let step = base * scale;
-    let rows = if space > 0.0 {
-        (space / step).floor() as usize
-    } else {
-        0
-    };
-    let (shown, more) = ingredient_window(total, rows * columns, total);
-    let per_column = (shown + usize::from(more > 0)).div_ceil(columns).max(1);
-
-    let line_size = s.line_size * u * scale;
-    let leading = step / line_size;
-    let gap = s.amount_gap * u * scale;
-    let column_gap = 2.0 * s.amount_gap * u;
-    let column_width = (w - 2.0 * margin - (columns - 1) as f64 * column_gap) / columns as f64;
-    let share = if columns == 2 {
-        s.paired_amount_share
-    } else {
-        1.0
-    };
-    let amount_width = s.amount_column * u * scale * share;
-    // The top, the amount's right edge, the name's left edge and its width for line `i`.
-    let slot = |i: usize| {
-        let left = margin + (i / per_column) as f64 * (column_width + column_gap);
-        let amount_right = left + amount_width;
-        let rest_x = amount_right + gap;
-        (
-            cursor + (i % per_column) as f64 * step,
-            amount_right,
-            rest_x,
-            left + column_width - rest_x,
-        )
-    };
-    for (i, line) in content.ingredients.iter().take(shown).enumerate() {
-        let (top, amount_right, rest_x, rest_width) = slot(i);
-        if !line.amount.is_empty() {
-            let amount = ellipsize(measure, Face::Num, line_size, &line.amount, amount_width);
+    for item in &list.placed {
+        let (amount_right, rest_x) = slot(item.column);
+        for (k, part) in item.parts.iter().enumerate() {
+            let top = cursor + (item.row + k) as f64 * list.step;
+            if k == 0 && !item.amount.is_empty() {
+                pen.text(
+                    amount_right,
+                    top,
+                    leading,
+                    &item.amount,
+                    Face::Num,
+                    list.size,
+                    &p.ink,
+                    true,
+                );
+            }
             pen.text(
-                amount_right,
+                rest_x,
                 top,
                 leading,
-                &amount,
-                Face::Num,
-                line_size,
+                part,
+                Face::Body,
+                list.size,
                 &p.ink,
-                true,
+                false,
             );
         }
-        let rest = ellipsize(measure, Face::Body, line_size, &line.rest, rest_width);
-        pen.text(
-            rest_x,
-            top,
-            leading,
-            &rest,
-            Face::Body,
-            line_size,
-            &p.ink,
-            false,
-        );
     }
-    if more > 0 {
-        let (top, _, rest_x, _) = slot(shown);
+    if list.more > 0 {
+        let (_, rest_x) = slot(list.more_at.0);
+        let top = cursor + list.more_at.1 as f64 * list.step;
         pen.text(
             rest_x,
             top,
             leading,
-            &format!("+ {more} more"),
+            &format!("+ {} more", list.more),
             Face::Body,
-            line_size,
+            list.size,
             &p.muted,
             false,
         );

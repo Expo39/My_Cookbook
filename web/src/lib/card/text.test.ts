@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ellipsize, fitLines, ingredientWindow, wrap, type Measure } from './text';
+import { ellipsize, fitLines, wrap, type Measure } from './text';
 
 /** Every character is as wide as the font size, so the widths are easy to reason about. */
 const mono: Measure = (_face, size, text) => [...text].length * size;
@@ -45,21 +45,5 @@ describe('fitLines', () => {
 
 	it('keeps the biggest size that fits', () => {
 		expect(fitLines(mono, 'display', [2, 1], 'ab', 10, 1)).toEqual({ size: 2, lines: ['ab'] });
-	});
-});
-
-describe('ingredientWindow', () => {
-	it('shows everything that fits', () => {
-		expect(ingredientWindow(5, 8, 12)).toEqual({ shown: 5, more: 0 });
-	});
-
-	it('spends the last line on the remainder', () => {
-		expect(ingredientWindow(20, 8, 12)).toEqual({ shown: 7, more: 13 });
-		expect(ingredientWindow(20, 30, 12)).toEqual({ shown: 11, more: 9 });
-	});
-
-	it('shows only the remainder when there is room for one line or none', () => {
-		expect(ingredientWindow(3, 1, 12)).toEqual({ shown: 0, more: 3 });
-		expect(ingredientWindow(3, 0, 12)).toEqual({ shown: 0, more: 3 });
 	});
 });
