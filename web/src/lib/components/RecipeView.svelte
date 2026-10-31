@@ -564,15 +564,6 @@
 		}
 	}
 
-	@media (min-width: 64rem) {
-		.ingredients {
-			position: sticky;
-			inset-block-start: var(--space-5);
-			max-block-size: calc(100dvh - 2 * var(--space-5));
-			overflow-y: auto;
-		}
-	}
-
 	@media print {
 		article {
 			gap: var(--space-3);
@@ -593,12 +584,6 @@
 			grid-template-columns: 30% 1fr;
 			gap: var(--space-4);
 			align-items: start;
-		}
-
-		.ingredients {
-			position: static;
-			max-block-size: none;
-			overflow: visible;
 		}
 	}
 </style>
