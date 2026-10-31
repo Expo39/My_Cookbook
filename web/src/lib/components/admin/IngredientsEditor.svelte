@@ -186,6 +186,23 @@
 	{/if}
 {/snippet}
 
+{#snippet lines(group: GroupForm, g: number)}
+	<RowList
+		items={group.items}
+		noun="ingredient"
+		compact
+		onmove={(from, to) => moveItem(group.items, from, to)}
+		onremove={(index) => removeItem(group.items, index)}
+	>
+		{#snippet row(item, i)}
+			<IngredientRowFields {ed} row={item} path="ingredientGroups[{g}].items[{i}]" />
+		{/snippet}
+	</RowList>
+	<button type="button" class="add-line" onclick={() => group.items.push(emptyRow())}>
+		<Icon name="plus" size={18} />Add an ingredient
+	</button>
+{/snippet}
+
 <FieldSet legend="Ingredients">
 	<Segmented
 		legend="How to enter them"
@@ -209,13 +226,7 @@
 		<div class="room">
 			<div class="write">
 				<div class="field">
-					<div class="field-head">
-						<label for={fieldId('ingredientGroups')}>One ingredient per line</label>
-						<InfoTip
-							topic="the ingredient list"
-							text={'Write it the way you would on paper: "400 g plain flour", "2 eggs", "salt to taste", "1 lemon, zested". Add "(optional)" for anything that can be left out. A line ending in a colon, such as "For the filling:", starts a new part with its own heading.'}
-						/>
-					</div>
+					<label for={fieldId('ingredientGroups')}>One ingredient per line</label>
 					<textarea
 						id={fieldId('ingredientGroups')}
 						class="control list"
@@ -285,36 +296,24 @@
 			</div>
 		</div>
 	{:else}
-		<RowList
-			items={groups}
-			noun="part"
-			canRemove={groups.length > 1}
-			onmove={(from, to) => moveItem(groups, from, to)}
-			onremove={(index) => removeItem(groups, index)}
-		>
-			{#snippet row(group, g)}
-				<div class="group" id="f-ingredientGroups-{g}" tabindex="-1">
-					{#if split}{@render part(group, g)}{/if}
-
-					{#if !split || !folded.has(group.uid)}
-						<RowList
-							items={group.items}
-							noun="ingredient"
-							compact
-							onmove={(from, to) => moveItem(group.items, from, to)}
-							onremove={(index) => removeItem(group.items, index)}
-						>
-							{#snippet row(item, i)}
-								<IngredientRowFields {ed} row={item} path="ingredientGroups[{g}].items[{i}]" />
-							{/snippet}
-						</RowList>
-						<button type="button" class="btn add" onclick={() => group.items.push(emptyRow())}>
-							<Icon name="plus" size={18} />Add an ingredient
-						</button>
-					{/if}
-				</div>
-			{/snippet}
-		</RowList>
+		{#if split}
+			<RowList
+				items={groups}
+				noun="part"
+				canRemove={groups.length > 1}
+				onmove={(from, to) => moveItem(groups, from, to)}
+				onremove={(index) => removeItem(groups, index)}
+			>
+				{#snippet row(group, g)}
+					<div class="group" id="f-ingredientGroups-{g}" tabindex="-1">
+						{@render part(group, g)}
+						{#if !folded.has(group.uid)}{@render lines(group, g)}{/if}
+					</div>
+				{/snippet}
+			</RowList>
+		{:else}
+			<div class="group" id="f-ingredientGroups-0" tabindex="-1">{@render lines(groups[0], 0)}</div>
+		{/if}
 
 		<div class="split">
 			<button type="button" class="btn" onclick={() => groups.push(emptyGroup())}>
@@ -351,14 +350,7 @@
 		align-content: start;
 	}
 
-	.field-head {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: var(--space-1);
-	}
-
-	.field-head label {
+	.field > label {
 		font-weight: 700;
 	}
 
@@ -469,8 +461,22 @@
 		outline: none;
 	}
 
-	.add {
-		justify-self: start;
+	/* Sits where the next line would go, so it reads as "one more of these". */
+	.add-line {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		min-block-size: var(--target);
+		border: 1px dashed var(--colour-primary);
+		border-radius: var(--radius-m);
+		background: transparent;
+		color: var(--colour-primary);
+		font-weight: 700;
+	}
+
+	.add-line:hover {
+		background: var(--colour-tint);
 	}
 
 	.part-head {

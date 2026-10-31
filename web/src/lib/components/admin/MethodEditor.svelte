@@ -14,6 +14,9 @@
 
 	let { ed }: { ed: EditorState } = $props();
 
+	const HEADING_INFO =
+		'For a method in stages, such as "Day 1: the night before" or "The sauce". It shows as a heading over this step and the ones after it.';
+
 	/** Steps whose heading box is open; a step that already has a heading always shows it. */
 	const headed = $state<Record<string, boolean>>({});
 
@@ -65,12 +68,15 @@
 						label="Heading above this step"
 						bind:value={step.heading}
 						optional
-						info={'For a method in stages, such as "Day 1: the night before" or "The sauce". It shows as a heading over this step and the ones after it.'}
+						info={HEADING_INFO}
 					/>
 				{:else}
-					<button type="button" class="more" onclick={() => (headed[step.uid] = true)}>
-						<Icon name="plus" size={16} />Add a heading above this step
-					</button>
+					<div class="row">
+						<button type="button" class="more" onclick={() => (headed[step.uid] = true)}>
+							<Icon name="plus" size={16} />Add a heading above this step
+						</button>
+						<InfoTip topic="a heading above a step" text={HEADING_INFO} />
+					</div>
 				{/if}
 				<TextField
 					id={fieldId(`steps[${i}].text`)}
@@ -99,7 +105,8 @@
 				<div class="times">
 					<TextField
 						id={fieldId(`steps[${i}].time.active`)}
-						label="Hands-on minutes"
+						label="Hands-on time"
+						hint="In minutes."
 						info="Time you are busy with this step: chopping, stirring, shaping. It adds up to the time shown on the recipe."
 						bind:value={step.active}
 						inputmode="numeric"
@@ -110,7 +117,8 @@
 					/>
 					<TextField
 						id={fieldId(`steps[${i}].time.passive`)}
-						label="Waiting minutes"
+						label="Waiting time"
+						hint="In minutes."
 						info="Time the food looks after itself, such as baking, rising or chilling, while you are free."
 						bind:value={step.passive}
 						inputmode="numeric"
@@ -184,6 +192,13 @@
 		font-variant-numeric: tabular-nums;
 	}
 
+	.row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1);
+	}
+
 	.more {
 		display: inline-flex;
 		align-items: center;
@@ -213,7 +228,7 @@
 
 	@media (min-width: 40rem) {
 		.times {
-			grid-template-columns: repeat(3, 1fr);
+			grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 		}
 	}
 </style>
