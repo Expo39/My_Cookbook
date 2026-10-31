@@ -13,7 +13,7 @@ CARDS_OUT := web/static/cards
 CARDS_STAMP := $(CARDS_OUT)/.state.json
 CARD_SRC := cookbook.config.json $(shell find assets -type f)
 
-.PHONY: walkthrough ascii contrast preview worker-deploy worker-secrets verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost
+.PHONY: walkthrough ascii contrast preview worker-deploy worker-secrets verify hooks screenshots image dev test-fast test check build wasm data cards types fmt lint shell install worker-build server selfhost import-eval
 
 image:
 	docker compose build dev
@@ -88,6 +88,15 @@ walkthrough: build
 	docker compose run --rm -e E2E_PREBUILT=1 -e WALKTHROUGH=1 dev pnpm --dir web e2e
 	docker run --rm --network none --user "$$(id -u):$$(id -g)" -v "$(CURDIR):/w" -w /w \
 		--entrypoint sh $(FFMPEG_IMAGE) scripts/walkthrough-video.sh
+
+# Tries the recipe importer on real Gemini with the sample recipes, old instruction against new.
+# Needs a Google AI Studio key in .gemini-key (git-ignored); it is passed to the container only.
+# IMPORT_MODEL picks another model, e.g. make import-eval IMPORT_MODEL=gemini-flash-lite-latest
+IMPORT_MODEL ?=
+import-eval:
+	@test -s .gemini-key || { echo "Put a Google AI Studio API key in .gemini-key first (it is git-ignored)."; exit 1; }
+	@docker compose run --rm -e GEMINI_API_KEY="$$(cat .gemini-key)" -e GEMINI_MODEL="$(IMPORT_MODEL)" dev \
+		cargo run --quiet -p cookbook-server --example import_eval
 
 worker-build:
 	$(RUN) sh -c 'cd crates/cookbook-worker && worker-build --release'

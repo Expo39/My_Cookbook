@@ -64,3 +64,6 @@ web/static/img/
 
 # Wrangler keeps account details and build caches here.
 .wrangler/
+
+# A Gemini key for make import-eval; never committed.
+.gemini-key
