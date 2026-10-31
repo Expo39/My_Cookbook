@@ -1,18 +1,16 @@
-import type { Recipe } from '$lib/types/recipe';
+import { loadCore, scaleRecipe } from '$lib/core';
+import { recipeText } from '$lib/kitchen/share-text';
+import { servingsText } from '$lib/recipe/format';
 import type { LocalRecipe } from './local-store';
 
-/** The file "Export" writes and "Import" reads back: the recipes, keyed by their address. */
-interface ExportFile {
-	kind: 'sapori-recipes';
-	version: 1;
-	recipes: { id: string; recipe: Recipe }[];
-}
+export type ExportFormat = 'json' | 'csv' | 'txt';
 
-const ID = /^[a-z0-9]+(?:-[a-z0-9]+)*(?:\/[a-z0-9]+(?:-[a-z0-9]+)*)*$/;
-const LIMIT = 500;
+/** Tells Excel a CSV file is UTF-8, so accents and fractions survive. */
+const BOM = '\uFEFF';
 
+/** The complete recipes, exactly as stored, keyed by their address. */
 export function toExport(entries: LocalRecipe[]): string {
-	const file: ExportFile = {
+	const file = {
 		kind: 'sapori-recipes',
 		version: 1,
 		recipes: entries.map(({ id, recipe }) => ({ id, recipe }))
@@ -20,42 +18,60 @@ export function toExport(entries: LocalRecipe[]): string {
 	return `${JSON.stringify(file, null, 2)}\n`;
 }
 
-const isObject = (value: unknown): value is Record<string, unknown> =>
-	typeof value === 'object' && value !== null && !Array.isArray(value);
+/** One CSV row; a cell with a comma, quote or line break is quoted, as spreadsheets expect. */
+export const csvRow = (cells: (string | number | undefined)[]): string =>
+	cells
+		.map((cell) => {
+			const text = String(cell ?? '');
+			return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+		})
+		.join(',');
 
-function looksLikeRecipe(value: unknown): value is Recipe {
-	return (
-		isObject(value) &&
-		typeof value.title === 'string' &&
-		value.title.trim() !== '' &&
-		typeof value.servings === 'number' &&
-		Array.isArray(value.ingredientGroups) &&
-		Array.isArray(value.steps)
+const section = (id: string) => id.slice(0, Math.max(0, id.lastIndexOf('/')));
+
+/**
+ * The recipes as a file to keep: JSON as stored, a spreadsheet with a row per recipe, or plain text
+ * to read and print. The readable two are worded as the recipe page words them.
+ */
+export async function exportFile(
+	entries: LocalRecipe[],
+	format: ExportFormat
+): Promise<{ blob: Blob; name: string }> {
+	const name = `my-recipes-${new Date().toISOString().slice(0, 10)}.${format}`;
+	if (format === 'json') {
+		return { blob: new Blob([toExport(entries)], { type: 'application/json' }), name };
+	}
+	await loadCore();
+	const readable = entries.map(({ id, recipe }) => ({ id, recipe, view: scaleRecipe(recipe) }));
+	if (format === 'txt') {
+		const text = readable
+			.map(({ recipe, view }) =>
+				recipeText(recipe.title, servingsText(view.servings, recipe.servingsNoun), view)
+			)
+			.join('\n\n----------\n\n');
+		return { blob: new Blob([`${text}\n`], { type: 'text/plain' }), name };
+	}
+	const rows = readable.map(({ id, recipe, view }) =>
+		csvRow([
+			recipe.title,
+			section(id),
+			view.servings,
+			recipe.times?.prep,
+			recipe.times?.cook,
+			view.groups.flatMap((group) => group.items.map((item) => item.text)).join('\n'),
+			view.steps
+				.map((step, i) => `${i + 1}. ${step.segments.map((part) => part.text).join('')}`)
+				.join('\n')
+		])
 	);
-}
-
-/** Reads an exported file. Throws an `Error` that says what is wrong, so nothing half-imports. */
-export function parseExport(text: string): { id: string; recipe: Recipe }[] {
-	let data: unknown;
-	try {
-		data = JSON.parse(text);
-	} catch {
-		throw new Error('That file is not a recipe export. Choose a file saved with Export.');
-	}
-	const list = isObject(data) && data.kind === 'sapori-recipes' ? data.recipes : undefined;
-	if (!Array.isArray(list)) {
-		throw new Error('That file is not a recipe export. Choose a file saved with Export.');
-	}
-	if (list.length > LIMIT) throw new Error(`An import can hold up to ${LIMIT} recipes.`);
-	return list.map((entry, index) => {
-		if (!isObject(entry) || typeof entry.id !== 'string' || !ID.test(entry.id)) {
-			throw new Error(
-				`Recipe ${index + 1} in the file has no valid address. Nothing was imported.`
-			);
-		}
-		if (!looksLikeRecipe(entry.recipe)) {
-			throw new Error(`"${entry.id}" in the file is not a complete recipe. Nothing was imported.`);
-		}
-		return { id: entry.id, recipe: entry.recipe };
-	});
+	const header = csvRow([
+		'Title',
+		'Section',
+		'Servings',
+		'Prep (min)',
+		'Cook (min)',
+		'Ingredients',
+		'Method'
+	]);
+	return { blob: new Blob([`${BOM}${[header, ...rows].join('\n')}\n`], { type: 'text/csv' }), name };
 }

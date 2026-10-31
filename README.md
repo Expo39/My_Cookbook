@@ -74,7 +74,7 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 
 - Anyone can add recipes, with no account and no token. They are kept in the browser (IndexedDB), appear on the home page and in their section marked "Yours", and have every feature of a published recipe.
 - The editor is friendly in this mode: paste the ingredient list in one go, write the method in plain words ("bake for 25 minutes at 200C" becomes a timer and a converted temperature), and find the rarer fields folded away.
-- Export, import and clear-all in Settings, and search and favourites include them.
+- Export (text, CSV or JSON) and clear-all in Settings, a first-time note and a weekly reminder that they live only in this browser, and search and favourites include them.
 - **Share with everyone** hands a recipe to the cookbook with the GitHub token, after which it is the cookbook's.
 
 ### Editing

@@ -31,6 +31,7 @@
 	import { loadCore } from '$lib/core';
 	import { createSource, createWriter, RecipeNotFoundError } from '$lib/data';
 	import { LocalWriter } from '$lib/data/local-writer';
+	import { deviceNotice } from '$lib/stores/device-notice.svelte';
 	import { personal } from '$lib/stores/personal.svelte';
 	import type { BuildStatus, RecipeWriter, SaveResult } from '$lib/data/writer';
 	import { WriteError } from '$lib/data/writer';
@@ -79,6 +80,7 @@
 
 	onMount(() => {
 		void admin.restore();
+		deviceNotice.load();
 		void personal.load().then(() => (mounted = true));
 		// The save bar sits where the back-to-top button would, so the button moves above it.
 		chrome.hasActionBar = true;
@@ -438,10 +440,22 @@
 						A title, the ingredients and the method are all a recipe needs. Write it the way you
 						would tell a friend; the rest is optional.
 					</p>
-					<p class="where">
-						<Icon name="device" size={16} />Saved in this browser only. Share it from Settings when
-						you want everyone to see it.
-					</p>
+					{#if deviceNotice.read === null}
+						<div class="first" role="note">
+							<p>
+								<strong>Your recipes are saved only in this browser, on this device.</strong> If you clear
+								your browsing data or remove the browser, they are deleted for good. Export them from
+								Settings now and then to keep a copy.
+							</p>
+							<button type="button" class="btn primary" onclick={() => deviceNotice.acknowledge()}>
+								Got it
+							</button>
+						</div>
+					{:else}
+						<p class="where">
+							<Icon name="device" size={16} />Saved only in this browser on this device.
+						</p>
+					{/if}
 				{/if}
 			</div>
 			<div class="top-actions">
@@ -750,6 +764,17 @@
 		display: grid;
 		gap: var(--space-4);
 		padding: 0 var(--space-4) var(--space-4);
+	}
+
+	.first {
+		display: grid;
+		gap: var(--space-3);
+		justify-items: start;
+		margin-block-start: var(--space-2);
+		padding: var(--space-4);
+		border-inline-start: 4px solid var(--colour-accent);
+		border-radius: var(--radius-s);
+		background: var(--colour-surface);
 	}
 
 	.where {
