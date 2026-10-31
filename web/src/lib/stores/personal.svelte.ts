@@ -1,4 +1,7 @@
 import { keepStorage, localRecipes, type LocalRecipe } from '$lib/data/local-store';
+import { homeHref, pageHref } from '$lib/links';
+import { devicePhotos } from './photos';
+import { writeStorage } from './storage';
 import type { Recipe } from '$lib/types/recipe';
 
 /**
@@ -30,6 +33,25 @@ class Personal {
 			this.list = [];
 		}
 		this.loaded = true;
+		this.#remember();
+	}
+
+	/**
+	 * Keeps where the recipes sit (the home page and each one's section page, as addresses) in plain
+	 * storage, which the script in app.html can read before the first paint, unlike IndexedDB. It uses
+	 * them to hold room for the cards a page will show.
+	 */
+	#remember(): void {
+		if (typeof location === 'undefined') return;
+		const mine = this.list.filter((entry) => !entry.shared);
+		const at = (href: string) => new URL(href, location.href).pathname.replace(/\/$/, '');
+		const sections = mine.map((entry) =>
+			at(pageHref(entry.id.slice(0, entry.id.lastIndexOf('/'))))
+		);
+		writeStorage(
+			MINE_KEY,
+			sections.length ? JSON.stringify({ home: at(homeHref()), sections }) : null
+		);
 	}
 
 	get(id: string): LocalRecipe | undefined {
@@ -44,7 +66,10 @@ class Personal {
 
 	async save(id: string, recipe: Recipe, previous?: string): Promise<void> {
 		keepStorage();
-		if (previous && previous !== id) await localRecipes.remove(previous);
+		if (previous && previous !== id) {
+			await localRecipes.remove(previous);
+			await devicePhotos.move(previous, id);
+		}
 		await localRecipes.put({ id, recipe: $state.snapshot(recipe) as Recipe, updated: Date.now() });
 		await this.#changed();
 	}
@@ -58,10 +83,12 @@ class Personal {
 
 	async remove(id: string): Promise<void> {
 		await localRecipes.remove(id);
+		await devicePhotos.remove(id);
 		await this.#changed();
 	}
 
 	async clear(): Promise<void> {
+		for (const entry of this.list) await devicePhotos.remove(entry.id);
 		await localRecipes.clear();
 		await this.#changed();
 	}
@@ -78,5 +105,7 @@ class Personal {
 		this.#channel?.postMessage('changed');
 	}
 }
+
+export const MINE_KEY = 'sapori:mine';
 
 export const personal = new Personal();

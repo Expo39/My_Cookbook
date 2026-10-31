@@ -2,6 +2,7 @@
 	import '$lib/styles/admin.css';
 	import { onMount } from 'svelte';
 	import { admin } from '$lib/admin/session.svelte';
+	import { devicePhotos } from '$lib/stores/photos';
 	import { createWriter } from '$lib/data';
 	import { WriteError } from '$lib/data/writer';
 	import { editHref, mineHref } from '$lib/links';
@@ -50,8 +51,17 @@
 		sharing = id;
 		problem = '';
 		try {
-			const result = await createWriter(admin.token).save(id, entry.recipe, { isNew: true });
+			const writer = createWriter(admin.token);
+			// A photo kept with the recipe on this device goes to the cookbook in the same commit.
+			const kept = await devicePhotos.blob(id);
+			let recipe = entry.recipe;
+			if (kept?.alt) {
+				const { src } = await writer.uploadImage(id, kept.blob);
+				recipe = { ...recipe, image: { src, alt: kept.alt } };
+			}
+			const result = await writer.save(id, recipe, { isNew: true });
 			await personal.markShared(id, result.commit);
+			if (kept) await devicePhotos.remove(id);
 			done = `"${entry.recipe.title}" is now in the cookbook. It appears after the next deploy, in a minute or two.`;
 		} catch (error) {
 			problem =

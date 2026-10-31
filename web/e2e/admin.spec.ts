@@ -313,6 +313,132 @@ test.describe('the editor', () => {
 		expect(photo).toBeDefined();
 	});
 
+	test('adds a photo from the recipe page in one commit, and shows it at once', async ({
+		page
+	}) => {
+		const github = await mockGitHub(page);
+		await unlocked(page);
+		const id = unlinked;
+		const title = recipeData(id).recipe.title as string;
+		await page.goto(id);
+		await expect(page.getByRole('button', { name: 'Add a photo' })).toBeVisible();
+
+		await page.getByLabel(`Choose a photo for ${title}`).setInputFiles({
+			name: 'dish.png',
+			mimeType: 'image/png',
+			buffer: Buffer.from(PNG, 'base64')
+		});
+		const dialog = page.getByRole('dialog', { name: 'Add this photo' });
+		await expect(dialog).toBeVisible();
+		await expect(dialog.getByRole('button', { name: 'Save photo' })).toBeDisabled();
+		await dialog.getByLabel(/Describe the photo/).fill('The finished dish');
+		await dialog.getByRole('button', { name: 'Save photo' }).click();
+		await expect(page.getByText('The photo is live.')).toBeVisible();
+		await expect(page.locator('img.fresh')).toBeVisible();
+		await expect(page.getByRole('button', { name: 'Change photo' })).toBeVisible();
+
+		const slug = id.split('/').pop();
+		expect(github.commits()).toHaveLength(1);
+		expect(github.commits()[0].body?.message).toBe(`content(recipes): update ${title}`);
+		expect(
+			github
+				.tree()
+				.map((entry) => entry.path)
+				.sort()
+		).toEqual([`recipes/${id}.jpg`, `recipes/${id}.json`]);
+		expect(JSON.parse(github.contentAt(`recipes/${id}.json`) as string)).toEqual({
+			...JSON.parse(original(id)),
+			image: { src: `${slug}.jpg`, alt: 'The finished dish' }
+		});
+	});
+
+	test('without the token, a photo is kept in this browser, survives a reload and can go', async ({
+		page
+	}) => {
+		const github: string[] = [];
+		await page.route('https://api.github.com/**', (route) => {
+			github.push(route.request().url());
+			return route.fulfill({ json: {} });
+		});
+		const title = recipeData(unlinked).recipe.title as string;
+		await page.goto(unlinked);
+		await page.getByLabel(`Choose a photo for ${title}`).setInputFiles({
+			name: 'dish.png',
+			mimeType: 'image/png',
+			buffer: Buffer.from(PNG, 'base64')
+		});
+		const dialog = page.getByRole('dialog', { name: 'Add this photo' });
+		await expect(dialog).toContainText('It is kept in this browser');
+		await dialog.getByLabel(/Describe the photo/).fill('The finished dish');
+		await dialog.getByRole('button', { name: 'Save photo' }).click();
+		await expect(page.getByText('Only on this device')).toBeVisible();
+		await expect(page.getByRole('img', { name: 'The finished dish' })).toBeVisible();
+		expect(github.filter((url) => !url.endsWith('/permissions'))).toEqual([]);
+
+		await page.reload();
+		await expect(page.getByRole('img', { name: 'The finished dish' })).toBeVisible();
+		await page.getByRole('button', { name: 'Remove' }).click();
+		await expect(page.getByRole('button', { name: 'Add a photo' })).toBeVisible();
+		await page.reload();
+		await expect(page.getByRole('button', { name: 'Add a photo' })).toBeVisible();
+	});
+
+	test("Share with everyone sends a device recipe's photo in the same commit", async ({ page }) => {
+		const github = await mockGitHub(page);
+		await page.goto('edit');
+		const gotIt = page.getByRole('button', { name: 'Got it' });
+		if (await gotIt.isVisible()) await gotIt.click();
+		await page.getByLabel('Title', { exact: true }).fill('Kusksu');
+		await page.getByLabel('Summary', { exact: true }).fill('A broad bean and pasta soup.');
+		await page.getByRole('textbox', { name: 'Servings', exact: true }).fill('4');
+		await page.getByLabel('Section', { exact: true }).selectOption('soups');
+		await page.getByLabel('One ingredient per line').fill('300 g broad beans\n200 g kusksu');
+		await page.getByLabel('Step 1', { exact: true }).fill('Simmer the beans and the kusksu.');
+		await page.getByRole('button', { name: 'Save recipe' }).click();
+		await expect(page.getByText('It is on this device, ready to cook from.')).toBeVisible();
+
+		await page.goto('mine?id=soups/kusksu');
+		await page.getByLabel('Choose a photo for Kusksu').setInputFiles({
+			name: 'kusksu.png',
+			mimeType: 'image/png',
+			buffer: Buffer.from(PNG, 'base64')
+		});
+		const dialog = page.getByRole('dialog', { name: 'Add this photo' });
+		await dialog.getByLabel(/Describe the photo/).fill('A bowl of kusksu');
+		await dialog.getByRole('button', { name: 'Save photo' }).click();
+		await expect(page.getByText('Only on this device')).toBeVisible();
+
+		await page.evaluate(() => sessionStorage.setItem('sapori:admin-token', 'test-token'));
+		await page.reload();
+		await page.getByRole('button', { name: 'Settings' }).click();
+		const drawer = page.getByRole('dialog', { name: 'Settings' });
+		await drawer.getByRole('button', { name: 'Share with everyone' }).click();
+		await drawer.getByRole('button', { name: 'Share it' }).click();
+		await expect(drawer.getByText(/is now in the cookbook/)).toBeVisible();
+
+		expect(github.commits()).toHaveLength(1);
+		expect(
+			github
+				.tree()
+				.map((entry) => entry.path)
+				.sort()
+		).toEqual(['recipes/soups/kusksu.jpg', 'recipes/soups/kusksu.json']);
+		expect(JSON.parse(github.contentAt('recipes/soups/kusksu.json') as string).image).toEqual({
+			src: 'kusksu.jpg',
+			alt: 'A bowl of kusksu'
+		});
+	});
+
+	test('says what is saved once editing is unlocked', async ({ page }) => {
+		await mockGitHub(page);
+		await unlocked(page);
+		await page.goto('./');
+		const drawer = await ownerPanel(page);
+		await expect(drawer.getByText('Editing is unlocked in this tab.')).toBeVisible();
+		await expect(drawer.getByText('GitHub token saved')).toBeVisible();
+		await expect(drawer.getByText('No AI import secret: Import from text is off')).toBeVisible();
+	});
+
 	test('edits a recipe and changes nothing else in its file', async ({ page }) => {
 		const github = await mockGitHub(page);
 		await unlocked(page);

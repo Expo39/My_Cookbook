@@ -10,15 +10,30 @@ export interface LocalRecipe {
 	shared?: { at: number; commit?: string };
 }
 
+/** A photo someone gave a recipe on this device, shown only to them. */
+export interface LocalPhoto {
+	/** The recipe's id: one of theirs, or one of the cookbook's. */
+	id: string;
+	blob: Blob;
+	alt: string;
+	updated: number;
+}
+
 const DATABASE = 'sapori';
 const STORE = 'recipes';
+const PHOTOS = 'photos';
 
 let opening: Promise<IDBDatabase> | undefined;
 
 function database(): Promise<IDBDatabase> {
 	opening ??= new Promise<IDBDatabase>((resolve, reject) => {
-		const request = indexedDB.open(DATABASE, 1);
-		request.onupgradeneeded = () => request.result.createObjectStore(STORE, { keyPath: 'id' });
+		const request = indexedDB.open(DATABASE, 2);
+		request.onupgradeneeded = () => {
+			const db = request.result;
+			for (const name of [STORE, PHOTOS]) {
+				if (!db.objectStoreNames.contains(name)) db.createObjectStore(name, { keyPath: 'id' });
+			}
+		};
 		request.onsuccess = () => resolve(request.result);
 		request.onerror = () => reject(request.error);
 	}).catch((error) => {
@@ -30,12 +45,13 @@ function database(): Promise<IDBDatabase> {
 
 async function run<T>(
 	mode: IDBTransactionMode,
-	work: (store: IDBObjectStore) => IDBRequest<T>
+	work: (store: IDBObjectStore) => IDBRequest<T>,
+	name = STORE
 ): Promise<T> {
 	const db = await database();
 	return new Promise<T>((resolve, reject) => {
-		const transaction = db.transaction(STORE, mode);
-		const request = work(transaction.objectStore(STORE));
+		const transaction = db.transaction(name, mode);
+		const request = work(transaction.objectStore(name));
 		transaction.oncomplete = () => resolve(request.result);
 		transaction.onerror = () => reject(transaction.error);
 		transaction.onabort = () => reject(transaction.error);
@@ -53,4 +69,12 @@ export const localRecipes = {
 	put: (entry: LocalRecipe): Promise<IDBValidKey> => run('readwrite', (store) => store.put(entry)),
 	remove: (id: string): Promise<undefined> => run('readwrite', (store) => store.delete(id)),
 	clear: (): Promise<undefined> => run('readwrite', (store) => store.clear())
+};
+
+export const localPhotos = {
+	get: (id: string): Promise<LocalPhoto | undefined> =>
+		run('readonly', (store) => store.get(id), PHOTOS),
+	put: (entry: LocalPhoto): Promise<IDBValidKey> =>
+		run('readwrite', (store) => store.put(entry), PHOTOS),
+	remove: (id: string): Promise<undefined> => run('readwrite', (store) => store.delete(id), PHOTOS)
 };
