@@ -4,6 +4,7 @@
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import type { PanShape, Unit, UnitSystem } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
+	import InfoTip from './InfoTip.svelte';
 	import Segmented from './Segmented.svelte';
 	import ServingsStepper from './ServingsStepper.svelte';
 
@@ -155,7 +156,13 @@
 
 			{#if choices.length || recipe.pan}
 				<details class="more-details">
-					<summary><Icon name="chevronDown" size={18} />Scale another way</summary>
+					<summary>
+						<Icon name="chevronDown" size={18} />Scale another way
+						<InfoTip
+							topic="scaling another way"
+							text="Scale from what you have. Say you have 300 g of mince: enter it, and every other amount follows. Where the recipe names a tin, you can scale to a different tin size too."
+						/>
+					</summary>
 					<div class="more">
 						{#if choices.length}
 							<form onsubmit={applyHave} novalidate>
@@ -341,6 +348,7 @@
 
 	.more-details > summary {
 		display: inline-flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: var(--space-2);
 		min-block-size: var(--target);
@@ -348,7 +356,7 @@
 		font-weight: 700;
 	}
 
-	.more-details[open] > summary :global(svg) {
+	.more-details[open] > summary > :global(svg) {
 		transform: rotate(180deg);
 	}
 
