@@ -6,7 +6,7 @@ const font = (face: Face, size: number): string => {
 	return `${weight} ${size}px "${family}"`;
 };
 
-export const canvasMeasure =
+const canvasMeasure =
 	(ctx: CanvasRenderingContext2D): Measure =>
 	(face, size, text) => {
 		ctx.font = font(face, size);
