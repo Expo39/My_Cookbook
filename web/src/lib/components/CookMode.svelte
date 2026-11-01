@@ -748,9 +748,11 @@
 		background: var(--colour-scrim);
 	}
 
+	/* Ingredients takes the width its label needs, so the word never runs past its border;
+	   Next, the button tapped most, takes the rest. */
 	footer {
 		display: grid;
-		grid-template-columns: auto 1fr 1.3fr;
+		grid-template-columns: auto auto minmax(0, 1fr);
 		gap: var(--space-2);
 		padding: var(--space-3) var(--gutter) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
 		border-block-start: 1px solid var(--colour-line);
@@ -761,6 +763,16 @@
 		min-block-size: 3.75rem;
 		padding-inline: var(--space-3);
 		font-size: var(--text-l);
+		white-space: nowrap;
+	}
+
+	/* The narrowest phones: the label shrinks a step rather than squeezing Next. */
+	@media (max-width: 24rem) {
+		.list-button {
+			gap: var(--space-1);
+			padding-inline: var(--space-2);
+			font-size: var(--text-m);
+		}
 	}
 
 	.nav.primary {
