@@ -21,6 +21,10 @@
           "item": "casarecce or short pasta"
         },
         {
+          "item": "pasta water",
+          "note": "reserved"
+        },
+        {
           "amount": {
             "qty": 175,
             "unit": "g"
@@ -32,10 +36,6 @@
           "amount": {
             "qty": 2.5,
             "unit": "tbsp"
-          },
-          "alt": {
-            "qty": 37,
-            "unit": "ml"
           },
           "item": "extra virgin olive oil"
         },
@@ -127,10 +127,10 @@
       "text": "Add the tuna with its oil, breaking it up gently. Do not over-mix; keep some chunks. Cook for {timer:2-3} to warm through."
     },
     {
-      "text": "Cook the pasta until al dente. Reserve 1 cup of pasta water before draining."
+      "text": "Cook the pasta until al dente. Reserve a mugful of pasta water before draining."
     },
     {
-      "text": "Add the drained pasta to the tuna mixture. Add the pasta water a little at a time, starting with 3-4 tbsp, and toss until glossy and well coated."
+      "text": "Add the drained pasta to the tuna mixture. Add the pasta water a little at a time, a few spoonfuls at a time, and toss until glossy and well coated."
     },
     {
       "text": "Take off the heat and add the chopped parsley and black pepper. Taste: it may not need more salt. Serve straight away, without cheese."

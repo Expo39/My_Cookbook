@@ -72,7 +72,7 @@
             "qty": 1
           },
           "item": "large onion",
-          "note": "finely diced, 150-180 g",
+          "note": "finely diced",
           "scale": "discrete"
         },
         {
@@ -96,10 +96,9 @@
             "unit": "g"
           },
           "item": "cherry tomatoes",
-          "note": "halved, or 350 g crushed tomatoes"
+          "note": "halved"
         },
         {
-          "key": "liquid",
           "amount": {
             "qty": 250,
             "unit": "ml"
@@ -147,6 +146,10 @@
           },
           "item": "paccheri",
           "note": "or mezzi paccheri, rigatoni or thick spaghetti"
+        },
+        {
+          "item": "pasta water",
+          "note": "reserved"
         }
       ]
     },
@@ -167,7 +170,7 @@
             "unit": "tbsp"
           },
           "item": "bottarga",
-          "note": "finely grated, about 25-30 g"
+          "note": "finely grated"
         },
         {
           "amount": {
@@ -220,7 +223,7 @@
       "text": "Add the octopus and cook for {timer:5}. Pour in the wine and let it reduce for {timer:2-3}."
     },
     {
-      "text": "Add the tomatoes, the olives, the capers and {@liquid}."
+      "text": "Add the tomatoes, the olives, the capers and the octopus cooking liquid."
     },
     {
       "text": "Simmer gently, partly covered, for {timer:1.5-2h|ragù}, until the sauce is thick and glossy and clings to the octopus."
@@ -243,8 +246,10 @@
   ],
   "tips": [
     "Never fry or boil the bottarga: heat dulls its aroma, which is the whole point. It goes in at the end, off the heat, like a seasoning.",
-    "Add no salt at all. Between the octopus, capers, olives, anchovies and bottarga there is plenty, which is also why the recipe uses only 2 anchovies.",
+    "Add no salt at all. Between the octopus, capers, olives, anchovies and bottarga there is plenty, which is also why the anchovies are kept to a minimum.",
     "Paccheri or mezzi paccheri are the best choice: the thick tubes hold the octopus ragù and the bottarga beautifully.",
-    "Use up to 300 ml of the octopus cooking liquid if the ragù needs it."
+    "If the ragù gets too thick as it simmers, add a little more of the octopus cooking liquid.",
+    "As a guide, 1 large onion is about 150-180 g, and 2 tbsp of grated bottarga about 25-30 g.",
+    "Crushed tomatoes work instead of the cherry tomatoes: use a little less by weight, about 350 g for every 400 g."
   ]
 }

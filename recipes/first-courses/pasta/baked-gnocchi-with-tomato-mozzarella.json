@@ -18,19 +18,13 @@
             "qty": 475,
             "unit": "g"
           },
-          "item": "potato gnocchi",
-          "note": "1 packet"
+          "item": "potato gnocchi"
         },
         {
-          "key": "oil",
           "food": "olive-oil",
           "amount": {
             "qty": 2,
             "unit": "tbsp"
-          },
-          "alt": {
-            "qty": 30,
-            "unit": "ml"
           },
           "item": "extra virgin olive oil"
         },
@@ -63,7 +57,7 @@
             "unit": "g"
           },
           "item": "crushed tomatoes",
-          "note": "one 28 oz tin"
+          "note": "tinned"
         },
         {
           "amount": {
@@ -84,10 +78,6 @@
           "amount": {
             "qty": 170,
             "unit": "g"
-          },
-          "alt": {
-            "qty": 6,
-            "unit": "oz"
           },
           "item": "fresh mozzarella",
           "note": "torn"
@@ -124,7 +114,7 @@
   ],
   "steps": [
     {
-      "text": "Heat {@oil} in a large ovenproof frying pan over a medium heat. Add the onion and sauté for {timer:1}."
+      "text": "Heat the olive oil in a large ovenproof frying pan over a medium heat. Add the onion and sauté for {timer:1}."
     },
     {
       "text": "Add the garlic, and the chilli flakes if using. Cook for another {timer:4}, until soft and fragrant."

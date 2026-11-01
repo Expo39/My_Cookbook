@@ -15,7 +15,7 @@
             "unit": "kg"
           },
           "item": "potatoes",
-          "note": "peeled and cut into 4 cm chunks"
+          "note": "peeled"
         },
         {
           "food": "salt",
@@ -70,7 +70,7 @@
   ],
   "steps": [
     {
-      "text": "Put the potatoes in a saucepan and cover them with cold water by 2-3 cm. Add the salt to the water."
+      "text": "Cut the potatoes into 4 cm chunks and put them in a saucepan and cover them with cold water by 2-3 cm. Add the salt to the water."
     },
     {
       "text": "Bring to the boil, then lower to a steady simmer and cook for {timer:15-20}, until a knife slides straight through the potatoes with no resistance."
@@ -90,7 +90,7 @@
   ],
   "tips": [
     "Never use a blender or a food processor: it makes the potatoes gluey.",
-    "The milk is a guide: anything from 120 to 150 ml, depending on the potatoes and how soft you like it. Start with a quarter teaspoon of pepper and add more to taste.",
+    "Add the milk a little at a time: how much the mash takes depends on the potatoes and how soft you like it. Start with half the pepper and add more to taste.",
     "A small pinch of nutmeg works particularly well when the mash goes with lamb."
   ],
   "related": [

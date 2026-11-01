@@ -28,8 +28,7 @@
             "qty": 1.1,
             "unit": "kg"
           },
-          "item": "tomahawk steak",
-          "note": "about 900 g meat and 200 g bone"
+          "item": "tomahawk steak"
         },
         {
           "amount": {
@@ -250,7 +249,8 @@
     "Temperature over time, always. Keep the lid closed for steady heat and do not peek too often.",
     "Never butter the steak before searing: it burns. The butter goes on only as it rests, where it melts into the crust and the juices.",
     "The rest is not optional. If the vegetables finish early, move them to the cool side rather than off the BBQ; if the steak is cooking too fast, move it further into the cool zone.",
-    "For extra aroma, throw a few rosemary sprigs on the grill while the steak sears."
+    "For extra aroma, throw a few rosemary sprigs on the grill while the steak sears.",
+    "About a fifth of a tomahawk's weight is bone."
   ],
   "related": [
     "main-courses/steaks/bbq-fillet-steak"

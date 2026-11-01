@@ -29,10 +29,6 @@
             "qty": 170,
             "unit": "g"
           },
-          "alt": {
-            "qty": 1.25,
-            "unit": "cup"
-          },
           "item": "jasmine rice"
         },
         {
@@ -82,7 +78,17 @@
           "item": "tomato paste"
         },
         {
-          "item": "olive oil"
+          "food": "olive-oil",
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "olive oil",
+          "note": "for the eggs"
+        },
+        {
+          "item": "olive oil",
+          "note": "for frying"
         }
       ]
     },
@@ -164,7 +170,7 @@
       "text": "Test it with a few drops of water. If they form little beads that glide around the pan, it is ready; if they evaporate at once, it is too hot. Wipe the water away carefully and let the pan dry completely."
     },
     {
-      "text": "Turn the heat down to medium-low and let the pan cool slightly for {timer:20-30s}. Add 1 tbsp olive oil and swirl it around the pan."
+      "text": "Turn the heat down to medium-low and let the pan cool slightly for {timer:20-30s}. Add the olive oil for the eggs and swirl it around the pan."
     },
     {
       "text": "Add the beaten eggs. They should start to set gently rather than brown straight away. Stir slowly with a spatula until softly scrambled, and lift them onto a plate while they are still slightly moist."
@@ -213,8 +219,7 @@
   "tips": [
     "If the eggs stick at once, the pan is too hot or the oil has not spread properly. Lower the heat and do not try to force them off.",
     "No sugar or sesame oil is needed.",
-    "The three things that make it: properly chilled rice, deeply browned beef, and eggs cooked separately so they stay soft rather than dry and rubbery.",
-    "Use 1-2 tsp tomato paste, to taste."
+    "The three things that make it: properly chilled rice, deeply browned beef, and eggs cooked separately so they stay soft rather than dry and rubbery."
   ],
   "related": [
     "sides/stovetop-jasmine-rice"

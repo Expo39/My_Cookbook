@@ -43,6 +43,10 @@
           "item": "tagliatelle"
         },
         {
+          "item": "pasta water",
+          "note": "reserved"
+        },
+        {
           "amount": {
             "qty": 1
           },
