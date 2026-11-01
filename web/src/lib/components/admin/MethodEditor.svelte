@@ -192,16 +192,21 @@
 		font-variant-numeric: tabular-nums;
 	}
 
+	/* The "i" keeps its own column beside the link, so a long label wraps inside the link instead;
+	   the note a tap opens on a touch screen takes the whole row underneath. */
 	.row {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: minmax(0, auto) auto;
+		justify-content: start;
 		align-items: center;
-		gap: var(--space-1);
+		column-gap: var(--space-1);
 	}
 
-	/* Leaves room for the "i", so it stays beside the link and a long label wraps inside it. */
+	.row > :global(p) {
+		grid-column: 1 / -1;
+	}
+
 	.row > .more {
-		max-inline-size: calc(100% - var(--target));
 		text-align: start;
 	}
 
