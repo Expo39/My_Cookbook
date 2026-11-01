@@ -46,7 +46,13 @@ export async function exportFile(
 	if (format === 'txt') {
 		const text = readable
 			.map(({ recipe, view }) =>
-				recipeText(recipe.title, servingsText(view.servings, recipe.servingsNoun), view)
+				recipeText({
+					title: recipe.title,
+					localTitle: recipe.titleLocal,
+					summary: recipe.summary,
+					serves: servingsText(view.servings, recipe.servingsNoun),
+					view
+				})
 			)
 			.join('\n\n----------\n\n');
 		return { blob: new Blob([`${text}\n`], { type: 'text/plain' }), name };

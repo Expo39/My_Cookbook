@@ -16,14 +16,18 @@ const view = {
 			]
 		},
 		{ heading: null, segments: [{ type: 'text', text: 'Bake.' }] }
-	]
+	],
+	tips: []
 } as unknown as ScaledRecipe;
 
 describe('recipeText', () => {
 	it('writes the recipe as plain text, parts and stages included, with the link last', () => {
-		expect(recipeText('Pie', '4 servings', view, 'https://example.test/pie')).toBe(
+		expect(
+			recipeText({ title: 'Pie', serves: '4 servings', view, link: 'https://example.test/pie' })
+		).toBe(
 			[
 				'Pie',
+				'',
 				'4 servings',
 				'',
 				'Ingredients',
@@ -44,6 +48,29 @@ describe('recipeText', () => {
 	});
 
 	it('leaves the link out for a recipe kept on the device', () => {
-		expect(recipeText('Pie', '4 servings', view)).not.toContain('https://');
+		expect(recipeText({ title: 'Pie', serves: '4 servings', view })).not.toContain('https://');
+	});
+
+	it('carries the local name, summary, times and tips, so the text is the whole recipe', () => {
+		const text = recipeText({
+			title: 'Pie',
+			localTitle: 'Torta',
+			summary: 'A rich ricotta pie.',
+			serves: '4 servings',
+			times: [
+				['Prep', '20 min'],
+				['Total', '1 hr']
+			],
+			view: { ...view, tips: ['Rest it before slicing.'] }
+		});
+		expect(text.split('\n').slice(0, 6)).toEqual([
+			'Pie',
+			'Torta',
+			'',
+			'A rich ricotta pie.',
+			'',
+			'4 servings | Prep 20 min | Total 1 hr'
+		]);
+		expect(text).toMatch(/\nChef's tip\nRest it before slicing\.$/);
 	});
 });

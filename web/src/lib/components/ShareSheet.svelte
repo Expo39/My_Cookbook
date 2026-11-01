@@ -4,9 +4,9 @@
 	import { loadPhoto, renderCard, toBlob } from '$lib/card/render';
 	import { instagram } from '$lib/config';
 	import { loadCore, qrMatrix } from '$lib/core';
-	import { recipeText } from '$lib/kitchen/share-text';
+	import { recipeText, shareText } from '$lib/kitchen/share-text';
 	import { photoOf, widthUpTo } from '$lib/photo';
-	import { servingsText } from '$lib/recipe/format';
+	import { servingsText, timeLabels } from '$lib/recipe/format';
 	import type { RecipeModel } from '$lib/recipe/recipe-model.svelte';
 	import { canonicalUrl } from '$lib/seo/site';
 	import { download, shareFile, shareLink } from '$lib/share';
@@ -41,13 +41,28 @@
 	let busy = $state(false);
 	let status = $state('');
 	let withText = $state(false);
+	/**
+	 * Set once the card has gone out with the whole recipe ticked. Chat apps such as WhatsApp drop
+	 * or cut short the words that come with a picture, so the text is also on the clipboard and one
+	 * more tap sends it on its own.
+	 */
+	let textToFollow = $state(false);
 	/** Phones hand the picture to other apps; most computers cannot, so there it is copied instead. */
 	let canSend = $state(false);
 
 	const title = $derived(model.data.recipe.title);
 	const serves = $derived(servingsText(model.view.servings, model.data.recipe.servingsNoun));
 	const link = () => `${location.origin}${location.pathname}${model.search('')}`;
-	const asText = () => recipeText(title, serves, model.view, local ? undefined : link());
+	const asText = () =>
+		recipeText({
+			title,
+			localTitle: model.data.recipe.titleLocal,
+			summary: model.data.recipe.summary,
+			serves,
+			times: timeLabels(card.times),
+			view: model.view,
+			link: local ? undefined : link()
+		});
 
 	export function show() {
 		dialog.showModal();
@@ -58,6 +73,7 @@
 		if (made) URL.revokeObjectURL(made.url);
 		made = null;
 		status = '';
+		textToFollow = false;
 	}
 
 	async function make() {
@@ -108,22 +124,40 @@
 
 	async function sendCard() {
 		if (!made) return;
-		const text = withText ? asText() : local ? undefined : link();
+		const words = withText ? asText() : undefined;
+		const text = words ?? (local ? undefined : link());
 		if (canSend) {
 			const file = new File([made.blob], made.name, { type: 'image/png' });
+			// Not awaited: the share has to start while the tap still counts as the reader's own.
+			if (words) navigator.clipboard?.writeText(words).catch(() => undefined);
 			const outcome = await shareFile(file, title, text);
-			if (outcome === 'shared') dialog.close();
 			if (outcome === 'failed') status = 'The card could not be sent. Save it instead.';
+			if (outcome !== 'shared') return;
+			if (words) textToFollow = true;
+			else dialog.close();
 			return;
 		}
 		try {
 			await navigator.clipboard.write([new ClipboardItem({ 'image/png': made.blob })]);
-			if (withText)
-				status = 'Card copied. Paste it into a chat, then use Copy as text for the words.';
+			if (words) textToFollow = true;
 			else chrome.notify('Card copied. Paste it into any chat.');
 		} catch {
 			status = 'This browser cannot copy pictures. Save the image, then attach it.';
 		}
+	}
+
+	/** The second half of sending the card with the whole recipe: the words on their own. */
+	async function sendText() {
+		if (!canSend) {
+			if (await copyText()) dialog.close();
+			return;
+		}
+		const outcome = await shareText(title, asText());
+		if (outcome === 'cancelled') return;
+		dialog.close();
+		if (outcome === 'copied') chrome.notify('Recipe copied. Paste it anywhere.');
+		if (outcome === 'failed')
+			chrome.notify('The recipe could not be sent. Use Copy as text.', 5000);
 	}
 
 	async function sendLink() {
@@ -134,12 +168,14 @@
 		if (outcome === 'failed') chrome.notify('Could not share. Copy the address instead.', 5000);
 	}
 
-	async function copyText() {
+	async function copyText(): Promise<boolean> {
 		try {
 			await navigator.clipboard.writeText(asText());
 			chrome.notify('Recipe copied. Paste it anywhere.');
+			return true;
 		} catch {
 			status = 'The recipe could not be copied.';
+			return false;
 		}
 	}
 
@@ -182,6 +218,22 @@
 			<input type="checkbox" bind:checked={withText} />
 			<span>Send the whole recipe as text too</span>
 		</label>
+
+		{#if textToFollow}
+			<div class="follow" role="status">
+				<p>
+					<strong>{canSend ? 'Card sent.' : 'Card copied.'}</strong>
+					{canSend
+						? 'Some apps leave out the words sent with a picture, so send the recipe text on its own too. It is also copied, ready to paste.'
+						: 'Paste it into the chat, then copy the recipe text and paste that under it.'}
+				</p>
+				<button type="button" class="primary" onclick={sendText}>
+					<Icon name={canSend ? 'send' : 'copy'} />{canSend
+						? 'Send the recipe text'
+						: 'Copy the recipe text'}
+				</button>
+			</div>
+		{/if}
 
 		<div class="actions">
 			<button type="button" class="primary" disabled={!made} onclick={sendCard}>
@@ -321,6 +373,16 @@
 
 	.primary:hover:not(:disabled) {
 		background: var(--colour-primary);
+	}
+
+	.follow {
+		display: grid;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		border-inline-start: 3px solid var(--colour-primary);
+		border-radius: var(--radius-s);
+		background: var(--colour-tint);
+		font-size: var(--text-s);
 	}
 
 	.close {

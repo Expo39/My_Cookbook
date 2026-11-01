@@ -67,7 +67,7 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 ### Sharing
 
 - **Share** opens straight onto a recipe card drawn in the browser for the current scale, units and variant, with every ingredient (long ones wrap; long lists run in two columns) and a QR code for the recipe.
-- On a phone, **Send the card** hands the image and the link to the system share sheet (WhatsApp, Messenger, Instagram and so on), optionally with the whole recipe as text; most computers get **Copy the card** instead. **Save image**, **Send the link**, **Copy as text** and **Print** (an A5 index card) sit beside it. A recipe kept on the device has no link yet.
+- On a phone, **Send the card** hands the image and the link to the system share sheet (WhatsApp, Messenger, Instagram and so on), optionally with the whole recipe as text; most computers get **Copy the card** instead. **Save image**, **Send the link**, **Copy as text** (the whole recipe) and **Print** (the whole recipe on A4, the same page as the browser's own Print) sit beside it. A recipe kept on the device has no link yet.
 - Share cards (Open Graph, portrait and story) rendered at build time with the same layout.
 - A shopping list that merges ingredients across recipes and can be shared as text. Your own items are typed as you would write them ("2 kg potatoes"), and any amount can change its number and unit.
 

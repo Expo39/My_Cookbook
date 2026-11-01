@@ -48,7 +48,7 @@
 		},
 		{
 			q: 'How do I send a recipe to a friend?',
-			a: 'Tap Share on the recipe. A picture of the recipe card appears straight away, with every ingredient and a code that opens the recipe. On a phone, Send the card opens your phone\'s share sheet, so it goes straight into WhatsApp, Messenger, Instagram or a message, with the link. Tick "Send the whole recipe as text too" to include the full recipe.'
+			a: 'Tap Share on the recipe. A picture of the recipe card appears straight away, with every ingredient and a code that opens the recipe. On a phone, Send the card opens your phone\'s share sheet, so it goes straight into WhatsApp, Messenger, Instagram or a message, with the link. Tick "Send the whole recipe as text too" to include the full recipe; the text is also copied, and one more tap sends it on its own, for apps that drop the words sent with a picture.'
 		},
 		{
 			q: 'Why does my computer say Copy the card instead of Send the card?',
@@ -276,7 +276,9 @@
 			<li>
 				<strong>Send the card</strong> (on a phone) opens the phone's share sheet, so the card goes
 				straight into WhatsApp, Messenger, Instagram or a message, with the recipe's link. Tick
-				<strong>Send the whole recipe as text too</strong> to include the full recipe.
+				<strong>Send the whole recipe as text too</strong> to include the full recipe: as many chat apps
+				leave out words sent with a picture, the text is also copied, and one more tap sends it on its
+				own.
 			</li>
 			<li>
 				<strong>Copy the card</strong> (on most computers) copies the picture to paste into a chat.
@@ -284,7 +286,10 @@
 			<li><strong>Save image</strong> keeps the card in your downloads.</li>
 			<li><strong>Send the link</strong> shares, or copies, the recipe's address.</li>
 			<li><strong>Copy as text</strong> copies the whole recipe to paste anywhere.</li>
-			<li><strong>Print</strong> prints the card on an A5 index card.</li>
+			<li>
+				<strong>Print</strong> prints the whole recipe on an A4 page, as you have it on screen, with a
+				code to open it on your phone. The browser's own Print gives the same page.
+			</li>
 		</ul>
 		<p>
 			A recipe of your own has no link yet, so <strong>Send the link</strong> is greyed out; the card

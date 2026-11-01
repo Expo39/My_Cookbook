@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, tick, untrack } from 'svelte';
+	import { flushSync, onMount, tick, untrack } from 'svelte';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import { afterNavigate, invalidate, replaceState } from '$app/navigation';
@@ -32,7 +32,7 @@
 	import MethodPanel from './MethodPanel.svelte';
 	import PageHead from './PageHead.svelte';
 	import Planner from './Planner.svelte';
-	import PrintCard from './PrintCard.svelte';
+	import PrintSheet from './PrintSheet.svelte';
 	import RecipeCard from './RecipeCard.svelte';
 	import RecipeHeader from './RecipeHeader.svelte';
 	import RecipeNotes from './RecipeNotes.svelte';
@@ -78,8 +78,9 @@
 	let sheet: ShareSheet | undefined = $state();
 	const ai = createAiClient();
 	let chef: SousChef | undefined = $state();
-	let printingCard = $state(false);
 	let printQr = $state<QrMatrix | null>(null);
+	/** True from the moment the print dialog is asked for until it closes; the A4 sheet exists only then. */
+	let printing = $state(false);
 
 	/** The step cook mode is on (1-based), or `null` while it is closed. `?cook=3` deep-links to a step. */
 	let cookStep = $state<number | null>(null);
@@ -242,17 +243,25 @@
 
 	const share = () => sheet?.show();
 
-	/** Prints the A5 index card: the page shows only the card while the browser's print dialog is open. */
-	async function printCard() {
+	/** Draws the A4 sheet; its code opens the recipe as printed: servings, units and variants. */
+	function preparePrint() {
 		try {
-			await loadCore();
 			printQr = local ? null : (qrMatrix(`${canonicalUrl(card.id)}${model.search('')}`) ?? null);
 		} catch {
 			printQr = null;
 		}
-		printingCard = true;
+		printing = true;
+	}
+
+	/** Prints the whole recipe on A4, the same page the browser's own Print gives. */
+	async function printRecipe() {
+		try {
+			await loadCore();
+		} catch {
+			/* the page prints without the code */
+		}
+		preparePrint();
 		await tick();
-		window.addEventListener('afterprint', () => (printingCard = false), { once: true });
 		window.print();
 	}
 
@@ -286,7 +295,16 @@
 	{/if}
 </svelte:head>
 
-<article class:printing-card={printingCard} class:settling={!model.ready}>
+<svelte:window
+	onbeforeprint={() => {
+		// The browser lays the page out for print as soon as this returns, so the sheet is drawn now.
+		if (hydrated) preparePrint();
+		flushSync();
+	}}
+	onafterprint={() => (printing = false)}
+/>
+
+<article class:printing class:settling={!model.ready}>
 	{#if !hydrated || (cookStep !== null && !CookMode)}
 		<!-- Drawn only when the address asks for cook mode (the script in app.html), so a reload
 		     goes straight to it instead of showing the recipe first. -->
@@ -397,11 +415,20 @@
 	{#if hydrated && cookStep !== null && CookMode}
 		<CookMode {model} {recipe} {ticks} step={cookStep} onstep={cookTo} onexit={exitCook} />
 	{/if}
-	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} {local} onprint={printCard} />{/if}
+	{#if hydrated}<ShareSheet bind:this={sheet} {card} {model} {local} onprint={printRecipe} />{/if}
 	{#if hydrated && ai}
 		<SousChef bind:this={chef} client={ai} recipeId={card.id} recipe={data.recipe} />
 	{/if}
-	{#if printingCard}<PrintCard {card} {model} qr={printQr} />{/if}
+	{#if printing}
+		<PrintSheet
+			{card}
+			{model}
+			{photo}
+			qr={printQr}
+			trail={trail.slice(1, -1).map((crumb) => crumb.label)}
+			notes={notes.text}
+		/>
+	{/if}
 </article>
 
 <style>
@@ -629,8 +656,8 @@
 			gap: var(--space-3);
 		}
 
-		/* While the index card prints, nothing else on the page does. */
-		.printing-card > :global(:not(.index-card)) {
+		/* While the A4 sheet is drawn, it is all that prints; without it, the page itself does. */
+		.printing > :global(:not(.sheet)) {
 			display: none;
 		}
 
