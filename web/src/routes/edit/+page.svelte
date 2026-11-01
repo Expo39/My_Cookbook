@@ -27,6 +27,7 @@
 	import TagsField from '$lib/components/admin/TagsField.svelte';
 	import TextField from '$lib/components/admin/TextField.svelte';
 	import Icon from '$lib/components/Icon.svelte';
+	import InfoTip from '$lib/components/InfoTip.svelte';
 	import Segmented from '$lib/components/Segmented.svelte';
 	import { loadCore } from '$lib/core';
 	import { createSource, createWriter, RecipeNotFoundError } from '$lib/data';
@@ -40,6 +41,9 @@
 	import { siteTitle } from '$lib/title';
 
 	let { data } = $props();
+
+	const ADDRESS_INFO =
+		"The end of the recipe's link, made from its title as you type it. Leave it as it is unless you want a shorter or clearer link. Changing it once the recipe is published moves the recipe to the new link.";
 
 	type Phase = 'loading' | 'locked' | 'missing' | 'ready';
 	type Pane = 'edit' | 'checks' | 'preview';
@@ -371,7 +375,9 @@
 	{#snippet address()}
 		<details class="address" bind:open={addressOpen}>
 			<summary>
-				<span>Web address <code>/{editor.id}</code></span>
+				<span class="what">Web address<span class="opt">optional</span></span>
+				<InfoTip topic="a recipe's address" text={ADDRESS_INFO} />
+				<code>/{editor.id}</code>
 				<span class="change">Change</span>
 			</summary>
 			<TextField
@@ -741,8 +747,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-2);
+		gap: var(--space-1) var(--space-2);
 		min-block-size: var(--target);
 		color: var(--colour-muted);
 		font-size: var(--text-s);
@@ -752,7 +757,20 @@
 		margin-block-end: var(--space-2);
 	}
 
+	.what {
+		color: var(--colour-ink);
+		font-weight: 700;
+	}
+
+	.opt {
+		margin-inline-start: var(--space-2);
+		color: var(--colour-muted);
+		font-size: var(--text-xs);
+		font-weight: 400;
+	}
+
 	.change {
+		margin-inline-start: auto;
 		color: var(--colour-primary);
 		font-weight: 700;
 	}

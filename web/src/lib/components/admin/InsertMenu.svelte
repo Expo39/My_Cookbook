@@ -175,11 +175,23 @@
 		justify-items: start;
 	}
 
+	/* As in the method's heading link: the "i" keeps a column of its own, so it never drops below
+	   the button or runs past the card; a long label wraps inside the button. */
 	.opener {
-		display: flex;
-		flex-wrap: wrap;
+		display: grid;
+		grid-template-columns: minmax(0, auto) auto;
 		align-items: center;
-		gap: var(--space-1);
+		column-gap: var(--space-1);
+		max-inline-size: 100%;
+	}
+
+	.opener > :global(p) {
+		grid-column: 1 / -1;
+	}
+
+	.opener > .btn {
+		padding-block: var(--space-2);
+		text-align: start;
 	}
 
 	.panel {
