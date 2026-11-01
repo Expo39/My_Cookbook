@@ -8,7 +8,8 @@ Copy everything the recipe gives, and nothing it does not.
 
 - Every amount written in the source must appear in the JSON, attached to its ingredient. If the source writes "200g plain flour", the object for plain flour has `"amount": { "qty": 200, "unit": "g" }`. Losing an amount is the worst mistake you can make.
 - Every ingredient, step, time and temperature in the source must appear too.
-- Make up nothing: no ingredient, amount, step, time or tip that the text does not write. When the source gives no amount for an ingredient ("salt", "olive oil for frying"), that ingredient has no `amount`.
+- Make up nothing: no ingredient, amount, step, time or tip that the text does not write.
+- Copying means copying the content, not the form. However the source writes it (imperial units, equivalents in brackets, amounts in the method, hob settings), convert it to the rules below: each amount once, in the ingredient's `amount`, and words everywhere else. When the source gives no amount for an ingredient ("salt", "olive oil for frying"), that ingredient has no `amount`.
 
 ## Work in this order
 
@@ -54,8 +55,13 @@ Each ingredient is one object in `items`. Every object has an `item`, the ingred
   - A count has no `unit`: "3 eggs" is `{ "qty": 3 }` with `item` "eggs".
   - Fractions become decimals: "½ tsp" is `0.5`; "1 1/2 cups" is `1.5`; "1/3 cup" is `0.33`; "half a pumpkin" is `0.5` with `item` "pumpkin".
   - Keep the source's units. Do not convert between metric and imperial yourself.
-- Ranges: only a count takes a range, as `{ "qty": { "min": 2, "max": 3 } }` for "2-3 cloves garlic". A weight or a volume never takes a range: use the middle of it, so "100-150 g sugar" becomes `{ "qty": 125, "unit": "g" }`, and add a tip saying that amount is a guide. Time ranges in the method stay ranges (see the method).
+- Ranges: only a count takes a range, as `{ "qty": { "min": 2, "max": 3 } }` for "2-3 cloves garlic". A weight or a volume never takes a range: use the middle of it, so "100-150 g sugar" becomes `{ "qty": 125, "unit": "g" }`, with no tip about it. Time ranges in the method stay ranges (see the method).
 - `prefix`: words before the amount that are not the ingredient, always in the same object as the ingredient: "Zest of 1 lemon" is `prefix` "Zest of", `amount` `{ "qty": 1 }`, `item` "lemon". "Zest and juice of 2 lemons" is one object: `prefix` "Zest and juice of", `amount` `{ "qty": 2 }`, `item` "lemons".
+- Numbers live only in `amount`. `item`, `note` and `prefix` never hold a number, because only the amount changes with the servings and can be switched to other units:
+  - A weight or count written beside another amount ("1 tin (400 g)", "1 large onion, about 200 g", "10 g garlic, 2-3 cloves", "1 packet") keeps one amount, the one the list is in, and the other goes in a tip as a reference only if it helps: "1 large onion is about 180 g", "A tin of coconut milk is 400 ml".
+  - A size to cut to ("cut into 4 cm chunks") goes in the method step that does the cutting, and the note says only "cut into chunks". A thickness that the cooking times depend on ("a steak 2 cm thick") goes in a tip: "These timings are for a steak about 2 cm thick."
+  - "Per person" figures ("400 g per person") are left out: the servings already do that.
+  - Never write `alt`, the equivalent in other units in brackets: the reader switches units on the page.
 - No amount: "Salt, to taste" has no `amount`, `item` "salt", and `"scale": "toTaste"`. "Olive oil, for frying" has no `amount`, `item` "olive oil", `note` "for frying". "A handful of soaked beans" has no `amount`, `item` "beans", `note` "a handful, soaked overnight".
 - `optional`: `true` only when the source says "optional", "if you like" or "if you find it"; then leave those words out of the name and the note.
 - `scale`, how the amount changes with the servings. Most ingredients have no `scale` at all.
@@ -80,7 +86,8 @@ Each source line on the left becomes exactly the objects on the right.
 | `Pastry: 200g plain flour, 100g cold butter` | in the group "Pastry": `{ "food": "flour-plain", "amount": { "qty": 200, "unit": "g" }, "item": "plain flour" }`, `{ "food": "butter", "amount": { "qty": 100, "unit": "g" }, "item": "butter", "note": "cold" }` |
 | `zest and juice of 2 lemons` | `{ "prefix": "Zest and juice of", "amount": { "qty": 2 }, "item": "lemons", "scale": "discrete" }` |
 | `2 sprigs thyme` | `{ "amount": { "qty": 2 }, "item": "sprigs of thyme", "scale": "discrete" }` (a counting word such as sprigs, slices, sheets, cloves or tins stays in `item`) |
-| `2 x 400g tins chopped tomatoes` | `{ "amount": { "qty": 2 }, "item": "tins of chopped tomatoes", "note": "400 g each", "scale": "discrete" }` |
+| `2 x 400g tins chopped tomatoes` | `{ "amount": { "qty": 800, "unit": "g" }, "item": "chopped tomatoes", "note": "tinned" }` |
+| `1 large onion (about 200 g), diced` | `{ "amount": { "qty": 1 }, "item": "large onion", "note": "diced", "scale": "discrete" }`, and the tip "1 large onion is about 200 g." |
 | `Salt and pepper to taste` | `{ "item": "salt and pepper", "scale": "toTaste" }` |
 | `a handful of beans soaked overnight` | `{ "item": "beans", "note": "a handful, soaked overnight" }` |
 | `1 tsp baking soda` | `{ "amount": { "qty": 1, "unit": "tsp" }, "item": "bicarbonate of soda" }` |
@@ -103,15 +110,17 @@ Each instruction is one object in `steps`, with its words in `text`.
   - A fan temperature alone: add 20 for the conventional one, so "180°C fan" is `{temp:200/180}`.
   - Fahrenheit only: convert to the nearest 10 °C, so "350°F" is `{temp:180}`.
   - A temperature inside the food (meat, sugar, oil) takes `!`: "until it reaches 63°C" is "until it reaches {temp:63!}".
-- `{@key}` tokens: use one only when a step repeats an ingredient's amount with its number, as in "Add 200 g of the sugar." Then give that ingredient a short lowercase `key` ("sugar") and write "Add {@sugar}." For half of it, `{@sugar*1/2}`; for the amount alone, `{@sugar:amount}`. When a step does not repeat a number, do not use a token and do not give the ingredient a key: "Heat the oil and add the butter" stays exactly "Heat the oil and add the butter." Most recipes need no tokens at all.
+- Never repeat an ingredient's amount in a step: the ingredient list already gives it, and a number written in a step would not follow the servings. Name the ingredient instead: "Warm 1 tbsp olive oil" becomes "Warm the olive oil". When a step uses only part of an ingredient, say so in words: "Heat half the olive oil", "Add about two-thirds of the butter", "Add the rest of the butter". Do not write `{@key}` tokens and do not give ingredients a `key`. An amount of something that is not in the ingredient list, such as "add 100 ml of the pasta water", stays as written.
 - `heading`: when the method has stages ("Day 1", "Make the sauce", "To assemble"), put `heading` on the first step of each stage.
+- Heat is named in words only: low, medium-low, medium, medium-high or high. Never a hob setting such as "5 of 9".
+- When the method keeps pasta or cooking water ("reserve a cup of the pasta water"), the list has it as an ingredient with no amount: `{ "item": "pasta water", "note": "reserved" }`, and the step says how much in words: "a mugful", "a splash at a time".
 - Never add a step the source does not have, such as "Serve and enjoy" or "Preheat the oven" when the source does not say it.
 
 ## Times and the rest
 
 - `times`: `prep`, `cook` and `rest`, in whole minutes, copied only from a line of the source that names them, such as "Prep: 20 mins" or "Cook time: 1 hour". Never work a time out from the method: a step that says "cool for 10 minutes" is not a `rest` time. When the source names prep and cook, include both.
 - `difficulty`: `easy`, `medium` or `hard`, only when the source says it.
-- `tips`: the source's own notes, substitutions, storage and serving ideas, each one sentence or two. The only tip you may add yourself is the one the amounts rule asks for, when a weight or volume range became its middle. Never add a tip about a time range or anything else.
+- `tips`: the source's own notes, substitutions, storage and serving ideas, each one sentence or two. A tip never repeats an amount from the ingredient list or gives a range for it (it would not change with the servings), and never lays out a cooking timeline. A number in a tip is only a reference guide that the list cannot give: "1 large onion is about 200 g", "For a 1 kg fillet you need about 10 crepes". The only tip you may add yourself is such a reference, when the rules above move a weight or count out of the ingredient's words. Never add a tip about a time range or anything else.
 - `origin`: only when the text names where the recipe comes from (a website, a book, a person), written as "Adapted from <name>". Never guess a source.
 - `tags`: only when the source lists categories or the dish's cuisine is stated; short words such as "Italian", "Vegetarian".
 - Leave out every field you have no value for. Never write an empty string, `null` or a placeholder such as "unknown".

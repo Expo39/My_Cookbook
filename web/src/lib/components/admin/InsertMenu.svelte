@@ -1,19 +1,17 @@
 <script lang="ts">
 	import '$lib/styles/admin.css';
-	import type { EditorState } from '$lib/admin/editor-state.svelte';
-	import { ingredientToken, temperatureToken, timerToken } from '$lib/admin/tokens';
+	import { temperatureToken, timerToken } from '$lib/admin/tokens';
 	import Icon from '../Icon.svelte';
 	import InfoTip from '../InfoTip.svelte';
 
-	let { ed, oninsert }: { ed: EditorState; oninsert: (token: string) => void } = $props();
+	/** Timers and temperatures only: an amount never goes in a step, so there is no ingredient here. */
+	let { oninsert }: { oninsert: (token: string) => void } = $props();
 
 	const id = $props.id();
-	type Kind = 'ingredient' | 'temperature' | 'timer';
+	type Kind = 'temperature' | 'timer';
 
 	let open = $state(false);
-	let kind = $state<Kind>('ingredient');
-	let ingredient = $state('');
-	let amountOnly = $state(false);
+	let kind = $state<Kind>('timer');
 	let degrees = $state('');
 	let degreesTo = $state('');
 	let fan = $state('');
@@ -24,8 +22,6 @@
 	let name = $state('');
 	let problem = $state('');
 
-	const rows = $derived(ed.ingredientRows);
-
 	const positive = (text: string): number | undefined => {
 		const value = Number(text);
 		return text.trim() !== '' && Number.isFinite(value) && value > 0 ? value : undefined;
@@ -34,11 +30,7 @@
 	function insert() {
 		problem = '';
 		let token: string | undefined;
-		if (kind === 'ingredient') {
-			const row = rows.find((r) => r.uid === ingredient);
-			if (!row) problem = 'Choose an ingredient.';
-			else token = ingredientToken(ed.ensureKey(row), amountOnly);
-		} else if (kind === 'temperature') {
+		if (kind === 'temperature') {
 			const celsius = positive(degrees);
 			const max = positive(degreesTo);
 			const fanDegrees = positive(fan);
@@ -71,16 +63,16 @@
 			<Icon name="plus" size={18} />Add to this step
 		</button>
 		<InfoTip
-			topic="adding a timer, temperature or amount"
-			text="Puts it into the step where the cursor was: a timer the cook can tap, a temperature that also shows in °F, or an ingredient's amount that changes with the servings."
+			topic="adding a timer or temperature"
+			text="Puts it into the step where the cursor was: a timer the cook can tap, or a temperature that also shows in °F. Amounts are not added here: they stay in the ingredient list, where they change with the servings."
 		/>
 	</div>
-	{#if !open}<p class="help">A timer, a temperature or an ingredient's amount.</p>{/if}
+	{#if !open}<p class="help">A timer or a temperature.</p>{/if}
 	{#if open}
 		<div class="panel" id="{id}-panel" role="group" aria-label="Insert into the step">
 			<fieldset class="kinds">
 				<legend class="sr-only">What to insert</legend>
-				{#each [['ingredient', 'An ingredient'], ['temperature', 'A temperature'], ['timer', 'A timer']] as [value, label] (value)}
+				{#each [['timer', 'A timer'], ['temperature', 'A temperature']] as [value, label] (value)}
 					<label>
 						<input type="radio" name="{id}-kind" {value} bind:group={kind} />
 						<span>{label}</span>
@@ -88,27 +80,7 @@
 				{/each}
 			</fieldset>
 
-			{#if kind === 'ingredient'}
-				{#if rows.length}
-					<label for="{id}-ingredient">Ingredient</label>
-					<select id="{id}-ingredient" class="control" bind:value={ingredient}>
-						<option value="">Choose...</option>
-						{#each rows as row (row.uid)}
-							<option value={row.uid}>{row.item}</option>
-						{/each}
-					</select>
-					<label class="check">
-						<input type="checkbox" bind:checked={amountOnly} />
-						<span>The amount only, without the name</span>
-					</label>
-					<p class="help">
-						The page shows the amount for the number of servings being cooked, such as "600 g short
-						pasta".
-					</p>
-				{:else}
-					<p class="help">Add some ingredients first, then they can be mentioned here.</p>
-				{/if}
-			{:else if kind === 'temperature'}
+			{#if kind === 'temperature'}
 				<div class="pair">
 					<div>
 						<label for="{id}-deg">Temperature (°C)</label>

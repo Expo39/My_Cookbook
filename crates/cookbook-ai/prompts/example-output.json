@@ -9,7 +9,6 @@
 			"items": [
 				{ "amount": { "qty": 400, "unit": "g" }, "item": "rigatoni" },
 				{
-					"key": "oil",
 					"food": "olive-oil",
 					"amount": { "qty": 1, "unit": "tbsp" },
 					"item": "olive oil"
@@ -20,12 +19,7 @@
 					"note": "crushed",
 					"scale": "discrete"
 				},
-				{
-					"amount": { "qty": 1 },
-					"item": "tin of chopped tomatoes",
-					"note": "400 g",
-					"scale": "discrete"
-				},
+				{ "amount": { "qty": 400, "unit": "g" }, "item": "chopped tomatoes", "note": "tinned" },
 				{ "item": "salt and pepper", "scale": "toTaste" }
 			]
 		},
@@ -45,7 +39,7 @@
 			"text": "Cook the rigatoni in a large pan of salted boiling water for {timer:10}, then drain."
 		},
 		{
-			"text": "Meanwhile, warm {@oil} in a frying pan and fry the garlic for {timer:1}. Add the tomatoes, season with salt and pepper, and simmer for {timer:10-12}."
+			"text": "Meanwhile, warm the olive oil in a frying pan and fry the garlic for {timer:1}. Add the tomatoes, season with salt and pepper, and simmer for {timer:10-12}."
 		},
 		{ "text": "Stir the pasta into the sauce and tip it into a baking dish." },
 		{
@@ -54,7 +48,6 @@
 		{ "text": "Bake for {timer:15}, until golden. Scatter with the basil to serve." }
 	],
 	"tips": [
-		"The tomato sauce can be made a day ahead and kept in the fridge.",
-		"The amount of Parmesan is a guide: the recipe gave a range, so use more or less to taste."
+		"The tomato sauce can be made a day ahead and kept in the fridge."
 	]
 }

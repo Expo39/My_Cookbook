@@ -238,8 +238,31 @@ impl Checker<'_> {
         if let Some(a) = &ing.amount {
             self.amount(&format!("{path}.amount"), a);
         }
-        if let Some(a) = &ing.alt {
-            self.amount(&format!("{path}.alt"), a);
+        if ing.alt.is_some() {
+            self.error(
+                "E-ALT",
+                format!("{path}.alt"),
+                "an ingredient has one amount: the reader switches units on the page, so leave out \
+                 the equivalent in brackets",
+            );
+        }
+        for (field, text) in [
+            ("prefix", ing.prefix.as_deref()),
+            ("item", ing.item.as_deref()),
+            ("note", ing.note.as_deref()),
+        ] {
+            if let Some(found) = text.and_then(number_in) {
+                self.error(
+                    "E-INGREDIENT-NUMBER",
+                    format!("{path}.{field}"),
+                    format!(
+                        "\"{found}\" is a number in the ingredient's words. The amount goes only in \
+                         the amount, where it changes with the servings. A size to cut it to goes in \
+                         the method (\"cut into 4 cm chunks\"); a weight or a count for reference \
+                         goes in a tip (\"1 large onion is about 180 g\")."
+                    ),
+                );
+            }
         }
         if ing.each.is_some_and(|e| !e.is_finite() || e <= 0.0) {
             self.error(
@@ -401,7 +424,6 @@ impl Checker<'_> {
             }
         }
 
-        let mut referenced = BTreeSet::new();
         let mut texts: Vec<(String, &str)> = r
             .steps
             .iter()
@@ -429,22 +451,18 @@ impl Checker<'_> {
                                 format!("{{@{key}}} matches no ingredient key"),
                             );
                         }
-                        referenced.insert(key);
+                        self.error(
+                            "E-STEP-AMOUNT",
+                            &path,
+                            step_amount_message(&format!("{{@{key}}}")),
+                        );
+                    }
+                    Segment::Text { text } => {
+                        if let Some(found) = written_amount(&text) {
+                            self.error("E-STEP-AMOUNT", &path, step_amount_message(&found));
+                        }
                     }
                     _ => {}
-                }
-            }
-        }
-        for (g, group) in r.ingredient_groups.iter().enumerate() {
-            for (i, ing) in group.items.iter().enumerate() {
-                if let Some(key) = &ing.key
-                    && !referenced.contains(key)
-                {
-                    self.warn(
-                        "W-KEY-UNUSED",
-                        format!("ingredientGroups[{g}].items[{i}].key"),
-                        format!("key '{key}' is never referenced in the method"),
-                    );
                 }
             }
         }
@@ -704,7 +722,6 @@ impl Checker<'_> {
                 "the summary is over 200 characters and may not fit a share card",
             );
         }
-        self.redundant_alts();
         self.seasoning_to_taste();
         self.british_spelling();
     }
@@ -738,37 +755,6 @@ impl Checker<'_> {
     }
 
     /// An `alt` that restates the amount in an equivalent unit (1000 g and 1 kg) adds nothing.
-    fn redundant_alts(&mut self) {
-        let r = self.recipe;
-        for (g, group) in r.ingredient_groups.iter().enumerate() {
-            for (i, ing) in group.items.iter().enumerate() {
-                let (Some(amount), Some(alt)) = (&ing.amount, &ing.alt) else {
-                    continue;
-                };
-                let (Some(from), Some(to)) = (amount.unit, alt.unit) else {
-                    continue;
-                };
-                // Only a restatement in the same metric family is redundant; 60 ml (4 tbsp) is useful.
-                let family = from == to
-                    || matches!((from, to), (Unit::G, Unit::Kg) | (Unit::Kg, Unit::G))
-                    || matches!((from, to), (Unit::Ml, Unit::L) | (Unit::L, Unit::Ml));
-                if !family {
-                    continue;
-                }
-                let same = |a: f64, b: f64| {
-                    convert(a, from, to, None).is_some_and(|c| (c - b).abs() <= b.abs() * 1e-6)
-                };
-                if same(amount.qty.min(), alt.qty.min()) && same(amount.qty.max(), alt.qty.max()) {
-                    self.warn(
-                        "W-ALT-REDUNDANT",
-                        format!("ingredientGroups[{g}].items[{i}].alt"),
-                        "the alt is the same amount as the main one in another unit, so it can go",
-                    );
-                }
-            }
-        }
-    }
-
     fn british_spelling(&mut self) {
         let r = self.recipe;
         let mut fields: Vec<(String, String)> = vec![
@@ -1037,6 +1023,132 @@ pub fn check_removal(id: &str, collection: &Collection) -> Vec<CheckResult> {
         .collect()
 }
 
+/// The units an amount is written in, as a cook might type them.
+const AMOUNT_UNITS: &[&str] = &[
+    "g",
+    "gram",
+    "grams",
+    "kg",
+    "kilo",
+    "kilos",
+    "ml",
+    "millilitre",
+    "millilitres",
+    "l",
+    "litre",
+    "litres",
+    "liter",
+    "liters",
+    "tsp",
+    "teaspoon",
+    "teaspoons",
+    "tbsp",
+    "tablespoon",
+    "tablespoons",
+    "cup",
+    "cups",
+    "oz",
+    "ounce",
+    "ounces",
+    "lb",
+    "lbs",
+    "pound",
+    "pounds",
+    "pinch",
+    "pinches",
+];
+
+const FRACTIONS: &[char] = &[
+    '\u{bc}', '\u{bd}', '\u{be}', '\u{2153}', '\u{2154}', '\u{215b}',
+];
+
+/// The first amount written out in a step's text, such as "1 tbsp" or "100-200 ml": a number,
+/// or a range of numbers, followed by a unit of weight or volume.
+fn written_amount(text: &str) -> Option<String> {
+    let chars: Vec<char> = text.chars().collect();
+    let is_num = |c: char| c.is_ascii_digit() || FRACTIONS.contains(&c);
+    let mut i = 0;
+    while i < chars.len() {
+        let starts = is_num(chars[i]) && (i == 0 || !chars[i - 1].is_alphanumeric());
+        if !starts {
+            i += 1;
+            continue;
+        }
+        let begin = i;
+        let mut end = i;
+        // The number, with decimals, and an optional second number for a range.
+        while end < chars.len() && (is_num(chars[end]) || ".,/".contains(chars[end])) {
+            end += 1;
+        }
+        let mut probe = end;
+        while probe < chars.len() && chars[probe] == ' ' {
+            probe += 1;
+        }
+        let rest: String = chars[probe..].iter().collect();
+        let after_range = ["-", "\u{2013}", "to "]
+            .iter()
+            .find_map(|joint| rest.strip_prefix(joint))
+            .map(str::trim_start);
+        if let Some(second) = after_range
+            && second.starts_with(|c: char| is_num(c))
+        {
+            probe = chars.len() - second.chars().count();
+            while probe < chars.len() && (is_num(chars[probe]) || ".,/".contains(chars[probe])) {
+                probe += 1;
+            }
+            end = probe;
+            while probe < chars.len() && chars[probe] == ' ' {
+                probe += 1;
+            }
+        }
+        let word: String = chars[probe..]
+            .iter()
+            .take_while(|c| c.is_alphabetic())
+            .collect::<String>()
+            .to_lowercase();
+        if AMOUNT_UNITS.contains(&word.as_str()) {
+            let stop = probe + word.chars().count();
+            return Some(chars[begin..stop].iter().collect());
+        }
+        i = end.max(begin + 1);
+    }
+    None
+}
+
+/// The first number standing on its own in an ingredient's words, such as "200" in "about 200 g"
+/// or "2-3" in "2-3 cloves". A grade that is part of a name ("A5 Wagyu", "00 flour") does not count.
+fn number_in(text: &str) -> Option<String> {
+    let chars: Vec<char> = text.chars().collect();
+    let is_num = |c: char| c.is_ascii_digit() || FRACTIONS.contains(&c);
+    let mut i = 0;
+    while i < chars.len() {
+        if !is_num(chars[i]) || (i > 0 && chars[i - 1].is_alphabetic()) {
+            i += 1;
+            continue;
+        }
+        let begin = i;
+        while i < chars.len() && (is_num(chars[i]) || ".,/-%".contains(chars[i])) {
+            i += 1;
+        }
+        let found: String = chars[begin..i].iter().collect();
+        let grade = found == "00" || chars.get(i).is_some_and(|c| c.is_alphabetic());
+        if !grade {
+            return Some(found.trim_end_matches(['-', '.', ',']).to_owned());
+        }
+    }
+    None
+}
+
+fn step_amount_message(found: &str) -> String {
+    format!(
+        "\"{found}\" is an amount in the method. Amounts belong only in the ingredient list, \
+         where they change with the servings. Name the ingredient instead (\"add the olive oil\"), \
+         or say how much of it in words: \"half the olive oil\", \"a quarter of the sugar\", \
+         \"two-thirds of the stock\", \"the rest of the butter\". If it is not in the ingredient \
+         list, add it there, or put the detail in a tip."
+    )
+}
+
 /// Salt, pepper or both, as an item with nothing else in it.
 fn is_seasoning(item: &str) -> bool {
     let words = item
@@ -1062,7 +1174,7 @@ mod tests {
             { "key": "salt", "amount": { "qty": 1, "unit": "tsp" }, "item": "salt", "scale": "seasoning" },
             { "key": "egg", "amount": { "qty": 2 }, "item": "eggs", "scale": "discrete" }
         ]}],
-        "steps": [{ "key": "cook", "text": "Heat {@stock} to {temp:90}, add {@salt} and {@egg}, simmer {timer:10}." }],
+        "steps": [{ "key": "cook", "text": "Heat the stock to {temp:90}, add the salt and the eggs, simmer {timer:10}." }],
         "related": ["mains/other"]
     }"#;
 
@@ -1095,8 +1207,37 @@ mod tests {
     }
 
     #[test]
+    fn amounts_written_in_a_step_are_found() {
+        assert_eq!(
+            written_amount("Heat 1 tbsp olive oil."),
+            Some("1 tbsp".into())
+        );
+        assert_eq!(
+            written_amount("add 100-200 ml hot water"),
+            Some("100-200 ml".into())
+        );
+        assert_eq!(
+            written_amount("about \u{bd} tsp sugar"),
+            Some("\u{bd} tsp".into())
+        );
+        assert_eq!(
+            written_amount("Pour in 1.5 litres of stock"),
+            Some("1.5 litres".into())
+        );
+        for none in [
+            "Cut into 2-3 cm pieces.",
+            "Add 1 large onion.",
+            "Brown 2 at a time, on 5 of 9.",
+            "Step 2 of 11.",
+            "Add the stock.",
+        ] {
+            assert_eq!(written_amount(none), None, "{none}");
+        }
+    }
+
+    #[test]
     fn each_mutation_raises_its_check() {
-        let cases: [(&str, &str, &str, &str); 25] = [
+        let cases: [(&str, &str, &str, &str); 26] = [
             (
                 "zero quantity",
                 r#""qty": 1, "unit": "l""#,
@@ -1123,9 +1264,16 @@ mod tests {
             ),
             (
                 "unresolved token",
-                "{@egg}",
+                "the eggs",
                 "{@eggs}",
                 "E-TOKEN-UNRESOLVED",
+            ),
+            ("token in a step", "the eggs", "{@egg}", "E-STEP-AMOUNT"),
+            (
+                "amount in a step",
+                "the salt",
+                "1 tsp salt",
+                "E-STEP-AMOUNT",
             ),
             ("broken token", "{timer:10}", "{timer:x}", "E-TOKEN-SYNTAX"),
             (
@@ -1177,7 +1325,6 @@ mod tests {
                 r#""servings": 4, "image": { "src": "a.jpg", "alt": "Soup" },"#,
                 "E-IMAGE-MISSING",
             ),
-            ("unused key", " add {@salt} and", " add", "W-KEY-UNUSED"),
             (
                 "no times",
                 r#""times": { "prep": 5, "cook": 20 },"#,
@@ -1228,7 +1375,7 @@ mod tests {
             ),
             (
                 "empty steps",
-                r#""steps": [{ "key": "cook", "text": "Heat {@stock} to {temp:90}, add {@salt} and {@egg}, simmer {timer:10}." }]"#,
+                r#""steps": [{ "key": "cook", "text": "Heat the stock to {temp:90}, add the salt and the eggs, simmer {timer:10}." }]"#,
                 r#""steps": []"#,
                 "E-SCHEMA-STEPS",
             ),
@@ -1272,29 +1419,46 @@ mod tests {
     }
 
     #[test]
-    fn a_redundant_alt_is_flagged_but_a_real_equivalent_is_not() {
-        let with_alt = |amount: &str, alt: &str| {
+    fn an_ingredient_keeps_numbers_out_of_its_words() {
+        let with = |line: &str| {
             BASE.replace(
-                r#""key": "stock", "amount": { "qty": 1, "unit": "l" }"#,
-                &format!(r#""key": "stock", "amount": {amount}, "alt": {alt}"#),
+                r#"{ "key": "egg", "amount": { "qty": 2 }, "item": "eggs", "scale": "discrete" }"#,
+                line,
             )
         };
-        let redundant = with_alt(
-            r#"{ "qty": 1000, "unit": "ml" }"#,
-            r#"{ "qty": 1, "unit": "l" }"#,
+        for bad in [
+            r#"{ "amount": { "qty": 1 }, "item": "large onion", "note": "about 200 g" }"#,
+            r#"{ "amount": { "qty": 475, "unit": "g" }, "item": "gnocchi", "note": "1 packet" }"#,
+            r#"{ "amount": { "qty": 3 }, "item": "garlic", "note": "2-3 cloves" }"#,
+            r#"{ "amount": { "qty": 1 }, "item": "\u00bd lemon" }"#,
+        ] {
+            assert!(
+                codes(&run("mains/soup.json", &with(bad))).contains(&"E-INGREDIENT-NUMBER"),
+                "{bad}"
+            );
+        }
+        for good in [
+            r#"{ "amount": { "qty": 320, "unit": "g" }, "item": "A5 Wagyu steak" }"#,
+            r#"{ "amount": { "qty": 500, "unit": "g" }, "item": "00 flour" }"#,
+        ] {
+            assert!(
+                !codes(&run("mains/soup.json", &with(good))).contains(&"E-INGREDIENT-NUMBER"),
+                "{good}"
+            );
+        }
+        let alt = with(
+            r#"{ "amount": { "qty": 60, "unit": "ml" }, "alt": { "qty": 4, "unit": "tbsp" }, "item": "wine" }"#,
         );
-        assert!(codes(&run("mains/soup.json", &redundant)).contains(&"W-ALT-REDUNDANT"));
-        let useful = with_alt(
-            r#"{ "qty": 60, "unit": "ml" }"#,
-            r#"{ "qty": 4, "unit": "tbsp" }"#,
-        );
-        assert!(!codes(&run("mains/soup.json", &useful)).contains(&"W-ALT-REDUNDANT"));
+        assert!(codes(&run("mains/soup.json", &alt)).contains(&"E-ALT"));
     }
 
     #[test]
     fn seasoning_without_an_amount_is_marked_to_taste() {
         let salt = r#"{ "key": "salt", "amount": { "qty": 1, "unit": "tsp" }, "item": "salt", "scale": "seasoning" }"#;
-        let with = |line: &str| BASE.replace(salt, line).replace(" add {@salt} and", " add");
+        let with = |line: &str| {
+            BASE.replace(salt, line)
+                .replace(" add the salt and", " add")
+        };
         let plain = with(r#"{ "item": "Salt and black pepper" }"#);
         assert!(codes(&run("mains/soup.json", &plain)).contains(&"W-TO-TASTE"));
         let worded = with(r#"{ "item": "Salt to taste", "scale": "toTaste" }"#);
@@ -1310,7 +1474,7 @@ mod tests {
         let results = run(
             "mains/soup.json",
             &BASE
-                .replace("{@egg}", "{@eggs}")
+                .replace("the eggs", "{@eggs}")
                 .replace(r#""times": { "prep": 5, "cook": 20 },"#, ""),
         );
         for r in &results {

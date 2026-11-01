@@ -2,16 +2,9 @@ import { SvelteSet } from 'svelte/reactivity';
 import { checkRecipe, isCoreLoaded } from '$lib/core';
 import { allRecipes, findRecipe } from '$lib/data/tree';
 import type { CheckResult, Recipe, SectionNode, SiteIndex } from '$lib/types/recipe';
-import {
-	emptyForm,
-	formFromRecipe,
-	recipeFromForm,
-	uid,
-	type FormData,
-	type IngredientRow
-} from './recipe-form';
+import { emptyForm, formFromRecipe, recipeFromForm, uid, type FormData } from './recipe-form';
 import { tokensToWords, wordsToTokens, type Found } from './plain-steps';
-import { slugify, suggestKey } from './slug';
+import { slugify } from './slug';
 
 export interface Photo {
 	blob: Blob;
@@ -269,18 +262,7 @@ export class EditorState {
 		return this.errors.find((result) => this.pathOf(result) === path)?.message;
 	}
 
-	/** Every ingredient, for the token picker. */
-	get ingredientRows(): IngredientRow[] {
-		return this.form.groups.flatMap((group) => group.items).filter((row) => row.item.trim());
-	}
-
 	get keys(): string[] {
 		return this.form.groups.flatMap((g) => g.items.map((row) => row.key)).filter(Boolean);
-	}
-
-	/** Gives the row a key if it has none, and returns it. */
-	ensureKey(row: IngredientRow): string {
-		if (!row.key) row.key = suggestKey(row.item, this.keys);
-		return row.key;
 	}
 }

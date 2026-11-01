@@ -283,7 +283,7 @@ fn recipe(extra: Value) -> Value {
         "ingredientGroups": [{ "items": [
             { "key": "chickpeas", "amount": { "qty": 400, "unit": "g" }, "item": "chickpeas" }
         ]}],
-        "steps": [{ "text": "Simmer {@chickpeas} for {timer:20}." }]
+        "steps": [{ "text": "Simmer the chickpeas for {timer:20}." }]
     });
     base.as_object_mut()
         .unwrap()
@@ -1253,7 +1253,7 @@ async fn a_failed_check_on_a_linker_leaves_the_tree_as_it_was() {
     .await;
     let broken = fs::read_to_string(k.path("recipes/mains/linker.json"))
         .unwrap()
-        .replace("{@chickpeas}", "{@nothing}");
+        .replace("the chickpeas", "{@nothing}");
     fs::write(k.path("recipes/mains/linker.json"), &broken).unwrap();
     put(
         &k,

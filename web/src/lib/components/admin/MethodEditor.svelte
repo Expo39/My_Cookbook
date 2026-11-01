@@ -43,6 +43,11 @@
 
 <FieldSet legend="Method">
 	<p class="help">Write each step on its own, the way you would tell someone in the kitchen.</p>
+	<p class="hint">
+		<Icon name="basket" size={18} />Leave the amounts to the ingredient list, where they change with
+		the servings. In a step, name the ingredient ("add the butter"), or say how much of it in words:
+		"half the olive oil", "a quarter of the sugar", "the rest of the stock".
+	</p>
 	{#if ed.plainSteps}
 		<p class="hint">
 			<Icon name="timer" size={18} />Write normally: times and temperatures become tappable timers.
@@ -101,7 +106,7 @@
 						{/each}
 					</ul>
 				{/if}
-				{#if !ed.plainSteps}<InsertMenu {ed} oninsert={(token) => insert(i, token)} />{/if}
+				{#if !ed.plainSteps}<InsertMenu oninsert={(token) => insert(i, token)} />{/if}
 				<div class="times">
 					<TextField
 						id={fieldId(`steps[${i}].time.active`)}

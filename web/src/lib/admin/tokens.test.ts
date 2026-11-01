@@ -1,12 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ingredientToken, insertAt, temperatureToken, timerToken } from './tokens';
-
-describe('ingredientToken', () => {
-	it('names the ingredient, with or without its item', () => {
-		expect(ingredientToken('pasta')).toBe('{@pasta}');
-		expect(ingredientToken('pasta', true)).toBe('{@pasta:amount}');
-	});
-});
+import { insertAt, temperatureToken, timerToken } from './tokens';
 
 describe('temperatureToken', () => {
 	it.each([

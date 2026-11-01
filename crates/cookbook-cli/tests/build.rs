@@ -62,7 +62,7 @@ fn a_valid_tree_emits_every_file() {
     assert_eq!(page["recipe"]["title"], "Lentil soup");
     assert_eq!(page["view"]["factor"], 1.0);
     assert!(
-        page["view"]["steps"][0]["text"]
+        page["view"]["groups"][0]["items"][0]["text"]
             .as_str()
             .unwrap()
             .contains("250 g red lentils")

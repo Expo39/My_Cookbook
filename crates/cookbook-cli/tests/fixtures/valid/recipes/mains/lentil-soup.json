@@ -13,7 +13,7 @@
     }
   ],
   "steps": [
-    { "text": "Simmer {@lentils} in {@stock} for {timer:25-30}." },
-    { "text": "Season with {@salt}." }
+    { "text": "Simmer the lentils in the stock for {timer:25-30}." },
+    { "text": "Season with the salt." }
   ]
 }
