@@ -60,10 +60,13 @@ test.setTimeout(240_000);
 test('records the walkthrough @walkthrough', async ({ browser }) => {
 	const context = await browser.newContext({
 		viewport: SIZE,
-		recordVideo: { dir: raw.pathname, size: SIZE }
+		recordVideo: { dir: raw.pathname, size: SIZE },
+		permissions: ['clipboard-read', 'clipboard-write']
 	});
 	const page = await context.newPage();
 	await page.addInitScript(POINTER);
+	// The real print dialog would stop the recording; the printed page is shown instead.
+	await page.addInitScript(() => (window.print = () => undefined));
 
 	/** Glides the drawn pointer to the middle of `target`, the way a person would reach for it. */
 	async function reach(target: Locator) {
@@ -204,9 +207,39 @@ test('records the walkthrough @walkthrough', async ({ browser }) => {
 
 	// Sharing
 	await tap(page.getByRole('button', { name: 'Share', exact: true }).first());
-	await expect(page.getByRole('dialog', { name: 'Share' })).toBeVisible();
-	await say('Share opens on the recipe card, ready to send with its link or copy as text.');
-	await page.keyboard.press('Escape');
+	const sheet = page.getByRole('dialog', { name: 'Share' });
+	await expect(sheet).toBeVisible();
+	await say('Share opens on the recipe card, ready to send with its link.');
+	await tap(sheet.getByRole('checkbox', { name: /whole recipe as text/ }));
+	await say('Tick this to send the whole recipe as text with the card.', 2600);
+	await tap(sheet.getByRole('button', { name: /(Send|Copy) the card/ }));
+	await expect(sheet.getByRole('button', { name: /(Send|Copy) the recipe text/ })).toBeVisible();
+	await say(
+		'Chat apps often drop words sent with a picture, so the text follows in one more tap.',
+		3600
+	);
+	await tap(sheet.getByRole('button', { name: /(Send|Copy) the recipe text/ }));
+	await slowly(1200);
+
+	// Printing
+	await tap(page.getByRole('button', { name: 'Share', exact: true }).first());
+	await expect(sheet).toBeVisible();
+	await tap(sheet.getByRole('button', { name: 'Print' }));
+	await expect(sheet).toBeHidden();
+	// The page as it prints, framed as a sheet of paper so the video shows what comes out.
+	const paper = await page.addStyleTag({
+		content: `html, body { background: #d9dfe5 !important; }
+			.sheet { max-width: 210mm; margin: 24px auto; padding: 14mm 15mm; background: #fff;
+				box-shadow: 0 0.5rem 1.75rem rgb(0 0 0 / 0.25); }`
+	});
+	await page.emulateMedia({ media: 'print' });
+	await page.evaluate(() => scrollTo({ top: 0 }));
+	await say('Print gives the whole recipe on A4, at your servings, with a code to open it.', 2600);
+	await page.mouse.wheel(0, 500);
+	await say('Tick the ingredients in pencil as you go.', 2400);
+	await page.emulateMedia({ media: 'screen' });
+	await paper.evaluate((tag) => tag.remove());
+	await page.evaluate(() => dispatchEvent(new Event('afterprint')));
 
 	// Your own recipe
 	await page.goto('edit');
