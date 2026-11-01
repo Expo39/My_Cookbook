@@ -29,7 +29,7 @@ flowchart TB
     recipe --> variants["variants: Variant[]"]
     groups --> ing["items: Ingredient[]"]
     groups --> total["total: Amount"]
-    ing --> amount["amount and alt: Amount"]
+    ing --> amount["amount: Amount"]
     amount --> qty["qty: number or min/max, unit"]
     steps --> tokens["text with tokens: {@key}, {temp:...}, {timer:...}"]
     tokens -. "refers to ingredient key" .-> ing
@@ -82,9 +82,9 @@ flowchart TB
 | `food` | string | optional stable id, e.g. `flour-00` or `egg`; used for density lookup, merging shopping lists and ingredient search |
 | `each` | number | grams per piece for discrete items (e.g. egg about 50) |
 | `amount` | Amount | optional; omit it for "salt to taste" lines |
-| `alt` | Amount | an author-given equivalent in a second unit, shown in brackets: "130 ml (9 tbsp)". It wins over the density table |
+| `alt` | Amount | not used: the checklist fails `E-ALT`, since the reader switches units on the page. The engine fills it in itself only for a fractional egg shown by weight |
 | `prefix` | string | text before the amount: "Zest of" 1 lemon |
-| `item` | string | "short pasta" |
+| `item` | string | "short pasta"; like `note` and `prefix`, it holds no number (`E-INGREDIENT-NUMBER`): the amount goes in `amount`, a size to cut to in the method, a reference weight or count in a tip |
 | `note` | string | "penne or rigatoni"; shown after a comma |
 | `optional` | bool | |
 | `scale` | `"linear" \| "discrete" \| "seasoning" \| "fixed" \| "toTaste"` | defaults to `linear`; `discrete` keeps whole pieces (eggs, cloves, tins); `seasoning` shows a range from 0.75x to 1x of the linear change, "start low"; `toTaste` marks salt and pepper with no amount, and the site shows "to taste" where the amount would be. Keep the words "to taste" out of `item`: the checklist warns (`W-TO-TASTE`) when they are there, or when salt or pepper has neither an amount nor `toTaste` |
@@ -137,9 +137,9 @@ Times, temperatures and cookware are never scaled automatically. When the scale 
 - A variant option replaces a whole ingredient (its `key` is taken from the map key) and may only name keys that exist in the recipe.
 - `seasoning` above 1x shows `max(base, 0.75 * base * f)` to `base * f`; at or below 1x it is plain linear.
 - `discrete` rounds to the nearest whole piece (minimum 1). Only when the recipe is `precise` and the ingredient has `each` does a fractional part of 0.25 to 0.75 show as a half with its weight, e.g. "1½ (75 g) eggs".
-- A cup is 240 ml, a tablespoon 15 ml, a teaspoon 5 ml and a US fluid ounce 30 ml. An ingredient with an `alt` is shown in its authored units and never converted.
+- A cup is 240 ml, a tablespoon 15 ml, a teaspoon 5 ml and a US fluid ounce 30 ml. Every amount is converted on the page to the reader's units, so a recipe never writes one twice.
 - Token modifiers combine as `{@key:amount*1/2}`. `{timer:12-15|name}` takes both a range and a name.
-- Cook mode lists the ingredients each step uses without any tokens: it matches the step's words against the ingredient lines ("add the shallots and the red wine" finds both). Name ingredients plainly in the method and the match follows. A `{@key}` token is only needed to show an amount inline, and its line always counts as used by that step.
+- Cook mode lists the ingredients each step uses without any tokens: it matches the step's words against the ingredient lines ("add the shallots and the red wine" finds both). Name ingredients plainly in the method and the match follows. A `{@key}` token is only needed to show an amount inline, and its line always counts as used by that step. A step never holds an amount: the checklist fails `E-STEP-AMOUNT` on a `{@key}` token or a written amount such as "1 tbsp" or "100-200 ml" in a step's text. A step names the ingredient, or a part of it in words ("half the olive oil", "the rest of the butter"), so the method can never show an amount that does not follow the servings; a planning figure such as the water for the pasta goes in a tip. An ingredient `key` is then needed only by a variant that replaces it (see `crates/cookbook-ai/prompts/recipe-style.md`).
 
 ## Validation
 `cookbook-cli check` runs the recipe checklist; `make check` runs it over the whole tree. Errors have ids starting `E-` and stop the build; warnings start `W-` and are reported but allowed. The same rules run in the in-site editor (through WASM), in CI and on the self-hosted server. See [ARCHITECTURE.md](ARCHITECTURE.md#where-the-checklist-runs).

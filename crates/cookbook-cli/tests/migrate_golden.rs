@@ -237,6 +237,14 @@ fn assert_amounts_survive(recipes: &BTreeMap<String, Recipe>) {
         }
         for span in element.select(&selector(".ingredients [data-base]")) {
             let base: f64 = span.value().attr("data-base").unwrap().parse().unwrap();
+            // An equivalent in brackets ("130 ml (9 tbsp)") is not kept: the page converts units.
+            let bracketed = span
+                .prev_sibling()
+                .and_then(|node| node.value().as_text().map(|t| t.trim_end().ends_with('(')))
+                .unwrap_or(false);
+            if bracketed {
+                continue;
+            }
             assert!(
                 found.iter().any(|v| (v - base).abs() < 1e-9),
                 "{legacy}: base {base} ({}) is missing",

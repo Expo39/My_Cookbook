@@ -69,7 +69,12 @@ describe('the WASM core', () => {
 	});
 
 	it('checks a recipe against the context', () => {
-		const clean = checkRecipe(fixture, 'mains/lentil-soup', {
+		// A step names its ingredients: an amount in a step, a token included, is an error.
+		const worded = {
+			...fixture,
+			steps: [{ text: 'Simmer the lentils in the stock at {temp:200/180} for {timer:25-30}.' }]
+		};
+		const clean = checkRecipe(worded, 'mains/lentil-soup', {
 			knownIds: ['mains/lentil-soup'],
 			sectionFolders: ['mains']
 		});
@@ -81,6 +86,12 @@ describe('the WASM core', () => {
 			sectionFolders: ['mains']
 		});
 		expect(results.map((r) => r.id)).toContain('E-TOKEN-UNRESOLVED');
+		expect(
+			checkRecipe(fixture, 'mains/lentil-soup', {
+				knownIds: ['mains/lentil-soup'],
+				sectionFolders: ['mains']
+			}).map((r) => r.id)
+		).toContain('E-STEP-AMOUNT');
 	});
 
 	it('blocks the removal of a recipe that others link to', () => {

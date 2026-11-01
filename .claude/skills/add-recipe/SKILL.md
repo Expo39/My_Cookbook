@@ -34,6 +34,18 @@ On top of those rules, the skill can do what the importer cannot:
 
 When you change a house rule, change it in `recipe-style.md` and keep the worked example passing; `cargo test -p cookbook-ai` checks that it does.
 
+### Amounts: the rules most often broken
+Apply these to every recipe, including when you fix or extend an existing one:
+- **An amount lives only in the ingredient's `amount`**, the one place it changes with the servings and switches units on the page. Never write an equivalent in brackets (`alt`, "120 ml (½ cup)"); the checklist fails it with `E-ALT`.
+- **No numbers in an ingredient's words** (`item`, `note`, `prefix`): no "1 packet", "about 200 g", "2-3 cloves", "28 oz tin", "400 g per person" (`E-INGREDIENT-NUMBER`). A size to cut to goes in the method ("cut into 4 cm chunks"); a thickness the timings depend on, or a weight or count worth knowing, goes in a tip as a reference ("These timings are for a steak about 2 cm thick", "1 large onion is about 180 g").
+- **No amounts in the method** (`E-STEP-AMOUNT`): a step names the ingredient ("add the olive oil") or says how much in words ("half the olive oil", "a quarter of the sugar", "the rest of the butter").
+- **Tips never repeat or give a range for the recipe's own amounts**, and never lay out a cooking timeline. A number in a tip is only a reference guide the list cannot give ("For a 1 kg fillet you need about 10 crepes").
+- **Heat in words only**: low, medium-low, medium, medium-high, high. Never a hob setting such as "5 of 9".
+- **Pasta or cooking water** that the method keeps is in the ingredient list, with no amount and the note "reserved"; the step says how much in words ("a mugful", "a splash at a time").
+- These rules hold however the recipe arrives: a source in imperial, with amounts in its method, with equivalents in brackets or in any other format is converted to them, never copied as written.
+
+So a source line "1 tin (400 g) chopped tomatoes" becomes 400 g chopped tomatoes, note "tinned"; "Heat 2 tbsp of the oil" becomes "Heat half the oil" when the list has 4 tbsp; "120 ml (½ cup) wine" becomes 120 ml wine; "cook on 5 of 9" becomes "cook over a medium heat".
+
 ## 4. Check, then fix
 Run `.claude/skills/add-recipe/scripts/check.sh recipes/<path>.json`. It runs `cookbook-cli check` in the Docker dev container; nothing gets installed on the host. Fix every error and run it again until it passes. Look at each warning: fix it when you can (British spelling, unused keys, a missing time you can justify), and otherwise mention it.
 

@@ -1,8 +1,5 @@
 /** The inline tokens a step can hold; `docs/RECIPE_FORMAT.md` lists what each renders as. */
 
-export const ingredientToken = (key: string, amountOnly = false): string =>
-	`{@${key}${amountOnly ? ':amount' : ''}}`;
-
 export interface TemperatureInput {
 	celsius: number;
 	/** The top of a range. A range takes no fan value. */
