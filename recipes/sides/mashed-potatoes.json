@@ -1,0 +1,99 @@
+{
+  "title": "Mashed Potatoes",
+  "summary": "Smooth, buttery mash, dried off in the hot pan before the butter and warm milk go in. The one that goes under the lamb shanks.",
+  "servings": 4,
+  "times": {
+    "prep": 10,
+    "cook": 25
+  },
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "kg"
+          },
+          "item": "potatoes",
+          "note": "peeled and cut into 4 cm chunks"
+        },
+        {
+          "food": "salt",
+          "amount": {
+            "qty": 1.5,
+            "unit": "tsp"
+          },
+          "item": "salt",
+          "note": "for the cooking water",
+          "scale": "seasoning"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 60,
+            "unit": "g"
+          },
+          "item": "butter"
+        },
+        {
+          "food": "milk",
+          "amount": {
+            "qty": 135,
+            "unit": "ml"
+          },
+          "item": "milk",
+          "note": "warm"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "black pepper",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "pinch"
+          },
+          "item": "nutmeg",
+          "optional": true,
+          "scale": "seasoning"
+        },
+        {
+          "item": "salt",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Put the potatoes in a saucepan and cover them with cold water by 2-3 cm. Add the salt to the water."
+    },
+    {
+      "text": "Bring to the boil, then lower to a steady simmer and cook for {timer:15-20}, until a knife slides straight through the potatoes with no resistance."
+    },
+    {
+      "text": "Drain them very well, then put them back in the hot, empty saucepan over a low heat for {timer:1}, moving them around gently. This dries off the water and makes a much better mash."
+    },
+    {
+      "text": "Turn off the heat and mash thoroughly."
+    },
+    {
+      "text": "Mix in the butter, then the warm milk a little at a time. Stop adding milk when you like the consistency."
+    },
+    {
+      "text": "Season with the black pepper and the nutmeg, if using, then taste and add salt if it needs it."
+    }
+  ],
+  "tips": [
+    "Never use a blender or a food processor: it makes the potatoes gluey.",
+    "The milk is a guide: anything from 120 to 150 ml, depending on the potatoes and how soft you like it. Start with a quarter teaspoon of pepper and add more to taste.",
+    "A small pinch of nutmeg works particularly well when the mash goes with lamb."
+  ],
+  "related": [
+    "main-courses/lamb/slow-braised-lamb-shanks-with-red-wine-and-polpa"
+  ]
+}

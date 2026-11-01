@@ -1,0 +1,222 @@
+{
+  "title": "Beef Fried Rice with Soft Egg",
+  "summary": "Takeaway-style beef fried rice. The secret is dry, cold rice, deeply browned beef and soft eggs cooked on their own first.",
+  "servings": 2,
+  "times": {
+    "prep": 15,
+    "cook": 35,
+    "rest": 10
+  },
+  "tags": [
+    "Asian-Inspired"
+  ],
+  "equipment": [
+    "Stainless-steel frying pan"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "g"
+          },
+          "item": "beef mince"
+        },
+        {
+          "food": "rice",
+          "amount": {
+            "qty": 170,
+            "unit": "g"
+          },
+          "alt": {
+            "qty": 1.25,
+            "unit": "cup"
+          },
+          "item": "jasmine rice"
+        },
+        {
+          "food": "water",
+          "amount": {
+            "qty": 255,
+            "unit": "ml"
+          },
+          "item": "water"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "eggs",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 4
+          },
+          "item": "spring onions",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 3
+          },
+          "item": "garlic cloves",
+          "note": "finely chopped",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "fresh ginger",
+          "note": "grated; optional, but recommended",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 1.5,
+            "unit": "tsp"
+          },
+          "item": "tomato paste"
+        },
+        {
+          "item": "olive oil"
+        }
+      ]
+    },
+    {
+      "name": "Sauce",
+      "items": [
+        {
+          "amount": {
+            "qty": 1.5,
+            "unit": "tbsp"
+          },
+          "item": "oyster sauce"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "light soy sauce",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "Shaoxing wine",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "white pepper",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "pinch"
+          },
+          "item": "MSG",
+          "note": "a small pinch",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Cook the rice",
+      "text": "Rinse the rice until the water runs mostly clear."
+    },
+    {
+      "text": "Put the rice and the water in a saucepan, bring to the boil, then cover and turn the heat down to its lowest setting."
+    },
+    {
+      "text": "Cook for {timer:12|rice} without lifting the lid, then turn off the heat and leave it covered for {timer:10|rice rest}."
+    },
+    {
+      "text": "Spread the rice on a large plate or tray to let the steam out. Ideally, refrigerate it until cold: cold, dry rice fries much better than freshly cooked rice. If you are cooking straight away, let it cool as much as possible while you prepare everything else."
+    },
+    {
+      "heading": "Prepare everything",
+      "text": "Separate the white parts of the spring onions from the green tops, and slice both thinly."
+    },
+    {
+      "text": "Mix the oyster sauce, soy sauce, Shaoxing wine, white pepper and MSG in a small bowl. Beat the eggs in another bowl."
+    },
+    {
+      "text": "Keep the garlic, ginger and tomato paste ready beside the hob. Once you start frying, things move quickly."
+    },
+    {
+      "heading": "Cook the eggs",
+      "text": "Put the empty stainless-steel pan over a medium heat for {timer:1-2}."
+    },
+    {
+      "text": "Test it with a few drops of water. If they form little beads that glide around the pan, it is ready; if they evaporate at once, it is too hot. Wipe the water away carefully and let the pan dry completely."
+    },
+    {
+      "text": "Turn the heat down to medium-low and let the pan cool slightly for {timer:20-30s}. Add 1 tbsp olive oil and swirl it around the pan."
+    },
+    {
+      "text": "Add the beaten eggs. They should start to set gently rather than brown straight away. Stir slowly with a spatula until softly scrambled, and lift them onto a plate while they are still slightly moist."
+    },
+    {
+      "heading": "Brown the beef",
+      "text": "Turn the heat up to medium-high and add a little olive oil if needed. Add the beef mince, spreading it across the pan."
+    },
+    {
+      "text": "Leave it undisturbed for {timer:1-2} so it browns properly, then break it up and keep cooking until browned and cooked through, {timer:4-6} in all."
+    },
+    {
+      "text": "If there is a lot of liquid, let it evaporate before you go on. Good browning is what gives the dish its deep, savoury flavour."
+    },
+    {
+      "heading": "Build the flavour",
+      "text": "Push the beef to one side of the pan, or lift it out for a moment if the pan is crowded."
+    },
+    {
+      "text": "Add the spring onion whites, the garlic and the ginger, with a little olive oil if needed. Fry for {timer:30-45s}, stirring constantly, without letting the garlic burn."
+    },
+    {
+      "text": "Add the tomato paste and cook for another {timer:45-60s}, stirring it into the beef. This takes away the raw tomato taste and adds colour. Return the beef to the pan if you lifted it out."
+    },
+    {
+      "heading": "Fry the rice",
+      "text": "Add the cold rice, breaking up any clumps with the spatula. Spread it out and let it fry for {timer:30-60s} before tossing."
+    },
+    {
+      "text": "Stir-fry for another {timer:2-3}, until the rice is hot and coated in the beef and tomato."
+    },
+    {
+      "text": "Pour the sauce around the hot sides of the pan, then toss everything together."
+    },
+    {
+      "text": "Return the scrambled eggs and break them gently into bite-sized pieces. Add the spring onion greens and toss for {timer:30s} more."
+    },
+    {
+      "text": "Taste before adding any salt: the oyster sauce and soy sauce are already salty."
+    },
+    {
+      "heading": "Serve",
+      "text": "Serve straight away while the rice is hot, finished with a few fresh spring onion greens and a small pinch of white pepper."
+    }
+  ],
+  "tips": [
+    "If the eggs stick at once, the pan is too hot or the oil has not spread properly. Lower the heat and do not try to force them off.",
+    "No sugar or sesame oil is needed.",
+    "The three things that make it: properly chilled rice, deeply browned beef, and eggs cooked separately so they stay soft rather than dry and rubbery.",
+    "Use 1-2 tsp tomato paste, to taste."
+  ],
+  "related": [
+    "sides/stovetop-jasmine-rice"
+  ]
+}

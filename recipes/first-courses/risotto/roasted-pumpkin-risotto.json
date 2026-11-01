@@ -1,0 +1,180 @@
+{
+  "title": "Roasted Pumpkin Risotto",
+  "summary": "A naturally orange risotto: roasted pumpkin, part blended into a purée, part stirred in as soft pieces, with butter and Parmesan. No cream.",
+  "servings": 4,
+  "times": {
+    "prep": 15,
+    "cook": 50
+  },
+  "tags": [
+    "Italian Classics"
+  ],
+  "ingredientGroups": [
+    {
+      "name": "Pumpkin",
+      "items": [
+        {
+          "amount": {
+            "qty": 700,
+            "unit": "g"
+          },
+          "item": "orange pumpkin flesh",
+          "note": "scooped, with the orange fibres attached"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "item": "salt and black pepper",
+          "scale": "toTaste"
+        }
+      ]
+    },
+    {
+      "name": "Risotto",
+      "items": [
+        {
+          "amount": {
+            "qty": 320,
+            "unit": "g"
+          },
+          "item": "Arborio or Carnaroli rice"
+        },
+        {
+          "amount": {
+            "qty": 1.3,
+            "unit": "l"
+          },
+          "item": "vegetable stock"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "shallots",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "ml"
+          },
+          "item": "dry white wine"
+        },
+        {
+          "amount": {
+            "qty": 80,
+            "unit": "g"
+          },
+          "item": "Parmesan",
+          "note": "finely grated"
+        },
+        {
+          "key": "butter",
+          "food": "butter",
+          "amount": {
+            "qty": 50,
+            "unit": "g"
+          },
+          "item": "butter"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "dried thyme",
+          "note": "or 6-8 fresh sprigs",
+          "scale": "seasoning"
+        },
+        {
+          "item": "salt and black pepper",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Roast the pumpkin",
+      "text": "Heat the oven to {temp:200/180}."
+    },
+    {
+      "text": "Spread out the scooped pumpkin and remove the seeds and the white, spongy material around them. Keep the orange flesh and the orange fibres attached to it, and weigh out about 700 g."
+    },
+    {
+      "text": "Spread it across a large baking tray: there is no need to cut it into neat cubes. Drizzle with the olive oil and season with salt and black pepper."
+    },
+    {
+      "text": "Roast for {timer:25-35|pumpkin}, turning the pieces halfway, until completely soft and lightly golden at the edges."
+    },
+    {
+      "heading": "Blend",
+      "text": "Put about a third of the roasted pumpkin (around 230 g) in a blender with 2-3 tbsp of the stock, warmed, and blend until completely smooth. If the purée is still stringy, push it through a fine sieve. Set it aside, and keep the other two-thirds for later."
+    },
+    {
+      "heading": "The stock",
+      "text": "Pour the stock into a saucepan, bring it to a gentle simmer, then turn it down and keep it hot all the way through."
+    },
+    {
+      "heading": "The risotto base",
+      "text": "Finely dice the shallots and finely chop the garlic."
+    },
+    {
+      "text": "Heat {@butter*7/10} and the olive oil in a large saucepan over a medium heat. Add the shallots and cook for {timer:3-4}, until softened."
+    },
+    {
+      "text": "Add the garlic and the thyme and cook for {timer:30s}. Add the rice and stir constantly for about {timer:2}, until every grain is coated."
+    },
+    {
+      "text": "Pour in the wine and stir until it has almost completely evaporated."
+    },
+    {
+      "heading": "Cook the rice",
+      "text": "Add a ladle of the hot stock and stir regularly until most of it has been absorbed. Add another ladle and repeat, adding the stock gradually and stirring regularly."
+    },
+    {
+      "text": "After about {timer:15|rice}, start tasting the rice. Keep going until it is al dente, usually 16-18 minutes in all. You may not need all the stock."
+    },
+    {
+      "heading": "Add the pumpkin",
+      "text": "When the rice is almost cooked, add all the pumpkin purée and stir until the rice is evenly coated."
+    },
+    {
+      "text": "Add the remaining roasted pumpkin, keeping a few pieces back for the top, then the rest of the butter ({@butter:amount*3/10}) and the Parmesan. Stir vigorously until it all comes together."
+    },
+    {
+      "text": "If it is too thick, add a little more hot stock. Taste and adjust the salt and pepper. It should be creamy and flow gently when you tilt the pan, not stand in a stiff mound."
+    },
+    {
+      "heading": "Serve",
+      "text": "Spoon it into warm shallow bowls and arrange the reserved pumpkin on top. Finish with freshly grated Parmesan, black pepper and a little thyme, and serve straight away."
+    }
+  ],
+  "tips": [
+    "Do not add cream: the pumpkin, butter and Parmesan give plenty of creaminess.",
+    "If the pumpkin is watery, roast it for longer to drive off the moisture.",
+    "Keep the stock hot throughout, and do not let the rice overcook while you stir in the purée.",
+    "Timings: preparing the pumpkin 5-10 minutes, roasting 25-35, blending 3, the base 7, the rice 16-18 and finishing 3, about 55-65 minutes in all."
+  ]
+}

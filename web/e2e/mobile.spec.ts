@@ -121,7 +121,7 @@ test('the sections stay on one row with the current one in view, the breadcrumb 
 	await expect(sections.getByRole('link', { name: 'Main Courses' })).toBeInViewport();
 
 	const crumbs = page.getByRole('navigation', { name: 'Breadcrumb' });
-	for (const name of ['Home', 'Main Courses', 'Beef & Steak']) {
+	for (const name of ['Home', 'Main Courses', 'Beef']) {
 		await expect(crumbs.getByRole('link', { name, exact: true })).toBeVisible();
 	}
 	await expect(crumbs.locator('[aria-current="page"]')).toBeHidden();

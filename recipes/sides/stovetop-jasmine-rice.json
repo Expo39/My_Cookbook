@@ -1,0 +1,56 @@
+{
+  "title": "Stovetop Jasmine Rice",
+  "summary": "Fluffy jasmine rice in a saucepan: 12 minutes on the lowest heat, then 10 more with the lid shut. No peeking.",
+  "servings": 2,
+  "times": {
+    "prep": 5,
+    "cook": 15,
+    "rest": 10
+  },
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "food": "rice",
+          "amount": {
+            "qty": 180,
+            "unit": "g"
+          },
+          "item": "jasmine rice"
+        },
+        {
+          "food": "water",
+          "amount": {
+            "qty": 270,
+            "unit": "ml"
+          },
+          "item": "water"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Rinse the rice under cold water until the water runs mostly clear, then drain it."
+    },
+    {
+      "text": "Put the rice and the water in a saucepan and bring it to the boil, uncovered, over a medium-high heat."
+    },
+    {
+      "text": "As soon as it boils, put the lid on fully, turn the heat down to its lowest setting and cook for {timer:12|rice}. Do not open the lid or stir the rice."
+    },
+    {
+      "text": "Turn off the heat and leave the lid closed for another {timer:10|rice rest}."
+    },
+    {
+      "text": "Open the lid and fluff the rice gently with a fork."
+    }
+  ],
+  "tips": [
+    "If the water is still bubbling hard under the lid, turn the heat down. The rice should steam gently, not boil over."
+  ],
+  "related": [
+    "main-courses/rice-grain-bowls/honey-sriracha-chicken-with-coconut-sauce",
+    "main-courses/rice-grain-bowls/beef-fried-rice-with-soft-egg"
+  ]
+}

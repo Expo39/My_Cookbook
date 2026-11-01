@@ -1,0 +1,97 @@
+{
+  "title": "Guacamole",
+  "summary": "Classic guacamole with lime, onion, tomato and coriander. Best made a couple of hours ahead at most.",
+  "servings": 2,
+  "times": {
+    "prep": 10
+  },
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "ripe avocados",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 0.5
+          },
+          "item": "small white onion",
+          "note": "finely diced, about 40 g"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "small tomato",
+          "note": "deseeded and diced, about 70 g",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "prefix": "Juice of",
+          "item": "small lime",
+          "note": "1-2 tbsp",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "fresh coriander",
+          "note": "chopped",
+          "optional": true
+        },
+        {
+          "food": "salt",
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "salt",
+          "scale": "seasoning"
+        },
+        {
+          "item": "black pepper",
+          "scale": "toTaste"
+        },
+        {
+          "amount": {
+            "qty": 0.5
+          },
+          "item": "small jalapeño or chilli",
+          "note": "finely chopped, for heat",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Cut the avocados in half, remove the stones and scoop the flesh into a bowl."
+    },
+    {
+      "text": "Mash with a fork until it is as smooth or as chunky as you like."
+    },
+    {
+      "text": "Stir in the onion, the tomato, the coriander, the lime juice, the salt and the pepper, with the chilli if using."
+    },
+    {
+      "text": "Taste and adjust the seasoning, adding more lime or salt if it needs it."
+    },
+    {
+      "text": "Serve with tortilla chips, tacos, grilled meat or burgers."
+    }
+  ],
+  "tips": [
+    "It is best made up to 2-4 hours before serving, and keeps for about 24 hours at most, though the flavour and colour are best on the day. For guests, I make it 1-2 hours ahead.",
+    "To keep it green, press cling film directly onto the surface so no air touches it, and keep it in the fridge. A little extra lime juice on top helps, but the airtight seal matters most.",
+    "A thin brown layer is only oxidation: scrape it off, or stir it in if it is slight. The guacamole underneath is fine."
+  ]
+}

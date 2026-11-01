@@ -1,0 +1,99 @@
+{
+  "title": "Gnocchi with Brown Butter and Sage",
+  "summary": "Gnocchi tossed in nutty brown butter with crisp sage leaves and Parmesan. Ten minutes, for one.",
+  "servings": 1,
+  "times": {
+    "prep": 2,
+    "cook": 10
+  },
+  "tags": [
+    "Italian Classics"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "gnocchi"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 25,
+            "unit": "g"
+          },
+          "item": "unsalted butter"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 6,
+              "max": 8
+            }
+          },
+          "item": "fresh sage leaves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 17.5,
+            "unit": "g"
+          },
+          "item": "Parmesan",
+          "note": "finely grated"
+        },
+        {
+          "item": "salt",
+          "note": "for the cooking water",
+          "scale": "toTaste"
+        },
+        {
+          "item": "black pepper",
+          "scale": "toTaste"
+        },
+        {
+          "amount": {
+            "qty": 1.5,
+            "unit": "tbsp"
+          },
+          "item": "gnocchi cooking water"
+        },
+        {
+          "item": "lemon zest",
+          "note": "a little",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Bring a saucepan of salted water to the boil and cook the gnocchi as the packet says, usually until they float. Keep a small cup of the cooking water before draining them."
+    },
+    {
+      "text": "Meanwhile, put a frying pan over a medium-low heat, add the butter and let it melt and foam."
+    },
+    {
+      "text": "Add the sage leaves and cook for {timer:1-2}, turning them once, until the butter has golden-brown flecks and smells nutty. Turn the heat down if it darkens too quickly."
+    },
+    {
+      "text": "Add the drained gnocchi to the pan and toss gently for {timer:1-2} to coat them in the sage butter. For a golden outside, leave them undisturbed a little longer before tossing."
+    },
+    {
+      "text": "Turn the heat to low, add 1 tbsp of the cooking water and toss to bring the butter together into a light sauce. Add a little more water if needed."
+    },
+    {
+      "text": "Take the pan off the heat and add the Parmesan, black pepper and lemon zest, if using. Toss until glossy, and taste before adding any salt: Parmesan is already salty."
+    },
+    {
+      "text": "Serve straight away, while the sage is crisp and the sauce glossy."
+    }
+  ],
+  "tips": [
+    "Do not skip browning the butter, but watch it closely: the difference between nutty brown butter and burnt butter is only a few seconds.",
+    "Use 15-20 g Parmesan and 1-2 tbsp of the cooking water."
+  ]
+}

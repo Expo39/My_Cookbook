@@ -11,6 +11,9 @@
     "cook": 7,
     "rest": 5
   },
+  "tags": [
+    "Pan"
+  ],
   "order": 1,
   "ingredientGroups": [
     {

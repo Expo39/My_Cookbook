@@ -1,0 +1,215 @@
+{
+  "title": "Beef Chuck Roll Stew",
+  "summary": "A slow hob-top stew of chuck roll, potatoes and carrots in a rich gravy. Even better made a few hours or a day ahead.",
+  "servings": 5,
+  "times": {
+    "prep": 20,
+    "cook": 180,
+    "rest": 5
+  },
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1.35,
+            "unit": "kg"
+          },
+          "item": "beef chuck roll",
+          "note": "cut into 4-5 cm cubes"
+        },
+        {
+          "amount": {
+            "qty": 800,
+            "unit": "g"
+          },
+          "item": "potatoes",
+          "note": "peeled and cut into large chunks"
+        },
+        {
+          "amount": {
+            "qty": 400,
+            "unit": "g"
+          },
+          "item": "carrots",
+          "note": "cut into thick pieces"
+        },
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "g"
+          },
+          "item": "onions",
+          "note": "diced, about 2 medium"
+        },
+        {
+          "amount": {
+            "qty": 200,
+            "unit": "g"
+          },
+          "item": "celery",
+          "note": "diced, 3-4 stalks"
+        },
+        {
+          "amount": {
+            "qty": 4
+          },
+          "item": "garlic cloves",
+          "note": "minced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "tomato paste"
+        },
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "plain flour"
+        },
+        {
+          "key": "oil",
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "amount": {
+            "qty": 900,
+            "unit": "ml"
+          },
+          "item": "beef stock"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "Worcestershire sauce"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "bay leaves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "dried thyme",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "dried rosemary",
+          "note": "crushed",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "paprika",
+          "optional": true,
+          "scale": "seasoning"
+        },
+        {
+          "item": "salt and black pepper",
+          "scale": "toTaste"
+        },
+        {
+          "amount": {
+            "qty": 1.5,
+            "unit": "tsp"
+          },
+          "item": "balsamic vinegar",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Brown the beef",
+      "text": "Pat the beef dry with kitchen paper and season it with salt and black pepper."
+    },
+    {
+      "text": "Heat {@oil*1/2} in a large, heavy-bottomed pot over a medium-high heat."
+    },
+    {
+      "text": "Brown the beef in batches, {timer:2-3} per side, without crowding the pot. Lift it onto a plate and add the rest of the oil if needed."
+    },
+    {
+      "heading": "Cook the vegetables",
+      "text": "Turn the heat down to medium. Add the onions and celery and cook for {timer:5-7}, stirring occasionally."
+    },
+    {
+      "text": "Add the garlic and cook for {timer:30-60s}. Stir in the tomato paste and cook for {timer:1-2}."
+    },
+    {
+      "text": "Sprinkle in the flour and stir constantly for {timer:1}."
+    },
+    {
+      "heading": "Add the liquid",
+      "text": "Pour in the beef stock gradually, stirring and scraping the browned bits from the bottom."
+    },
+    {
+      "text": "Add the Worcestershire sauce, thyme, rosemary, paprika if using, and the bay leaves. Return the beef and any juices from the plate to the pot."
+    },
+    {
+      "text": "Turn the heat up until the liquid comes to a gentle simmer."
+    },
+    {
+      "heading": "Simmer the beef",
+      "text": "Turn the heat down to low, put the lid on and keep it at a gentle simmer for {timer:105-150|stew}: occasional small bubbles, not a boil. A hard boil toughens the beef and dries out the stew."
+    },
+    {
+      "text": "Check every 20-30 minutes, stirring gently and scraping the bottom so nothing sticks. If the liquid gets too low, add 100-200 ml hot water or stock."
+    },
+    {
+      "text": "After 1 hour 45 minutes, check whether the beef is becoming tender, and keep cooking if it is still tough."
+    },
+    {
+      "heading": "Add the potatoes and carrots",
+      "text": "Add the potatoes and carrots and stir gently. If needed, add a little hot water so the vegetables are partly submerged."
+    },
+    {
+      "text": "Cover and simmer over a low heat for {timer:40-50|vegetables}."
+    },
+    {
+      "text": "Check that the potatoes are tender and that a fork goes easily into the beef. If the beef is still tough, keep simmering in {timer:15-20} stretches."
+    },
+    {
+      "heading": "Finish the gravy",
+      "text": "Remove the bay leaves. Taste and adjust the salt and pepper."
+    },
+    {
+      "text": "If the gravy is too thin, take the lid off and simmer over a medium-low heat for {timer:5-10}, stirring gently."
+    },
+    {
+      "text": "Stir in the balsamic vinegar, if using, for a little brightness. Turn off the heat and let the stew rest for {timer:5}."
+    }
+  ],
+  "tips": [
+    "The tenderness of the beef matters more than the exact time. Chuck roll has connective tissue that needs time to break down, so do not serve it just because the timer is up.",
+    "The beef can be mostly, or almost completely, submerged while it braises: the covered pot traps the steam. The potatoes and carrots push the liquid up when they go in, so only add more if the vegetables struggle to cook.",
+    "Do not add the potatoes and carrots before the beef has had its first braise. The beef needs much longer to become tender.",
+    "Use 1.2-1.5 kg beef and 1-2 tsp balsamic vinegar. Allow 3-3.5 hours in all."
+  ]
+}

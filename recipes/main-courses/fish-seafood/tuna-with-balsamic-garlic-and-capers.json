@@ -1,0 +1,141 @@
+{
+  "title": "Tuna with Balsamic, Garlic and Capers",
+  "summary": "Small tuna steaks seared for a minute or two a side, with a quick, glossy balsamic, garlic and caper sauce. Dinner for one in 10 minutes.",
+  "servings": 1,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 5,
+    "cook": 6
+  },
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 231,
+            "unit": "g"
+          },
+          "item": "small tuna steaks"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "note": "thinly sliced, 8-10 g",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "balsamic vinegar"
+        },
+        {
+          "food": "honey",
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "honey",
+          "note": "optional, but recommended",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "capers",
+          "note": "drained",
+          "optional": true
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 10,
+            "unit": "g"
+          },
+          "item": "unsalted butter"
+        },
+        {
+          "food": "salt",
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "fine salt",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "black pepper",
+          "note": "freshly ground",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh parsley",
+          "note": "chopped",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "lemon wedge",
+          "scale": "discrete"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Pat the tuna dry with kitchen paper and season it all over with the salt and pepper."
+    },
+    {
+      "text": "Heat the olive oil in a frying pan over a high heat until shimmering."
+    },
+    {
+      "text": "Sear the tuna for {timer:90s} per side for medium-rare. For rare, give it {timer:1} per side; for medium, {timer:2}."
+    },
+    {
+      "text": "Lift the tuna onto a warm plate and let it rest."
+    },
+    {
+      "text": "Turn the heat down to medium, add the garlic and cook for {timer:30s}, until fragrant."
+    },
+    {
+      "text": "Pour in the balsamic vinegar and the honey, and add the capers if using. Simmer for {timer:1}, scraping up any browned bits."
+    },
+    {
+      "text": "Stir in the butter until the sauce turns glossy."
+    },
+    {
+      "text": "Spoon the sauce over the tuna, scatter over the parsley, if using, and serve with the lemon wedge."
+    }
+  ],
+  "tips": [
+    "The inside should stay slightly pink: tuna turns dry if it is overcooked.",
+    "For a sharper sauce, use 1.5 tbsp red wine vinegar instead of the balsamic.",
+    "Serve it with 200 g baby potatoes, boiled or roasted; 75 g rice (about 190 g cooked); or 200 g green vegetables such as broccoli, asparagus or green beans. It is especially good with roast potatoes or a crisp salad."
+  ]
+}

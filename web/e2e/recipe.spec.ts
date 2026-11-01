@@ -196,7 +196,8 @@ test('step text joins exactly as written around timers, and a redundant alt is n
 });
 
 test('counts use the singular when there is one', async ({ page }) => {
-	await page.goto('./');
+	// BBQ holds a single recipe.
+	await page.goto('main-courses/bbq');
 	await expect(page.getByText('1 recipe', { exact: true }).first()).toBeVisible();
 	await expect(page.getByText('1 recipes')).toHaveCount(0);
 });

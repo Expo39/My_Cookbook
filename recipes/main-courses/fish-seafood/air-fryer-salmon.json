@@ -1,0 +1,53 @@
+{
+  "title": "Air-Fryer Salmon",
+  "summary": "Salmon fillets in the air fryer: 7-10 minutes at 200 °C, no turning, crisp outside and moist inside.",
+  "servings": 3,
+  "times": {
+    "prep": 5,
+    "cook": 10
+  },
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 3
+          },
+          "item": "salmon fillets",
+          "scale": "discrete"
+        },
+        {
+          "food": "oil",
+          "item": "olive or avocado oil",
+          "note": "a little, to rub"
+        },
+        {
+          "item": "salt and black pepper",
+          "scale": "toTaste"
+        },
+        {
+          "item": "garlic powder",
+          "note": "or your favourite dry rub"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Preheat the air fryer to {temp:200} for {timer:3} while you prepare the fish. It helps give the outside a crisp sear."
+    },
+    {
+      "text": "Pat the fillets dry with kitchen paper. Rub them lightly with oil, then season generously with salt, black pepper and garlic powder."
+    },
+    {
+      "text": "Lay them in the basket skin side down, in a single layer with space between them so the hot air can circulate. If they would overlap, cook them in two batches."
+    },
+    {
+      "text": "Air fry for {timer:7-10}, without turning them. They are done when the flesh flakes easily with a fork and the thickest part reaches {temp:63!}."
+    }
+  ],
+  "tips": [
+    "Time it by thickness: about 1 cm takes 7-8 minutes, about 2.5 cm 8-10 minutes, and 4 cm or more 10-12 minutes, all to 63 °C in the thickest part.",
+    "For medium-rare to medium salmon, take the fillets out at 52-57 °C and let them rest on a plate for 3-5 minutes: the remaining heat finishes them without drying them out."
+  ]
+}
