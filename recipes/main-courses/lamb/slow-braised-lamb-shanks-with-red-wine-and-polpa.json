@@ -53,7 +53,7 @@
             "qty": 5
           },
           "item": "garlic cloves",
-          "note": "chopped, or 1.5 tbsp minced garlic",
+          "note": "chopped",
           "scale": "discrete"
         },
         {
@@ -168,7 +168,7 @@
     },
     {
       "heading": "Build the sauce",
-      "text": "Add the polpa, {@stock}, the rosemary, thyme and bay leaves, and the Worcestershire sauce and paprika, if using. Stir and bring to a gentle simmer.",
+      "text": "Add the polpa, the stock, the rosemary, thyme and bay leaves, and the Worcestershire sauce and paprika, if using. Stir and bring to a gentle simmer.",
       "key": "sauce"
     },
     {
@@ -203,7 +203,8 @@
   "tips": [
     "No lid? A roasting tray sealed very tightly with foil works as well. Use two overlapping sheets if one does not seal the edges, to trap the steam. At 2 hours, peel back the foil (mind the steam), turn the shanks, spoon some sauce over them and reseal.",
     "Chunky shanks may need closer to 3.5 hours. Pale browning is fine: they darken a lot during the braise.",
-    "For the mash, start the potatoes about 2 hours 20 minutes into the braise, so it is ready when the lamb is."
+    "For the mash, start the potatoes about 2 hours 20 minutes into the braise, so it is ready when the lamb is.",
+    "Minced garlic from a jar works too: about 1.5 tbsp in place of 5 cloves."
   ],
   "variants": [
     {
@@ -221,11 +222,11 @@
           "ingredients": {
             "stock": {
               "amount": {
-                "qty": 1
+                "qty": 500,
+                "unit": "ml"
               },
-              "item": "Knorr Beef Gravy Pot",
-              "note": "dissolved in 500 ml hot water",
-              "scale": "discrete"
+              "item": "hot water with a Knorr Beef Gravy Pot",
+              "note": "the pot dissolved in it"
             }
           },
           "steps": {

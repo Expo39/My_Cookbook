@@ -22,11 +22,8 @@
           "note": "or linguine"
         },
         {
-          "amount": {
-            "qty": 125,
-            "unit": "g"
-          },
-          "item": "reserved pasta water"
+          "item": "pasta water",
+          "note": "reserved"
         }
       ]
     },
@@ -66,11 +63,13 @@
         },
         {
           "amount": {
-            "qty": 10,
-            "unit": "g"
+            "qty": {
+              "min": 2,
+              "max": 3
+            }
           },
-          "item": "garlic",
-          "note": "2-3 cloves"
+          "item": "garlic cloves",
+          "scale": "discrete"
         },
         {
           "item": "salt",
@@ -82,7 +81,7 @@
   ],
   "steps": [
     {
-      "text": "Pick the basil, discarding the thick stems but keeping the very thin, tender ones: you want about 95 g usable basil. Wash it and dry it very thoroughly."
+      "text": "Pick the basil, discarding the thick stems but keeping the very thin, tender ones: the ingredient list gives the weight once trimmed. Wash it and dry it very thoroughly."
     },
     {
       "text": "Toast the cashews lightly in a dry pan for {timer:2-3}, then let them cool completely. This is optional, but it gives the cashews more nuttiness."
@@ -94,19 +93,18 @@
       "text": "Add the Pecorino, then the olive oil gradually, pulsing only until smooth. Do not blend continuously for long: the heat darkens the basil and dulls the flavour."
     },
     {
-      "text": "Cook the pasta in well-salted water. Keep at least 150 g of the pasta water before draining."
+      "text": "Cook the pasta in well-salted water. Keep a mugful of the pasta water before draining."
     },
     {
-      "text": "Do not cook the pesto. Put the drained pasta in a bowl, or in the pan off the heat, add the pesto and about 60 g of the pasta water, and toss vigorously. Add more water gradually until the pesto turns creamy and coats the pasta."
+      "text": "Do not cook the pesto. Put the drained pasta in a bowl, or in the pan off the heat, add the pesto and about half the pasta water, and toss vigorously. Add more water gradually until the pesto turns creamy and coats the pasta."
     },
     {
       "text": "Taste before adding any salt: the Pecorino and the salted pasta water already bring a lot."
     }
   ],
   "tips": [
-    "Basil is sold with its stems, so buy 130-150 g to end up with 95 g of leaves and tender stems.",
+    "Basil is sold with its stems, so buy about half as much again as the weight in the list: the thick stems are thrown away.",
     "Trofie are the best match: the twists hold the pesto. Linguine is my second choice; trenette, fusilli or spaghetti also work.",
-    "With all Pecorino and no Parmesan, make the pesto without salt and taste it first. It is stronger and saltier than Parmesan.",
-    "Use 100-150 g pasta water, as needed."
+    "With all Pecorino and no Parmesan, make the pesto without salt and taste it first. It is stronger and saltier than Parmesan."
   ]
 }

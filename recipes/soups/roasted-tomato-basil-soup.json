@@ -48,10 +48,6 @@
             "qty": 6,
             "unit": "tbsp"
           },
-          "alt": {
-            "qty": 90,
-            "unit": "ml"
-          },
           "item": "olive oil"
         },
         {
@@ -77,7 +73,8 @@
           "item": "stock"
         },
         {
-          "item": "Large handful of fresh basil"
+          "item": "fresh basil",
+          "note": "a large handful"
         },
         {
           "item": "Salt and pepper",

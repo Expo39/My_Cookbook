@@ -27,7 +27,6 @@
           "item": "dried porcini mushrooms"
         },
         {
-          "key": "truffle",
           "amount": {
             "qty": 85,
             "unit": "g"
@@ -51,7 +50,6 @@
           "item": "dry white wine"
         },
         {
-          "key": "butter",
           "food": "butter",
           "amount": {
             "qty": 80,
@@ -108,7 +106,6 @@
           "note": "for soaking the porcini"
         },
         {
-          "key": "soak",
           "amount": {
             "qty": 180,
             "unit": "ml"
@@ -117,12 +114,8 @@
           "note": "from the soak"
         },
         {
-          "amount": {
-            "qty": 200,
-            "unit": "ml"
-          },
-          "item": "reserved pasta water",
-          "note": "as needed"
+          "item": "pasta water",
+          "note": "reserved"
         },
         {
           "item": "salt",
@@ -142,7 +135,7 @@
       "text": "Put the porcini in a bowl and pour over the warm water, enough to cover them. Leave for {timer:20-25|porcini}, until soft."
     },
     {
-      "text": "Lift the porcini out and squeeze out the excess liquid gently. Do not throw away the soaking water: strain it through a coffee filter, or a fine sieve lined with kitchen paper, to remove any grit, and measure out {@soak:amount}."
+      "text": "Lift the porcini out and squeeze out the excess liquid gently. Do not throw away the soaking water: strain it through a coffee filter, or a fine sieve lined with kitchen paper, to remove any grit. Measure out the strained soaking liquid the sauce needs."
     },
     {
       "text": "Cut the larger porcini into bite-sized pieces, leaving some whole for texture."
@@ -152,11 +145,11 @@
       "text": "While the porcini soak, finely mince the garlic, finely chop the parsley (keeping a little for the top) and finely grate the Parmesan."
     },
     {
-      "text": "Measure out the wine, the Elmlea and the truffle paste, and divide the butter into two portions of {@butter:amount*1/2}. Put a large pot of water on to heat."
+      "text": "Measure out the wine, the Elmlea and the truffle paste, and divide the butter in half. Put a large pot of water on to heat."
     },
     {
       "heading": "Fry the porcini",
-      "text": "Heat a large, deep frying pan over a medium-high heat. Add the olive oil and {@butter:amount*1/2} of the butter."
+      "text": "Heat a large, deep frying pan over a medium-high heat. Add the olive oil and half the butter."
     },
     {
       "text": "Once the butter has melted, add the drained porcini and fry for {timer:5-6}, stirring occasionally, until the moisture has gone and they take on a little colour."
@@ -177,24 +170,24 @@
     },
     {
       "heading": "The truffle",
-      "text": "Turn off the heat and stir in {@truffle*16/17} until evenly mixed. Taste, and add the rest for a stronger truffle flavour. Do not boil the sauce once the truffle paste is in."
+      "text": "Turn off the heat and stir in the truffle paste, keeping back about a teaspoon, until evenly mixed. Taste, and add the rest for a stronger truffle flavour. Do not boil the sauce once the truffle paste is in."
     },
     {
       "heading": "Cook the tagliatelle",
-      "text": "Ideally, start the pasta while the sauce is cooking so they finish together. Bring 6-7 litres of water to a rolling boil and add about 40-45 g salt, less if your truffle paste and Parmesan are salty."
+      "text": "Ideally, start the pasta while the sauce is cooking so they finish together. Bring a very large pot of water to a rolling boil and salt it well, a little less if your truffle paste and Parmesan are salty."
     },
     {
       "text": "Add the tagliatelle and stir straight away so it does not stick. Cook until about 1 minute before al dente, by the packet."
     },
     {
-      "text": "Keep at least 300 ml of the pasta water, then drain the pasta without rinsing it."
+      "text": "Keep a large mugful of the pasta water, then drain the pasta without rinsing it."
     },
     {
       "heading": "Bring it together",
-      "text": "Add the tagliatelle straight to the sauce with 100 ml of the pasta water, and toss gently over a very low heat for {timer:30-60s}."
+      "text": "Add the tagliatelle straight to the sauce with a good splash of the pasta water, and toss gently over a very low heat for {timer:30-60s}."
     },
     {
-      "text": "Turn off the heat. Add the Parmesan gradually, tossing all the time. If the sauce is too thick, add more pasta water, 30-50 ml at a time, and keep tossing until it is silky and coats every strand."
+      "text": "Turn off the heat. Add the Parmesan gradually, tossing all the time. If the sauce is too thick, add more pasta water, a splash at a time, and keep tossing until it is silky and coats every strand."
     },
     {
       "text": "Stir in most of the parsley, then taste and adjust the salt, pepper and chilli. Leave it a little saucier than you think it needs: it soaks up sauce as you serve."
@@ -206,9 +199,8 @@
   ],
   "tips": [
     "Keep the truffle aroma: add the paste off the heat, after the wine has reduced and the cream is in.",
-    "Do not let the sauce get too thick. With only 270 ml Elmlea for 700 g pasta, the pasta water matters: add it gradually to keep the sauce silky.",
+    "Do not let the sauce get too thick. There is little cream for this much pasta, so the pasta water matters: add it gradually to keep the sauce silky.",
     "Have the Parmesan grated, the parsley chopped and the plates ready before you drain the pasta, so nothing sits around getting cold.",
-    "Timeline: soak the porcini at 0:00; chop and grate at 0:05; heat the pasta water at 0:15; fry the porcini at 0:25; garlic and chilli at 0:30; wine at 0:31; soaking liquid at 0:35; Elmlea and butter at 0:37; truffle paste at 0:39; then bring it together in the last 2 minutes. Time the pasta to finish as the truffle paste goes in.",
-    "Use 150-250 ml pasta water, as needed."
+    "As a guide, boil about 1 litre of water for every 100 g of pasta, salted with about 6 g of salt."
   ]
 }

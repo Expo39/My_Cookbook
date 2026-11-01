@@ -28,8 +28,7 @@
             "qty": 150,
             "unit": "g"
           },
-          "item": "fillet steak",
-          "note": "about 4.5 cm thick"
+          "item": "fillet steak"
         },
         {
           "item": "salt",
@@ -91,7 +90,8 @@
   "tips": [
     "Trust the thermometer over the clock. After resting it finishes at 54-56 °C, a pink medium-rare.",
     "Use tongs, never a fork, and never press the steak down.",
-    "Cooking it with the A5 Wagyu: the Wagyu goes on the hot grill at the moment the fillet moves to the cooler side, and both are ready to eat at about the same time."
+    "Cooking it with the A5 Wagyu: the Wagyu goes on the hot grill at the moment the fillet moves to the cooler side, and both are ready to eat at about the same time.",
+    "These timings are for a fillet about 4.5 cm thick."
   ],
   "related": [
     "main-courses/steaks/bbq-a5-wagyu"

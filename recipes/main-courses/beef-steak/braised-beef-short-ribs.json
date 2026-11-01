@@ -15,8 +15,7 @@
             "qty": 1600,
             "unit": "g"
           },
-          "item": "beef short ribs",
-          "note": "400 g per person"
+          "item": "beef short ribs"
         },
         {
           "amount": {
@@ -63,8 +62,7 @@
             "qty": 750,
             "unit": "ml"
           },
-          "item": "red wine",
-          "note": "anywhere from 500 to 1000 ml works"
+          "item": "red wine"
         },
         {
           "amount": {
@@ -159,6 +157,7 @@
     }
   ],
   "tips": [
-    "The key to tender short ribs is low, slow cooking, so do not rush the braise. The meat should be tender enough to fall apart under a fork. Searing the ribs well adds a great deal of flavour to the sauce. The dish is even better made a day ahead: refrigerate it overnight, skim the fat from the surface, then reheat gently. The reduced gravy should be rich and glossy. For a traditional Italian finish, serve with soft polenta and a gremolata of lemon zest, parsley and garlic."
+    "The key to tender short ribs is low, slow cooking, so do not rush the braise. The meat should be tender enough to fall apart under a fork. Searing the ribs well adds a great deal of flavour to the sauce. The dish is even better made a day ahead: refrigerate it overnight, skim the fat from the surface, then reheat gently. The reduced gravy should be rich and glossy. For a traditional Italian finish, serve with soft polenta and a gremolata of lemon zest, parsley and garlic.",
+    "The wine is flexible: a little less or a little more works just as well."
   ]
 }

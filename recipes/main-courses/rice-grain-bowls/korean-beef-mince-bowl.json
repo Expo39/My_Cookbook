@@ -18,17 +18,12 @@
             "qty": 340,
             "unit": "g"
           },
-          "item": "beef mince",
-          "note": "20% fat (80/20)"
+          "item": "beef mince"
         },
         {
           "amount": {
             "qty": 25,
             "unit": "g"
-          },
-          "alt": {
-            "qty": 1.5,
-            "unit": "tbsp"
           },
           "item": "soy sauce"
         },
@@ -36,10 +31,6 @@
           "amount": {
             "qty": 10,
             "unit": "g"
-          },
-          "alt": {
-            "qty": 0.75,
-            "unit": "tbsp"
           },
           "item": "sesame oil"
         },
@@ -49,16 +40,12 @@
             "unit": "g"
           },
           "item": "garlic",
-          "note": "2 cloves, minced"
+          "note": "minced"
         },
         {
           "amount": {
             "qty": 3,
             "unit": "g"
-          },
-          "alt": {
-            "qty": 0.75,
-            "unit": "tsp"
           },
           "item": "ginger",
           "note": "minced"
@@ -69,15 +56,14 @@
             "unit": "g"
           },
           "item": "spring onions",
-          "note": "2 stalks, sliced"
+          "note": "sliced"
         },
         {
           "amount": {
             "qty": 240,
             "unit": "g"
           },
-          "item": "cooked rice",
-          "note": "80g per person"
+          "item": "cooked rice"
         },
         {
           "item": "Salt and pepper",
@@ -96,7 +82,7 @@
   ],
   "steps": [
     {
-      "text": "Have the rice cooked and ready: 80-100 g of raw rice gives 240 g cooked."
+      "text": "Have the rice cooked and ready."
     },
     {
       "text": "Put a large frying pan over a medium-high heat. Add the beef mince and break it up with a spatula. Brown until no longer pink, {timer:5-7}. Drain off the excess fat if you prefer."
@@ -108,10 +94,13 @@
       "text": "Pour in the soy sauce and sesame oil and add the spring onions. Stir well and simmer for {timer:2-3} to let the flavours meld."
     },
     {
-      "text": "Divide the rice between bowls, 80 g each, and spoon the beef over. Add vegetables or a fried egg, if you like. Garnish with sesame seeds or extra spring onions."
+      "text": "Divide the rice evenly between the bowls, and spoon the beef over. Add vegetables or a fried egg, if you like. Garnish with sesame seeds or extra spring onions."
     }
   ],
   "tips": [
-    "For vegetables, my favourites here are carrots and peppers, both cut into matchsticks (julienne). Toss them into the pan with the beef for the last 2 minutes if you like them soft, or pile them on raw for crunch. For a tangy Korean flavour, quick-pickle vegetables in rice vinegar, sugar and salt for 10 minutes, or use pickled vegetables."
+    "For vegetables, my favourites here are carrots and peppers, both cut into matchsticks (julienne). Toss them into the pan with the beef for the last 2 minutes if you like them soft, or pile them on raw for crunch. For a tangy Korean flavour, quick-pickle vegetables in rice vinegar, sugar and salt for 10 minutes, or use pickled vegetables.",
+    "Rice roughly triples in weight as it cooks, so a third of the cooked weight in raw rice is enough.",
+    "Use mince with about 20% fat.",
+    "As a guide, a garlic clove is about 4 g and a spring onion about 10 g."
   ]
 }

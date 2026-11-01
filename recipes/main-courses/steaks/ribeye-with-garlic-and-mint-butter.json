@@ -27,8 +27,7 @@
             "qty": 200,
             "unit": "g"
           },
-          "item": "ribeye steak",
-          "note": "about 1.5-2 cm thick"
+          "item": "ribeye steak"
         },
         {
           "food": "oil",
@@ -108,7 +107,7 @@
     "Do not start with the butter: at searing heat it burns. Sear in oil, then add the butter, garlic and mint once the heat is down.",
     "Mint burns quickly, which is why it goes in only for the last moments: it stays aromatic rather than bitter.",
     "A thin steak needs about 3 minutes in the pan in all. Trust the thermometer over the timings: if it reaches 52 °C early, take it out at once. It settles at 54-56 °C after resting.",
-    "Use 10-15 g butter."
+    "These timings are for a steak about 1.5-2 cm thick."
   ],
   "related": [
     "main-courses/steaks/pan-seared-ribeye-steak"

@@ -23,10 +23,6 @@
         {
           "food": "flour-plain",
           "amount": {
-            "qty": 16,
-            "unit": "g"
-          },
-          "alt": {
             "qty": 2,
             "unit": "tbsp"
           },
@@ -39,10 +35,6 @@
         {
           "food": "oil",
           "amount": {
-            "qty": 15,
-            "unit": "ml"
-          },
-          "alt": {
             "qty": 1,
             "unit": "tbsp"
           },
@@ -72,10 +64,6 @@
         },
         {
           "amount": {
-            "qty": 30,
-            "unit": "ml"
-          },
-          "alt": {
             "qty": 2,
             "unit": "tbsp"
           },
@@ -83,10 +71,6 @@
         },
         {
           "amount": {
-            "qty": 15,
-            "unit": "ml"
-          },
-          "alt": {
             "qty": 1,
             "unit": "tbsp"
           },
@@ -95,10 +79,6 @@
         {
           "food": "honey",
           "amount": {
-            "qty": 15,
-            "unit": "ml"
-          },
-          "alt": {
             "qty": 1,
             "unit": "tbsp"
           },
@@ -109,8 +89,7 @@
             "qty": 400,
             "unit": "ml"
           },
-          "item": "full-fat coconut milk",
-          "note": "1 tin"
+          "item": "full-fat coconut milk"
         },
         {
           "amount": {
@@ -194,11 +173,11 @@
     }
   ],
   "tips": [
-    "To cook it all together: rinse and start the rice and flour the chicken (0-5 min); sear the chicken (5-13 min); make the sauce (13-17 min); simmer the chicken while the rice cooks (17-30 min); then cook the broccoli, rest the rice and check the chicken in the last 5 minutes.",
     "In a stainless-steel pan, preheat it before adding the oil, add the chicken once the oil is hot, and let a crust form before you try to turn it. Do not crowd the pan.",
     "Keep the sauce at a gentle simmer: a hard boil can split the coconut milk. If it is too thin, lift out the chicken and simmer the sauce uncovered for a few minutes.",
-    "For a milder sauce use 1 tbsp sriracha; the full 2 tbsp gives it a noticeable kick.",
-    "Use 200-250 g broccoli. For the rice, the Stovetop Jasmine Rice recipe gives exact water and timings."
+    "For a milder sauce, use half the sriracha; the full amount gives it a noticeable kick.",
+    "For the rice, the Stovetop Jasmine Rice recipe gives exact water and timings.",
+    "A tin of coconut milk is usually 400 ml."
   ],
   "related": [
     "sides/stovetop-jasmine-rice"

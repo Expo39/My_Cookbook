@@ -76,10 +76,6 @@
             "qty": 4,
             "unit": "tbsp"
           },
-          "alt": {
-            "qty": 60,
-            "unit": "ml"
-          },
           "item": "olive oil"
         },
         {
@@ -113,10 +109,10 @@
       "text": "Season well with salt and pepper, stir in the parsley and remove the bay leaves."
     },
     {
-      "text": "Slice the cotechino, allowing 125 g per person. Serve over the lentils, with polenta or mashed potatoes if you like."
+      "text": "Slice the cotechino and share it out evenly. Serve over the lentils, with polenta or mashed potatoes if you like."
     }
   ],
   "tips": [
-    "A standard cotechino weighs 500 g, which is 125 g per person. It is very rich, so this portion works well. The generous soffritto base adds volume and flavour. The dish tastes better made ahead, as the flavours meld overnight."
+    "A standard cotechino weighs about 500 g. It is very rich, so a small portion each is plenty. The generous soffritto base adds volume and flavour. The dish tastes better made ahead, as the flavours meld overnight."
   ]
 }

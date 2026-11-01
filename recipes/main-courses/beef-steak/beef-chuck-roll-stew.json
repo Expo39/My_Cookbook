@@ -16,7 +16,7 @@
             "unit": "kg"
           },
           "item": "beef chuck roll",
-          "note": "cut into 4-5 cm cubes"
+          "note": "cut into cubes"
         },
         {
           "amount": {
@@ -40,7 +40,7 @@
             "unit": "g"
           },
           "item": "onions",
-          "note": "diced, about 2 medium"
+          "note": "diced"
         },
         {
           "amount": {
@@ -48,7 +48,7 @@
             "unit": "g"
           },
           "item": "celery",
-          "note": "diced, 3-4 stalks"
+          "note": "diced"
         },
         {
           "amount": {
@@ -74,7 +74,6 @@
           "item": "plain flour"
         },
         {
-          "key": "oil",
           "food": "olive-oil",
           "amount": {
             "qty": 2,
@@ -147,10 +146,10 @@
   "steps": [
     {
       "heading": "Brown the beef",
-      "text": "Pat the beef dry with kitchen paper and season it with salt and black pepper."
+      "text": "Cut the beef into 4-5 cm cubes. Pat them dry with kitchen paper and season with salt and black pepper."
     },
     {
-      "text": "Heat {@oil*1/2} in a large, heavy-bottomed pot over a medium-high heat."
+      "text": "Heat half the olive oil in a large, heavy-bottomed pot over a medium-high heat."
     },
     {
       "text": "Brown the beef in batches, {timer:2-3} per side, without crowding the pot. Lift it onto a plate and add the rest of the oil if needed."
@@ -180,7 +179,7 @@
       "text": "Turn the heat down to low, put the lid on and keep it at a gentle simmer for {timer:105-150|stew}: occasional small bubbles, not a boil. A hard boil toughens the beef and dries out the stew."
     },
     {
-      "text": "Check every 20-30 minutes, stirring gently and scraping the bottom so nothing sticks. If the liquid gets too low, add 100-200 ml hot water or stock."
+      "text": "Check every 20-30 minutes, stirring gently and scraping the bottom so nothing sticks. If the liquid gets too low, add a splash of hot water or stock."
     },
     {
       "text": "After 1 hour 45 minutes, check whether the beef is becoming tender, and keep cooking if it is still tough."
@@ -210,6 +209,7 @@
     "The tenderness of the beef matters more than the exact time. Chuck roll has connective tissue that needs time to break down, so do not serve it just because the timer is up.",
     "The beef can be mostly, or almost completely, submerged while it braises: the covered pot traps the steam. The potatoes and carrots push the liquid up when they go in, so only add more if the vegetables struggle to cook.",
     "Do not add the potatoes and carrots before the beef has had its first braise. The beef needs much longer to become tender.",
-    "Use 1.2-1.5 kg beef and 1-2 tsp balsamic vinegar. Allow 3-3.5 hours in all."
+    "Allow 3-3.5 hours in all.",
+    "As a guide, a medium onion is about 150 g and a celery stalk about 50-60 g."
   ]
 }

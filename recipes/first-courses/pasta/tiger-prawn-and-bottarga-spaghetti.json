@@ -20,6 +20,10 @@
           "item": "spaghetti or linguine"
         },
         {
+          "item": "pasta water",
+          "note": "reserved"
+        },
+        {
           "amount": {
             "qty": 6
           },
@@ -75,7 +79,6 @@
           "note": "chopped"
         },
         {
-          "key": "bottarga",
           "amount": {
             "qty": 17.5,
             "unit": "g"
@@ -109,7 +112,7 @@
     },
     {
       "heading": "Cook",
-      "text": "Cook the pasta in well-salted boiling water until al dente. Keep about 100 ml of the pasta water, then drain."
+      "text": "Cook the pasta in well-salted boiling water until al dente. Keep a small cupful of the pasta water, then drain."
     },
     {
       "text": "Heat the olive oil over a medium heat and fry the garlic gently for {timer:1}, with the chilli flakes if using."
@@ -121,7 +124,7 @@
       "text": "Add the pasta to the pan with a splash of the pasta water and toss until the sauce coats it lightly."
     },
     {
-      "text": "Take the pan off the heat. Stir in the lemon zest, the parsley, a small squeeze of the lemon juice and {@bottarga*1/2}."
+      "text": "Take the pan off the heat. Stir in the lemon zest, the parsley, a small squeeze of the lemon juice and half the bottarga."
     },
     {
       "text": "Plate the pasta and grate the rest of the bottarga over the top. Finish with a drizzle of extra virgin olive oil and black pepper."
@@ -129,9 +132,8 @@
   ],
   "tips": [
     "Do not cook the bottarga: it turns bitter when heated too much, so it goes in off the heat. Leave out the Parmesan; the bottarga brings all the salt and savour the dish needs.",
-    "For an even silkier sauce, stir in 10-15 g butter off the heat.",
+    "For an even silkier sauce, stir in a small knob of butter off the heat.",
     "The heads and shells are full of flavour. Freeze them for a seafood stock, or simmer them with onion, garlic and water for 20-30 minutes and strain it: a splash of that prawn stock in the sauce makes it even better.",
-    "The \"vein\" is the prawn's digestive tract. It is not harmful, but in large prawns such as tiger prawns it can be gritty and taste faintly bitter or muddy, so it is worth removing.",
-    "Use 15-20 g bottarga and 1-2 tsp lemon juice."
+    "The \"vein\" is the prawn's digestive tract. It is not harmful, but in large prawns such as tiger prawns it can be gritty and taste faintly bitter or muddy, so it is worth removing."
   ]
 }

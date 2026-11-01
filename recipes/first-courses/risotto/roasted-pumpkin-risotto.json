@@ -82,7 +82,6 @@
           "note": "finely grated"
         },
         {
-          "key": "butter",
           "food": "butter",
           "amount": {
             "qty": 50,
@@ -104,7 +103,6 @@
             "unit": "tsp"
           },
           "item": "dried thyme",
-          "note": "or 6-8 fresh sprigs",
           "scale": "seasoning"
         },
         {
@@ -120,7 +118,7 @@
       "text": "Heat the oven to {temp:200/180}."
     },
     {
-      "text": "Spread out the scooped pumpkin and remove the seeds and the white, spongy material around them. Keep the orange flesh and the orange fibres attached to it, and weigh out about 700 g."
+      "text": "Spread out the scooped pumpkin and remove the seeds and the white, spongy material around them. Keep the orange flesh and the orange fibres attached to it, and weigh out the amount in the ingredient list."
     },
     {
       "text": "Spread it across a large baking tray: there is no need to cut it into neat cubes. Drizzle with the olive oil and season with salt and black pepper."
@@ -130,7 +128,7 @@
     },
     {
       "heading": "Blend",
-      "text": "Put about a third of the roasted pumpkin (around 230 g) in a blender with 2-3 tbsp of the stock, warmed, and blend until completely smooth. If the purée is still stringy, push it through a fine sieve. Set it aside, and keep the other two-thirds for later."
+      "text": "Put about a third of the roasted pumpkin in a blender with a few spoonfuls of the stock, warmed, and blend until completely smooth. If the purée is still stringy, push it through a fine sieve. Set it aside, and keep the other two-thirds for later."
     },
     {
       "heading": "The stock",
@@ -141,7 +139,7 @@
       "text": "Finely dice the shallots and finely chop the garlic."
     },
     {
-      "text": "Heat {@butter*7/10} and the olive oil in a large saucepan over a medium heat. Add the shallots and cook for {timer:3-4}, until softened."
+      "text": "Heat about two-thirds of the butter and the olive oil in a large saucepan over a medium heat. Add the shallots and cook for {timer:3-4}, until softened."
     },
     {
       "text": "Add the garlic and the thyme and cook for {timer:30s}. Add the rice and stir constantly for about {timer:2}, until every grain is coated."
@@ -161,7 +159,7 @@
       "text": "When the rice is almost cooked, add all the pumpkin purée and stir until the rice is evenly coated."
     },
     {
-      "text": "Add the remaining roasted pumpkin, keeping a few pieces back for the top, then the rest of the butter ({@butter:amount*3/10}) and the Parmesan. Stir vigorously until it all comes together."
+      "text": "Add the remaining roasted pumpkin, keeping a few pieces back for the top, then the rest of the butter and the Parmesan. Stir vigorously until it all comes together."
     },
     {
       "text": "If it is too thick, add a little more hot stock. Taste and adjust the salt and pepper. It should be creamy and flow gently when you tilt the pan, not stand in a stiff mound."
@@ -175,6 +173,6 @@
     "Do not add cream: the pumpkin, butter and Parmesan give plenty of creaminess.",
     "If the pumpkin is watery, roast it for longer to drive off the moisture.",
     "Keep the stock hot throughout, and do not let the rice overcook while you stir in the purée.",
-    "Timings: preparing the pumpkin 5-10 minutes, roasting 25-35, blending 3, the base 7, the rice 16-18 and finishing 3, about 55-65 minutes in all."
+    "Fresh thyme works too: 6-8 sprigs in place of each teaspoon of dried."
   ]
 }

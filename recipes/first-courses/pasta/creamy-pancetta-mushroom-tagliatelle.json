@@ -21,6 +21,10 @@
           "item": "tagliatelle"
         },
         {
+          "item": "pasta water",
+          "note": "reserved"
+        },
+        {
           "amount": {
             "qty": 150,
             "unit": "g"
@@ -65,10 +69,6 @@
             "qty": 60,
             "unit": "ml"
           },
-          "alt": {
-            "qty": 4,
-            "unit": "tbsp"
-          },
           "item": "white wine",
           "optional": true
         },
@@ -107,7 +107,7 @@
       "text": "Add the butter to the rendered fat and turn the heat up to medium-high. Add the mushrooms and cook undisturbed for {timer:2-3} to brown, then stir. Add the onion and cook for {timer:2-3}, then the garlic for 30 seconds."
     },
     {
-      "text": "Meanwhile, cook the pasta in salted water for 1 minute less than the packet instructions. Reserve 1 cup of pasta water before draining."
+      "text": "Meanwhile, cook the pasta in salted water for 1 minute less than the packet instructions. Reserve a mugful of pasta water before draining."
     },
     {
       "text": "If using wine, pour it into the mushroom pan and let it bubble. Lower the heat to medium, pour in the cream and simmer gently for {timer:2}."

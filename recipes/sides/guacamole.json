@@ -20,14 +20,14 @@
             "qty": 0.5
           },
           "item": "small white onion",
-          "note": "finely diced, about 40 g"
+          "note": "finely diced"
         },
         {
           "amount": {
             "qty": 1
           },
           "item": "small tomato",
-          "note": "deseeded and diced, about 70 g",
+          "note": "deseeded and diced",
           "scale": "discrete"
         },
         {
@@ -36,7 +36,6 @@
           },
           "prefix": "Juice of",
           "item": "small lime",
-          "note": "1-2 tbsp",
           "scale": "discrete"
         },
         {

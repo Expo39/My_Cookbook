@@ -16,7 +16,6 @@
             "qty": 1
           },
           "item": "rack of lamb",
-          "note": "8 ribs, about 800-900g",
           "scale": "discrete"
         },
         {
@@ -89,7 +88,6 @@
           "item": "Dijon mustard"
         },
         {
-          "key": "oil",
           "food": "olive-oil",
           "amount": {
             "qty": 3,
@@ -109,13 +107,13 @@
       "text": "Preheat the oven to {temp:200/180}."
     },
     {
-      "text": "In a bowl, mix the pistachios, breadcrumbs, Parmigiano, sage, rosemary, thyme, mint and lemon zest. Stir in {@oil:amount*2/3} of the olive oil until the mixture holds together, and season with salt and pepper."
+      "text": "In a bowl, mix the pistachios, breadcrumbs, Parmigiano, sage, rosemary, thyme, mint and lemon zest. Stir in two-thirds of the olive oil until the mixture holds together, and season with salt and pepper."
     },
     {
       "text": "Season the rack of lamb generously with salt and pepper."
     },
     {
-      "text": "Heat the remaining {@oil:amount*1/3} of olive oil in an ovenproof frying pan over a high heat. Sear the lamb on all sides until golden brown, {timer:2} per side. Take off the heat."
+      "text": "Heat the rest of the olive oil in an ovenproof frying pan over a high heat. Sear the lamb on all sides until golden brown, {timer:2} per side. Take off the heat."
     },
     {
       "text": "Brush the meat side of the lamb (not the bones) generously with the Dijon mustard."
@@ -134,6 +132,7 @@
     }
   ],
   "tips": [
-    "Ask your butcher to french the rack (clean the rib bones) for a neater presentation. The mustard glues the crust on and adds a tangy flavour. Do not skip the searing: it adds flavour and helps the crust stick. For medium-rare lamb, aim for 52-55 °C inside; it keeps cooking as it rests. The crust should be golden and fragrant. Save any crust that falls off to sprinkle over the plates. Mint sauce or a red wine jus makes a classic accompaniment."
+    "Ask your butcher to french the rack (clean the rib bones) for a neater presentation. The mustard glues the crust on and adds a tangy flavour. Do not skip the searing: it adds flavour and helps the crust stick. For medium-rare lamb, aim for 52-55 °C inside; it keeps cooking as it rests. The crust should be golden and fragrant. Save any crust that falls off to sprinkle over the plates. Mint sauce or a red wine jus makes a classic accompaniment.",
+    "These timings are for a rack of 8 ribs, about 800-900 g."
   ]
 }
