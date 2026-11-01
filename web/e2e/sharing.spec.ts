@@ -31,9 +31,9 @@ const withSharing = (page: Page) =>
 		Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
 		Object.defineProperty(navigator, 'share', {
 			configurable: true,
-			value: async (data: { files: File[]; title?: string; text?: string }) => {
+			value: async (data: { files?: File[]; title?: string; text?: string }) => {
 				shared.push({
-					files: data.files.map(({ name, type }) => ({ name, type })),
+					files: (data.files ?? []).map(({ name, type }) => ({ name, type })),
 					title: data.title,
 					text: data.text
 				});
@@ -108,7 +108,11 @@ test('Send the link falls back to copying the link with the current view state',
 	expect(copied).toContain(`${brulee}?serves=6&u=us`);
 });
 
-test('a phone sends the card with the link, or with the whole recipe as text', async ({ page }) => {
+test('a phone sends the card with the link, or with the whole recipe as text', async ({
+	page,
+	context
+}) => {
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
 	await withSharing(page);
 	await page.goto(wellington);
 	await waitForCore(page);
@@ -119,18 +123,28 @@ test('a phone sends the card with the link, or with the whole recipe as text', a
 	sheet = await openSheet(page);
 	await sheet.getByRole('checkbox', { name: /whole recipe as text/ }).check();
 	await sheet.getByRole('button', { name: 'Send the card' }).click();
+	// Chat apps often drop the words sent with a picture, so the text is copied and offered on its own.
+	await expect(sheet.getByText('Card sent.')).toBeVisible();
+	expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('Method');
+	await sheet.getByRole('button', { name: 'Send the recipe text' }).click();
 	await expect(sheet).toBeHidden();
 
-	const [withLink, withText] = await sharedItems(page);
+	const [withLink, withText, textAlone] = await sharedItems(page);
 	expect(withLink).toMatchObject({
 		files: [{ name: 'beef-wellington.png', type: 'image/png' }],
 		title: 'Beef Wellington'
 	});
 	expect(withLink.text).toMatch(new RegExp(`${wellington}$`));
-	expect(withText.text).toContain('Beef Wellington');
-	expect(withText.text).toContain('Ingredients');
-	expect(withText.text).toContain('Method');
-	expect(withText.text).toContain(wellington);
+	expect(withText.files).toHaveLength(1);
+	for (const part of [
+		'Beef Wellington',
+		'A showstopper for five',
+		'Ingredients',
+		'Method',
+		wellington
+	])
+		expect(withText.text).toContain(part);
+	expect(textAlone).toMatchObject({ files: [], text: withText.text });
 });
 
 test('a browser that cannot send pictures copies the card instead', async ({ page }) => {
@@ -168,7 +182,8 @@ test('Copy as text copies the whole recipe as it is shown, with its link', async
 	await sheet.getByRole('button', { name: 'Copy as text' }).click();
 	await expect(page.getByText('Recipe copied. Paste it anywhere.')).toBeVisible();
 	const text = await page.evaluate(() => navigator.clipboard.readText());
-	expect(text.split('\n').slice(0, 2)).toEqual(['Beef Wellington', '10 servings']);
+	expect(text.split('\n')[0]).toBe('Beef Wellington');
+	expect(text).toContain('\n10 servings | Prep 1 h | Cook 1 h 35 min | Rest 20 min | Total');
 	expect(text).toMatch(/\nIngredients\n- .+/);
 	expect(text).toMatch(/\nMethod\n[\s\S]*?\n1\. .+/);
 	expect(text).toContain(`${wellington}?serves=10`);
@@ -205,7 +220,7 @@ test('the Open Graph tags and the cards they point to are in place', async ({ pa
 	}
 });
 
-test('Print card prints an A5 index card and nothing else', async ({ page }) => {
+test('Print prints the whole recipe on A4 and nothing else', async ({ page }) => {
 	await page.addInitScript(() => {
 		Object.assign(window, { printed: 0 });
 		window.print = () => {
@@ -214,22 +229,23 @@ test('Print card prints an A5 index card and nothing else', async ({ page }) => 
 	});
 	await page.goto(`${wellington}?serves=10`);
 	await waitForCore(page);
-	const sheet = await openSheet(page);
-	await sheet.getByRole('button', { name: 'Print' }).click();
-	await expect(sheet).toBeHidden();
+	const dialog = await openSheet(page);
+	await dialog.getByRole('button', { name: 'Print' }).click();
+	await expect(dialog).toBeHidden();
 	await page.waitForFunction(() => (window as unknown as { printed: number }).printed === 1);
 
 	await page.emulateMedia({ media: 'print' });
-	const card = page.getByRole('region', { name: 'Index card' });
-	await expect(card).toBeVisible();
-	await expect(card.getByRole('heading', { name: 'Beef Wellington' })).toBeVisible();
-	await expect(card).toContainText('10 servings');
-	await expect(card.getByText('chateaubriand beef fillet')).toBeVisible();
-	await expect(card.getByRole('img', { name: 'QR code for this recipe' })).toBeVisible();
+	const sheet = page.getByRole('article', { name: 'Printed recipe' });
+	await expect(sheet).toBeVisible();
+	await expect(sheet.getByRole('heading', { name: 'Beef Wellington' })).toBeVisible();
+	await expect(sheet).toContainText('A showstopper for five');
+	await expect(sheet).toContainText('10 servings');
+	await expect(ingredients(page).getByText('chateaubriand beef fillet')).toBeVisible();
+	await expect(method(page).getByRole('listitem')).not.toHaveCount(0);
+	await expect(sheet.getByRole('img', { name: 'QR code for this recipe' })).toBeVisible();
 	await expect(page.getByRole('heading', { level: 1 })).toBeHidden();
-	await expect(ingredients(page)).toBeHidden();
-	await expect(method(page)).toBeHidden();
+	await expect(page.getByRole('button', { name: 'More servings' })).toBeHidden();
 
 	await page.emulateMedia({ media: 'screen' });
-	await expect(card).toBeHidden();
+	await expect(sheet).toBeHidden();
 });

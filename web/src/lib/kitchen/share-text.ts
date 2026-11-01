@@ -20,14 +20,41 @@ export async function shareText(title: string, text: string): Promise<TextShareO
 	}
 }
 
-/** The recipe as the reader sees it, as plain text to paste anywhere: their servings and units. */
-export function recipeText(
-	title: string,
-	serves: string,
-	view: ScaledRecipe,
-	link?: string
-): string {
-	const lines = [title, serves, '', 'Ingredients'];
+export interface RecipeTextParts {
+	title: string;
+	/** The servings as the reader has them, e.g. "6 servings". */
+	serves: string;
+	view: ScaledRecipe;
+	localTitle?: string | null;
+	summary?: string;
+	/** Labelled times in order, e.g. [["Prep", "20 min"], ["Total", "1 hr"]]. */
+	times?: [string, string][];
+	/** Left out for a recipe kept on the device, which has no link. */
+	link?: string;
+}
+
+/**
+ * The whole recipe as the reader sees it, as plain text to paste anywhere: their servings, units
+ * and variants, with the summary, times, stages and tips, and the link last.
+ */
+export function recipeText({
+	title,
+	serves,
+	view,
+	localTitle,
+	summary,
+	times = [],
+	link
+}: RecipeTextParts): string {
+	const lines = [title];
+	if (localTitle) lines.push(localTitle);
+	if (summary) lines.push('', summary);
+	lines.push(
+		'',
+		[serves, ...times.map(([label, value]) => `${label} ${value}`)].join(' | '),
+		'',
+		'Ingredients'
+	);
 	for (const group of view.groups) {
 		if (group.name) lines.push('', group.name);
 		for (const item of group.items) lines.push(`- ${item.text}`);
@@ -37,6 +64,8 @@ export function recipeText(
 		if (step.heading) lines.push('', step.heading);
 		lines.push(`${i + 1}. ${step.segments.map((segment) => segment.text).join('')}`);
 	});
+	if (view.tips?.length)
+		lines.push('', view.tips.length > 1 ? "Chef's tips" : "Chef's tip", ...view.tips);
 	if (link) lines.push('', link);
 	return lines.join('\n');
 }

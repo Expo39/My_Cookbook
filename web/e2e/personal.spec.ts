@@ -153,7 +153,7 @@ test('your recipes export as text, a spreadsheet or JSON', async ({ page }) => {
 	const drawer = page.getByRole('dialog', { name: 'Settings' });
 	await expect(drawer.getByText(/Saved only in this browser on this device/)).toBeVisible();
 	for (const [label, extension, opening] of [
-		['Text', 'txt', 'Ross il-forn\n4 servings'],
+		['Text', 'txt', 'Ross il-forn\n'],
 		['Spreadsheet (CSV)', 'csv', '\uFEFFTitle,Section,Servings'],
 		['JSON', 'json', '{\n  "kind": "sapori-recipes"']
 	] as const) {

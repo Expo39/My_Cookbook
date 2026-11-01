@@ -71,17 +71,22 @@ test('on a wide screen the ingredients scroll with the page, not in a box of the
 	expect((await column.boundingBox())?.y ?? 0).toBeLessThan(before - 500);
 });
 
-test('the print view keeps the title, meta, ingredients and method only', async ({ page }) => {
+test('the browser Print gives the A4 recipe from the top of the first page, with no controls', async ({
+	page
+}) => {
 	await page.goto(wellington);
 	await waitForCore(page);
+	await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
 	await page.emulateMedia({ media: 'print' });
-	await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+	const sheet = page.getByRole('article', { name: 'Printed recipe' });
+	await expect(sheet.getByRole('heading', { name: 'Beef Wellington' })).toBeVisible();
 	await expect(ingredients(page)).toBeVisible();
 	await expect(method(page)).toBeVisible();
 	await expect(page.getByRole('navigation', { name: 'Sections' })).toBeHidden();
 	await expect(page.getByRole('button', { name: 'More servings' })).toBeHidden();
-	await expect(page.getByText("Chef's tip")).toBeHidden();
 	await expect(page.getByText('Related recipes')).toBeHidden();
+	// Nothing above the sheet takes up a page of its own before the recipe starts.
+	expect((await sheet.boundingBox())?.y ?? Infinity).toBeLessThan(10);
 });
 
 test('every control can be reached and used from the keyboard', async ({ page }) => {

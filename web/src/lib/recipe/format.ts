@@ -1,4 +1,4 @@
-import type { ServingsNoun, Unit } from '$lib/types/recipe';
+import type { ServingsNoun, TimesSummary, Unit } from '$lib/types/recipe';
 
 const GLYPHS: [number, string][] = [
 	[0.125, '⅛'],
@@ -37,6 +37,19 @@ export function formatMinutes(minutes: number): string {
 	if (total < 60) return `${total} min`;
 	const [hours, rest] = [Math.floor(total / 60), total % 60];
 	return rest ? `${hours} h ${rest} min` : `${hours} h`;
+}
+
+/** The times a recipe states, labelled and formatted in the order a cook reads them. */
+export function timeLabels(times: TimesSummary): [string, string][] {
+	const labelled: [string, number | null | undefined][] = [
+		['Prep', times.prep],
+		['Cook', times.cook],
+		['Rest', times.rest],
+		['Total', times.total]
+	];
+	return labelled.flatMap(([label, minutes]) =>
+		typeof minutes === 'number' ? [[label, formatMinutes(minutes)] as [string, string]] : []
+	);
 }
 
 export function isoDuration(minutes: number): string {
