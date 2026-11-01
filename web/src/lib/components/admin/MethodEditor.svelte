@@ -73,7 +73,7 @@
 				{:else}
 					<div class="row">
 						<button type="button" class="more" onclick={() => (headed[step.uid] = true)}>
-							<Icon name="plus" size={16} />Add a heading above this step
+							<Icon name="plus" size={16} />Add a heading
 						</button>
 						<InfoTip topic="a heading above a step" text={HEADING_INFO} />
 					</div>
@@ -196,7 +196,7 @@
 	   the note a tap opens on a touch screen takes the whole row underneath. */
 	.row {
 		display: grid;
-		grid-template-columns: minmax(0, auto) auto;
+		grid-template-columns: minmax(0, auto) auto 1fr;
 		justify-content: start;
 		align-items: center;
 		column-gap: var(--space-1);
@@ -207,7 +207,7 @@
 	}
 
 	.row > .more {
-		text-align: start;
+		white-space: nowrap;
 	}
 
 	.more {

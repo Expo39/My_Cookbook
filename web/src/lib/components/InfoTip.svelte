@@ -59,8 +59,11 @@
 		color: var(--colour-primary);
 	}
 
+	/* Its width never counts towards the row it opens in, so opening it moves the content below
+	   down and never pushes the "i" or rewraps the label beside it. */
 	.tip {
 		flex-basis: 100%;
+		contain: inline-size;
 		padding: var(--space-2) var(--space-3);
 		border-inline-start: 3px solid var(--colour-primary);
 		border-radius: var(--radius-s);

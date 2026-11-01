@@ -68,13 +68,14 @@
 			aria-controls="{id}-panel"
 			onclick={() => (open = !open)}
 		>
-			<Icon name="plus" size={18} />Add a timer, temperature or amount
+			<Icon name="plus" size={18} />Add to this step
 		</button>
 		<InfoTip
 			topic="adding a timer, temperature or amount"
 			text="Puts it into the step where the cursor was: a timer the cook can tap, a temperature that also shows in °F, or an ingredient's amount that changes with the servings."
 		/>
 	</div>
+	{#if !open}<p class="help">A timer, a temperature or an ingredient's amount.</p>{/if}
 	{#if open}
 		<div class="panel" id="{id}-panel" role="group" aria-label="Insert into the step">
 			<fieldset class="kinds">
@@ -179,7 +180,7 @@
 	   the button or runs past the card; a long label wraps inside the button. */
 	.opener {
 		display: grid;
-		grid-template-columns: minmax(0, auto) auto;
+		grid-template-columns: minmax(0, auto) auto 1fr;
 		align-items: center;
 		column-gap: var(--space-1);
 		max-inline-size: 100%;
@@ -189,9 +190,9 @@
 		grid-column: 1 / -1;
 	}
 
+	/* A label short enough for the narrowest phone, so it never wraps beside the "i". */
 	.opener > .btn {
-		padding-block: var(--space-2);
-		text-align: start;
+		white-space: nowrap;
 	}
 
 	.panel {

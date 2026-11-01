@@ -43,7 +43,7 @@
 	let { data } = $props();
 
 	const ADDRESS_INFO =
-		"The end of the recipe's link, made from its title as you type it. Leave it as it is unless you want a shorter or clearer link. Changing it once the recipe is published moves the recipe to the new link.";
+		"The last part of the recipe's link, after its section. It is made from the title as you type, so you only change it for a shorter or clearer link. Once the recipe is published, changing it moves the recipe to the new link.";
 
 	type Phase = 'loading' | 'locked' | 'missing' | 'ready';
 	type Pane = 'edit' | 'checks' | 'preview';
@@ -373,30 +373,73 @@
 	{/snippet}
 
 	{#snippet address()}
-		<details class="address" bind:open={addressOpen}>
-			<summary>
-				<span class="what">Web address<span class="opt">optional</span></span>
+		{@const slugId = fieldId('slug')}
+		{@const slugError = editor.errorFor('slug')}
+		{@const prefix = editor.form.section ? `/${editor.form.section}/` : '/'}
+		<div class="address">
+			<div class="address-head">
+				<label for={slugId}>Web address<span class="opt">optional</span></label>
 				<InfoTip topic="a recipe's address" text={ADDRESS_INFO} />
-				<code>/{editor.id}</code>
-				<span class="change">Change</span>
-			</summary>
-			<TextField
-				id={fieldId('slug')}
-				label="Web address"
-				bind:value={
-					() => editor.slug,
-					(value) => {
-						editor.form.slug = value;
-						editor.form.slugTouched = true;
-					}
-				}
-				hint={editor.editing
-					? `Changing this moves the recipe. It is at /${editor.originalId} now.`
-					: `Follows the title until you change it: /${editor.id}`}
-				error={editor.errorFor('slug')}
-				onblur={() => editor.touch('slug')}
-			/>
-		</details>
+			</div>
+			{#if !addressOpen}
+				<div class="link">
+					<code><span class="fixed">{prefix}</span><strong>{editor.slug || '...'}</strong></code>
+					<button type="button" class="change" onclick={() => (addressOpen = true)}>Change</button>
+				</div>
+				<p class="help">
+					Made from the title as you type it. Most recipes never need to change it.
+				</p>
+			{/if}
+			<div class="edit-address" hidden={!addressOpen}>
+				<div class="prefixed">
+					<span class="prefix" aria-hidden="true"><span dir="ltr">{prefix}</span></span>
+					<input
+						id={slugId}
+						class="control"
+						bind:value={
+							() => editor.slug,
+							(value) => {
+								editor.form.slug = value;
+								editor.form.slugTouched = true;
+							}
+						}
+						autocomplete="off"
+						spellcheck="false"
+						aria-invalid={slugError ? 'true' : undefined}
+						aria-describedby="{slugId}-hint{slugError ? ` ${slugId}-error` : ''}"
+						onblur={() => editor.touch('slug')}
+					/>
+				</div>
+				<p class="help" id="{slugId}-hint">
+					{#if editor.editing}
+						Changing this moves the recipe. It is at <code>/{editor.originalId}</code> now.
+					{:else}
+						Type only the last part: lowercase letters, numbers and hyphens. The part before it
+						comes from the section above.
+					{/if}
+				</p>
+				{#if slugError}
+					<p class="error" id="{slugId}-error" role="alert">
+						<Icon name="alert" size={16} />{slugError}
+					</p>
+				{/if}
+				<div class="address-actions">
+					{#if editor.form.slugTouched}
+						<button
+							type="button"
+							class="change"
+							onclick={() => {
+								editor.form.slugTouched = false;
+								editor.form.slug = '';
+							}}>Follow the title again</button
+						>
+					{/if}
+					{#if !slugError && !editor.moving}
+						<button type="button" class="change" onclick={() => (addressOpen = false)}>Done</button>
+					{/if}
+				</div>
+			</div>
+		</div>
 		{#if editor.moving}
 			<p class="notice" role="status">
 				<span>
@@ -743,22 +786,19 @@
 		cursor: pointer;
 	}
 
-	.address summary {
+	.address {
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	.address-head {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: var(--space-1) var(--space-2);
-		min-block-size: var(--target);
-		color: var(--colour-muted);
-		font-size: var(--text-s);
+		gap: var(--space-1);
 	}
 
-	.address[open] summary {
-		margin-block-end: var(--space-2);
-	}
-
-	.what {
-		color: var(--colour-ink);
+	.address-head label {
 		font-weight: 700;
 	}
 
@@ -769,13 +809,106 @@
 		font-weight: 400;
 	}
 
+	/* Folded: the whole link as it will read, the part made from the title in bold. */
+	.link {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		min-block-size: var(--target);
+		padding-inline: var(--space-3) var(--space-1);
+		border: 1px dashed var(--colour-line);
+		border-radius: var(--radius-s);
+		background: var(--colour-bg);
+	}
+
+	.link code {
+		flex: 1;
+		min-inline-size: 0;
+		font-size: var(--text-s);
+		overflow-wrap: anywhere;
+	}
+
+	.fixed,
+	.prefix {
+		color: var(--colour-muted);
+	}
+
 	.change {
-		margin-inline-start: auto;
+		flex: none;
+		min-block-size: var(--target);
+		padding-inline: var(--space-2);
+		border: 0;
+		background: transparent;
 		color: var(--colour-primary);
 		font-weight: 700;
 	}
 
-	.address[open] .change {
+	.change:hover {
+		text-decoration: underline;
+	}
+
+	.edit-address {
+		display: grid;
+		gap: var(--space-2);
+	}
+
+	.edit-address[hidden] {
+		display: none;
+	}
+
+	/* Open: the fixed part of the link sits inside the box, so only the editable part can be typed. */
+	.prefixed {
+		display: flex;
+		align-items: stretch;
+		border: 1px solid var(--colour-line);
+		border-radius: var(--radius-s);
+		background: var(--colour-surface);
+		overflow: hidden;
+	}
+
+	.prefixed:focus-within {
+		outline: 2px solid var(--colour-primary);
+		outline-offset: 2px;
+	}
+
+	.prefixed:has([aria-invalid='true']) {
+		border-color: var(--colour-danger);
+	}
+
+	.prefix {
+		display: flex;
+		align-items: center;
+		max-inline-size: 45%;
+		padding-inline: var(--space-3) var(--space-1);
+		background: var(--colour-tint);
+		font-family: monospace;
+		font-size: var(--text-s);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		direction: rtl;
+	}
+
+	.prefixed .control {
+		flex: 1;
+		min-inline-size: 0;
+		border: 0;
+		border-radius: 0;
+		font-family: monospace;
+	}
+
+	.prefixed .control:focus-visible {
+		outline: none;
+	}
+
+	.address-actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
+		gap: var(--space-2);
+	}
+
+	.address-actions:empty {
 		display: none;
 	}
 
