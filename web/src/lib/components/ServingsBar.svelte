@@ -23,9 +23,10 @@
 	const activeMultiplier = $derived(
 		multipliers.find((m) => Math.abs(Number(m.value) - model.view.factor) < 1e-6)?.value ?? ''
 	);
+	// The same ingredient in several parts (garlic in the steak and in the butter) gives the same
+	// warning more than once; it is shown once.
 	const notes = $derived([
-		...model.view.warnings.map((warning) => warning.message),
-		...model.view.hints
+		...new Set([...model.view.warnings.map((warning) => warning.message), ...model.view.hints])
 	]);
 
 	let haveKey = $state('');
