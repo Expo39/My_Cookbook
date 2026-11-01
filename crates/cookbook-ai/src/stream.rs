@@ -96,6 +96,11 @@ impl Relay {
         Self::default()
     }
 
+    /// Whether any of the answer's words have been passed on yet.
+    pub fn wrote(&self) -> bool {
+        self.wrote
+    }
+
     /// The events for the bytes that just arrived. After an error nothing more is written.
     pub fn push(&mut self, bytes: &[u8]) -> String {
         let data = self.decoder.push(bytes);

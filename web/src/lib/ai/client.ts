@@ -26,11 +26,16 @@ export interface ImportResult {
 	checks: unknown[];
 }
 
+export type FallbackReason = 'busy' | 'slow';
+
 export interface ChatOptions {
 	/** Called with the answer so far each time more of it arrives. */
 	onText?: (text: string) => void;
-	/** Called when the main model cannot answer and a lighter one is asked instead. */
-	onFallback?: () => void;
+	/**
+	 * Called when a lighter model is asked instead: the main one is `busy`, or `slow`, having written
+	 * nothing in its first 10 seconds.
+	 */
+	onFallback?: (reason: FallbackReason) => void;
 	/** Called with the model that answers, and whether it is the fallback. */
 	onModel?: (model: string, fallback: boolean) => void;
 	signal?: AbortSignal;
@@ -146,11 +151,12 @@ export async function chatPost(
 					truncated?: boolean;
 					model?: string;
 					fallback?: boolean;
+					reason?: FallbackReason;
 					error?: string;
 					message?: string;
 				};
 				if (event === 'status') {
-					onFallback?.();
+					onFallback?.(parsed.reason === 'slow' ? 'slow' : 'busy');
 				} else if (event === 'model' && parsed.model) {
 					onModel?.(parsed.model, parsed.fallback ?? false);
 				} else if (event === 'delta' && parsed.text) {

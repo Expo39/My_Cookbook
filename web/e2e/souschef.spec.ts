@@ -89,7 +89,7 @@ test('says when a lighter model steps in, and labels its answer', async ({ page 
 	await ask(page, 'Can I freeze it?');
 	await expect(
 		chef.getByText(
-			'Answered by the lighter model, gemini-flash-lite-latest, because the main one could not answer.'
+			'Answered by the lighter model, gemini-flash-lite-latest, because the main one was busy or slow to start.'
 		)
 	).toBeVisible();
 });

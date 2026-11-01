@@ -233,8 +233,29 @@ describe('the sous-chef status and fallbacks', () => {
 			onModel
 		});
 		expect(reply).toEqual({ reply: 'Yes.', truncated: false });
-		expect(onFallback).toHaveBeenCalledOnce();
+		expect(onFallback).toHaveBeenCalledExactlyOnceWith('busy');
 		expect(onModel).toHaveBeenCalledWith('gemini-flash-lite-latest', true);
+	});
+
+	it('says when the lighter model steps in because the main one was slow to start', async () => {
+		const fetcher = mocked(
+			streamed(
+				event('model', { model: 'gemini-3.8-flash', fallback: false }) +
+					event('status', { state: 'fallback', reason: 'slow' }) +
+					event('model', { model: 'gemini-flash-lite-latest', fallback: true }) +
+					event('delta', { text: 'Yes.' }) +
+					event('done', { truncated: false })
+			)
+		);
+		const onFallback = vi.fn();
+		const onModel = vi.fn();
+		const reply = await new WorkerClient('https://ai.test', fetcher, human).chat(request, {
+			onFallback,
+			onModel
+		});
+		expect(reply).toEqual({ reply: 'Yes.', truncated: false });
+		expect(onFallback).toHaveBeenCalledExactlyOnceWith('slow');
+		expect(onModel).toHaveBeenLastCalledWith('gemini-flash-lite-latest', true);
 	});
 
 	it('passes on the high-demand message when every model is busy', async () => {

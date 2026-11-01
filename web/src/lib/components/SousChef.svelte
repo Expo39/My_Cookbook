@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
 	import { admin } from '$lib/admin/session.svelte';
-	import { AiError, isRetryable, type AiClient, type Turn } from '$lib/ai';
+	import { AiError, isRetryable, type AiClient, type FallbackReason, type Turn } from '$lib/ai';
 	import type { Recipe } from '$lib/types/recipe';
 	import Icon from './Icon.svelte';
 
@@ -34,8 +34,8 @@
 	let sending = $state(false);
 	let error = $state('');
 	let seconds = $state(0);
-	/** A lighter model is answering because the main one is too busy. */
-	let lighter = $state(false);
+	/** Why a lighter model is being asked instead: the main one is busy, or slow to start. */
+	let lighter = $state<FallbackReason | null>(null);
 	let controller: AbortController | undefined;
 
 	/**
@@ -89,7 +89,7 @@
 		error = '';
 		sending = true;
 		seconds = 0;
-		lighter = false;
+		lighter = null;
 		const clock = setInterval(() => seconds++, 1000);
 		void toEnd();
 		try {
@@ -103,7 +103,7 @@
 						{ recipeId, recipe, history, question: asked },
 						{
 							signal: controller.signal,
-							onFallback: () => (lighter = true),
+							onFallback: (reason) => (lighter = reason),
 							onModel: (model, fallback) => (by = { model, fallback }),
 							onText: (sofar) => {
 								if (messages.length === answer) {
@@ -281,7 +281,7 @@
 					{#if message.model}
 						<p class="cut">
 							{message.fallback
-								? `Answered by the lighter model, ${message.model}, because the main one could not answer.`
+								? `Answered by the lighter model, ${message.model}, because the main one was busy or slow to start.`
 								: `Answered by ${message.model}.`}
 						</p>
 					{/if}
@@ -309,7 +309,9 @@
 					<p>
 						<span class="dots" aria-hidden="true"><span></span><span></span><span></span></span>
 						<span>
-							{#if lighter}
+							{#if lighter === 'slow'}
+								Taking a while: switching to a faster model...
+							{:else if lighter}
 								High demand: switching to a lighter model...
 							{:else if seconds < PATIENT_SECONDS}
 								Thinking...

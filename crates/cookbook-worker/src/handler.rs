@@ -279,14 +279,26 @@ async fn human(req: &Request, env: &Env) -> std::result::Result<(), ApiError> {
 enum Phase {
     /// Asking the model at this place in the list.
     Asking(usize, GeminiRequest),
-    /// Relaying that model's streamed answer.
-    Answering(ByteStream, Relay),
+    /// Relaying that model's streamed answer, keeping the question in case it is too slow to start.
+    Answering {
+        chunks: ByteStream,
+        relay: Relay,
+        at: usize,
+        request: GeminiRequest,
+        /// When the model was asked, in milliseconds since the epoch.
+        asked: u64,
+    },
 }
 
+/// How long the main model may take, thinking included, before its first words. Past that a cook
+/// starts to give up, so the lighter model is asked instead when there is one.
+const FIRST_WORDS_WITHIN: Duration = Duration::from_secs(10);
+
 /// Answers a question as server-sent events, starting at once so the cook hears what is going on:
-/// a `status` event `{ state: "fallback" }` when the main model cannot answer and a lighter one is
-/// asked instead, a `model` event `{ model, fallback }` naming the one that answers, then `delta`
-/// events and a closing `done`, or an `error` event.
+/// a `status` event `{ state: "fallback", reason }` when a lighter model is asked instead, because
+/// the main one is busy (`"busy"`) or has written nothing within `FIRST_WORDS_WITHIN` (`"slow"`),
+/// a `model` event `{ model, fallback }` naming the one that answers, then `delta` events and a
+/// closing `done`, or an `error` event.
 fn answer(
     env: Env,
     config: &GeminiConfig,
@@ -299,14 +311,27 @@ fn answer(
         async move {
             let (out, next) = match phase? {
                 Phase::Asking(at, mut request) => {
-                    match ask_model(&key, &models[at], &mut request, true).await {
+                    let asked = Date::now().as_millis();
+                    // With a lighter model to turn to, the main one gets only the short wait.
+                    let within = if at + 1 < models.len() {
+                        FIRST_WORDS_WITHIN
+                    } else {
+                        REPLY_WITHIN
+                    };
+                    match ask_model(&key, &models[at], &mut request, true, within).await {
                         Ok(mut upstream) => match upstream.stream() {
                             Ok(chunks) => (
                                 sse_event(
                                     "model",
                                     &json!({ "model": models[at], "fallback": at > 0 }),
                                 ),
-                                Some(Phase::Answering(chunks, Relay::new())),
+                                Some(Phase::Answering {
+                                    chunks,
+                                    relay: Relay::new(),
+                                    at,
+                                    request,
+                                    asked,
+                                }),
                             ),
                             Err(_) => (error_event(&AiError::Unavailable), None),
                         },
@@ -314,8 +339,16 @@ fn answer(
                             let next = after_failure(&env, &models[at], &error).await
                                 && at + 1 < models.len();
                             if next {
+                                let reason = if error == AiError::Unavailable {
+                                    "slow"
+                                } else {
+                                    "busy"
+                                };
                                 (
-                                    sse_event("status", &json!({ "state": "fallback" })),
+                                    sse_event(
+                                        "status",
+                                        &json!({ "state": "fallback", "reason": reason }),
+                                    ),
                                     Some(Phase::Asking(at + 1, request)),
                                 )
                             } else {
@@ -327,17 +360,61 @@ fn answer(
                         }
                     }
                 }
-                Phase::Answering(mut chunks, mut relay) => match chunks.next().await {
-                    Some(Ok(bytes)) => {
-                        let out = relay.push(&bytes);
-                        (out, Some(Phase::Answering(chunks, relay)))
+                Phase::Answering {
+                    mut chunks,
+                    mut relay,
+                    at,
+                    request,
+                    asked,
+                } => {
+                    // Until the first words arrive, the main model races the clock.
+                    let waiting = at + 1 < models.len() && !relay.wrote();
+                    let arrived = if waiting {
+                        let deadline = asked + FIRST_WORDS_WITHIN.as_millis() as u64;
+                        let left = deadline.saturating_sub(Date::now().as_millis());
+                        let pause = Box::pin(Delay::from(Duration::from_millis(left)));
+                        match select(Box::pin(chunks.next()), pause).await {
+                            Either::Left((item, _)) => Some(item),
+                            Either::Right(_) => None,
+                        }
+                    } else {
+                        Some(chunks.next().await)
+                    };
+                    match arrived {
+                        None => {
+                            console_error!(
+                                "gemini: {} wrote nothing within {FIRST_WORDS_WITHIN:?}; asking {}",
+                                models[at],
+                                models[at + 1]
+                            );
+                            (
+                                sse_event(
+                                    "status",
+                                    &json!({ "state": "fallback", "reason": "slow" }),
+                                ),
+                                Some(Phase::Asking(at + 1, request)),
+                            )
+                        }
+                        Some(Some(Ok(bytes))) => {
+                            let out = relay.push(&bytes);
+                            (
+                                out,
+                                Some(Phase::Answering {
+                                    chunks,
+                                    relay,
+                                    at,
+                                    request,
+                                    asked,
+                                }),
+                            )
+                        }
+                        Some(Some(Err(error))) => {
+                            console_error!("gemini: the stream broke off: {error}");
+                            (relay.fail(&AiError::Unavailable), None)
+                        }
+                        Some(None) => (relay.end(), None),
                     }
-                    Some(Err(error)) => {
-                        console_error!("gemini: the stream broke off: {error}");
-                        (relay.fail(&AiError::Unavailable), None)
-                    }
-                    None => (relay.end(), None),
-                },
+                }
             };
             Some((Ok::<Vec<u8>, worker::Error>(out.into_bytes()), next))
         }
@@ -398,7 +475,7 @@ async fn mark_busy(env: &Env) {
 enum Refusal {
     /// The model does not take the thinking level that was asked for.
     Thinking,
-    /// The model sent nothing back within `REPLY_WITHIN`.
+    /// The model sent nothing back within the time it was given.
     Silent,
     Ai(AiError),
 }
@@ -422,6 +499,7 @@ async fn ask_model(
     model: &str,
     request: &mut GeminiRequest,
     streamed: bool,
+    within: Duration,
 ) -> std::result::Result<Response, AiError> {
     let url = if streamed {
         stream_endpoint(model)
@@ -431,7 +509,7 @@ async fn ask_model(
     let mut last = AiError::Unavailable;
     let mut attempt = 0;
     while attempt < ATTEMPTS_PER_MODEL {
-        match send(key, &url, request).await {
+        match send(key, &url, request, within).await {
             Ok(response) => return Ok(response),
             Err(Refusal::Thinking) => match request.without_thinking() {
                 Some(plain) => {
@@ -442,7 +520,7 @@ async fn ask_model(
             },
             // Asking a stuck model again only doubles the wait.
             Err(Refusal::Silent) => {
-                console_error!("gemini: {model} sent nothing within {REPLY_WITHIN:?}");
+                console_error!("gemini: {model} sent nothing within {within:?}");
                 return Err(AiError::Unavailable);
             }
             Err(Refusal::Ai(error)) => {
@@ -492,7 +570,7 @@ async fn gemini(
     let mut request = request.clone();
     let mut last = AiError::Unavailable;
     for model in config.models() {
-        match ask_model(&key, model, &mut request, false).await {
+        match ask_model(&key, model, &mut request, false, REPLY_WITHIN).await {
             Ok(response) => return Ok(response),
             Err(error) => {
                 if !after_failure(env, model, &error).await {
@@ -512,6 +590,7 @@ async fn send(
     key: &str,
     url: &str,
     request: &GeminiRequest,
+    within: Duration,
 ) -> std::result::Result<Response, Refusal> {
     let failed = |_| Refusal::Ai(AiError::Unavailable);
     let headers = Headers::new();
@@ -527,7 +606,7 @@ async fn send(
     let outgoing = Request::new_with_init(url, &init).map_err(failed)?;
     let fetch = Fetch::Request(outgoing);
     let reply = Box::pin(fetch.send());
-    let mut response = match select(reply, Box::pin(Delay::from(REPLY_WITHIN))).await {
+    let mut response = match select(reply, Box::pin(Delay::from(within))).await {
         Either::Left((result, _)) => result.map_err(failed)?,
         Either::Right(_) => return Err(Refusal::Silent),
     };
