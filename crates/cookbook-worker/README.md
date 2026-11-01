@@ -8,7 +8,7 @@ The static site uses the Worker when `ai.endpoint` in `cookbook.config.json` (or
 
 | route | auth | body | success |
 |---|---|---|---|
-| `POST /chat` | per-IP limit, and a Turnstile token when `TURNSTILE_SECRET` is set | `{ recipeId, history, question, recipe? }`, at most 32 KB; `recipe` is read only when the site has no recipe at `recipeId` | a `text/event-stream`, started at once: a `status` event `{ state: "fallback" }` when the main model is busy, retired or out of quota and `GEMINI_FALLBACK_MODEL` is asked instead, a `model` event `{ model, fallback }` naming the model that answers, `delta` events `{ text }`, then `done` `{ truncated }`, or an `error` event `{ error, message }` |
+| `POST /chat` | per-IP limit, and a Turnstile token when `TURNSTILE_SECRET` is set | `{ recipeId, history, question, recipe? }`, at most 32 KB; `recipe` is read only when the site has no recipe at `recipeId` | a `text/event-stream`, started at once: a `status` event `{ state: "fallback", reason }` when `GEMINI_FALLBACK_MODEL` is asked instead, with `reason` `"busy"` (the main model is busy, retired or out of quota) or `"slow"` (it has written nothing 10 s after the question, thinking included), a `model` event `{ model, fallback }` naming the model that answers, `delta` events `{ text }`, then `done` `{ truncated }`, or an `error` event `{ error, message }` |
 | `GET /status` | none | nothing | `{ gemini: "ok" \| "busy", retired: string \| null }`: "busy" for two minutes after every model stayed busy, and `retired` names a model Gemini no longer offers, for a day after it was last refused, which the site shows to the owner. It never calls Gemini; the site asks it when the sous-chef opens, and treats no answer as the Worker being unreachable |
 | `POST /import` | `X-Admin-Proof` header | `{ text }`, at most 20 KB | `{ recipe, checks }`, after at most one repair round when the checklist finds errors or ingredients are missing (see `cookbook-ai`'s `review_import` and `settle_import`) |
 | `OPTIONS *` | none | none | 204 with the CORS headers |
@@ -23,7 +23,7 @@ Errors before the answer starts are always `{ error, message }` with an error st
 | `ALLOWED_ORIGINS` | var | comma-separated, e.g. `https://expo39.github.io,http://localhost:5173` |
 | `GEMINI_MODEL` | var | defaults to the model compiled into `cookbook-ai` |
 | `GEMINI_THINKING_LEVEL` | var | `low` by default; `minimal`, `medium`, `high`, or `default` to send none |
-| `GEMINI_FALLBACK_MODEL` | var | optional; takes over when the main model is busy three times, out of quota, retired or silent for 25 s (`gemini-flash-lite-latest` here) |
+| `GEMINI_FALLBACK_MODEL` | var | optional; takes over when the main model is busy three times, out of quota, retired, or has written nothing 10 s after the question (25 s is the limit when there is no fallback) (`gemini-flash-lite-latest` here) |
 | `TURNSTILE_SECRET` | secret | optional; when set, `/chat` needs an `X-Turnstile-Token` header |
 | `GEMINI_API_KEY` | secret | Google AI Studio key |
 | `ADMIN_IMPORT_SECRET` | secret | keys the admin proof, see below |

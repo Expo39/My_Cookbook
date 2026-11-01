@@ -88,7 +88,7 @@ A one-minute walkthrough, with captions, is on the site's [How to use](https://e
 
 ### AI
 
-- A sous-chef chat on each recipe page, your own recipes included, with the answer streamed as it is written and labelled with the model that wrote it. As it opens it says whether the cook is offline, the service is unreachable or the AI is in high demand. A busy, retired or out-of-quota model hands over to a lighter fallback (Google's newest Flash-Lite), and the cook is told; a silent model is given up after 25 seconds. Cloudflare Turnstile checks that a person is asking, and per-visitor and site-wide limits keep bots from draining the quota.
+- A sous-chef chat on each recipe page, your own recipes included, with the answer streamed as it is written and labelled with the model that wrote it. As it opens it says whether the cook is offline, the service is unreachable or the AI is in high demand. A busy, retired or out-of-quota model hands over to a lighter fallback (Google's newest Flash-Lite), and so does a main model that has not started its answer within 10 seconds, thinking included; the cook is told either way. Cloudflare Turnstile checks that a person is asking, and per-visitor and site-wide limits keep bots from draining the quota.
 - Import from text in the editor, which fills the form for review.
 - Both go through a Cloudflare Worker (or the self-hosted server), so the Gemini key never reaches the browser. Without an AI endpoint, both are hidden.
 
