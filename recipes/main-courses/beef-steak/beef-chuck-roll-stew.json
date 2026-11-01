@@ -7,6 +7,10 @@
     "cook": 180,
     "rest": 5
   },
+  "image": {
+    "src": "beef-chuck-roll-stew.jpg",
+    "alt": "THE STEW"
+  },
   "ingredientGroups": [
     {
       "items": [
