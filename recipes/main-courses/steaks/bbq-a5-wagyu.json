@@ -1,0 +1,85 @@
+{
+  "title": "BBQ A5 Wagyu",
+  "summary": "Thin, heavily marbled A5 Wagyu on a very hot grill: under two minutes, lid open, with only salt. Slice it into strips to share.",
+  "servings": 2,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 45,
+    "cook": 2,
+    "rest": 4
+  },
+  "tags": [
+    "BBQ"
+  ],
+  "order": 5,
+  "equipment": [
+    "BBQ with a lid",
+    "Instant-read thermometer",
+    "Tongs"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 320,
+            "unit": "g"
+          },
+          "item": "A5 Wagyu steak",
+          "note": "about 1.3 cm thick"
+        },
+        {
+          "item": "salt",
+          "note": "a light sprinkle",
+          "scale": "toTaste"
+        },
+        {
+          "item": "flaky salt",
+          "note": "to finish",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Before you start",
+      "text": "Take the steak out of the fridge {timer:45} before cooking. Pat it very dry and sprinkle it lightly with salt only. If it already has pepper on it, wipe most of it off: over this heat, with this much fat, pepper scorches and turns bitter."
+    },
+    {
+      "text": "Preheat the BBQ with the lid closed for {timer:15}, with the hot side as hot as it goes, around {temp:280-300}. Clean the grill and oil it lightly."
+    },
+    {
+      "heading": "Cook",
+      "text": "Put the Wagyu on the hot grill and leave the lid open: it is so thin that you need to watch it the whole time. Cook for {timer:45s}."
+    },
+    {
+      "text": "Turn it over, still with the lid open, and cook for another {timer:45s}."
+    },
+    {
+      "text": "If flames rise from the dripping fat, move the steak away for a few seconds, let them die down, and put it straight back. Do not let the flames burn the meat."
+    },
+    {
+      "text": "Hold the steak on its fat edge with tongs for {timer:15-20s} to render it, then take it off. It is ready at {temp:50-52!}."
+    },
+    {
+      "heading": "Rest and serve",
+      "text": "Rest it for only {timer:3-4|rest}: being thin, it needs no more."
+    },
+    {
+      "text": "Slice it into strips about 1 cm wide and finish with a little flaky salt."
+    }
+  ],
+  "tips": [
+    "If your steak is thicker than about 1.5 cm, give each edge 20-30 seconds on the grill to render the fat.",
+    "After resting it settles at 54-56 °C, a beautiful medium-rare.",
+    "Salt alone is traditional, and lets the beef speak for itself. Never press it down, and turn it only once.",
+    "Cooking it with the fillet: start the fillet first, and put the Wagyu on when the fillet moves to the cooler side. Both are ready to eat at about the same time."
+  ],
+  "related": [
+    "main-courses/steaks/bbq-fillet-steak"
+  ]
+}

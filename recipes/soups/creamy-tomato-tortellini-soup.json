@@ -1,0 +1,207 @@
+{
+  "title": "Creamy Tomato Tortellini Soup",
+  "summary": "A creamy tomato and basil broth with cheese tortellini cooked straight from the freezer, spinach and plenty of Parmesan.",
+  "servings": 5,
+  "times": {
+    "prep": 10,
+    "cook": 35
+  },
+  "equipment": [
+    "Large pot, at least 5 litres"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 500,
+            "unit": "g"
+          },
+          "item": "frozen cheese tortellini"
+        },
+        {
+          "amount": {
+            "qty": 665,
+            "unit": "g"
+          },
+          "item": "passata"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "l"
+          },
+          "item": "chicken or vegetable stock"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "large onion",
+          "note": "about 200 g",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "minced garlic",
+          "note": "about 5 cloves"
+        },
+        {
+          "amount": {
+            "qty": 25,
+            "unit": "g"
+          },
+          "item": "tomato paste"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 25,
+            "unit": "ml"
+          },
+          "item": "olive oil"
+        }
+      ]
+    },
+    {
+      "name": "Cream and vegetables",
+      "items": [
+        {
+          "food": "cream",
+          "amount": {
+            "qty": 170,
+            "unit": "ml"
+          },
+          "item": "double cream"
+        },
+        {
+          "amount": {
+            "qty": 100,
+            "unit": "g"
+          },
+          "item": "frozen spinach"
+        }
+      ]
+    },
+    {
+      "name": "Herbs and seasoning",
+      "items": [
+        {
+          "key": "basil",
+          "amount": {
+            "qty": 20
+          },
+          "item": "fresh basil leaves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 0.75,
+            "unit": "tsp"
+          },
+          "item": "dried oregano",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "chilli flakes",
+          "scale": "seasoning"
+        },
+        {
+          "item": "salt",
+          "scale": "toTaste"
+        },
+        {
+          "item": "black pepper",
+          "scale": "toTaste"
+        }
+      ]
+    },
+    {
+      "name": "To finish",
+      "items": [
+        {
+          "key": "parmesan",
+          "amount": {
+            "qty": 70,
+            "unit": "g"
+          },
+          "item": "Parmesan",
+          "note": "grated"
+        },
+        {
+          "item": "extra virgin olive oil",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 175,
+            "unit": "ml"
+          },
+          "item": "extra stock",
+          "note": "if needed"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Prepare",
+      "text": "Finely dice the onion, and mince the garlic if it is not already. Grate the Parmesan."
+    },
+    {
+      "text": "Thaw the spinach and squeeze out the excess water. Wash and dry the basil, and tear the leaves by hand, keeping half for serving."
+    },
+    {
+      "heading": "Soften the onion",
+      "text": "Put the pot over a medium heat (5 of 9 on the hob). Add the olive oil and the onion, and cook for {timer:5-6}, stirring occasionally, until soft and translucent. Do not let it brown much."
+    },
+    {
+      "heading": "Fry the aromatics",
+      "text": "Turn the heat to medium-low (3-4 of 9). Add the garlic, tomato paste, oregano, chilli flakes and a generous grind of black pepper, and stir constantly for {timer:1-2}. The tomato paste should darken slightly, but the garlic must not burn."
+    },
+    {
+      "heading": "Build the broth",
+      "text": "Add the passata and the stock and stir well. Bring to a gentle boil, then turn the heat to low-medium (3 of 9) and simmer uncovered for {timer:15|broth}, stirring occasionally. Aim for small, gentle bubbles, not a hard boil."
+    },
+    {
+      "heading": "Infuse the basil",
+      "text": "Turn the heat to low (2-3 of 9). Stir in {@basil*1/2}, torn by hand, and let them infuse for {timer:2}. Keep the rest for serving."
+    },
+    {
+      "heading": "Add the cream",
+      "text": "Turn the heat to low (2 of 9). Pour in the cream, stir until the colour is even and warm it gently for {timer:2}. Do not let it come to a rolling boil from now on."
+    },
+    {
+      "heading": "Cook the tortellini",
+      "text": "Bring the soup back to a gentle simmer (3 of 9). Add all the tortellini straight from the freezer, without thawing, and stir gently to separate them."
+    },
+    {
+      "text": "Cook them as the packet says, usually {timer:5-8|tortellini}. Check one to make sure the pasta and the filling are cooked through."
+    },
+    {
+      "heading": "Add the spinach",
+      "text": "Turn the heat to low (2-3 of 9). Stir in the spinach gently and simmer for {timer:1-2}, until piping hot throughout. Spinach added still frozen needs a little longer."
+    },
+    {
+      "heading": "Finish",
+      "text": "Turn the heat to its lowest setting (1-2 of 9) and stir in {@parmesan*5/7}. Taste before adding salt: the stock and cheese may already be salty. If the soup is too thick, add the extra stock gradually."
+    },
+    {
+      "heading": "Serve",
+      "text": "Turn off the heat and divide the soup between five bowls. Finish each with the rest of the Parmesan, the fresh basil, cracked black pepper and a small drizzle of extra virgin olive oil."
+    }
+  ],
+  "tips": [
+    "Cook the tortellini as late as possible: frozen tortellini soak up the broth and release starch as they cook. If you expect leftovers, cook them separately, add them to each bowl, and keep the pasta and the soup apart in the fridge so the tortellini do not swell and go soft.",
+    "For more depth, add a small splash of balsamic vinegar before the cream, or fry an extra teaspoon of tomato paste with the garlic. For more heat, add extra chilli flakes or a pinch of cayenne.",
+    "Serve it with garlic bread for dipping, and tear more fresh basil over each bowl if you like.",
+    "Use 150-200 ml extra stock, only if the soup needs it."
+  ]
+}

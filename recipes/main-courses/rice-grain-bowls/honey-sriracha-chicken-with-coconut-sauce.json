@@ -1,0 +1,206 @@
+{
+  "title": "Honey Sriracha Chicken with Coconut Sauce",
+  "summary": "Seared chicken thighs simmered in a sweet, spicy honey, sriracha and coconut sauce, with jasmine rice and tenderstem broccoli.",
+  "servings": 2,
+  "times": {
+    "prep": 5,
+    "cook": 30
+  },
+  "tags": [
+    "Asian-Inspired"
+  ],
+  "ingredientGroups": [
+    {
+      "name": "Chicken",
+      "items": [
+        {
+          "amount": {
+            "qty": 600,
+            "unit": "g"
+          },
+          "item": "boneless, skinless chicken thighs"
+        },
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 16,
+            "unit": "g"
+          },
+          "alt": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "plain flour"
+        },
+        {
+          "item": "salt and black pepper",
+          "scale": "toTaste"
+        },
+        {
+          "food": "oil",
+          "amount": {
+            "qty": 15,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "vegetable oil",
+          "note": "plus a drizzle for the sauce"
+        }
+      ]
+    },
+    {
+      "name": "Honey sriracha coconut sauce",
+      "items": [
+        {
+          "amount": {
+            "qty": 5
+          },
+          "item": "garlic cloves",
+          "note": "finely minced",
+          "scale": "discrete"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 30,
+            "unit": "g"
+          },
+          "item": "salted butter"
+        },
+        {
+          "amount": {
+            "qty": 30,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "sriracha"
+        },
+        {
+          "amount": {
+            "qty": 15,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "light soy sauce"
+        },
+        {
+          "food": "honey",
+          "amount": {
+            "qty": 15,
+            "unit": "ml"
+          },
+          "alt": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "honey"
+        },
+        {
+          "amount": {
+            "qty": 400,
+            "unit": "ml"
+          },
+          "item": "full-fat coconut milk",
+          "note": "1 tin"
+        },
+        {
+          "amount": {
+            "qty": 160,
+            "unit": "ml"
+          },
+          "item": "chicken stock"
+        }
+      ]
+    },
+    {
+      "name": "Rice and vegetables",
+      "items": [
+        {
+          "food": "rice",
+          "amount": {
+            "qty": 160,
+            "unit": "g"
+          },
+          "item": "jasmine rice",
+          "note": "uncooked"
+        },
+        {
+          "amount": {
+            "qty": 225,
+            "unit": "g"
+          },
+          "item": "tenderstem broccoli"
+        },
+        {
+          "item": "fresh chives",
+          "note": "finely chopped"
+        },
+        {
+          "item": "chilli oil or chilli crisp",
+          "optional": true
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "The chicken",
+      "text": "Pat the chicken thighs dry with kitchen paper. Mix the flour with salt and black pepper on a plate, then coat the thighs lightly on both sides, shaking off the excess."
+    },
+    {
+      "text": "Preheat a frying pan over a medium-high heat and add the vegetable oil. Once it is hot, add the chicken and sear for {timer:3-4} per side, until golden brown. Work in batches if needed."
+    },
+    {
+      "text": "Lift the chicken onto a plate. It will not be cooked through yet."
+    },
+    {
+      "heading": "The sauce",
+      "text": "Turn the heat down to medium. Add a small drizzle of oil, the butter and the garlic to the same pan, and cook for {timer:1-2}, stirring constantly and scraping up the browned bits. Do not let the garlic burn."
+    },
+    {
+      "text": "Add the sriracha, soy sauce and honey, and stir for {timer:1-2}, until bubbling and glossy."
+    },
+    {
+      "text": "Pour in the coconut milk and the chicken stock, and stir well to bring in the glaze and the browned bits. Bring to a gentle boil, then turn the heat down to low."
+    },
+    {
+      "text": "Return the chicken and any resting juices to the pan. Simmer gently for {timer:8-12|chicken}, turning the thighs halfway."
+    },
+    {
+      "text": "Check that the thickest part of each thigh reaches {temp:74!}. If not, keep cooking and check again."
+    },
+    {
+      "heading": "Rice and broccoli",
+      "text": "Rinse the rice under cold water until the water runs clearer. Put it in a saucepan with the amount of water on the packet, bring to the boil, cover and turn the heat to low. Cook as the packet says, usually {timer:10-12|rice}, then rest it covered for {timer:5|rice rest} and fluff with a fork."
+    },
+    {
+      "text": "Bring a saucepan of salted water to the boil. Add the broccoli and cook for {timer:3-5|broccoli}, until bright green and tender but still slightly crunchy. Drain well. You can also steam it for {timer:4-6|broccoli}."
+    },
+    {
+      "heading": "Serve",
+      "text": "Divide the rice between two plates. Slice the chicken into strips or serve the thighs whole, with the broccoli alongside."
+    },
+    {
+      "text": "Spoon plenty of the sauce over the chicken and rice, and finish with the chives and the chilli oil, if using."
+    }
+  ],
+  "tips": [
+    "To cook it all together: rinse and start the rice and flour the chicken (0-5 min); sear the chicken (5-13 min); make the sauce (13-17 min); simmer the chicken while the rice cooks (17-30 min); then cook the broccoli, rest the rice and check the chicken in the last 5 minutes.",
+    "In a stainless-steel pan, preheat it before adding the oil, add the chicken once the oil is hot, and let a crust form before you try to turn it. Do not crowd the pan.",
+    "Keep the sauce at a gentle simmer: a hard boil can split the coconut milk. If it is too thin, lift out the chicken and simmer the sauce uncovered for a few minutes.",
+    "For a milder sauce use 1 tbsp sriracha; the full 2 tbsp gives it a noticeable kick.",
+    "Use 200-250 g broccoli. For the rice, the Stovetop Jasmine Rice recipe gives exact water and timings."
+  ],
+  "related": [
+    "sides/stovetop-jasmine-rice"
+  ]
+}

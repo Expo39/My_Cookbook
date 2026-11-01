@@ -1,0 +1,250 @@
+{
+  "title": "Octopus Ragù with Bottarga",
+  "summary": "A slow octopus ragù with tomatoes, olives and capers, tossed with paccheri and finished off the heat with lemon and bottarga.",
+  "servings": 4,
+  "titleLocal": "Ragù di Polpo con Bottarga",
+  "times": {
+    "prep": 20,
+    "cook": 200
+  },
+  "tags": [
+    "Italian Classics"
+  ],
+  "ingredientGroups": [
+    {
+      "name": "Octopus",
+      "items": [
+        {
+          "amount": {
+            "qty": 880,
+            "unit": "g"
+          },
+          "item": "cleaned octopus"
+        },
+        {
+          "amount": {
+            "qty": 100,
+            "unit": "ml"
+          },
+          "item": "dry white wine"
+        },
+        {
+          "amount": {
+            "qty": 20,
+            "unit": "ml"
+          },
+          "item": "white wine vinegar"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "bay leaf",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 5,
+              "max": 6
+            }
+          },
+          "item": "black peppercorns",
+          "optional": true,
+          "scale": "discrete"
+        }
+      ]
+    },
+    {
+      "name": "Ragù",
+      "items": [
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 100,
+            "unit": "ml"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "large onion",
+          "note": "finely diced, 150-180 g",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 5
+          },
+          "item": "garlic cloves",
+          "note": "thinly sliced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 120,
+            "unit": "ml"
+          },
+          "item": "dry white wine"
+        },
+        {
+          "amount": {
+            "qty": 400,
+            "unit": "g"
+          },
+          "item": "cherry tomatoes",
+          "note": "halved, or 350 g crushed tomatoes"
+        },
+        {
+          "key": "liquid",
+          "amount": {
+            "qty": 250,
+            "unit": "ml"
+          },
+          "item": "octopus cooking liquid",
+          "note": "kept from cooking the octopus"
+        },
+        {
+          "amount": {
+            "qty": 80,
+            "unit": "g"
+          },
+          "item": "Kalamata olives",
+          "note": "pitted and halved"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "capers",
+          "note": "rinsed"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "anchovy fillets in oil",
+          "optional": true,
+          "scale": "discrete"
+        },
+        {
+          "item": "black pepper",
+          "scale": "toTaste"
+        }
+      ]
+    },
+    {
+      "name": "Pasta",
+      "items": [
+        {
+          "amount": {
+            "qty": 500,
+            "unit": "g"
+          },
+          "item": "paccheri",
+          "note": "or mezzi paccheri, rigatoni or thick spaghetti"
+        }
+      ]
+    },
+    {
+      "name": "Lemon bottarga",
+      "items": [
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "bottarga",
+          "note": "finely grated, about 25-30 g"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "lemon zest",
+          "note": "finely grated, yellow part only"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "fresh parsley",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "black pepper",
+          "note": "freshly ground",
+          "optional": true,
+          "scale": "seasoning"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Cook the octopus",
+      "text": "Put the octopus in a large, heavy pot with the wine, the vinegar, and the bay leaf and peppercorns, if using. Cover tightly with a lid."
+    },
+    {
+      "text": "Cook over a low heat for {timer:60-90|octopus}. The octopus releases its own liquid, which makes a concentrated broth."
+    },
+    {
+      "text": "Check it is tender: a fork should go easily into the thickest part of a tentacle. Lift the octopus out, keep the cooking liquid, and cut the octopus into 2-3 cm pieces."
+    },
+    {
+      "heading": "Build the ragù",
+      "text": "Heat the olive oil in a large pan or casserole over a medium-low heat. Add the onion and cook it slowly for {timer:8-10}, until soft and sweet."
+    },
+    {
+      "text": "Add the garlic and cook for {timer:1}. Add the anchovies, if using, and let them melt."
+    },
+    {
+      "text": "Add the octopus and cook for {timer:5}. Pour in the wine and let it reduce for {timer:2-3}."
+    },
+    {
+      "text": "Add the tomatoes, the olives, the capers and {@liquid}."
+    },
+    {
+      "text": "Simmer gently, partly covered, for {timer:1.5-2h|ragù}, until the sauce is thick and glossy and clings to the octopus."
+    },
+    {
+      "heading": "Lemon bottarga",
+      "text": "Put the olive oil for the lemon bottarga in a small bowl. Add the bottarga, the lemon zest, the parsley and the pepper, if using, and mix into a thick paste. Let it sit for {timer:10-15} before it goes into the pasta."
+    },
+    {
+      "heading": "The pasta",
+      "text": "Bring a large pot of salted water to the boil and cook the pasta until 2 minutes before al dente. Keep some of the pasta water."
+    },
+    {
+      "text": "Add the pasta straight to the ragù and toss for {timer:1-2}, adding pasta water until it is silky."
+    },
+    {
+      "heading": "Finish",
+      "text": "Turn off the heat. Add the lemon bottarga and toss well, with a splash of pasta water if it looks dry."
+    }
+  ],
+  "tips": [
+    "Never fry or boil the bottarga: heat dulls its aroma, which is the whole point. It goes in at the end, off the heat, like a seasoning.",
+    "Add no salt at all. Between the octopus, capers, olives, anchovies and bottarga there is plenty, which is also why the recipe uses only 2 anchovies.",
+    "Paccheri or mezzi paccheri are the best choice: the thick tubes hold the octopus ragù and the bottarga beautifully.",
+    "Use up to 300 ml of the octopus cooking liquid if the ragù needs it."
+  ]
+}

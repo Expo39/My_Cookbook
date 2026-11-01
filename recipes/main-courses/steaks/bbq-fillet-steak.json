@@ -1,0 +1,99 @@
+{
+  "title": "BBQ Fillet Steak",
+  "summary": "A thick fillet seared over the hottest part of the BBQ with the lid down, then finished on the cooler side to a pink medium-rare.",
+  "servings": 1,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 45,
+    "cook": 12,
+    "rest": 8
+  },
+  "tags": [
+    "BBQ"
+  ],
+  "order": 4,
+  "equipment": [
+    "BBQ with a lid",
+    "Instant-read thermometer",
+    "Tongs"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "g"
+          },
+          "item": "fillet steak",
+          "note": "about 4.5 cm thick"
+        },
+        {
+          "item": "salt",
+          "note": "generous",
+          "scale": "toTaste"
+        },
+        {
+          "item": "black pepper",
+          "note": "after cooking",
+          "optional": true,
+          "scale": "toTaste"
+        },
+        {
+          "item": "flaky salt",
+          "note": "to finish",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Before you start",
+      "text": "Take the steak out of the fridge {timer:45} before cooking. Pat it very dry and salt it generously on all sides. Keep the pepper for after cooking."
+    },
+    {
+      "text": "Preheat the BBQ with the lid closed for {timer:15}. You want the hot side as hot as it goes, around {temp:280-300}, and the other side much gentler. On a BBQ with a grill and a carbon plate, the grill is the hot side and the plate the cooler one."
+    },
+    {
+      "text": "Clean the grill and oil it lightly."
+    },
+    {
+      "heading": "Cook",
+      "text": "Put the fillet on the hot grill, close the lid and cook for {timer:2.5} without touching it."
+    },
+    {
+      "text": "Open the lid and turn the steak 90° on the same side, for crosshatch marks. Close the lid and cook for another {timer:2.5}."
+    },
+    {
+      "text": "Open the lid, turn the steak over, close the lid and cook for {timer:2.5}."
+    },
+    {
+      "text": "Open the lid, turn it 90° again, close the lid and cook for {timer:2}."
+    },
+    {
+      "text": "Move the fillet to the cooler side and close the lid."
+    },
+    {
+      "text": "Check it with the thermometer, pushed into the centre from the side. At {temp:48-49!}, leave it on the cooler side with the lid closed for another minute. At {temp:50-52!}, or above, take it off straight away."
+    },
+    {
+      "heading": "Rest and serve",
+      "text": "Rest it for {timer:7-8|rest}, unwrapped; tent it loosely with foil only if it is windy."
+    },
+    {
+      "text": "Serve it whole or sliced into medallions, with a little flaky salt and black pepper if you like."
+    }
+  ],
+  "tips": [
+    "Trust the thermometer over the clock. After resting it finishes at 54-56 °C, a pink medium-rare.",
+    "Use tongs, never a fork, and never press the steak down.",
+    "Cooking it with the A5 Wagyu: the Wagyu goes on the hot grill at the moment the fillet moves to the cooler side, and both are ready to eat at about the same time."
+  ],
+  "related": [
+    "main-courses/steaks/bbq-a5-wagyu"
+  ]
+}

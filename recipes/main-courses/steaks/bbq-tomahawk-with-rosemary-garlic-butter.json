@@ -1,0 +1,258 @@
+{
+  "title": "BBQ Tomahawk with Rosemary Garlic Butter",
+  "summary": "A tomahawk cooked slowly on the cool side of the BBQ, seared over the flames and rested under rosemary garlic butter, with grilled vegetables.",
+  "servings": 2,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 30,
+    "cook": 50,
+    "rest": 15
+  },
+  "tags": [
+    "BBQ"
+  ],
+  "order": 6,
+  "equipment": [
+    "BBQ with a lid, set up with two zones",
+    "Instant-read thermometer"
+  ],
+  "ingredientGroups": [
+    {
+      "name": "Steak",
+      "items": [
+        {
+          "amount": {
+            "qty": 1.1,
+            "unit": "kg"
+          },
+          "item": "tomahawk steak",
+          "note": "about 900 g meat and 200 g bone"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tsp"
+          },
+          "item": "coarse salt",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "black pepper",
+          "scale": "seasoning"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        }
+      ]
+    },
+    {
+      "name": "Vegetables",
+      "items": [
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "bell peppers",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "large onions",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 250,
+            "unit": "g"
+          },
+          "item": "mushrooms"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "courgette",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "corn on the cob",
+          "scale": "discrete"
+        },
+        {
+          "item": "lemon",
+          "note": "for squeezing",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "Vegetable marinade",
+      "items": [
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 3,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "food": "salt",
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "salt",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "black pepper",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "smoked paprika",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "dried oregano",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "garlic clove",
+          "note": "minced",
+          "scale": "discrete"
+        }
+      ]
+    },
+    {
+      "name": "Rosemary garlic butter",
+      "items": [
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 50,
+            "unit": "g"
+          },
+          "item": "butter",
+          "note": "softened"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "garlic clove",
+          "note": "very finely minced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "fresh rosemary",
+          "note": "finely chopped"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "pinch"
+          },
+          "item": "salt and pepper"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Get ready",
+      "text": "An hour before cooking, take the steak out of the fridge and pat it dry. Season it all over with the salt and pepper, coat it lightly with the olive oil and leave it at room temperature."
+    },
+    {
+      "text": "Mash the softened butter with the garlic, rosemary and a pinch of salt and pepper, and set it aside."
+    },
+    {
+      "text": "Forty minutes before cooking, light the BBQ and set up two zones. The hot zone has the coals stacked thick, or the burners on full, with the grill at {temp:250-350}: it is only for searing. The cool zone has no coals underneath, or the burners low or off, and holds {temp:160-190} with the lid closed, {temp:200} at most. Keep the lid closed."
+    },
+    {
+      "text": "Cut the peppers into thick strips, the onions into thick wedges (keeping the root so they hold together) and the courgette into thick lengthwise slices. Leave the mushrooms whole, or halve large ones, and the corn whole."
+    },
+    {
+      "text": "Mix the olive oil, salt, pepper, smoked paprika, oregano and garlic for the marinade, and toss all the vegetables in it."
+    },
+    {
+      "heading": "Cook",
+      "text": "Put the steak on the cool zone with the bone towards the heat, and close the lid. It cooks slowly here until the centre reaches {temp:46-48!}, usually in 35-45 minutes."
+    },
+    {
+      "text": "After {timer:15|onions}, put the onions on the medium heat, around {temp:180-220}, and close the lid."
+    },
+    {
+      "text": "After {timer:5|corn} more, add the corn, turning it occasionally."
+    },
+    {
+      "text": "After {timer:5|peppers} more, add the peppers."
+    },
+    {
+      "text": "After {timer:5|mushrooms} more, add the mushrooms and the courgette. Everything is on now."
+    },
+    {
+      "text": "Every 3-5 minutes, turn the vegetables, and check the steak every 5-10 minutes. Move each vegetable to the cool side as it is done: the onions take 12-15 minutes, the corn 10-15, the peppers and mushrooms 8-10, the courgette 6-8."
+    },
+    {
+      "heading": "Sear",
+      "text": "When the steak reaches {temp:46-48!}, move it to the hot zone. Sear it for {timer:90-120s} on each side, then {timer:20-30s} on each edge to render the fat. Take it off at {temp:52-54!}."
+    },
+    {
+      "heading": "Rest",
+      "text": "Put the steak on a board and top it straight away with all the rosemary garlic butter. Tent it loosely with foil and rest it for {timer:10-15|rest}. It rises to 54-57 °C, medium-rare."
+    },
+    {
+      "text": "While it rests, put the vegetables back on the grill for {timer:1-2} if they need it, then finish them with a squeeze of lemon and a pinch of salt."
+    },
+    {
+      "heading": "Serve",
+      "text": "Cut the bone off if you like, and slice the steak against the grain into 1 cm slices. Pour the melted butter and juices over the meat and arrange the vegetables around it."
+    }
+  ],
+  "tips": [
+    "Temperature over time, always. Keep the lid closed for steady heat and do not peek too often.",
+    "Never butter the steak before searing: it burns. The butter goes on only as it rests, where it melts into the crust and the juices.",
+    "The rest is not optional. If the vegetables finish early, move them to the cool side rather than off the BBQ; if the steak is cooking too fast, move it further into the cool zone.",
+    "For extra aroma, throw a few rosemary sprigs on the grill while the steak sears."
+  ],
+  "related": [
+    "main-courses/steaks/bbq-fillet-steak"
+  ]
+}

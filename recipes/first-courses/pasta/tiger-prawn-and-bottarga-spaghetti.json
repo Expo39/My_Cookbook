@@ -1,0 +1,137 @@
+{
+  "title": "Tiger Prawn and Bottarga Spaghetti",
+  "summary": "A light, bright spaghetti for one with tiger prawns, garlic, lemon and grated bottarga. About 20 minutes.",
+  "servings": 1,
+  "times": {
+    "prep": 10,
+    "cook": 12
+  },
+  "tags": [
+    "Italian Classics"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 100,
+            "unit": "g"
+          },
+          "item": "spaghetti or linguine"
+        },
+        {
+          "amount": {
+            "qty": 6
+          },
+          "item": "tiger prawns",
+          "note": "raw",
+          "scale": "discrete"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 1.5,
+            "unit": "tbsp"
+          },
+          "item": "extra virgin olive oil"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "garlic cloves",
+          "note": "thinly sliced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "pinch"
+          },
+          "item": "chilli flakes",
+          "optional": true,
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.5
+          },
+          "prefix": "Zest of",
+          "item": "lemon"
+        },
+        {
+          "amount": {
+            "qty": 1.5,
+            "unit": "tsp"
+          },
+          "item": "lemon juice"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "fresh parsley",
+          "note": "chopped"
+        },
+        {
+          "key": "bottarga",
+          "amount": {
+            "qty": 17.5,
+            "unit": "g"
+          },
+          "item": "bottarga",
+          "note": "grated"
+        },
+        {
+          "item": "salt",
+          "note": "lightly: the bottarga is salty",
+          "scale": "toTaste"
+        },
+        {
+          "item": "black pepper",
+          "note": "freshly ground",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Prepare the prawns",
+      "text": "If the prawns have their heads, twist them off. Pull off the legs, then peel away the shell from the underside, working towards the tail. Take the tail off too, so the pasta is easier to eat."
+    },
+    {
+      "text": "Lay each prawn on a board with its curved back facing up. Make a shallow cut, 2-3 mm deep, along the length of the back with a small, sharp knife."
+    },
+    {
+      "text": "Lift out the dark thread with the tip of the knife or a toothpick and throw it away. If there is no dark vein, there is nothing to remove. Rinse the prawns briefly under cold water and pat them dry with kitchen paper."
+    },
+    {
+      "heading": "Cook",
+      "text": "Cook the pasta in well-salted boiling water until al dente. Keep about 100 ml of the pasta water, then drain."
+    },
+    {
+      "text": "Heat the olive oil over a medium heat and fry the garlic gently for {timer:1}, with the chilli flakes if using."
+    },
+    {
+      "text": "Add the prawns and cook for {timer:1-2|prawns} per side, until pink and opaque."
+    },
+    {
+      "text": "Add the pasta to the pan with a splash of the pasta water and toss until the sauce coats it lightly."
+    },
+    {
+      "text": "Take the pan off the heat. Stir in the lemon zest, the parsley, a small squeeze of the lemon juice and {@bottarga*1/2}."
+    },
+    {
+      "text": "Plate the pasta and grate the rest of the bottarga over the top. Finish with a drizzle of extra virgin olive oil and black pepper."
+    }
+  ],
+  "tips": [
+    "Do not cook the bottarga: it turns bitter when heated too much, so it goes in off the heat. Leave out the Parmesan; the bottarga brings all the salt and savour the dish needs.",
+    "For an even silkier sauce, stir in 10-15 g butter off the heat.",
+    "The heads and shells are full of flavour. Freeze them for a seafood stock, or simmer them with onion, garlic and water for 20-30 minutes and strain it: a splash of that prawn stock in the sauce makes it even better.",
+    "The \"vein\" is the prawn's digestive tract. It is not harmful, but in large prawns such as tiger prawns it can be gritty and taste faintly bitter or muddy, so it is worth removing.",
+    "Use 15-20 g bottarga and 1-2 tsp lemon juice."
+  ]
+}

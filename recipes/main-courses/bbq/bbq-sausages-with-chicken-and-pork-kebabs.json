@@ -1,0 +1,92 @@
+{
+  "title": "BBQ Sausages with Chicken and Pork Kebabs",
+  "summary": "A full BBQ run on a three-zone grill: fresh beef and pork sausages first, then chicken and pork kebabs, each to a safe temperature.",
+  "servings": 4,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "cook": 60
+  },
+  "tags": [
+    "BBQ"
+  ],
+  "equipment": [
+    "BBQ with a lid and a hot, a medium and a cool zone",
+    "Instant-read thermometer",
+    "Tongs"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "item": "fresh beef sausages"
+        },
+        {
+          "item": "fresh pork sausages"
+        },
+        {
+          "item": "chicken kebabs"
+        },
+        {
+          "item": "pork kebabs"
+        },
+        {
+          "food": "oil",
+          "item": "oil",
+          "note": "a little, for the kebabs"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Set up the BBQ",
+      "text": "Preheat the BBQ and set up three zones, measured at the grate: hot at {temp:230-260} for browning, medium at {temp:180-210} for the main cooking, and cool at {temp:120-150} for holding food and stopping it burning. Keep the hot zone going throughout."
+    },
+    {
+      "text": "Plan by space, not by quantity. Each zone takes only one layer with a finger's gap between pieces: crowded food steams instead of browning, and you lose the room to move anything that flares up. Always keep a strip of the cool zone free for that."
+    },
+    {
+      "heading": "Sausages",
+      "text": "Lay as many sausages on the medium zone as fit in one layer with a gap between each. If they do not all fit, cook them in batches and keep the finished ones on the cool zone. Never start fresh sausages on the hot zone."
+    },
+    {
+      "text": "Close the lid and cook for {timer:3-4|sausages}. Open it, turn the sausages and close it again. Repeat every 3-4 minutes, for {timer:15-20|sausages total} in all. If they brown too fast, move them to the cool zone."
+    },
+    {
+      "text": "Once they are almost cooked, move a few at a time to the hot zone with the lid open, turning often, {timer:30-60s} per side, until well browned. Never leave them there unattended: the fat flares up."
+    },
+    {
+      "text": "They are done at {temp:71!} in the centre of the thickest one. Rest them for {timer:5}. Do not prick them: they lose their juices."
+    },
+    {
+      "heading": "Chicken kebabs",
+      "text": "Bring the hot zone up to {temp:230-250}. Oil the kebabs lightly, rather than the grill."
+    },
+    {
+      "text": "Put only as many kebabs on the hot zone as fit with a finger's gap between them, and leave the medium zone clear for them to move onto. With the lid open, turn them every 1-2 minutes for {timer:4-6|chicken sear}, until well browned without burning."
+    },
+    {
+      "text": "Move them to the medium zone, at {temp:180-200}, close the lid and cook for {timer:3-6|chicken}, turning once or twice. Then sear the next batch on the hot zone."
+    },
+    {
+      "text": "Take each one off as soon as the middle of the largest piece reaches {temp:74!}, so it does not dry out."
+    },
+    {
+      "heading": "Pork kebabs",
+      "text": "Bring the hot zone back up to {temp:230-250}. Sear the pork kebabs on it, as many as fit with gaps, lid open, turning every 1-2 minutes for {timer:4-6|pork sear}."
+    },
+    {
+      "text": "Move them to the medium zone, close the lid and cook until the centre reaches at least {temp:63!}, or {temp:68-70!} if you like it more done. Small pieces take 8-12 minutes in all. Rest them for at least {timer:3}."
+    }
+  ],
+  "tips": [
+    "In short: sausages on medium with the lid closed; kebabs seared on hot with the lid open, then finished on medium with the lid closed.",
+    "Keep raw chicken, raw pork and the raw sausages away from cooked food, with their own plates and tongs. Never put cooked meat back on a plate that held raw meat.",
+    "Soak wooden skewers in water for at least 30 minutes before threading them.",
+    "A thermometer in the lid reads differently from the heat at the grate where the food is, so treat it only as a guide.",
+    "Kebabs with vegetables need turning more often, so the vegetables do not burn before the meat is cooked."
+  ]
+}

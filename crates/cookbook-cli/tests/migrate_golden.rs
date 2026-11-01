@@ -97,16 +97,42 @@ fn recipes() -> BTreeMap<String, Recipe> {
     parse_tree(migrated())
 }
 
-/// The committed `recipes/` tree, which has been copy-edited since the migration.
+/// The legacy recipes in the committed `recipes/` tree, which have been copy-edited since the
+/// migration. Recipes added since are left out, so the tree can keep growing.
 fn committed() -> BTreeMap<String, Recipe> {
+    let legacy: Vec<&str> = LEGACY_RECIPES
+        .iter()
+        .map(|entry| current_id(entry.id))
+        .collect();
     parse_tree(&read_tree(&root().join("recipes")))
+        .into_iter()
+        .filter(|(id, _)| legacy.contains(&id.as_str()))
+        .collect()
 }
 
-/// Recipes renamed after the migration: (migrated id, committed id).
-const RENAMED: &[(&str, &str)] = &[(
-    "main-courses/rice-grain-bowls/korean-ground-beef-bowl",
-    "main-courses/rice-grain-bowls/korean-beef-mince-bowl",
-)];
+/// Recipes renamed or moved after the migration: (migrated id, committed id).
+const RENAMED: &[(&str, &str)] = &[
+    (
+        "main-courses/rice-grain-bowls/korean-ground-beef-bowl",
+        "main-courses/rice-grain-bowls/korean-beef-mince-bowl",
+    ),
+    (
+        "main-courses/beef-steak/pan-seared-ribeye-steak",
+        "main-courses/steaks/pan-seared-ribeye-steak",
+    ),
+    (
+        "main-courses/beef-steak/pan-seared-fillet-steak",
+        "main-courses/steaks/pan-seared-fillet-steak",
+    ),
+];
+
+/// Where a migrated recipe lives now.
+fn current_id(id: &'static str) -> &'static str {
+    RENAMED
+        .iter()
+        .find(|(from, _)| *from == id)
+        .map_or(id, |(_, to)| to)
+}
 
 fn legacy_page() -> Html {
     Html::parse_document(&fs::read_to_string(fixture()).unwrap())
@@ -121,10 +147,9 @@ fn pairs<'a>(
         .map(|element| {
             let legacy = element.value().id().unwrap();
             let entry = LEGACY_RECIPES.iter().find(|r| r.legacy == legacy).unwrap();
-            let recipe = migrated.get(entry.id).unwrap_or_else(|| {
-                let (_, renamed) = RENAMED.iter().find(|(from, _)| *from == entry.id).unwrap();
-                &migrated[*renamed]
-            });
+            let recipe = migrated
+                .get(entry.id)
+                .unwrap_or_else(|| &migrated[current_id(entry.id)]);
             (element, recipe, entry.legacy, entry.id)
         })
         .collect()

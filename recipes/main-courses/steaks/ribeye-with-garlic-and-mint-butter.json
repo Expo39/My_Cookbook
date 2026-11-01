@@ -1,0 +1,116 @@
+{
+  "title": "Ribeye with Garlic and Mint Butter",
+  "summary": "A thin ribeye seared hard and fast in a stainless-steel pan, then basted with garlic and fresh mint butter. About three minutes in the pan.",
+  "servings": 1,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 20,
+    "cook": 4,
+    "rest": 5
+  },
+  "tags": [
+    "Pan"
+  ],
+  "order": 3,
+  "equipment": [
+    "Stainless-steel frying pan",
+    "Meat thermometer"
+  ],
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 200,
+            "unit": "g"
+          },
+          "item": "ribeye steak",
+          "note": "about 1.5-2 cm thick"
+        },
+        {
+          "food": "oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tsp"
+          },
+          "item": "neutral oil",
+          "note": "one that takes high heat"
+        },
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 12.5,
+            "unit": "g"
+          },
+          "item": "butter"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "garlic clove",
+          "note": "lightly crushed, skin on",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 5,
+              "max": 7
+            }
+          },
+          "item": "fresh mint leaves",
+          "scale": "discrete"
+        },
+        {
+          "item": "salt and black pepper",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Season the steak with salt and black pepper and leave it out for {timer:15-20}. Pat it dry just before cooking if the surface has become wet."
+    },
+    {
+      "text": "Put the empty stainless-steel pan over a medium-high heat for {timer:2-3}."
+    },
+    {
+      "text": "Test it with a tiny drop of water: when it forms a little ball that skates around the pan rather than evaporating at once, the pan is ready."
+    },
+    {
+      "text": "Add the oil and swirl it around. Give it {timer:10-15s}."
+    },
+    {
+      "text": "Lay the steak in the pan, away from you. It should sizzle straight away. Cook the first side for {timer:90s} without moving it; once a crust forms it will release on its own."
+    },
+    {
+      "text": "Turn it and cook the second side for {timer:1}."
+    },
+    {
+      "text": "Turn the heat down to medium-low and add the butter and the garlic."
+    },
+    {
+      "text": "When the butter foams, add the mint leaves and baste the steak continuously for {timer:30s}, tilting the pan and spooning the butter over."
+    },
+    {
+      "text": "Take the steak out when the centre reaches {temp:52-53!} for medium-rare."
+    },
+    {
+      "text": "Rest it uncovered on a warm plate for {timer:4-5}, and spoon a little of the garlic and mint butter over it before serving."
+    }
+  ],
+  "tips": [
+    "Do not start with the butter: at searing heat it burns. Sear in oil, then add the butter, garlic and mint once the heat is down.",
+    "Mint burns quickly, which is why it goes in only for the last moments: it stays aromatic rather than bitter.",
+    "A thin steak needs about 3 minutes in the pan in all. Trust the thermometer over the timings: if it reaches 52 °C early, take it out at once. It settles at 54-56 °C after resting.",
+    "Use 10-15 g butter."
+  ],
+  "related": [
+    "main-courses/steaks/pan-seared-ribeye-steak"
+  ]
+}

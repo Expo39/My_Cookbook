@@ -1,0 +1,243 @@
+{
+  "title": "Slow-Braised Lamb Shanks with Red Wine and Polpa",
+  "summary": "Lamb shanks braised in the oven for over three hours in red wine and polpa until they fall from the bone. Serve them on mash.",
+  "servings": 4,
+  "times": {
+    "prep": 30,
+    "cook": 210
+  },
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 4
+          },
+          "item": "lamb shanks",
+          "scale": "discrete"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "olive oil"
+        },
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "large onion",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "carrots",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "celery stalks",
+          "note": "diced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 5
+          },
+          "item": "garlic cloves",
+          "note": "chopped, or 1.5 tbsp minced garlic",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tbsp"
+          },
+          "item": "tomato paste"
+        },
+        {
+          "amount": {
+            "qty": 300,
+            "unit": "ml"
+          },
+          "item": "dry red wine"
+        },
+        {
+          "key": "stock",
+          "amount": {
+            "qty": 500,
+            "unit": "ml"
+          },
+          "item": "beef or lamb stock"
+        },
+        {
+          "amount": {
+            "qty": 400,
+            "unit": "g"
+          },
+          "item": "polpa di pomodoro"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "sprigs of rosemary",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": {
+              "min": 4,
+              "max": 5
+            }
+          },
+          "item": "sprigs of thyme",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "bay leaves",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "Worcestershire sauce",
+          "optional": true
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "paprika",
+          "optional": true,
+          "scale": "seasoning"
+        },
+        {
+          "item": "salt",
+          "scale": "toTaste"
+        },
+        {
+          "item": "black pepper",
+          "scale": "toTaste"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Heat the oven to {temp:180/160}."
+    },
+    {
+      "heading": "Brown the lamb",
+      "text": "Pat the shanks very dry with kitchen paper and season them generously with salt and black pepper.",
+      "key": "season"
+    },
+    {
+      "text": "Heat a heavy pot over a medium-high heat for about 2 minutes, then add the olive oil."
+    },
+    {
+      "text": "Brown the shanks two at a time rather than crowding the pot, {timer:2-3} per side, turning them so they brown all round. Lift them onto a plate."
+    },
+    {
+      "heading": "Cook the vegetables",
+      "text": "Turn the heat down to medium. Add the onion, carrots and celery to the same pot and cook for {timer:7-8}, stirring occasionally and scraping up the browned bits."
+    },
+    {
+      "text": "Add the garlic and cook for {timer:1}."
+    },
+    {
+      "text": "Add the tomato paste and cook for another {timer:2}, stirring. Letting it darken slightly gives a richer sauce."
+    },
+    {
+      "heading": "Deglaze",
+      "text": "Pour in the red wine and scrape the bottom of the pot thoroughly with a wooden spoon. Let it bubble fairly hard for {timer:5-7}, until reduced by about half."
+    },
+    {
+      "heading": "Build the sauce",
+      "text": "Add the polpa, {@stock}, the rosemary, thyme and bay leaves, and the Worcestershire sauce and paprika, if using. Stir and bring to a gentle simmer.",
+      "key": "sauce"
+    },
+    {
+      "text": "Return all four shanks to the pot. They should not be submerged: the liquid should come about half to two-thirds of the way up. If your pot is wide and the liquid sits well below that, add a little more stock."
+    },
+    {
+      "heading": "Slow cook",
+      "text": "Cover with the lid and put the whole pot in the oven for {timer:3-3.5h|lamb}."
+    },
+    {
+      "text": "At {timer:2h|turn}, carefully turn each shank over and put the lid back on."
+    },
+    {
+      "text": "Start checking at 3 hours: push a fork into the thickest part. It should meet very little resistance, with the meat starting to pull away from the bone. If it is still firm, give it another {timer:20-30}."
+    },
+    {
+      "heading": "Reduce the sauce",
+      "text": "Lift the shanks out carefully and cover them loosely to keep warm. Remove the bay leaves and herb stems."
+    },
+    {
+      "text": "Put the pot back on the hob, uncovered, over a medium heat and simmer the sauce for {timer:10-20}, stirring occasionally, until it is much richer and thicker. Only now taste it for salt: the sauce concentrates as it reduces.",
+      "key": "reduce"
+    },
+    {
+      "text": "Return the shanks to the sauce for a couple of minutes."
+    },
+    {
+      "heading": "Serve",
+      "text": "Serve one shank per person on creamy mashed potatoes, with plenty of the sauce spooned over. If the shanks barely hold together as you lift them out, that is exactly right."
+    }
+  ],
+  "tips": [
+    "No lid? A roasting tray sealed very tightly with foil works as well. Use two overlapping sheets if one does not seal the edges, to trap the steam. At 2 hours, peel back the foil (mind the steam), turn the shanks, spoon some sauce over them and reseal.",
+    "Chunky shanks may need closer to 3.5 hours. Pale browning is fine: they darken a lot during the braise.",
+    "For the mash, start the potatoes about 2 hours 20 minutes into the braise, so it is ready when the lamb is."
+  ],
+  "variants": [
+    {
+      "key": "stock",
+      "label": "Stock",
+      "options": [
+        {
+          "key": "stock",
+          "label": "Stock",
+          "default": true
+        },
+        {
+          "key": "gravy-pot",
+          "label": "Knorr gravy pot",
+          "ingredients": {
+            "stock": {
+              "amount": {
+                "qty": 1
+              },
+              "item": "Knorr Beef Gravy Pot",
+              "note": "dissolved in 500 ml hot water",
+              "scale": "discrete"
+            }
+          },
+          "steps": {
+            "season": "Pat the shanks very dry with kitchen paper and season them with black pepper and only a little salt: the gravy pot is already salty.",
+            "sauce": "Add the polpa, the dissolved gravy pot, the rosemary, thyme and bay leaves, and the Worcestershire sauce and paprika, if using. Stir and bring to a gentle simmer. Use one pot only: it is more concentrated than stock, and thickens the sauce as well.",
+            "reduce": "The sauce may already be thick from the gravy pot. If it is still watery, put the pot back on the hob uncovered over a medium heat and simmer it for {timer:5-15}, until it is like gravy. Taste it before adding any salt, and add no flour or cornflour unless it really needs it."
+          }
+        }
+      ]
+    }
+  ],
+  "related": [
+    "sides/mashed-potatoes"
+  ]
+}

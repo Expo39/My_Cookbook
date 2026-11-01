@@ -1,0 +1,155 @@
+{
+  "title": "Red Leicester Mac and Cheese",
+  "summary": "A creamy, saucy hob-top mac and cheese, mostly Red Leicester with a little cheddar, Grana Padano, ricotta and feta. Never baked, so never stringy.",
+  "servings": 4,
+  "times": {
+    "prep": 10,
+    "cook": 15
+  },
+  "tags": [
+    "Creamy & Rich"
+  ],
+  "ingredientGroups": [
+    {
+      "name": "Pasta",
+      "items": [
+        {
+          "amount": {
+            "qty": 350,
+            "unit": "g"
+          },
+          "item": "macaroni"
+        },
+        {
+          "amount": {
+            "qty": 150,
+            "unit": "ml"
+          },
+          "item": "reserved pasta water"
+        }
+      ]
+    },
+    {
+      "name": "Sauce",
+      "items": [
+        {
+          "food": "butter",
+          "amount": {
+            "qty": 30,
+            "unit": "g"
+          },
+          "item": "butter"
+        },
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 30,
+            "unit": "g"
+          },
+          "item": "plain flour"
+        },
+        {
+          "food": "milk",
+          "amount": {
+            "qty": 400,
+            "unit": "ml"
+          },
+          "item": "whole milk"
+        },
+        {
+          "item": "black pepper",
+          "scale": "toTaste"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "pinch"
+          },
+          "item": "nutmeg or cayenne",
+          "optional": true,
+          "scale": "seasoning"
+        },
+        {
+          "item": "salt",
+          "note": "only after tasting",
+          "scale": "toTaste"
+        }
+      ]
+    },
+    {
+      "name": "Cheese",
+      "items": [
+        {
+          "amount": {
+            "qty": 120,
+            "unit": "g"
+          },
+          "item": "Red Leicester",
+          "note": "grated"
+        },
+        {
+          "amount": {
+            "qty": 40,
+            "unit": "g"
+          },
+          "item": "cheddar",
+          "note": "grated"
+        },
+        {
+          "amount": {
+            "qty": 25,
+            "unit": "g"
+          },
+          "item": "Grana Padano",
+          "note": "grated"
+        },
+        {
+          "amount": {
+            "qty": 40,
+            "unit": "g"
+          },
+          "item": "creamy ricotta"
+        },
+        {
+          "amount": {
+            "qty": 15,
+            "unit": "g"
+          },
+          "item": "feta",
+          "note": "crumbled"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Cook the macaroni in salted water until about 1 minute before al dente. Keep the pasta water before you drain it."
+    },
+    {
+      "text": "Meanwhile, melt the butter over a medium-low heat. Add the flour and stir constantly for {timer:1-2}, without letting it brown."
+    },
+    {
+      "text": "Add the milk slowly, whisking as you go. Cook it gently for {timer:3-5}, stirring, until it coats the back of a spoon. Do not make it very thick."
+    },
+    {
+      "text": "Turn the heat off completely."
+    },
+    {
+      "text": "Add the Red Leicester in 3-4 batches, stirring gently between each, then the cheddar and the Grana Padano. Once smooth, stir in the ricotta, then crumble in the feta."
+    },
+    {
+      "text": "Season with black pepper and the nutmeg or cayenne, if using. Taste before adding any salt: the cheeses are salty."
+    },
+    {
+      "text": "Add the pasta and mix. It will look quite saucy at first, which is right: after a minute or two the pasta soaks some of it up. If it gets too thick, add pasta water a tablespoon at a time."
+    },
+    {
+      "text": "Serve it straight from the saucepan. Do not keep heating it once the cheese is in."
+    }
+  ],
+  "tips": [
+    "Heat is what makes cheese stringy and tight. Taking the sauce off the heat before the cheese goes in, and never baking it, keeps it creamy and flowing with only a very slight pull.",
+    "For an even creamier sauce, use about 425 ml milk rather than more cheese. Keep 20-30 g extra Red Leicester to hand, and stir it in off the heat if the sauce needs more.",
+    "It makes 3 large or 4 normal portions."
+  ]
+}
