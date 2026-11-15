@@ -1,0 +1,202 @@
+{
+  "title": "Chicken Coconut Korma",
+  "summary": "Yoghurt-marinated chicken simmered in a mild, creamy sauce of coconut milk, ground almonds and warm spices.",
+  "servings": 5,
+  "times": {
+    "prep": 5,
+    "cook": 45,
+    "rest": 30
+  },
+  "tags": [
+    "Asian-Inspired"
+  ],
+  "order": 6,
+  "ingredientGroups": [
+    {
+      "items": [
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "kg"
+          },
+          "item": "chicken breast",
+          "note": "cut into cubes"
+        },
+        {
+          "food": "yoghurt",
+          "amount": {
+            "qty": 200,
+            "unit": "g"
+          },
+          "item": "natural full-fat yoghurt"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "ground turmeric",
+          "scale": "seasoning"
+        },
+        {
+          "food": "salt",
+          "amount": {
+            "qty": 1.5,
+            "unit": "tsp"
+          },
+          "item": "salt",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 3,
+            "unit": "tbsp"
+          },
+          "item": "ghee or neutral oil"
+        },
+        {
+          "amount": {
+            "qty": 2
+          },
+          "item": "large onions",
+          "note": "finely sliced",
+          "scale": "discrete"
+        },
+        {
+          "amount": {
+            "qty": 1.5,
+            "unit": "tbsp"
+          },
+          "item": "minced garlic"
+        },
+        {
+          "amount": {
+            "qty": 1.5,
+            "unit": "tsp"
+          },
+          "item": "ground ginger",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 2,
+            "unit": "tsp"
+          },
+          "item": "ground coriander",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "ground cumin",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "mild chilli powder",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.125,
+            "unit": "tsp"
+          },
+          "item": "ground cloves",
+          "scale": "seasoning"
+        },
+        {
+          "food": "ground-almonds",
+          "amount": {
+            "qty": 60,
+            "unit": "g"
+          },
+          "item": "ground almonds"
+        },
+        {
+          "amount": {
+            "qty": 400,
+            "unit": "ml"
+          },
+          "item": "full-fat coconut milk"
+        },
+        {
+          "amount": {
+            "qty": 100,
+            "unit": "ml"
+          },
+          "item": "chicken stock",
+          "note": "or water"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "garam masala",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tbsp"
+          },
+          "item": "lemon juice"
+        },
+        {
+          "item": "flaked almonds",
+          "note": "to serve"
+        },
+        {
+          "item": "fresh coriander",
+          "note": "to serve"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "text": "Cut the chicken breast into 3 cm cubes. Combine the chicken with the yoghurt, the turmeric and the salt. Cover and refrigerate for {timer:30|marinade}.",
+      "time": {
+        "active": 5,
+        "passive": 30
+      }
+    },
+    {
+      "text": "Heat the ghee in a large heavy-based pan over a medium heat. Cook the onions for {timer:10-12}, stirring frequently, until soft and pale golden.",
+      "time": {
+        "active": 12
+      }
+    },
+    {
+      "text": "Add the garlic and cook for {timer:30s}. Stir in the ginger, coriander, cumin, chilli powder and cloves and cook for a further {timer:30s}. Add a splash of water if the spices stick.",
+      "time": {
+        "active": 1
+      }
+    },
+    {
+      "text": "Add the marinated chicken and cook over a medium-high heat for {timer:8}, turning occasionally, until sealed and no raw pink remains.",
+      "time": {
+        "active": 8
+      }
+    },
+    {
+      "text": "Stir in the ground almonds, coconut milk and chicken stock. Bring to a gentle simmer, cover, and cook over a low heat for {timer:20|korma}, stirring occasionally.",
+      "time": {
+        "active": 2,
+        "passive": 18
+      }
+    },
+    {
+      "text": "Stir in the garam masala and lemon juice. Simmer uncovered for {timer:5-10}, until the sauce coats the back of a spoon. Adjust the salt and serve topped with the flaked almonds and fresh coriander.",
+      "time": {
+        "active": 2,
+        "passive": 6
+      }
+    }
+  ]
+}
