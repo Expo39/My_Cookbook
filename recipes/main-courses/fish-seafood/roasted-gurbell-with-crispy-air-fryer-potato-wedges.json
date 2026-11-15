@@ -1,0 +1,272 @@
+{
+  "title": "Roasted Gurbell with Crispy Air-Fryer Potato Wedges",
+  "summary": "A Mediterranean-style whole roasted grouper with marjoram, thyme, paprika, garlic and lemon, served with crispy seasoned potato wedges.",
+  "servings": 2,
+  "servingsNoun": {
+    "one": "person",
+    "other": "people"
+  },
+  "times": {
+    "prep": 20,
+    "cook": 30,
+    "rest": 30
+  },
+  "tags": [
+    "Mediterranean"
+  ],
+  "equipment": [
+    "air fryer",
+    "roasting tray"
+  ],
+  "ingredientGroups": [
+    {
+      "name": "Fish",
+      "items": [
+        {
+          "amount": {
+            "qty": 1
+          },
+          "item": "whole Gurbell",
+          "note": "cleaned and scaled",
+          "scale": "discrete"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 20,
+            "unit": "g"
+          },
+          "item": "olive oil"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "dried marjoram",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "dried thyme",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 1,
+            "unit": "tsp"
+          },
+          "item": "paprika",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "dried oregano",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "black pepper",
+          "scale": "seasoning"
+        },
+        {
+          "food": "salt",
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "salt",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "dried garlic powder",
+          "note": "for the cavity",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.5
+          },
+          "item": "lemon",
+          "note": "sliced"
+        },
+        {
+          "amount": {
+            "qty": 0.5
+          },
+          "item": "lemon",
+          "note": "for juice"
+        }
+      ]
+    },
+    {
+      "name": "Potato wedges",
+      "items": [
+        {
+          "amount": {
+            "qty": 500,
+            "unit": "g"
+          },
+          "item": "potatoes"
+        },
+        {
+          "food": "olive-oil",
+          "amount": {
+            "qty": 15,
+            "unit": "g"
+          },
+          "item": "olive oil"
+        },
+        {
+          "food": "flour-plain",
+          "amount": {
+            "qty": 10,
+            "unit": "g"
+          },
+          "item": "plain flour"
+        },
+        {
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "paprika",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "garlic powder",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "dried oregano",
+          "scale": "seasoning"
+        },
+        {
+          "amount": {
+            "qty": 0.25,
+            "unit": "tsp"
+          },
+          "item": "black pepper",
+          "scale": "seasoning"
+        },
+        {
+          "food": "salt",
+          "amount": {
+            "qty": 0.5,
+            "unit": "tsp"
+          },
+          "item": "salt",
+          "scale": "seasoning"
+        },
+        {
+          "item": "cayenne pepper",
+          "scale": "toTaste"
+        },
+        {
+          "item": "lemon zest",
+          "note": "to finish"
+        },
+        {
+          "item": "lemon juice",
+          "note": "a tiny squeeze"
+        }
+      ]
+    },
+    {
+      "name": "To serve",
+      "items": [
+        {
+          "item": "fresh lemon wedges"
+        },
+        {
+          "item": "extra virgin olive oil",
+          "note": "to drizzle"
+        }
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "heading": "Prepare the potatoes",
+      "text": "Wash and scrub the potatoes, then cut them into evenly sized wedges, about 2 cm thick."
+    },
+    {
+      "text": "Soak the wedges in cold water for {timer:20-30|soak}."
+    },
+    {
+      "text": "Drain and dry the wedges extremely well with a clean kitchen towel."
+    },
+    {
+      "text": "In a large bowl, combine the olive oil, plain flour, paprika, garlic powder, oregano, black pepper, salt and cayenne pepper for the wedges."
+    },
+    {
+      "text": "Add the potatoes and toss until evenly coated."
+    },
+    {
+      "heading": "Prepare the fish",
+      "text": "Make sure the fish is scaled and gutted. Pat it completely dry, inside and outside."
+    },
+    {
+      "text": "Make two or three shallow diagonal cuts on each side of the fish."
+    },
+    {
+      "text": "Make the seasoning oil: mix together the olive oil, marjoram, thyme, paprika, oregano, black pepper and salt for the fish."
+    },
+    {
+      "text": "Rub the seasoning oil over both sides of the fish, including inside the cuts."
+    },
+    {
+      "text": "Season the cavity: add the dried garlic powder, two or three of the lemon slices, a pinch of thyme and marjoram, and a little salt and pepper."
+    },
+    {
+      "heading": "Cook the potato wedges",
+      "text": "Preheat the air fryer to {temp:200} for {timer:3}."
+    },
+    {
+      "text": "Arrange the wedges in a single layer without overcrowding. Cook for {timer:25-30|wedges}, turning them at 10 and 20 minutes."
+    },
+    {
+      "text": "Once cooked, finish the wedges with the lemon zest, a tiny squeeze of lemon juice and salt to taste."
+    },
+    {
+      "heading": "Roast the Gurbell",
+      "text": "Fully preheat the oven to {temp:210/190}, with a rack in a high position, but not the very top. Lightly oil a roasting tray."
+    },
+    {
+      "text": "Place the fish in the roasting tray and put it on the high rack. Roast uncovered, without turning, for about {timer:20-25|fish}. Start checking after 18 to 20 minutes."
+    },
+    {
+      "text": "If the skin browns too quickly, cover it loosely with foil towards the end."
+    },
+    {
+      "heading": "Serve",
+      "text": "Serve half the fish per person, with a generous portion of the potato wedges, fresh lemon wedges and a drizzle of extra virgin olive oil."
+    }
+  ],
+  "tips": [
+    "These timings are for a fish of about 800 g to 1 kg. The cooking time can differ considerably with the weight and thickness of the fish.",
+    "Marjoram and thyme are lovely with fish, while paprika gives the skin colour and warmth.",
+    "Keep the dried garlic mainly inside the cavity, so that it does not burn on the exposed skin."
+  ]
+}
